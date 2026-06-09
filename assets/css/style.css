@@ -1,0 +1,16 @@
+/* Basic stylesheet */
+body {
+    font-family: Arial, sans-serif;
+}
+.container {
+    display: flex;
+}
+.sidebar {
+    width: 200px;
+    background: #f4f4f4;
+    padding: 15px;
+}
+main {
+    flex: 1;
+    padding: 15px;
+}
