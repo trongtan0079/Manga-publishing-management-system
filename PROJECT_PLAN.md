@@ -1,123 +1,231 @@
-# PROJECT PLAN
+# PROJECT PLAN BONUS
 
-## Manga Creation Workflow and Publishing Management System
-
-### 1. Mục tiêu dự án
-
-Xây dựng hệ thống hỗ trợ quản lý quy trình sáng tác, kiểm duyệt và xuất bản Manga, giúp tự động hóa việc phân công công việc, theo dõi tiến độ Chapter, quản lý Submission, Review, Ranking và Notification giữa các thành viên tham gia quy trình sản xuất Manga.
+# Manga Creation Workflow and Publishing Management System
 
 ---
 
-### 2. Công nghệ sử dụng
+# 1. Project Overview
 
-#### 2.1. Backend
+## 1.1 Project Objective
 
-* Ngôn ngữ: PHP 
-* Kiến trúc: MVC (Model – View – Controller)
-* Web Server: Apache
+Manga Creation Workflow and Publishing Management System là hệ thống hỗ trợ quản lý toàn bộ quy trình sáng tác, biên tập, kiểm duyệt và xuất bản Manga.
 
-#### 2.2. Frontend
+Hệ thống giúp tự động hóa việc quản lý công việc, theo dõi tiến độ thực hiện Chapter, kiểm duyệt Submission, quản lý Ranking và Notification giữa các thành viên tham gia quy trình sản xuất Manga.
+
+Mục tiêu của dự án là:
+
+* Nâng cao hiệu quả quản lý quy trình sản xuất Manga.
+* Hỗ trợ cộng tác giữa nhiều vai trò trong cùng một dự án Manga.
+* Giảm thời gian theo dõi tiến độ và xử lý công việc thủ công.
+* Tăng khả năng kiểm soát chất lượng nội dung trước khi xuất bản.
+* Cung cấp dữ liệu thống kê và xếp hạng hỗ trợ đánh giá hiệu suất Series.
+
+---
+
+# 2. Technology Stack
+
+## 2.1 Backend
+
+* PHP 8.x
+* Apache Web Server
+* MVC Pattern
+
+## 2.2 Frontend
 
 * HTML5
 * CSS3
 * JavaScript
 * Bootstrap 5
 
-#### 2.3. Database
+## 2.3 Database
 
 * MySQL
 
-#### 2.4. Công cụ phát triển
+## 2.4 Development Tools
 
 * Visual Studio Code
 * XAMPP
 * GitHub
 * Jira
-* Draw.io / PlantUML
+* Antigravity
+* Draw.io
+* PlantUML
 
 ---
 
-### 3. Kiến trúc hệ thống
+# 3. System Architecture
 
-Hệ thống được xây dựng theo mô hình MVC bao gồm:
+## 3.1 Software Architecture
 
-#### Model
+Hệ thống được xây dựng theo mô hình kiến trúc ba lớp (Three-Tier Architecture).
 
-Quản lý dữ liệu và thao tác với cơ sở dữ liệu.
+### Presentation Layer
 
-#### View
+Cung cấp giao diện tương tác cho các đối tượng sử dụng:
 
-Hiển thị giao diện người dùng.
+* Admin
+* Mangaka
+* Assistant
+* Tantou Editor
+* Editorial Board
 
-#### Controller
+### Business Logic Layer
 
-Tiếp nhận yêu cầu từ người dùng và xử lý nghiệp vụ.
+Thực hiện xử lý nghiệp vụ:
 
----
+* User Management
+* Series Management
+* Chapter Management
+* Page Management
+* Task Management
+* Submission Management
+* Review Management
+* Ranking Management
+* Notification Management
 
-### 4. Phạm vi chức năng
+Tầng xử lý nghiệp vụ được tổ chức theo mô hình MVC (Model – View – Controller).
 
-#### Quản lý người dùng và phân quyền
+### Data Layer
 
-* Đăng nhập
-* Quản lý tài khoản
-* Phân quyền hệ thống
-
-#### Quản lý Series
-
-* Tạo Series
-* Cập nhật thông tin Series
-* Theo dõi trạng thái Series
-
-#### Quản lý Chapter
-
-* Tạo Chapter
-* Quản lý tiến độ Chapter
-* Quản lý trạng thái Chapter
-
-#### Quản lý Page
-
-* Quản lý Manga Page
-* Quản lý Artwork
-
-#### Quản lý Task
-
-* Tạo Task
-* Giao Task
-* Theo dõi tiến độ Task
-
-#### Quản lý Submission
-
-* Nộp Submission
-* Kiểm duyệt Submission
-
-#### Quản lý Review
-
-* Review Chapter
-* Ghi chú chỉnh sửa
-* Theo dõi lịch sử Review
-
-#### Quản lý xuất bản
-
-* Phê duyệt xuất bản
-* Lập lịch phát hành
-
-#### Quản lý Ranking
-
-* Cập nhật Ranking
-* Theo dõi hiệu suất Series
-
-#### Quản lý Notification
-
-* Thông báo công việc
-* Thông báo trạng thái Chapter
-* Thông báo Review
+Quản lý việc lưu trữ, truy xuất và cập nhật dữ liệu trong hệ quản trị cơ sở dữ liệu MySQL.
 
 ---
 
-### 5. Thiết kế cơ sở dữ liệu
+## 3.2 Deployment Architecture
 
-Cơ sở dữ liệu bao gồm các thực thể chính:
+Hệ thống được triển khai theo mô hình Client – Server.
+
+### Client
+
+Người dùng truy cập hệ thống thông qua trình duyệt Web.
+
+### Application Server
+
+Tiếp nhận yêu cầu từ người dùng, xử lý nghiệp vụ và tương tác với cơ sở dữ liệu.
+
+### Database Server
+
+Lưu trữ toàn bộ dữ liệu của hệ thống.
+
+---
+
+# 4. User Roles
+
+## 4.1 Admin
+
+* Quản lý tài khoản người dùng.
+* Quản lý vai trò và phân quyền.
+* Giám sát hoạt động hệ thống.
+
+## 4.2 Mangaka
+
+* Tạo và quản lý Series.
+* Tạo Chapter.
+* Quản lý Page.
+* Giao Task cho Assistant.
+* Theo dõi tiến độ thực hiện.
+
+## 4.3 Assistant
+
+* Nhận Task được phân công.
+* Thực hiện công việc.
+* Nộp Submission.
+
+## 4.4 Tantou Editor
+
+* Kiểm tra Submission.
+* Thực hiện Review.
+* Gửi yêu cầu chỉnh sửa.
+* Đánh giá chất lượng nội dung.
+
+## 4.5 Editorial Board
+
+* Phê duyệt xuất bản.
+* Lập lịch phát hành.
+* Quản lý Ranking.
+* Theo dõi hiệu suất Series.
+
+---
+
+# 5. Functional Scope
+
+## 5.1 Authentication & Authorization
+
+* Login
+* Logout
+* Role-based Access Control
+
+## 5.2 User Management
+
+* Create User
+* Update User
+* Manage User Status
+* Manage Roles
+
+## 5.3 Series Management
+
+* Create Series
+* Update Series
+* View Series Details
+* Track Series Status
+
+## 5.4 Chapter Management
+
+* Create Chapter
+* Update Chapter
+* Track Chapter Progress
+* Manage Chapter Status
+
+## 5.5 Page Management
+
+* Upload Manga Pages
+* Manage Artwork Files
+* Organize Page Sequence
+
+## 5.6 Task Management
+
+* Create Task
+* Assign Task
+* Update Task Status
+* Track Task Progress
+
+## 5.7 Submission Management
+
+* Submit Work
+* View Submission History
+* Track Submission Status
+
+## 5.8 Review Management
+
+* Review Submission
+* Add Feedback
+* Request Revisions
+* Track Review History
+
+## 5.9 Publishing Management
+
+* Approve Publication
+* Schedule Release
+* Publish Series
+
+## 5.10 Ranking Management
+
+* Manage Ranking Data
+* View Ranking Reports
+* Analyze Series Performance
+
+## 5.11 Notification Management
+
+* Task Notifications
+* Review Notifications
+* Publishing Notifications
+* System Notifications
+
+---
+
+# 6. Database Design
+
+Các thực thể chính của hệ thống:
 
 * User
 * Role
@@ -127,75 +235,145 @@ Cơ sở dữ liệu bao gồm các thực thể chính:
 * Task
 * Submission
 * Review
-* Ranking
+* SeriesRanking
 * Notification
 
-Thiết kế chi tiết được trình bày trong tài liệu ERD.
+Thiết kế chi tiết được mô tả trong tài liệu ERD và Database Design Specification.
 
 ---
 
-### 6. Kế hoạch triển khai
+# 7. Project Implementation Plan
 
-#### Giai đoạn 1: Phân tích yêu cầu
+## Phase 1 – Requirements Analysis
 
-* Thu thập yêu cầu
-* Xây dựng Use Case
-* Xây dựng đặc tả yêu cầu
+Activities:
 
-#### Giai đoạn 2: Thiết kế hệ thống
+* Requirement Elicitation
+* Requirement Analysis
+* Use Case Modeling
+* SRS Documentation
 
-* Thiết kế kiến trúc hệ thống
-* Thiết kế cơ sở dữ liệu
-* Thiết kế UML Diagram
+Deliverables:
 
-#### Giai đoạn 3: Phát triển hệ thống
+* Software Requirement Specification (SRS)
+* Use Case Diagram
 
-* Xây dựng Database
-* Xây dựng Backend
-* Xây dựng Frontend
+---
 
-#### Giai đoạn 4: Kiểm thử
+## Phase 2 – System Design
+
+Activities:
+
+* Architecture Design
+* Database Design
+* UML Modeling
+
+Deliverables:
+
+* ERD
+* Class Diagram
+* Activity Diagram
+* Sequence Diagram
+* Architecture Design Document
+
+---
+
+## Phase 3 – Development
+
+Activities:
+
+* Database Implementation
+* Backend Development
+* Frontend Development
+* Integration
+
+Deliverables:
+
+* Source Code
+* Database Script
+
+---
+
+## Phase 4 – Testing
+
+Activities:
 
 * Unit Testing
 * Integration Testing
 * System Testing
+* Bug Fixing
 
-#### Giai đoạn 5: Triển khai và nghiệm thu
+Deliverables:
 
-* Hoàn thiện hệ thống
-* Chuẩn bị tài liệu
-* Báo cáo và bảo vệ dự án
+* Test Cases
+* Test Report
 
 ---
 
-### 7. Quản lý mã nguồn
+## Phase 5 – Deployment & Project Closure
 
-* Sử dụng GitHub để quản lý source code.
+Activities:
+
+* System Deployment
+* Documentation Finalization
+* Project Presentation
+
+Deliverables:
+
+* Final System
+* User Manual
+* Final Report
+* Presentation Slides
+
+---
+
+# 8. Source Code Management
+
+* GitHub được sử dụng để quản lý mã nguồn.
 * Không commit trực tiếp lên nhánh main.
-* Mỗi chức năng được phát triển trên một nhánh riêng.
-* Tạo Pull Request trước khi merge.
-* Commit message phải rõ ràng và mô tả đúng chức năng được thực hiện.
+* Mỗi chức năng được phát triển trên một feature branch riêng.
+* Thực hiện Pull Request trước khi merge.
+* Commit message phải mô tả rõ nội dung thay đổi.
+
+Ví dụ:
+
+Branch:
+feature/MGS-01-login
+
+Commit:
+MGS-01 Complete Login Module
+
+GitHub được tích hợp với Jira và Antigravity để hỗ trợ quản lý quy trình phát triển.
 
 ---
 
-### 8. Quản lý công việc
+# 9. Project Management
 
-Sử dụng Jira để:
+Công cụ quản lý công việc:
+
+* Jira
+* GitHub
+* Antigravity
+
+Workflow:
+
+To Do → In Progress → Review → Testing → Done
+
+Jira được sử dụng để:
 
 * Quản lý Sprint
 * Quản lý Epic
 * Quản lý Task
-* Theo dõi tiến độ thực hiện
+* Theo dõi tiến độ
 * Quản lý Bug và Issue
-
-Các thành viên phải cập nhật trạng thái công việc thường xuyên để đảm bảo tiến độ dự án.
 
 ---
 
-### 9. Kết quả mong đợi
+# 10. Expected Outcomes
 
 * Hệ thống hoạt động ổn định.
-* Quản lý đầy đủ quy trình sáng tác và xuất bản Manga.
+* Hỗ trợ đầy đủ quy trình sáng tác và xuất bản Manga.
 * Hỗ trợ nhiều vai trò người dùng.
 * Đảm bảo tính bảo mật và khả năng mở rộng.
-* Đáp ứng các yêu cầu chức năng và phi chức năng đã đề ra.
+* Đáp ứng đầy đủ các yêu cầu chức năng và phi chức năng.
+* Cung cấp môi trường cộng tác hiệu quả cho nhóm sản xuất Manga.
