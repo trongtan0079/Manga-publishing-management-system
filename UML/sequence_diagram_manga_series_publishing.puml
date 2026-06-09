@@ -1,0 +1,50 @@
+@startuml
+
+skinparam Shadowing false
+skinparam ParticipantBackgroundColor #E6E6F0
+skinparam ParticipantBorderColor Black
+skinparam SequenceMessageAlign center
+
+title Sequence Diagram - Quy Trình Xuất Bản Series
+
+actor "Editorial Board" as Board
+participant "Quản Lý Xuất Bản" as PublishManager
+participant "Quản Lý Xếp Hạng" as RankingManager
+database "Cơ Sở Dữ Liệu" as DB
+participant "Hệ Thống Thông Báo" as Notification
+
+Board -> PublishManager : Phê duyệt Chapter
+activate PublishManager
+
+PublishManager -> DB : Cập nhật trạng thái Chapter
+activate DB
+DB --> PublishManager : Trạng thái đã cập nhật
+deactivate DB
+
+Board -> PublishManager : Thiết lập lịch phát hành
+
+PublishManager -> DB : Lưu lịch phát hành
+activate DB
+DB --> PublishManager : Lưu thành công
+deactivate DB
+
+PublishManager -> Notification : Gửi thông báo xuất bản
+activate Notification
+Notification --> Board : Xác nhận xuất bản
+deactivate Notification
+
+PublishManager -> RankingManager : Cập nhật bảng xếp hạng
+activate RankingManager
+
+RankingManager -> DB : Cập nhật dữ liệu Ranking
+activate DB
+DB --> RankingManager : Ranking đã cập nhật
+deactivate DB
+
+RankingManager --> PublishManager : Hoàn tất cập nhật
+deactivate RankingManager
+
+PublishManager --> Board : Xuất bản hoàn tất
+deactivate PublishManager
+
+@enduml

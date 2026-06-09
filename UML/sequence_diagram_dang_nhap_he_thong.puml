@@ -1,0 +1,36 @@
+@startuml
+
+skinparam Shadowing false
+skinparam ParticipantBackgroundColor #E6E6F0
+skinparam ParticipantBorderColor Black
+skinparam SequenceMessageAlign center
+skinparam ResponseMessageBelowArrow true
+
+title Sequence Diagram - Đăng Nhập Hệ Thống
+
+actor User
+
+participant "Hệ Thống Web" as Web
+participant "Quản Lý Người Dùng" as UserManager
+database "Cơ Sở Dữ Liệu" as DB
+
+User -> Web : Nhập tài khoản và mật khẩu
+
+Web -> UserManager : login(username,password)
+
+UserManager -> DB : Kiểm tra thông tin đăng nhập
+DB --> UserManager : Kết quả xác thực
+
+alt Đăng nhập thành công
+
+    UserManager --> Web : Thông tin người dùng + Role
+    Web --> User : Hiển thị Dashboard
+
+else Đăng nhập thất bại
+
+    UserManager --> Web : Thông báo lỗi
+    Web --> User : Hiển thị lỗi đăng nhập
+
+end
+
+@enduml

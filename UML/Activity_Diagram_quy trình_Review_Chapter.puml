@@ -1,0 +1,58 @@
+@startuml
+title Activity Diagram - Quy Trình Review Chapter
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activityDiamondOrientation vertical
+
+start
+
+partition Mangaka {
+  :Hoàn thành Chapter;
+  :Upload Chapter hoàn chỉnh;
+}
+
+partition TantouEditor {
+  :Tiếp nhận Chapter;
+  :Kiểm tra nội dung Chapter;
+  :Kiểm tra chất lượng Artwork;
+}
+
+if (Phát hiện lỗi?) then (Có)
+  partition TantouEditor {
+    :Ghi chú trên Manga Page;
+    :Gửi yêu cầu chỉnh sửa;
+  }
+  partition Mangaka {
+    :Chỉnh sửa Chapter;
+    :Upload lại Chapter;
+  }
+  partition TantouEditor {
+    :Review lại Chapter;
+  }
+endif
+
+partition TantouEditor {
+  :Chuyển Chapter đến Editorial Board;
+}
+
+partition EditorialBoard {
+  :Đánh giá chất lượng Chapter;
+}
+
+if (Chapter được phê duyệt?) then (Có)
+  partition EditorialBoard {
+    :Cập nhật trạng thái Chapter;
+    :Cập nhật lịch phát hành;
+    :Chuyển sang quy trình xuất bản;
+  }
+  stop
+else (Không)
+  partition EditorialBoard {
+    :Từ chối hoặc yêu cầu chỉnh sửa bổ sung;
+  }
+  stop
+endif
+
+@enduml

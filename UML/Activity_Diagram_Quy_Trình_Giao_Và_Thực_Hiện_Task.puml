@@ -1,0 +1,60 @@
+@startuml
+title Activity Diagram - Quy Trình Giao Và Thực Hiện Task
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+skinparam activityDiamondOrientation vertical
+
+start
+
+partition Mangaka {
+  :Tạo Task;
+  :Phân vùng công việc trên Manga Page;
+  :Phân công Task cho Assistant;
+}
+
+partition Assistant {
+  :Xem Task được giao;
+  :Tải tài nguyên hỗ trợ;
+  :Thực hiện Artwork;
+  :Upload Submission;
+}
+
+partition Mangaka {
+  :Kiểm duyệt Submission;
+}
+
+if (Submission đạt yêu cầu?) then (Có)
+  partition Mangaka {
+    :Cập nhật trạng thái Task = Completed;
+    :Cập nhật tiến độ Chapter;
+  }
+  stop
+else (Không)
+  partition Mangaka {
+    :Gửi yêu cầu chỉnh sửa;
+  }
+  partition Assistant {
+    :Chỉnh sửa Artwork;
+    :Upload lại Submission;
+  }
+  partition Mangaka {
+    :Kiểm duyệt lại Submission;
+  }
+
+  if (Submission đạt yêu cầu?) then (Có)
+    partition Mangaka {
+      :Cập nhật trạng thái Task = Completed;
+      :Cập nhật tiến độ Chapter;
+    }
+    stop
+  else (Không)
+    partition Mangaka {
+      :Chuyển Task về trạng thái Rework;
+    }
+    stop
+  endif
+endif
+
+@enduml

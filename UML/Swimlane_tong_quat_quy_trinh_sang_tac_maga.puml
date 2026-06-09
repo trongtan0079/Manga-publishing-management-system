@@ -1,0 +1,98 @@
+@startuml
+scale 3
+skinparam dpi 300
+title Swimlane Diagram Tổng Quát Quy Trình Sáng Tác Và Xuất Bản Manga
+
+|Mangaka|
+start
+
+:Tạo hồ sơ Series mới;
+:Nộp bản thảo sơ bộ;
+
+|Editorial Board|
+:Xem thông tin Series;
+:Đánh giá Series;
+:Bỏ phiếu xét duyệt Series;
+
+if (Series được phê duyệt?) then (Có)
+
+|Mangaka|
+:Tạo Chapter mới;
+:Upload các trang Manga;
+:Phân vùng công việc;
+:Phân công Task cho Assistant;
+
+|Assistant|
+:Xem danh sách Task;
+:Tải tài nguyên làm việc;
+:Thực hiện công việc được giao;
+:Nộp Submission;
+
+|Mangaka|
+:Kiểm duyệt Submission;
+
+while (Submission đạt yêu cầu?) is (Không)
+
+:Gửi yêu cầu chỉnh sửa;
+
+|Assistant|
+:Chỉnh sửa công việc;
+:Nộp lại Submission;
+
+|Mangaka|
+:Kiểm duyệt lại Submission;
+
+endwhile (Có)
+
+:Chấp nhận kết quả;
+:Cập nhật tiến độ Chapter;
+
+|Tantou Editor|
+:Xem Chapter hoàn chỉnh;
+:Review nội dung và hình ảnh;
+
+while (Có yêu cầu chỉnh sửa?) is (Có)
+
+:Ghi chú chỉnh sửa;
+
+|Mangaka|
+:Cập nhật nội dung Chapter;
+:Upload lại Chapter;
+
+|Tantou Editor|
+:Review lại Chapter;
+
+endwhile (Không)
+
+|Editorial Board|
+:Xem báo cáo từ Tantou Editor;
+:Đánh giá chất lượng Chapter;
+
+if (Chapter được phê duyệt?) then (Có)
+
+:Thiết lập lịch phát hành;
+:Phát hành Manga;
+:Nhập dữ liệu bình chọn;
+:Cập nhật bảng xếp hạng;
+:Đánh giá hiệu quả Series;
+
+if (Tiếp tục xuất bản?) then (Có)
+:Tiếp tục phát hành Series;
+else (Không)
+:Ngừng phát hành Series;
+endif
+
+else (Không)
+:Từ chối xuất bản;
+endif
+
+stop
+
+else (Không)
+
+:Từ chối Series;
+stop
+
+endif
+
+@enduml

@@ -1,0 +1,91 @@
+@startuml
+title Manga Creation and Publishing Workflow Management System
+
+class Role {
+  +roleId : int
+  +roleName : string
+  +description : string
+}
+
+class User {
+  +userId : int
+  +fullName : string
+  +email : string
+  +passwordHash : string
+  +accountStatus : string
+}
+
+class Task {
+  +taskId : int
+  +taskType : string
+  +description : string
+  +taskStatus : string
+  +deadline : date
+}
+
+class Submission {
+  +submissionId : int
+  +submitDate : date
+  +submissionFile : string
+  +submissionStatus : string
+}
+
+class Review {
+  +reviewId : int
+  +reviewComment : string
+  +reviewDate : date
+  +reviewStatus : string
+}
+
+class Notification {
+  +notificationId : int
+  +notificationContent : string
+  +createdDate : date
+  +isRead : boolean
+}
+
+class Series {
+  +seriesId : int
+  +title : string
+  +description : string
+  +seriesStatus : string
+  +publishSchedule : string
+  +createdDate : date
+}
+
+class SeriesRanking {
+  +rankIngId : int
+  +voteCount : int
+  +rankPosition : int
+  +period : string
+  +updatedDate : date
+}
+
+class Chapter {
+  +chapterId : int
+  +chapterNumber : int
+  +title : string
+  +chapterStatus : string
+  +uploadDate : date
+}
+
+class Page {
+  +pageId : int
+  +pageNumber : int
+  +imagePath : string
+  +pageStatus : string
+}
+
+Role "1" -- "many" User : assigned to
+User "1" -- "many" Series : creates
+Series "1" -- "1" SeriesRanking : ranked by
+Series "1" -- "many" Chapter : contains
+Chapter "1" -- "many" Page : contains
+User "1" -- "many" Submission : submits
+Submission "1" -- "1" Review : reviewed by
+User "1" -- "many" Task : assigns
+Task "1" -- "many" Submission : generates
+Task "1" -- "many" Review : writes
+User "1" -- "many" Notification : receives
+
+@enduml

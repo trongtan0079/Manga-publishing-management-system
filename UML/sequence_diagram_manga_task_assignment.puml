@@ -1,0 +1,56 @@
+@startuml
+
+skinparam Shadowing false
+skinparam ParticipantBackgroundColor #E6E6F0
+skinparam ParticipantBorderColor Black
+skinparam SequenceMessageAlign center
+
+title Sequence Diagram - Quy Trình Phân Công Task
+
+actor Mangaka
+participant "Hệ Thống Web" as Web
+participant "Quản Lý Task" as TaskManager
+database "Cơ Sở Dữ Liệu" as DB
+participant "Hệ Thống Thông Báo" as Notification
+actor Assistant
+
+Mangaka -> Web : Tạo Task mới
+activate Web
+
+Web -> TaskManager : createTask()
+activate TaskManager
+
+TaskManager -> DB : Lưu thông tin Task
+activate DB
+DB --> TaskManager : Task đã lưu
+deactivate DB
+
+TaskManager -> Notification : Gửi thông báo Task mới
+activate Notification
+Notification -> Assistant : Thông báo công việc mới
+deactivate Notification
+
+TaskManager --> Web : Tạo Task thành công
+deactivate TaskManager
+
+Web --> Mangaka : Hiển thị kết quả
+deactivate Web
+
+Assistant -> Web : Xem danh sách Task
+activate Web
+
+Web -> TaskManager : getAssignedTasks()
+activate TaskManager
+
+TaskManager -> DB : Lấy danh sách Task
+activate DB
+DB --> TaskManager : Danh sách Task
+deactivate DB
+
+TaskManager --> Web : Trả về dữ liệu Task
+deactivate TaskManager
+
+Web --> Assistant : Hiển thị Task
+deactivate Web
+
+@enduml

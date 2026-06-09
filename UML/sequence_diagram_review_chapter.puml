@@ -1,0 +1,81 @@
+@startuml
+
+skinparam Shadowing false
+skinparam ParticipantBackgroundColor #E6E6F0
+skinparam ParticipantBorderColor Black
+skinparam SequenceMessageAlign center
+
+title Sequence Diagram - Review Chapter
+
+actor "Tantou Editor" as Editor
+participant "Hệ Thống Web" as Web
+participant "Quản Lý Review" as ReviewManager
+participant "Hệ Thống Thông Báo" as Notification
+database "Cơ Sở Dữ Liệu" as DB
+actor Mangaka
+
+Editor -> Web : Mở Chapter cần review
+activate Web
+
+Web -> ReviewManager : loadChapter()
+activate ReviewManager
+
+ReviewManager -> DB : Lấy dữ liệu Chapter
+activate DB
+DB --> ReviewManager : Nội dung Chapter
+deactivate DB
+
+ReviewManager --> Web : Trả dữ liệu
+deactivate ReviewManager
+
+Web --> Editor : Hiển thị Chapter
+deactivate Web
+
+alt Chapter đạt yêu cầu
+
+    Editor -> Web : Phê duyệt Chapter
+    activate Web
+
+    Web -> ReviewManager : approveChapter()
+    activate ReviewManager
+
+    ReviewManager -> DB : Cập nhật trạng thái
+    activate DB
+    DB --> ReviewManager : Thành công
+    deactivate DB
+
+    ReviewManager --> Web : Approved
+    deactivate ReviewManager
+
+    Web --> Editor : Hiển thị kết quả
+    deactivate Web
+
+else Cần chỉnh sửa
+
+    Editor -> Web : Gửi nhận xét
+    activate Web
+
+    Web -> ReviewManager : addComment()
+    activate ReviewManager
+
+    ReviewManager -> DB : Lưu nhận xét
+    activate DB
+    DB --> ReviewManager : Thành công
+    deactivate DB
+
+    ReviewManager -> Notification : Gửi thông báo
+    activate Notification
+
+    Notification -> Mangaka : Yêu cầu chỉnh sửa
+
+    deactivate Notification
+
+    ReviewManager --> Web : Review hoàn tất
+    deactivate ReviewManager
+
+    Web --> Editor : Hiển thị kết quả
+    deactivate Web
+
+end
+
+@enduml

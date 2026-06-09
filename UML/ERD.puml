@@ -1,0 +1,103 @@
+@startuml
+title ERD - Manga Creation Workflow and Publishing Management System
+
+entity roles {
+  *role_id : int <<PK>>
+  role_name : varchar
+  description : varchar
+}
+
+entity users {
+  *user_id : int <<PK>>
+  role_id : int <<FK>>
+  full_name : varchar
+  email : varchar
+  password_hash : varchar
+  account_status : varchar
+}
+
+entity series {
+  *series_id : int <<PK>>
+  user_id : int <<FK>>
+  title : varchar
+  description : text
+  series_status : varchar
+  publish_schedule : varchar
+  created_date : date
+}
+
+entity chapters {
+  *chapter_id : int <<PK>>
+  series_id : int <<FK>>
+  chapter_number : int
+  title : varchar
+  chapter_status : varchar
+  upload_date : date
+}
+
+entity pages {
+  *page_id : int <<PK>>
+  chapter_id : int <<FK>>
+  page_number : int
+  image_path : varchar
+  page_status : varchar
+}
+
+entity tasks {
+  *task_id : int <<PK>>
+  page_id : int <<FK>>
+  assigned_by : int <<FK>>
+  assigned_to : int <<FK>>
+  task_type : varchar
+  description : text
+  task_status : varchar
+  deadline : date
+}
+
+entity submissions {
+  *submission_id : int <<PK>>
+  task_id : int <<FK>>
+  submitted_by : int <<FK>>
+  submit_date : date
+  submission_file : varchar
+  submission_status : varchar
+}
+
+entity reviews {
+  *review_id : int <<PK>>
+  submission_id : int <<FK>>
+  reviewer_id : int <<FK>>
+  review_comment : text
+  review_date : date
+  review_status : varchar
+}
+
+entity rankings {
+  *ranking_id : int <<PK>>
+  series_id : int <<FK>>
+  vote_count : int
+  rank_position : int
+  period : varchar
+  updated_date : date
+}
+
+entity notifications {
+  *notification_id : int <<PK>>
+  user_id : int <<FK>>
+  notification_content : text
+  created_date : date
+  is_read : boolean
+}
+
+roles ||--o{ users : "has"
+users ||--o{ series : "creates"
+series ||--o{ chapters : "contains"
+chapters ||--o{ pages : "contains"
+pages ||--o{ tasks : "related to"
+users ||--o{ tasks : "assigns"
+tasks ||--o{ submissions : "generates"
+submissions ||--o{ reviews : "reviewed by"
+series ||--o{ rankings : "ranked by"
+users ||--o{ notifications : "receives"
+
+@enduml

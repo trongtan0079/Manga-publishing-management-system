@@ -1,0 +1,56 @@
+@startuml
+
+skinparam Shadowing false
+skinparam ParticipantBackgroundColor #E6E6F0
+skinparam ParticipantBorderColor Black
+skinparam SequenceMessageAlign center
+
+title Sequence Diagram - Quy Trình Nộp Submission
+
+actor Assistant
+participant "Hệ Thống Web" as Web
+participant "Quản Lý Submission" as SubmissionManager
+database "Cơ Sở Dữ Liệu" as DB
+participant "Hệ Thống Thông Báo" as Notification
+actor "Tantou Editor" as Editor
+
+Assistant -> Web : Nộp Submission
+activate Web
+
+Web -> SubmissionManager : submitWork()
+activate SubmissionManager
+
+SubmissionManager -> DB : Lưu Submission
+activate DB
+DB --> SubmissionManager : Submission đã lưu
+deactivate DB
+
+SubmissionManager -> Notification : Gửi thông báo Submission mới
+activate Notification
+Notification -> Editor : Thông báo cần review
+deactivate Notification
+
+SubmissionManager --> Web : Nộp thành công
+deactivate SubmissionManager
+
+Web --> Assistant : Hiển thị kết quả
+deactivate Web
+
+Editor -> Web : Xem danh sách Submission
+activate Web
+
+Web -> SubmissionManager : getSubmissionList()
+activate SubmissionManager
+
+SubmissionManager -> DB : Lấy danh sách Submission
+activate DB
+DB --> SubmissionManager : Danh sách Submission
+deactivate DB
+
+SubmissionManager --> Web : Trả dữ liệu Submission
+deactivate SubmissionManager
+
+Web --> Editor : Hiển thị Submission
+deactivate Web
+
+@enduml
