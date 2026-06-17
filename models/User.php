@@ -29,4 +29,30 @@ class User extends Model {
         $stmt->execute();
         return $stmt->fetch();
     }
+    /**
+     * Lấy tất cả người dùng kèm theo tên role
+     */
+    public function getAllUsersWithRole() {
+        $sql = "SELECT u.*, r.role_name 
+                FROM {$this->table} u 
+                LEFT JOIN roles r ON u.role_id = r.role_id
+                ORDER BY u.user_id DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy 1 người dùng theo ID kèm theo tên role
+     */
+    public function getUserByIdWithRole($id) {
+        $sql = "SELECT u.*, r.role_name 
+                FROM {$this->table} u 
+                LEFT JOIN roles r ON u.role_id = r.role_id
+                WHERE u.user_id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
