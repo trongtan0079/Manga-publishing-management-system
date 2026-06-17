@@ -3,101 +3,140 @@ title ERD - Manga Creation Workflow and Publishing Management System
 
 entity roles {
   *role_id : int <<PK>>
+  --
   role_name : varchar
   description : varchar
+  created_at : timestamp
 }
 
 entity users {
   *user_id : int <<PK>>
+  --
   role_id : int <<FK>>
+  username : varchar
   full_name : varchar
   email : varchar
   password_hash : varchar
-  account_status : varchar
+  status : enum
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity series {
   *series_id : int <<PK>>
-  user_id : int <<FK>>
+  --
+  mangaka_id : int <<FK>>
   title : varchar
   description : text
-  series_status : varchar
-  publish_schedule : varchar
-  created_date : date
+  status : enum
+  cover_image : varchar
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity chapters {
   *chapter_id : int <<PK>>
+  --
   series_id : int <<FK>>
   chapter_number : int
   title : varchar
-  chapter_status : varchar
-  upload_date : date
+  status : enum
+  published_at : datetime
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity pages {
   *page_id : int <<PK>>
+  --
   chapter_id : int <<FK>>
   page_number : int
-  image_path : varchar
-  page_status : varchar
+  image_url : varchar
+  status : enum
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity tasks {
   *task_id : int <<PK>>
-  page_id : int <<FK>>
-  assigned_by : int <<FK>>
-  assigned_to : int <<FK>>
-  task_type : varchar
+  --
+  chapter_id : int <<FK>>
+  mangaka_id : int <<FK>>
+  assistant_id : int <<FK>>
+  title : varchar
   description : text
-  task_status : varchar
-  deadline : date
+  priority : enum
+  status : enum
+  due_date : datetime
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity submissions {
   *submission_id : int <<PK>>
-  task_id : int <<FK>>
-  submitted_by : int <<FK>>
-  submit_date : date
-  submission_file : varchar
-  submission_status : varchar
+  --
+  user_id : int <<FK>>
+  task_id : int <<FK>> <<NULL>>
+  chapter_id : int <<FK>> <<NULL>>
+  file_url : varchar
+  notes : text
+  status : enum
+  submitted_at : timestamp
+  updated_at : timestamp
 }
 
 entity reviews {
   *review_id : int <<PK>>
+  --
   submission_id : int <<FK>>
   reviewer_id : int <<FK>>
-  review_comment : text
-  review_date : date
-  review_status : varchar
+  comments : text
+  rating : int
+  created_at : timestamp
 }
 
-entity rankings {
+entity series_rankings {
   *ranking_id : int <<PK>>
+  --
   series_id : int <<FK>>
-  vote_count : int
+  board_member_id : int <<FK>>
   rank_position : int
-  period : varchar
-  updated_date : date
+  score : decimal
+  period_start_date : date
+  created_at : timestamp
 }
 
 entity notifications {
   *notification_id : int <<PK>>
+  --
   user_id : int <<FK>>
-  notification_content : text
-  created_date : date
+  type : varchar
+  message : text
   is_read : boolean
+  created_at : timestamp
 }
 
-roles ||--o{ users : "has"
-users ||--o{ series : "creates"
-series ||--o{ chapters : "contains"
-chapters ||--o{ pages : "contains"
-pages ||--o{ tasks : "related to"
-users ||--o{ tasks : "assigns"
-tasks ||--o{ submissions : "generates"
-submissions ||--o{ reviews : "reviewed by"
-series ||--o{ rankings : "ranked by"
-users ||--o{ notifications : "receives"
+roles ||--o{ users : has
+
+users ||--o{ series : creates
+
+users ||--o{ tasks : assigns
+users ||--o{ tasks : receives
+
+users ||--o{ submissions : submits
+users ||--o{ reviews : writes
+users ||--o{ notifications : receives
+users ||--o{ series_rankings : evaluates
+
+series ||--o{ chapters : contains
+series ||--o{ series_rankings : ranked
+
+chapters ||--o{ pages : contains
+chapters ||--o{ tasks : requires
+chapters ||--o{ submissions : submitted
+
+tasks ||--o{ submissions : generates
+
+submissions ||--o{ reviews : receives
 
 @enduml

@@ -1,16 +1,21 @@
 <?php
+require_once __DIR__ . '/../core/Model.php';
 
-namespace App\Models;
-
-class Chapter
-{
-    public $id;
-    public $series_id;
-    public $title;
-    public $chapter_number;
-    public $status;
-    public $created_at;
-
+class Chapter extends Model {
     public function __construct() {
+        parent::__construct();
+        $this->table = 'chapters';
+        $this->primaryKey = 'chapter_id';
+    }
+
+    /**
+     * Lấy danh sách chapter theo series ID, sắp xếp theo số chương
+     */
+    public function findBySeriesId($seriesId) {
+        $sql = "SELECT * FROM {$this->table} WHERE series_id = :series_id ORDER BY chapter_number ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':series_id', $seriesId);
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
 }
