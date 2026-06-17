@@ -1,4 +1,13 @@
-<?php include '../layouts/header.php'; ?>
-<h2>Admin Dashboard</h2>
-<!-- Dashboard content -->
-<?php include '../layouts/footer.php'; ?>
+<?php
+require_once __DIR__ . '/../../core/Auth.php';
+requireRole('admin');
+?>
+<!DOCTYPE html>
+<html>
+<head><title>Admin Dashboard</title></head>
+<body>
+    <h1>Welcome to Admin Dashboard</h1>
+    <p>Hello, <?php echo htmlspecialchars($_SESSION['username']); ?></p>
+    <a href="/index.php?controller=auth&action=logout">Logout</a>
+</body>
+</html>
