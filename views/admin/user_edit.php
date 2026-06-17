@@ -1,4 +1,10 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
+<?php 
+/**
+ * @var array $user 
+ * @var array $roles 
+ */
+include __DIR__ . '/../layouts/header.php'; 
+?>
 
 <!-- Nút quay lại -->
 <div class="mb-3">

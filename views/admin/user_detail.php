@@ -1,4 +1,9 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
+<?php 
+/**
+ * @var array $user 
+ */
+include __DIR__ . '/../layouts/header.php'; 
+?>
 
 <!-- Thanh điều hướng cơ bản -->
 <div class="mb-3">

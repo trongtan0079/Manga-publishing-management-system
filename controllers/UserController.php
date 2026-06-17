@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/Role.php';
 
 use User;
 use Role;
+use PDOException;
 
 class UserController
 {
@@ -51,11 +52,28 @@ class UserController
      */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $username = trim($_POST['username'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+
+            // 1. Kiểm tra trùng lặp Username
+            if ($this->userModel->findByUsername($username)) {
+                $_SESSION['error'] = "Lỗi: Username '{$username}' đã tồn tại trong hệ thống!";
+                header('Location: /index.php?controller=user&action=create');
+                exit;
+            }
+
+            // 2. Kiểm tra trùng lặp Email
+            if ($this->userModel->findByEmail($email)) {
+                $_SESSION['error'] = "Lỗi: Email '{$email}' đã được đăng ký!";
+                header('Location: /index.php?controller=user&action=create');
+                exit;
+            }
+
             // Thu thập dữ liệu từ form gửi lên
             $data = [
-                'username'  => $_POST['username'] ?? '',
-                'full_name' => $_POST['full_name'] ?? '',
-                'email'     => $_POST['email'] ?? '',
+                'username'  => $username,
+                'full_name' => trim($_POST['full_name'] ?? ''),
+                'email'     => $email,
                 'role_id'   => $_POST['role_id'] ?? '',
                 'status'    => $_POST['status'] ?? 'active'
             ];
@@ -67,8 +85,13 @@ class UserController
                 $data['password_hash'] = password_hash('password123', PASSWORD_DEFAULT);
             }
 
-            // Thực hiện thêm mới vào DB
-            $this->userModel->insert($data);
+            try {
+                // Thực hiện thêm mới vào DB
+                $this->userModel->insert($data);
+                $_SESSION['success'] = "Tạo người dùng '{$username}' thành công!";
+            } catch (PDOException $e) {
+                $_SESSION['error'] = "Lỗi hệ thống khi tạo người dùng: " . $e->getMessage();
+            }
             
             // Quay về trang danh sách
             header('Location: /index.php?controller=user&action=index');
@@ -89,7 +112,9 @@ class UserController
         
         // Nếu không tìm thấy user, báo lỗi
         if (!$user) {
-            die("User not found");
+            $_SESSION['error'] = "Không tìm thấy người dùng (ID: {$id}).";
+            header('Location: /index.php?controller=user&action=index');
+            exit;
         }
         
         // Gọi view form chỉnh sửa
@@ -102,11 +127,30 @@ class UserController
      */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $username = trim($_POST['username'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+
+            // 1. Kiểm tra trùng lặp Username (loại trừ chính user hiện tại đang sửa)
+            $existingUserByUsername = $this->userModel->findByUsername($username);
+            if ($existingUserByUsername && $existingUserByUsername['user_id'] != $id) {
+                $_SESSION['error'] = "Lỗi: Username '{$username}' đã được sử dụng bởi người dùng khác!";
+                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                exit;
+            }
+
+            // 2. Kiểm tra trùng lặp Email (loại trừ chính user hiện tại)
+            $existingUserByEmail = $this->userModel->findByEmail($email);
+            if ($existingUserByEmail && $existingUserByEmail['user_id'] != $id) {
+                $_SESSION['error'] = "Lỗi: Email '{$email}' đã được sử dụng bởi người dùng khác!";
+                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                exit;
+            }
+
             // Thu thập dữ liệu từ form
             $data = [
-                'username'  => $_POST['username'] ?? '',
-                'full_name' => $_POST['full_name'] ?? '',
-                'email'     => $_POST['email'] ?? '',
+                'username'  => $username,
+                'full_name' => trim($_POST['full_name'] ?? ''),
+                'email'     => $email,
                 'role_id'   => $_POST['role_id'] ?? '',
                 'status'    => $_POST['status'] ?? 'active'
             ];
@@ -116,8 +160,13 @@ class UserController
                 $data['password_hash'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
             }
 
-            // Thực hiện update trong DB
-            $this->userModel->update($id, $data);
+            try {
+                // Thực hiện update trong DB
+                $this->userModel->update($id, $data);
+                $_SESSION['success'] = "Cập nhật người dùng '{$username}' thành công!";
+            } catch (PDOException $e) {
+                $_SESSION['error'] = "Lỗi hệ thống khi cập nhật: " . $e->getMessage();
+            }
             
             // Quay về trang danh sách
             header('Location: /index.php?controller=user&action=index');
@@ -132,7 +181,9 @@ class UserController
     public function show($id) {
         $user = $this->userModel->getUserByIdWithRole($id);
         if (!$user) {
-            die("User not found");
+            $_SESSION['error'] = "Không tìm thấy người dùng (ID: {$id}).";
+            header('Location: /index.php?controller=user&action=index');
+            exit;
         }
         
         // Gọi view hiển thị chi tiết
@@ -146,7 +197,13 @@ class UserController
     public function delete($id) {
         // Chỉ chấp nhận request POST để xóa, đảm bảo an toàn
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $this->userModel->delete($id);
+            try {
+                $this->userModel->delete($id);
+                $_SESSION['success'] = "Đã xóa người dùng thành công!";
+            } catch (PDOException $e) {
+                // Bắt lỗi nếu có ràng buộc khóa ngoại (VD: User đang giữ Role hoặc liên quan tới bảng khác)
+                $_SESSION['error'] = "Không thể xóa người dùng này vì dữ liệu đang được liên kết. Lỗi: " . $e->getMessage();
+            }
             
             // Xóa xong quay về trang danh sách
             header('Location: /index.php?controller=user&action=index');

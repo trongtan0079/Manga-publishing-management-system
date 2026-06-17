@@ -1,4 +1,9 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
+<?php 
+/**
+ * @var array $users 
+ */
+include __DIR__ . '/../layouts/header.php'; 
+?>
 
 <!-- Tiêu đề trang và Nút thêm mới -->
 <div class="d-flex justify-content-between align-items-center mb-3">

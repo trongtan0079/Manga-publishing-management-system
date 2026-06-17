@@ -1,4 +1,9 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
+<?php 
+/**
+ * @var array $roles 
+ */
+include __DIR__ . '/../layouts/header.php'; 
+?>
 
 <!-- Nút quay lại trang danh sách -->
 <div class="mb-3">
