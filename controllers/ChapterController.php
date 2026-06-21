@@ -14,15 +14,25 @@ class ChapterController
 {
     private $chapterModel;
     private $seriesModel;
-    private $allowedStatuses = ['draft', 'published', 'scheduled'];
+    
+    // Các trạng thái (status) hợp lệ của một chapter tương ứng với CSDL
+    private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
 
     public function __construct() {
-        requireRole('mangaka');
+        // Chỉ cho phép người dùng có role 'mangaka' truy cập vào Controller này
+        \requireRole('mangaka');
         
         $this->chapterModel = new Chapter();
         $this->seriesModel = new Series();
     }
 
+    /**
+     * Hàm dùng chung: Kiểm tra xem bộ truyện (Series) có thuộc quyền sở hữu của Mangaka hiện tại hay không.
+     * Tránh việc Mangaka này sửa/xóa chapter của Mangaka khác.
+     * 
+     * @param int $seriesId ID của bộ truyện
+     * @return array Trả về thông tin của Series nếu hợp lệ
+     */
     private function checkSeriesOwnership($seriesId) {
         $series = $this->seriesModel->findById($seriesId);
         if (!$series) {
@@ -39,6 +49,10 @@ class ChapterController
         return $series;
     }
 
+    /**
+     * Mặc định khi truy cập /index.php?controller=chapter
+     * Sẽ chuyển hướng (redirect) về trang chi tiết của bộ truyện nếu có series_id
+     */
     public function index() {
         $seriesId = $_GET['series_id'] ?? null;
         if ($seriesId) {
@@ -49,6 +63,9 @@ class ChapterController
         exit;
     }
 
+    /**
+     * Hiển thị Form tạo Chapter mới
+     */
     public function create() {
         $seriesId = $_GET['series_id'] ?? null;
         if (!$seriesId) {
@@ -61,6 +78,9 @@ class ChapterController
         require_once __DIR__ . '/../views/mangaka/chapter_create.php';
     }
 
+    /**
+     * Xử lý dữ liệu POST khi submit Form tạo Chapter
+     */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $seriesId = $_POST['series_id'] ?? null;
@@ -74,7 +94,7 @@ class ChapterController
 
             $chapterNumber = trim($_POST['chapter_number'] ?? '');
             $title = trim($_POST['title'] ?? '');
-            $status = $_POST['status'] ?? 'draft';
+            $status = $_POST['status'] ?? 'drafting';
 
             // Validation
             if ($chapterNumber === '' || !is_numeric($chapterNumber) || $chapterNumber <= 0) {
@@ -114,6 +134,11 @@ class ChapterController
         }
     }
 
+    /**
+     * Hiển thị Form chỉnh sửa Chapter
+     * 
+     * @param int $id ID của Chapter cần sửa
+     */
     public function edit($id) {
         $chapter = $this->chapterModel->findById($id);
         if (!$chapter) {
@@ -126,6 +151,11 @@ class ChapterController
         require_once __DIR__ . '/../views/mangaka/chapter_edit.php';
     }
 
+    /**
+     * Xử lý dữ liệu POST khi submit Form chỉnh sửa Chapter
+     * 
+     * @param int $id ID của Chapter cần sửa
+     */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $chapter = $this->chapterModel->findById($id);
@@ -140,7 +170,7 @@ class ChapterController
 
             $chapterNumber = trim($_POST['chapter_number'] ?? '');
             $title = trim($_POST['title'] ?? '');
-            $status = $_POST['status'] ?? 'draft';
+            $status = $_POST['status'] ?? 'drafting';
 
             // Validation
             if ($chapterNumber === '' || !is_numeric($chapterNumber) || $chapterNumber <= 0) {
@@ -179,6 +209,11 @@ class ChapterController
         }
     }
 
+    /**
+     * Hiển thị chi tiết của một Chapter (sẽ dùng để quản lý trang truyện/ảnh sau này)
+     * 
+     * @param int $id ID của Chapter
+     */
     public function show($id) {
         $chapter = $this->chapterModel->findById($id);
         if (!$chapter) {
@@ -191,6 +226,11 @@ class ChapterController
         require_once __DIR__ . '/../views/mangaka/chapter_detail.php';
     }
 
+    /**
+     * Xử lý xóa một Chapter
+     * 
+     * @param int $id ID của Chapter cần xóa
+     */
     public function delete($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $chapter = $this->chapterModel->findById($id);

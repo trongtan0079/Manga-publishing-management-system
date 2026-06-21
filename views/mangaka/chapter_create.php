@@ -1,4 +1,10 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
+<?php 
+/**
+ * Khai báo biến để Editor/IDE hiểu và không báo lỗi gạch đỏ
+ * @var array $series Thông tin bộ truyện
+ */
+include __DIR__ . '/../layouts/header.php'; 
+?>
 
 <div class="mb-3">
     <a href="/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Back to Series</a>
@@ -25,9 +31,11 @@
             <div class="mb-3">
                 <label for="status" class="form-label">Status</label>
                 <select class="form-select" id="status" name="status">
-                    <option value="draft">Draft</option>
+                    <option value="drafting">Drafting</option>
+                    <option value="drawing">Drawing</option>
+                    <option value="reviewing">Reviewing</option>
+                    <option value="approved">Approved</option>
                     <option value="published">Published</option>
-                    <option value="scheduled">Scheduled</option>
                 </select>
             </div>
             

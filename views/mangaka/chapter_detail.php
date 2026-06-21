@@ -1,4 +1,11 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
+<?php 
+/**
+ * Khai báo biến để Editor/IDE hiểu và không báo lỗi gạch đỏ
+ * @var array $series Thông tin bộ truyện
+ * @var array $chapter Thông tin chi tiết chapter
+ */
+include __DIR__ . '/../layouts/header.php'; 
+?>
 
 <div class="mb-3 d-flex justify-content-between align-items-center">
     <a href="/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Back to Series</a>
@@ -24,9 +31,11 @@
         <?php
         $cBadge = 'bg-secondary';
         switch ($chapter['status']) {
-            case 'draft': $cBadge = 'bg-secondary'; break;
+            case 'drafting': $cBadge = 'bg-secondary'; break;
+            case 'drawing': $cBadge = 'bg-primary'; break;
+            case 'reviewing': $cBadge = 'bg-warning text-dark'; break;
+            case 'approved': $cBadge = 'bg-info text-dark'; break;
             case 'published': $cBadge = 'bg-success'; break;
-            case 'scheduled': $cBadge = 'bg-info text-dark'; break;
         }
         ?>
         <p><strong>Status:</strong> <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span></p>

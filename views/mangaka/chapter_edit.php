@@ -1,4 +1,11 @@
-<?php include __DIR__ . '/../layouts/header.php'; ?>
+<?php 
+/**
+ * Khai báo biến để Editor/IDE hiểu và không báo lỗi gạch đỏ
+ * @var array $series Thông tin bộ truyện
+ * @var array $chapter Thông tin chapter đang chỉnh sửa
+ */
+include __DIR__ . '/../layouts/header.php'; 
+?>
 
 <div class="mb-3">
     <a href="/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Back to Series</a>
@@ -18,15 +25,17 @@
             
             <div class="mb-3">
                 <label for="title" class="form-label">Chapter Title</label>
-                <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($chapter['title']) ?>" placeholder="Optional">
+                <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($chapter['title'] ?? '') ?>" placeholder="Optional">
             </div>
             
             <div class="mb-3">
                 <label for="status" class="form-label">Status</label>
                 <select class="form-select" id="status" name="status">
-                    <option value="draft" <?= $chapter['status'] === 'draft' ? 'selected' : '' ?>>Draft</option>
+                    <option value="drafting" <?= $chapter['status'] === 'drafting' ? 'selected' : '' ?>>Drafting</option>
+                    <option value="drawing" <?= $chapter['status'] === 'drawing' ? 'selected' : '' ?>>Drawing</option>
+                    <option value="reviewing" <?= $chapter['status'] === 'reviewing' ? 'selected' : '' ?>>Reviewing</option>
+                    <option value="approved" <?= $chapter['status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
                     <option value="published" <?= $chapter['status'] === 'published' ? 'selected' : '' ?>>Published</option>
-                    <option value="scheduled" <?= $chapter['status'] === 'scheduled' ? 'selected' : '' ?>>Scheduled</option>
                 </select>
             </div>
             

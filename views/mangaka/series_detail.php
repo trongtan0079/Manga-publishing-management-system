@@ -95,14 +95,16 @@ include __DIR__ . '/../layouts/header.php';
                                 <?php foreach ($chapters as $chapter): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($chapter['chapter_number']) ?></td>
-                                        <td><?= htmlspecialchars($chapter['title']) ?></td>
+                                        <td><?= htmlspecialchars($chapter['title'] ?? '') ?></td>
                                         <td>
                                             <?php
                                             $cBadge = 'bg-secondary';
                                             switch ($chapter['status']) {
-                                                case 'draft': $cBadge = 'bg-secondary'; break;
+                                                case 'drafting': $cBadge = 'bg-secondary'; break;
+                                                case 'drawing': $cBadge = 'bg-primary'; break;
+                                                case 'reviewing': $cBadge = 'bg-warning text-dark'; break;
+                                                case 'approved': $cBadge = 'bg-info text-dark'; break;
                                                 case 'published': $cBadge = 'bg-success'; break;
-                                                case 'scheduled': $cBadge = 'bg-info text-dark'; break;
                                             }
                                             ?>
                                             <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span>
