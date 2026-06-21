@@ -4,8 +4,10 @@ namespace App\Controllers;
 
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Series.php';
+require_once __DIR__ . '/../models/Chapter.php';
 
 use Series;
+use Chapter;
 use PDOException;
 
 class SeriesController
@@ -155,6 +157,9 @@ class SeriesController
     public function show($id) {
         $series = $this->seriesModel->findById($id);
         $this->checkOwnership($series, $id);
+        
+        $chapterModel = new Chapter();
+        $chapters = $chapterModel->findBySeriesId($id);
         
         require_once __DIR__ . '/../views/mangaka/series_detail.php';
     }

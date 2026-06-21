@@ -72,17 +72,59 @@ include __DIR__ . '/../layouts/header.php';
             </div>
         </div>
 
-        <!-- Khung chờ (Placeholder) cho chức năng Chapter Management -->
+        <!-- Chapter Management -->
         <div class="card border-primary">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Chapters</h5>
-                <button class="btn btn-sm btn-light" disabled>+ Add Chapter (Coming Soon)</button>
+                <a href="/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Add Chapter</a>
             </div>
-            <div class="card-body text-center py-5">
-                <p class="text-muted mb-0">
-                    <em>Chapter Management module will be integrated here in the next phase.</em><br>
-                    You will be able to add, edit, and arrange chapters for this series.
-                </p>
+            <div class="card-body p-0">
+                <?php if (!empty($chapters)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Status</th>
+                                    <th>Updated At</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($chapters as $chapter): ?>
+                                    <tr>
+                                        <td><?= htmlspecialchars($chapter['chapter_number']) ?></td>
+                                        <td><?= htmlspecialchars($chapter['title']) ?></td>
+                                        <td>
+                                            <?php
+                                            $cBadge = 'bg-secondary';
+                                            switch ($chapter['status']) {
+                                                case 'draft': $cBadge = 'bg-secondary'; break;
+                                                case 'published': $cBadge = 'bg-success'; break;
+                                                case 'scheduled': $cBadge = 'bg-info text-dark'; break;
+                                            }
+                                            ?>
+                                            <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span>
+                                        </td>
+                                        <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></td>
+                                        <td class="text-end">
+                                            <a href="/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">View</a>
+                                            <a href="/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                            <form action="/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
+                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5">
+                        <p class="text-muted mb-0">Chưa có chapter nào. Hãy tạo chapter đầu tiên!</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
