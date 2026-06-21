@@ -47,13 +47,64 @@ include __DIR__ . '/../layouts/header.php';
 <div class="card border-info">
     <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Pages / Images</h5>
-        <button class="btn btn-sm btn-light" disabled>+ Add Page (Coming Soon)</button>
+        <a href="/index.php?controller=page&action=create&chapter_id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-light">+ Add Page</a>
     </div>
-    <div class="card-body text-center py-5">
-        <p class="text-muted mb-0">
-            <em>Page Management module will be integrated here in the next phase.</em><br>
-            You will be able to upload and manage images for this chapter.
-        </p>
+    <div class="card-body">
+        <?php if (empty($pages)): ?>
+            <div class="text-center py-5">
+                <p class="text-muted mb-0">
+                    <em>Chưa có trang truyện nào được thêm vào.</em><br>
+                    Hãy nhấn "+ Add Page" để tải lên hình ảnh cho chapter này.
+                </p>
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th scope="col" style="width: 100px;">Page #</th>
+                            <th scope="col">Thumbnail</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Updated At</th>
+                            <th scope="col" style="width: 250px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($pages as $page): ?>
+                            <?php
+                            $pBadge = 'bg-secondary';
+                            switch ($page['status']) {
+                                case 'drafting': $pBadge = 'bg-secondary'; break;
+                                case 'drawing': $pBadge = 'bg-primary'; break;
+                                case 'reviewing': $pBadge = 'bg-warning text-dark'; break;
+                                case 'approved': $pBadge = 'bg-info text-dark'; break;
+                                case 'published': $pBadge = 'bg-success'; break;
+                            }
+                            ?>
+                            <tr>
+                                <td class="text-center fs-5 fw-bold"><?= htmlspecialchars($page['page_number']) ?></td>
+                                <td>
+                                    <?php if (!empty($page['image_url'])): ?>
+                                        <img src="<?= htmlspecialchars($page['image_url']) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-thumbnail" style="max-height: 100px;">
+                                    <?php else: ?>
+                                        <span class="text-muted">No Image</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td><span class="badge <?= $pBadge ?>"><?= ucfirst(htmlspecialchars($page['status'])) ?></span></td>
+                                <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></td>
+                                <td>
+                                    <a href="/index.php?controller=page&action=show&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-info">View</a>
+                                    <a href="/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                    <form action="/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 

@@ -5,15 +5,18 @@ namespace App\Controllers;
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Chapter.php';
 require_once __DIR__ . '/../models/Series.php';
+require_once __DIR__ . '/../models/Page.php';
 
 use Chapter;
 use Series;
+use Page;
 use PDOException;
 
 class ChapterController
 {
     private $chapterModel;
     private $seriesModel;
+    private $pageModel;
     
     // Các trạng thái (status) hợp lệ của một chapter tương ứng với CSDL
     private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
@@ -24,6 +27,7 @@ class ChapterController
         
         $this->chapterModel = new Chapter();
         $this->seriesModel = new Series();
+        $this->pageModel = new Page();
     }
 
     /**
@@ -223,6 +227,10 @@ class ChapterController
         }
 
         $series = $this->checkSeriesOwnership($chapter['series_id']);
+        
+        // Lấy danh sách các trang của chapter này
+        $pages = $this->pageModel->findByChapterId($id);
+
         require_once __DIR__ . '/../views/mangaka/chapter_detail.php';
     }
 

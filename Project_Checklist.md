@@ -21,34 +21,34 @@
 
 * [x] Thiết kế cấu trúc thư mục MVC
 * [x] Tạo project framework
-* [ ] Cấu hình config/database.php
-* [ ] Tạo file index.php
-* [ ] Thiết lập routing cơ bản
+* [x] Cấu hình config/database.php
+* [x] Tạo file index.php
+* [x] Thiết lập routing cơ bản
 
 ---
 
 ### 3. Models
 
-* [ ] Role.php
-* [ ] User.php
-* [ ] Series.php
-* [ ] Chapter.php
-* [ ] Page.php
-* [ ] Task.php
-* [ ] Submission.php
-* [ ] Review.php
-* [ ] SeriesRanking.php
-* [ ] Notification.php
+* [x] Role.php
+* [x] User.php
+* [x] Series.php
+* [x] Chapter.php
+* [x] Page.php
+* [x] Task.php
+* [x] Submission.php
+* [x] Review.php
+* [x] SeriesRanking.php
+* [x] Notification.php
 
 ---
 
 ### 4. Controllers
 
-* [ ] AuthController.php
-* [ ] UserController.php
-* [ ] SeriesController.php
-* [ ] ChapterController.php
-* [ ] PageController.php
+* [x] AuthController.php
+* [x] UserController.php
+* [x] SeriesController.php
+* [x] ChapterController.php
+* [x] PageController.php
 * [ ] TaskController.php
 * [ ] SubmissionController.php
 * [ ] ReviewController.php
