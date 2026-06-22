@@ -3,6 +3,7 @@
 class Database {
     // Thông tin kết nối cơ sở dữ liệu
     private $host = 'localhost';
+    private $port = '3307';
     private $dbname = 'manga_workflow';
     private $username = 'root'; // Sửa lại nếu bạn có cấu hình username khác
     private $password = '';     // Sửa lại nếu bạn có cài đặt password cho MySQL
@@ -21,8 +22,8 @@ class Database {
 
         try {
             // Xây dựng chuỗi kết nối DSN (Data Source Name)
-            // Bao gồm định dạng host, dbname và thiết lập charset là utf8mb4 để hỗ trợ Unicode (như tiếng Việt, Emoji)
-            $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->dbname . ";charset=utf8mb4";
+            // Bao gồm định dạng host, port, dbname và thiết lập charset là utf8mb4 để hỗ trợ Unicode (như tiếng Việt, Emoji)
+            $dsn = "mysql:host=" . $this->host . ";port=" . $this->port . ";dbname=" . $this->dbname . ";charset=utf8mb4";
             
             // Khởi tạo đối tượng PDO
             $this->conn = new PDO($dsn, $this->username, $this->password);
