@@ -34,7 +34,7 @@
                     <?php endif; ?>
 
                     <!-- Chú ý action trỏ về đúng route của authentication. Ở đây giả định index.php là router chính -->
-                    <form action="/index.php?controller=auth&action=authenticate" method="POST">
+                    <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=auth&action=authenticate" method="POST">
                         <div class="mb-3">
                             <label for="login_id" class="form-label">Username or Email</label>
                             <input type="text" class="form-control" id="login_id" name="login_id" required autofocus>

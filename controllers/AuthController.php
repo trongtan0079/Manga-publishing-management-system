@@ -45,7 +45,7 @@ class AuthController {
 
             if (empty($loginId) || empty($password)) {
                 $_SESSION['error'] = 'Vui lòng nhập đầy đủ tên đăng nhập/email và mật khẩu.';
-                header('Location: /index.php?controller=auth&action=login');
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
                 exit;
             }
 
@@ -73,12 +73,12 @@ class AuthController {
                 $this->redirectBasedOnRole($roleName);
             } else {
                 $_SESSION['error'] = 'Tên đăng nhập/email hoặc mật khẩu không chính xác.';
-                header('Location: /index.php?controller=auth&action=login');
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
                 exit;
             }
         } else {
             // Nếu không phải POST, quay về trang đăng nhập
-            header('Location: /index.php?controller=auth&action=login');
+            header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
             exit;
         }
     }
@@ -107,7 +107,7 @@ class AuthController {
         session_destroy();
         
         // Chuyển hướng về trang đăng nhập
-        header('Location: /index.php?controller=auth&action=login');
+        header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
         exit;
     }
 
@@ -158,7 +158,7 @@ class AuthController {
                 $url = '/index.php'; // Mặc định nếu không xác định được
                 break;
         }
-        header('Location: ' . $url);
+        header('Location: ' . BASE_PATH . $url);
         exit;
     }
 }
