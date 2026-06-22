@@ -82,7 +82,7 @@ CREATE TABLE pages (
 -- ------------------------------------------------------------------------------
 CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
-    chapter_id INT NOT NULL,
+    page_id INT NOT NULL,
     mangaka_id INT NOT NULL,
     assistant_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -92,10 +92,10 @@ CREATE TABLE tasks (
     due_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_tasks_chapter FOREIGN KEY (chapter_id) REFERENCES chapters(chapter_id) ON DELETE CASCADE,
+    CONSTRAINT fk_tasks_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE,
     CONSTRAINT fk_tasks_mangaka FOREIGN KEY (mangaka_id) REFERENCES users(user_id) ON DELETE RESTRICT,
     CONSTRAINT fk_tasks_assistant FOREIGN KEY (assistant_id) REFERENCES users(user_id) ON DELETE RESTRICT
-) COMMENT 'Lưu trữ công việc (như đổ tone, vẽ nền) được giao cho các trợ lý trong một chương cụ thể';
+) COMMENT 'Lưu trữ công việc (như đổ tone, vẽ nền) được giao cho các trợ lý trên một trang cụ thể';
 
 -- ------------------------------------------------------------------------------
 -- 7. Bảng submissions: Quản lý việc nộp sản phẩm 
