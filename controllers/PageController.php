@@ -6,10 +6,12 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Page.php';
 require_once __DIR__ . '/../models/Chapter.php';
 require_once __DIR__ . '/../models/Series.php';
+require_once __DIR__ . '/../models/Task.php';
 
 use Page;
 use Chapter;
 use Series;
+use Task;
 use PDOException;
 
 class PageController
@@ -17,6 +19,7 @@ class PageController
     private $pageModel;
     private $chapterModel;
     private $seriesModel;
+    private $taskModel;
     
     // Giới hạn file ảnh 2MB
     private const MAX_FILE_SIZE = 2 * 1024 * 1024;
@@ -28,12 +31,14 @@ class PageController
     private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
 
     public function __construct() {
-        // Chỉ mangaka mới có quyền vào PageController
+        \requireLogin();
+        // Chỉ Mangaka mới được thao tác trong module Page
         \requireRole('mangaka');
         
         $this->pageModel = new Page();
         $this->chapterModel = new Chapter();
         $this->seriesModel = new Series();
+        $this->taskModel = new Task();
     }
 
     /**
@@ -208,6 +213,8 @@ class PageController
         $ownership = $this->checkChapterOwnership($page['chapter_id']);
         $chapter = $ownership['chapter'];
         $series = $ownership['series'];
+
+        $tasks = $this->taskModel->findByPageId($id);
 
         require_once __DIR__ . '/../views/mangaka/page_detail.php';
     }

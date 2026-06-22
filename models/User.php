@@ -55,4 +55,18 @@ class User extends Model {
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Lấy danh sách người dùng theo role (ví dụ: 'assistant') đang active
+     */
+    public function findByRoleName($roleName) {
+        $sql = "SELECT u.* 
+                FROM {$this->table} u 
+                JOIN roles r ON u.role_id = r.role_id
+                WHERE r.role_name = :role_name AND u.status = 'active'";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':role_name', $roleName);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

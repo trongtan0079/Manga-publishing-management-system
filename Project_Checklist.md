@@ -134,9 +134,9 @@
 
 #### Task Management
 
-* [ ] Assign Task
-* [ ] Update Task Status
-* [ ] View Task List
+* [x] Assign Task
+* [x] Update Task Status
+* [x] View Task List
 
 #### Submission Management
 

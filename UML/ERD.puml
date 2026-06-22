@@ -60,7 +60,7 @@ entity pages {
 entity tasks {
   *task_id : int <<PK>>
   --
-  chapter_id : int <<FK>>
+  page_id : int <<FK>>
   mangaka_id : int <<FK>>
   assistant_id : int <<FK>>
   title : varchar
@@ -132,9 +132,9 @@ series ||--o{ chapters : contains
 series ||--o{ series_rankings : ranked
 
 chapters ||--o{ pages : contains
-chapters ||--o{ tasks : requires
 chapters ||--o{ submissions : submitted
 
+pages ||--o{ tasks : requires
 tasks ||--o{ submissions : generates
 
 submissions ||--o{ reviews : receives
