@@ -1,27 +1,13 @@
 <?php 
-require_once __DIR__ . '/../../core/Auth.php';
-require_once __DIR__ . '/../../models/SeriesRanking.php';
-
-requireRole('board');
+/**
+ * @var int $evaluatedSeries
+ * @var string|null $latestPeriod
+ * @var string $topRankingSeriesName
+ * @var array $top5Series
+ * @var array $bottom5Series
+ */
 $pageTitle = 'Bảng Giám đốc (Board)';
 $current_page = 'dashboard';
-
-$rankingModel = new SeriesRanking();
-$latestPeriod = $rankingModel->getLatestPeriod();
-
-$evaluatedSeries = 0;
-$topRankingSeriesName = "Chưa có dữ liệu";
-$top5Series = [];
-$bottom5Series = [];
-
-if ($latestPeriod) {
-    $evaluatedSeries = $rankingModel->getSeriesCountByPeriod($latestPeriod);
-    $top5Series = $rankingModel->getTopSeriesByPeriod($latestPeriod, 5);
-    $bottom5Series = $rankingModel->getBottomSeriesByPeriod($latestPeriod, 5);
-    if (!empty($top5Series)) {
-        $topRankingSeriesName = $top5Series[0]['series_title'];
-    }
-}
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';

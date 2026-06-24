@@ -1,21 +1,14 @@
 <?php 
-require_once __DIR__ . '/../../core/Auth.php';
-require_once __DIR__ . '/../../models/SeriesRanking.php';
-
-requireRole('mangaka');
+/**
+ * @var int $totalSeries
+ * @var int $totalChapters
+ * @var int $totalPages
+ * @var int $totalTasks
+ * @var array $latestRankings
+ * @var \SeriesRanking $rankingModel
+ */
 $pageTitle = 'Không gian sáng tác (Mangaka)';
 $current_page = 'dashboard';
-
-$rankingModel = new SeriesRanking();
-$mangakaRankings = $rankingModel->findByMangakaId($_SESSION['user_id']);
-$latestRankings = [];
-$seenSeries = [];
-foreach ($mangakaRankings as $r) {
-    if (!isset($seenSeries[$r['series_id']])) {
-        $latestRankings[] = $r;
-        $seenSeries[$r['series_id']] = true;
-    }
-}
 
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';

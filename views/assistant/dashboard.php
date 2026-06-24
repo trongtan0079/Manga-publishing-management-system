@@ -1,6 +1,9 @@
 <?php 
-require_once __DIR__ . '/../../core/Auth.php';
-requireRole('assistant');
+/**
+ * @var int $assignedTasks
+ * @var int $inProgressTasks
+ * @var int $completedTasks
+ */
 $pageTitle = 'Bảng theo dõi Trợ lý (Assistant)';
 $current_page = 'dashboard';
 require_once __DIR__ . '/../layouts/header.php';

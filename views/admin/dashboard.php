@@ -1,6 +1,10 @@
 <?php 
-require_once __DIR__ . '/../../core/Auth.php';
-requireRole('admin');
+/**
+ * @var int $totalUsers
+ * @var int $totalSeries
+ * @var int $totalChapters
+ * @var int $totalPages
+ */
 $pageTitle = 'Quản trị hệ thống';
 $current_page = 'dashboard';
 require_once __DIR__ . '/../layouts/header.php';
