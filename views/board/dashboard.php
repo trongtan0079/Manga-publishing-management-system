@@ -1,4 +1,6 @@
 <?php 
+require_once __DIR__ . '/../../core/Auth.php';
+requireRole('board');
 $pageTitle = 'Bảng Giám đốc (Board)';
 $current_page = 'dashboard';
 require_once __DIR__ . '/../layouts/header.php';
@@ -15,31 +17,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <div class="row g-4 mb-4">
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
         <div class="card stat-card primary h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Doanh Thu (Tháng)</div>
-                        <div class="h3 mb-0 fw-bold">$2.5M</div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Series đánh giá</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($evaluatedSeries) ? $evaluatedSeries : 0 ?></div>
                     </div>
                     <div class="stat-icon primary">
-                        <i class="fas fa-dollar-sign"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card success h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Truyện đang Bán</div>
-                        <div class="h3 mb-0 fw-bold">45</div>
-                    </div>
-                    <div class="stat-icon success">
                         <i class="fas fa-book"></i>
                     </div>
                 </div>
@@ -47,34 +33,58 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
         <div class="card stat-card info h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Truyện Top 1</div>
-                        <div class="h5 mb-0 fw-bold">One Piece</div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Lượt Voting</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalVoting) ? $totalVoting : 0 ?></div>
                     </div>
                     <div class="stat-icon info">
-                        <i class="fas fa-crown"></i>
+                        <i class="fas fa-vote-yea"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6">
+    <div class="col-xl-4 col-md-6">
         <div class="card stat-card warning h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Cần Duyệt Ngân Sách</div>
-                        <div class="h3 mb-0 fw-bold">2</div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Top Ranking</div>
+                        <div class="h5 mb-0 fw-bold"><?= isset($topRankingSeries) ? $topRankingSeries : "Chưa có dữ liệu" ?></div>
                     </div>
                     <div class="stat-icon warning">
-                        <i class="fas fa-file-signature"></i>
+                        <i class="fas fa-trophy"></i>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="m-0"><i class="fas fa-list-ol text-primary me-2"></i>Bảng xếp hạng (Ranking)</h6>
+            </div>
+            <div class="card-body text-center py-5">
+                <p class="text-muted mb-0">Chưa có dữ liệu</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h6 class="m-0"><i class="fas fa-poll text-primary me-2"></i>Kết quả Voting</h6>
+            </div>
+            <div class="card-body text-center py-5">
+                <p class="text-muted mb-0">Chưa có dữ liệu</p>
             </div>
         </div>
     </div>
@@ -84,10 +94,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <div class="col-lg-12">
         <div class="card">
             <div class="card-header">
-                <h6 class="m-0"><i class="fas fa-chart-bar text-primary me-2"></i>Báo Cáo Tăng Trưởng Doanh Số</h6>
+                <h6 class="m-0"><i class="fas fa-star text-primary me-2"></i>Series đang đánh giá</h6>
             </div>
-            <div class="card-body" style="height: 300px; display: flex; align-items: center; justify-content: center; background-color: #f8fafc; border-radius: 8px;">
-                <p class="text-muted"><i class="fas fa-chart-bar me-2"></i>Khu vực tích hợp biểu đồ (E.g. Chart.js, ApexCharts)</p>
+            <div class="card-body text-center py-5">
+                <p class="text-muted mb-0">Chưa có dữ liệu</p>
             </div>
         </div>
     </div>

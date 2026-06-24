@@ -1,11 +1,18 @@
 <nav class="navbar navbar-expand-lg bg-white fixed-top">
-    <div class="container-fluid px-4">
+    <div class="container-fluid px-3 px-lg-0 ps-lg-2 pe-lg-4">
         <!-- Nút bật tắt menu cho mobile -->
         <button class="btn btn-light d-lg-none me-3 shadow-sm border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar">
             <i class="fas fa-bars"></i>
         </button>
         
-        <a class="navbar-brand d-flex align-items-center" href="#">
+        <!-- Nút bật tắt thanh bên cho Desktop (Canh giữa tuyệt đối bằng position absolute ở vị trí 40px) -->
+        <div class="d-none d-lg-flex align-items-center justify-content-center h-100" style="position: absolute; left: 0; top: 0; width: 80px; z-index: 1050;">
+            <button id="desktopSidebarToggle" class="btn btn-link text-dark p-0 text-decoration-none shadow-none sidebar-toggler-btn">
+                <i class="fas fa-bars fs-5"></i>
+            </button>
+        </div>
+
+        <a class="navbar-brand d-flex align-items-center ms-lg-5" href="#">
             <div class="bg-primary text-white rounded p-2 me-2 shadow-sm d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                 <i class="fas fa-book-open fs-5"></i>
             </div>
@@ -17,14 +24,17 @@
         </button>
         
         <div class="collapse navbar-collapse" id="navbarCollapse">
-            <form class="d-none d-md-flex ms-4" style="width: 300px;">
-                <div class="input-group">
-                    <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
-                    <input type="text" class="form-control bg-light border-0 shadow-none" placeholder="Tìm kiếm truyện, chương...">
-                </div>
-            </form>
-            
             <ul class="navbar-nav ms-auto mb-2 mb-md-0 align-items-center">
+                <!-- Chuyển ô tìm kiếm sang đây, gần chuông thông báo -->
+                <li class="nav-item me-3 d-none d-md-block">
+                    <form style="width: 250px;">
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-0"><i class="fas fa-search text-muted"></i></span>
+                            <input type="text" class="form-control bg-light border-0 shadow-none" placeholder="Tìm kiếm truyện, chương...">
+                        </div>
+                    </form>
+                </li>
+                
                 <li class="nav-item me-3">
                     <a class="nav-link position-relative" href="#">
                         <i class="fas fa-bell fs-5"></i>

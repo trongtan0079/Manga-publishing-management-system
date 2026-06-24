@@ -74,7 +74,45 @@ body {
         left: 0;
         z-index: 100;
         border-right: 1px solid var(--border-color);
+        transition: transform 0.3s ease;
     }
+}
+
+/* Trạng thái thu nhỏ Sidebar trên desktop (Mini-sidebar) */
+body.sidebar-collapsed .sidebar-custom {
+    width: 80px;
+    transform: none; /* Bỏ trượt ra ngoài */
+}
+
+/* Ẩn Text của Menu, phóng to Icon và căn giữa */
+body.sidebar-collapsed .sidebar-custom .nav-link {
+    font-size: 0; /* Ẩn chữ */
+    justify-content: center;
+    padding: 0.8rem 0;
+    margin: 0.25rem 0.5rem; /* Cách viền cho đẹp */
+}
+
+body.sidebar-collapsed .sidebar-custom .nav-link i {
+    font-size: 1.25rem; /* Phục hồi kích thước icon */
+    margin-right: 0;
+}
+
+/* Ẩn tiêu đề danh mục và hộp thoại hỗ trợ */
+body.sidebar-collapsed .sidebar-custom .nav-category,
+body.sidebar-collapsed .sidebar-custom .mt-auto {
+    display: none;
+}
+
+/* Nút bấm Hamburger trên Navbar */
+.sidebar-toggler-btn {
+    width: 40px; 
+    height: 40px; 
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+
+.sidebar-toggler-btn:hover {
+    background-color: var(--border-color);
 }
 
 /* Vùng nội dung có thể cuộn (Scroll) bên trong Sidebar */
@@ -146,10 +184,14 @@ main {
     background-color: var(--bg-color);
 }
 
-/* Thiết lập khoảng cách cho Màn hình máy tính để né Sidebar (260px) */
+/* Thiết lập khoảng cách cho Màn hình máy tính để né Sidebar */
 @media (min-width: 992px) {
     main {
         margin-left: 260px; /* Nhường chỗ trống bên trái cho Sidebar */
+        transition: margin-left 0.3s ease;
+    }
+    body.sidebar-collapsed main {
+        margin-left: 80px; /* Thu hẹp lề khi dùng Mini-sidebar */
     }
 }
 
