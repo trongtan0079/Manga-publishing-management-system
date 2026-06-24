@@ -44,7 +44,8 @@ Manga-publishing-management-system/
 │   │   ├── series.php
 │   │   ├── chapter.php
 │   │   ├── pages.php
-│   │   └── assign_task.php
+│   │   ├── task_create.php
+│   │   └── task_edit.php
 │   │
 │   ├── assistant/
 │   │   ├── dashboard.php

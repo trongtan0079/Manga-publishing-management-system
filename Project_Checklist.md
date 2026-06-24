@@ -49,7 +49,7 @@
 * [x] SeriesController.php
 * [x] ChapterController.php
 * [x] PageController.php
-* [ ] TaskController.php
+* [x] TaskController.php
 * [ ] SubmissionController.php
 * [ ] ReviewController.php
 * [ ] SeriesRankingController.php
@@ -82,12 +82,13 @@
 * [ ] series.php
 * [ ] chapter.php
 * [ ] pages.php
-* [ ] assign_task.php
+* [x] task_create.php
+* [x] task_edit.php
 
 #### Assistant Module
 
 * [ ] dashboard.php
-* [ ] task_list.php
+* [x] task_list.php
 * [ ] upload_submission.php
 
 #### Editor Module
