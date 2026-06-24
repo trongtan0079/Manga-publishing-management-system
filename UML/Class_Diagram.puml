@@ -1,8 +1,5 @@
 @startuml
-
-title Manga Creation and Publishing Management System
-
-skinparam classAttributeIconSize 0
+title Manga Creation and Publishing Workflow Management System
 
 class Role {
   +roleId : int
@@ -12,101 +9,83 @@ class Role {
 
 class User {
   +userId : int
-  +username : string
   +fullName : string
   +email : string
   +passwordHash : string
-  +status : string
+  +accountStatus : string
+}
+
+class Task {
+  +taskId : int
+  +taskType : string
+  +description : string
+  +taskStatus : string
+  +deadline : date
+}
+
+class Submission {
+  +submissionId : int
+  +submitDate : date
+  +submissionFile : string
+  +submissionStatus : string
+}
+
+class Review {
+  +reviewId : int
+  +reviewComment : string
+  +reviewDate : date
+  +reviewStatus : string
+}
+
+class Notification {
+  +notificationId : int
+  +notificationContent : string
+  +createdDate : date
+  +isRead : boolean
 }
 
 class Series {
   +seriesId : int
   +title : string
   +description : string
-  +status : string
-  +coverImage : string
+  +seriesStatus : string
+  +publishSchedule : string
+  +createdDate : date
+}
+
+class SeriesRanking {
+  +rankIngId : int
+  +voteCount : int
+  +rankPosition : int
+  +period : string
+  +updatedDate : date
 }
 
 class Chapter {
   +chapterId : int
   +chapterNumber : int
   +title : string
-  +status : string
-  +publishedAt : datetime
+  +chapterStatus : string
+  +uploadDate : date
 }
 
 class Page {
   +pageId : int
   +pageNumber : int
-  +imageUrl : string
-  +status : string
+  +imagePath : string
+  +pageStatus : string
 }
 
-class Task {
-  +taskId : int
-  +title : string
-  +description : string
-  +priority : string
-  +status : string
-  +dueDate : datetime
-}
-
-class Submission {
-  +submissionId : int
-  +fileUrl : string
-  +notes : string
-  +status : string
-  +submittedAt : datetime
-}
-
-class Review {
-  +reviewId : int
-  +comments : string
-  +rating : int
-  +createdAt : datetime
-}
-
-class SeriesRanking {
-  +rankingId : int
-  +rankPosition : int
-  +score : decimal
-  +periodStartDate : date
-}
-
-class Notification {
-  +notificationId : int
-  +type : string
-  +message : string
-  +isRead : boolean
-}
-
-Role "1" -- "*" User : assigned
-
-User "1" -- "*" Series : creates
-
-Series "1" -- "*" Chapter : contains
-
-Chapter "1" -- "*" Page : contains
-
-Page "1" -- "*" Task : requires
-
-User "1" -- "*" Task : assigns
-User "1" -- "*" Task : receives
-
-Task "1" -- "*" Submission : generates
-
-Chapter "1" -- "*" Submission : submitted
-
-User "1" -- "*" Submission : submits
-
-Submission "1" -- "*" Review : receives
-
-User "1" -- "*" Review : writes
-
-Series "1" -- "*" SeriesRanking : ranked
-
-User "1" -- "*" SeriesRanking : evaluates
-
-User "1" -- "*" Notification : receives
+Role "1" -- "many" User : assigned to
+User "1" -- "many" Series : creates
+Series "1" -- "1" SeriesRanking : ranked by
+Series "1" -- "many" Chapter : contains
+Chapter "1" -- "many" Page : contains
+User "1" -- "many" Submission : submits
+Submission "1" -- "1" Review : reviewed by
+User "1" -- "many" Task : assigns
+Task "1" -- "many" Submission : generates
+Task "1" -- "many" Review : writes
+User "1" -- "many" Notification : receives
 
 @enduml
