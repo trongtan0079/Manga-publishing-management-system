@@ -4,6 +4,9 @@
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Role.php';
+require_once __DIR__ . '/BaseController.php';
+
+use App\Controllers\BaseController;
 
 class AuthController extends BaseController {
     private $userModel;
@@ -20,15 +23,17 @@ class AuthController extends BaseController {
     }
 
     /**
-     * Hiển thị trang đăng nhập
+     * Action: Hiển thị trang đăng nhập (Login Page)
+     * Nếu người dùng đã đăng nhập (Session tồn tại), tự động điều hướng (Redirect)
+     * tới Dashboard tương ứng với Role của họ, ngăn việc truy cập lại trang login.
      */
     public function login() {
-        // Nếu đã đăng nhập, chuyển hướng theo role
+        // Kiểm tra và chuyển hướng nếu đã đăng nhập
         if ($this->checkAuth()) {
             $this->redirectBasedOnRole($_SESSION['role_name']);
         }
         
-        // Lấy thông báo lỗi nếu có
+        // Lấy thông báo lỗi từ Session (ví dụ: Sai mật khẩu) để hiển thị ra View
         $error = isset($_SESSION['error']) ? $_SESSION['error'] : null;
         unset($_SESSION['error']);
         
@@ -37,13 +42,16 @@ class AuthController extends BaseController {
     }
 
     /**
-     * Xử lý đăng nhập
+     * Action: Xử lý logic Đăng nhập khi người dùng Submit Form
+     * Hỗ trợ đăng nhập bằng cả Email hoặc Username.
+     * Sử dụng password_verify() để đối chiếu mật khẩu đã băm (Hash).
      */
     public function authenticate() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $loginId = trim($_POST['login_id'] ?? ''); // Có thể là username hoặc email
+            $loginId = trim($_POST['login_id'] ?? ''); // Người dùng có thể nhập Username hoặc Email
             $password = $_POST['password'] ?? '';
 
+            // 1. Kiểm tra đầu vào rỗng
             if (empty($loginId) || empty($password)) {
                 $_SESSION['error'] = 'Vui lòng nhập đầy đủ tên đăng nhập/email và mật khẩu.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
@@ -51,14 +59,14 @@ class AuthController extends BaseController {
             }
 
             $user = null;
-            // Kiểm tra xem input là email hay username
+            // 2. Phân loại định dạng: Nếu có chứa '@' thì query theo Email, ngược lại query theo Username
             if (filter_var($loginId, FILTER_VALIDATE_EMAIL)) {
                 $user = $this->userModel->findByEmail($loginId);
             } else {
                 $user = $this->userModel->findByUsername($loginId);
             }
 
-            // Kiểm tra mật khẩu
+            // 3. Đối chiếu mật khẩu an toàn (Bcrypt verification)
             if ($user && password_verify($password, $user['password_hash'])) {
                 // Lấy thông tin role
                 $role = $this->roleModel->findById($user['role_id']);
@@ -85,14 +93,15 @@ class AuthController extends BaseController {
     }
 
     /**
-     * Xử lý đăng xuất
+     * Action: Xử lý đăng xuất (Logout)
+     * Xóa toàn bộ dữ liệu Session và gỡ bỏ Cookie lưu vết của người dùng.
      */
     public function logout() {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         
-        // Xóa tất cả các biến session
+        // Dọn dẹp toàn bộ mảng Session hiện tại
         $_SESSION = array();
 
         // Xóa cookie của session nếu có
@@ -135,25 +144,26 @@ class AuthController extends BaseController {
     }
 
     /**
-     * Hàm hỗ trợ chuyển hướng theo role
+     * Helper: Hàm hỗ trợ tự động định tuyến (Routing) sau khi đăng nhập thành công.
+     * Dựa vào Tên Role của user để chuyển họ về đúng màn hình Dashboard riêng biệt.
      */
     private function redirectBasedOnRole($roleName) {
         $url = '';
         switch ($roleName) {
             case 'admin':
-                $url = '/views/admin/dashboard.php';
+                $url = '/index.php?controller=dashboard&action=admin';
                 break;
             case 'mangaka':
-                $url = '/views/mangaka/dashboard.php';
+                $url = '/index.php?controller=dashboard&action=mangaka';
                 break;
             case 'assistant':
-                $url = '/views/assistant/dashboard.php';
+                $url = '/index.php?controller=dashboard&action=assistant';
                 break;
             case 'editor':
-                $url = '/views/editor/dashboard.php';
+                $url = '/index.php?controller=dashboard&action=editor';
                 break;
             case 'board':
-                $url = '/views/board/dashboard.php';
+                $url = '/index.php?controller=dashboard&action=board';
                 break;
             default:
                 $url = '/index.php'; // Mặc định nếu không xác định được

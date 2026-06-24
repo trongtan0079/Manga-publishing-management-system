@@ -18,13 +18,15 @@ class SeriesRankingController extends BaseController
     private $seriesModel;
     private $notificationModel;
 
+    /**
+     * Hàm khởi tạo (Constructor)
+     * Đảm bảo người dùng đã đăng nhập.
+     * Chặn hoàn toàn quyền truy cập của Assistant vào module Xếp hạng.
+     */
     public function __construct() {
         parent::__construct();
         
-        if (!\isLoggedIn()) {
-            header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
-            exit;
-        }
+        \requireLogin();
 
         $role = $_SESSION['role_name'];
         if ($role === 'assistant') {
@@ -38,6 +40,12 @@ class SeriesRankingController extends BaseController
         $this->notificationModel = new Notification();
     }
 
+    /**
+     * Action: Hiển thị danh sách Xếp hạng
+     * - Mangaka: Chỉ nhìn thấy xếp hạng của các tác phẩm do mình sáng tác.
+     * - Board: Nhìn thấy toàn bộ xếp hạng (được quyền Thêm/Sửa/Xóa).
+     * - Admin, Editor: Nhìn thấy toàn bộ xếp hạng (chỉ xem, Read-only).
+     */
     public function index() {
         $role = $_SESSION['role_name'];
         if ($role === 'mangaka') {
@@ -55,6 +63,10 @@ class SeriesRankingController extends BaseController
         }
     }
 
+    /**
+     * Action: Hiển thị form tạo Xếp hạng mới
+     * Quyền: Chỉ dành cho Board (Ban Giám đốc)
+     */
     public function create() {
         \requireRole('board');
         // Need to get series for dropdown. Should get 'ongoing' or 'completed' maybe, but let's get all except planning/canceled
@@ -62,6 +74,10 @@ class SeriesRankingController extends BaseController
         require_once __DIR__ . '/../views/board/ranking_create.php';
     }
 
+    /**
+     * Action: Xử lý lưu dữ liệu Xếp hạng mới vào Database
+     * Nếu thành công, tự động gửi thông báo (Notification) cho Mangaka chủ sở hữu truyện.
+     */
     public function store() {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -93,7 +109,7 @@ class SeriesRankingController extends BaseController
             try {
                 $this->rankingModel->insert($data);
                 
-                // Get Mangaka to send notification
+                // Lấy thông tin Mangaka để gửi thông báo chúc mừng / cập nhật
                 $series = $this->seriesModel->findById($seriesId);
                 if ($series) {
                     $mangakaId = $series['mangaka_id'];
@@ -112,6 +128,10 @@ class SeriesRankingController extends BaseController
         }
     }
 
+    /**
+     * Action: Xem chi tiết một Xếp hạng cụ thể
+     * Nếu người dùng là Mangaka, chặn xem xếp hạng của truyện không thuộc quyền sở hữu.
+     */
     public function show($id) {
         $ranking = $this->rankingModel->findById($id);
         if (!$ranking) {
@@ -132,6 +152,10 @@ class SeriesRankingController extends BaseController
         require_once __DIR__ . '/../views/board/ranking_detail.php';
     }
 
+    /**
+     * Action: Hiển thị form chỉnh sửa Xếp hạng
+     * Quyền: Chỉ dành cho Board
+     */
     public function edit($id) {
         \requireRole('board');
         $ranking = $this->rankingModel->findById($id);
@@ -144,6 +168,10 @@ class SeriesRankingController extends BaseController
         require_once __DIR__ . '/../views/board/ranking_edit.php';
     }
 
+    /**
+     * Action: Xử lý lưu cập nhật Xếp hạng vào Database
+     * Có kiểm tra trùng lặp nếu người dùng đổi Series hoặc Kỳ đánh giá.
+     */
     public function update($id) {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -165,7 +193,7 @@ class SeriesRankingController extends BaseController
                 exit;
             }
 
-            // Check duplicate only if period_start_date or series_id changed
+            // Chỉ kiểm tra trùng lặp dữ liệu (Duplicate) nếu Series hoặc Kỳ đánh giá bị thay đổi
             if (($seriesId != $ranking['series_id'] || $periodStartDate != $ranking['period_start_date']) && 
                 $this->rankingModel->checkDuplicateRanking($seriesId, $periodStartDate)) {
                 $_SESSION['error'] = 'Series này đã có đánh giá trong kỳ này.';
@@ -193,6 +221,10 @@ class SeriesRankingController extends BaseController
         }
     }
 
+    /**
+     * Action: Xóa một Xếp hạng
+     * Quyền: Chỉ dành cho Board
+     */
     public function delete($id) {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

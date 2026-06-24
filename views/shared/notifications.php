@@ -32,6 +32,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <?php endif; ?>
                             
                             <?php 
+                                // Tùy chỉnh icon và màu sắc hiển thị dựa trên loại thông báo (type)
                                 $icon = 'fa-bell';
                                 $color = 'text-secondary';
                                 $typeLabel = 'Thông báo';
