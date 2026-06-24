@@ -52,7 +52,7 @@ $role = $_SESSION['role_name'] ?? '';
             </li>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['mangaka', 'editor'])): ?>
+            <?php if (in_array($role, ['mangaka', 'assistant', 'editor'])): ?>
             <li class="nav-item">
                 <a class="nav-link <?= (isset($current_page) && $current_page == 'submissions') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=submission&action=index">
                     <i class="fas fa-cloud-upload-alt"></i> Bản thảo & Phê duyệt

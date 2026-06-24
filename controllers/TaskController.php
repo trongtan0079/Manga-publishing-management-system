@@ -37,7 +37,7 @@ class TaskController
         
         // Kiểm tra xem người dùng hiện tại có thuộc Role hợp lệ không
         // Chỉ Mangaka và Assistant mới được phép thao tác với Task
-        $role = $_SESSION['user_role'] ?? '';
+        $role = $_SESSION['role_name'] ?? '';
         if ($role !== 'mangaka' && $role !== 'assistant') {
             $_SESSION['error'] = 'Bạn không có quyền truy cập quản lý Task.';
             header('Location: /index.php');

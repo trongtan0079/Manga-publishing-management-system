@@ -36,7 +36,7 @@ include __DIR__ . '/../layouts/header.php';
                                 <!-- Cột Ngữ cảnh: Hiển thị bộ truyện, chương, trang và người giao -->
                                 <td>
                                     <strong><?= htmlspecialchars($task['series_title']) ?></strong><br>
-                                    <small class="text-muted">Ch. <?= htmlspecialchars($task['chapter_number']) ?> - Pg. <?= htmlspecialchars($task['page_number']) ?></small><br>
+                                    <small class="text-muted">Ch. <?= htmlspecialchars($task['chapter_number']) ?></small><br>
                                     <small class="text-info">By: <?= htmlspecialchars($task['mangaka_name']) ?></small>
                                 </td>
                                 <!-- Cột Công việc: Tiêu đề và mô tả vắn tắt -->

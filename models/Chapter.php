@@ -36,4 +36,20 @@ class Chapter extends Model {
         $stmt->execute();
         return $stmt->fetchColumn() > 0;
     }
+
+    /**
+     * Lấy danh sách chapter thuộc các series của Mangaka
+     */
+    public function findByMangakaId($mangakaId) {
+        $sql = "SELECT c.*, s.title as series_title 
+                FROM {$this->table} c 
+                JOIN series s ON c.series_id = s.series_id 
+                WHERE s.mangaka_id = :mangaka_id 
+                ORDER BY s.title ASC, c.chapter_number ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':mangaka_id', $mangakaId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
+
