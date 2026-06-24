@@ -89,7 +89,7 @@ Thiết kế Database đảm bảo:
 * **Mô tả**: Quản lý công việc do Mangaka phân công cho Assistant (ví dụ đi nét, đổ tone trang cụ thể).
 * **Thuộc tính**:
     * `task_id`: INT, PK, Auto Increment.
-    * `chapter_id`: INT, Foreign Key (chapters.chapter_id), NOT NULL.
+    * `page_id`: INT, Foreign Key (pages.page_id), NOT NULL.
     * `mangaka_id`: INT, Foreign Key (users.user_id), NOT NULL (Người giao việc).
     * `assistant_id`: INT, Foreign Key (users.user_id), NOT NULL (Người nhận việc).
     * `title`: VARCHAR(255), NOT NULL.
@@ -159,7 +159,7 @@ Thiết kế Database đảm bảo:
   * `series` (1) - (N) `chapters`: Một `Series` chứa (`contains`) nhiều `Chapter` (thông qua `series_id`).
   * `series` (1) - (N) `series_rankings`: Một `Series` có thể được xếp hạng (`ranked`) nhiều lần qua các khoảng thời gian (thông qua `series_id`).
   * `chapters` (1) - (N) `pages`: Một `Chapter` chứa (`contains`) nhiều `Page` (thông qua `chapter_id`).
-  * `chapters` (1) - (N) `tasks`: Một `Chapter` yêu cầu (`requires`) nhiều `Task` (thông qua `chapter_id`).
+  * `pages` (1) - (N) `tasks`: Một `Page` yêu cầu (`requires`) nhiều `Task` (thông qua `page_id`).
   * `tasks` (1) - (N) `submissions`: Một `Task` sinh ra (`generates`) nhiều `Submission` (nếu bị reject và nộp lại nhiều lần, thông qua `task_id`).
   * `chapters` (1) - (N) `submissions`: Một `Chapter` được submit (`submitted`) qua nhiều lần (thông qua `chapter_id`).
   * `submissions` (1) - (N) `reviews`: Một `Submission` có thể nhận (`receives`) nhiều `Review` (thông qua `submission_id`).
@@ -242,7 +242,7 @@ CREATE TABLE pages (
 -- 6. tasks table
 CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
-    chapter_id INT NOT NULL,
+    page_id INT NOT NULL,
     mangaka_id INT NOT NULL,
     assistant_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -252,7 +252,7 @@ CREATE TABLE tasks (
     due_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_tasks_chapter FOREIGN KEY (chapter_id) REFERENCES chapters(chapter_id) ON DELETE CASCADE,
+    CONSTRAINT fk_tasks_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE,
     CONSTRAINT fk_tasks_mangaka FOREIGN KEY (mangaka_id) REFERENCES users(user_id) ON DELETE RESTRICT,
     CONSTRAINT fk_tasks_assistant FOREIGN KEY (assistant_id) REFERENCES users(user_id) ON DELETE RESTRICT
 );
