@@ -240,7 +240,7 @@ class TaskController extends BaseController
             exit;
         }
 
-        $role = $_SESSION['user_role'];
+        $role = $_SESSION['role_name'] ?? '';
 
         // LUỒNG 1: Nếu người dùng là Mangaka
         if ($role === 'mangaka') {
