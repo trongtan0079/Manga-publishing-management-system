@@ -11,12 +11,13 @@ use User;
 use Role;
 use PDOException;
 
-class UserController
+class UserController extends BaseController
 {
     private $userModel;
     private $roleModel;
 
     public function __construct() {
+        parent::__construct();
         // Chỉ cho phép Admin truy cập toàn bộ các chức năng trong controller này
         requireRole('admin');
         

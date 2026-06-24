@@ -5,11 +5,12 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Role.php';
 
-class AuthController {
+class AuthController extends BaseController {
     private $userModel;
     private $roleModel;
 
     public function __construct() {
+        parent::__construct();
         $this->userModel = new User();
         $this->roleModel = new Role();
         // Đảm bảo session đã được khởi tạo

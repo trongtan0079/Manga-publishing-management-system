@@ -10,12 +10,13 @@ use Series;
 use Chapter;
 use PDOException;
 
-class SeriesController
+class SeriesController extends BaseController
 {
     private $seriesModel;
     private $allowedStatuses = ['planning', 'ongoing', 'completed', 'canceled', 'suspended'];
 
     public function __construct() {
+        parent::__construct();
         // Chỉ cho phép Mangaka truy cập toàn bộ các chức năng trong controller này
         requireRole('mangaka');
         

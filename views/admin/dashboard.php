@@ -87,7 +87,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <div class="row">
-    <div class="col-lg-12">
+    <div class="col-lg-8">
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h6 class="m-0"><i class="fas fa-chart-area text-primary me-2"></i>Biểu đồ Thống kê Toàn hệ thống</h6>
@@ -96,6 +96,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <p class="text-muted mb-0">Chưa có dữ liệu</p>
             </div>
         </div>
+    </div>
+    <div class="col-lg-4">
+        <?php require_once __DIR__ . '/../shared/dashboard_notifications.php'; ?>
     </div>
 </div>
 

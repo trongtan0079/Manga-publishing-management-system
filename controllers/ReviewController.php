@@ -10,13 +10,14 @@ use Review;
 use Submission;
 use Notification;
 
-class ReviewController
+class ReviewController extends BaseController
 {
     private $reviewModel;
     private $submissionModel;
     private $notificationModel;
 
     public function __construct() {
+        parent::__construct();
         $this->reviewModel = new Review();
         $this->submissionModel = new Submission();
         $this->notificationModel = new Notification();
@@ -94,16 +95,25 @@ class ReviewController
             $status = ($decision === 'approved') ? 'approved' : 'rejected';
             $this->submissionModel->update($submissionId, ['status' => $status]);
 
-            // Create notification
+            // Create notifications
             $submission = $this->submissionModel->findById($submissionId);
             if ($submission) {
+                // Thông báo có Review mới
+                $this->notificationModel->createNotification(
+                    $submission['user_id'],
+                    'review_created',
+                    "Có một nhận xét mới cho bản thảo của bạn."
+                );
+
+                // Thông báo Approve/Reject
                 $statusText = $status === 'approved' ? 'phê duyệt' : 'từ chối';
-                $notifData = [
-                    'user_id' => $submission['user_id'],
-                    'type' => 'review_' . $status,
-                    'message' => "Bản thảo của bạn đã bị {$statusText}. Nhận xét: " . mb_substr($comments, 0, 50) . "..."
-                ];
-                $this->notificationModel->insert($notifData);
+                $notifType = $status === 'approved' ? 'submission_approved' : 'submission_rejected';
+                
+                $this->notificationModel->createNotification(
+                    $submission['user_id'],
+                    $notifType,
+                    "Bản thảo của bạn đã bị {$statusText}. Nhận xét: " . mb_substr($comments, 0, 50) . "..."
+                );
             }
 
             $_SESSION['success'] = 'Đã đánh giá bản thảo thành công.';

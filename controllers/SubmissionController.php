@@ -11,13 +11,14 @@ use Submission;
 use Task;
 use Chapter;
 
-class SubmissionController
+class SubmissionController extends BaseController
 {
     private $submissionModel;
     private $taskModel;
     private $chapterModel;
 
     public function __construct() {
+        parent::__construct();
         // Yêu cầu người dùng đăng nhập trước khi thao tác
         \requireLogin();
         
@@ -217,9 +218,32 @@ class SubmissionController
         $submissionId = $this->submissionModel->insert($submissionData);
 
         if ($submissionId) {
+            require_once __DIR__ . '/../models/Notification.php';
+            $notificationModel = new \Notification();
+
             // Nếu là Mangaka nộp Chapter, tự động chuyển trạng thái Chapter sang 'reviewing'
             if ($role === 'mangaka' && $chapterId > 0) {
                 $this->chapterModel->update($chapterId, ['status' => 'reviewing']);
+                
+                require_once __DIR__ . '/../models/User.php';
+                $userModel = new \User();
+                $editors = $userModel->findByRoleName('editor');
+                foreach ($editors as $editor) {
+                    $notificationModel->createNotification(
+                        $editor['user_id'],
+                        'chapter_submitted',
+                        'Mangaka ' . $_SESSION['username'] . ' vừa nộp một Chapter mới chờ duyệt.'
+                    );
+                }
+            } elseif ($role === 'assistant' && $taskId > 0) {
+                $task = $this->taskModel->findById($taskId);
+                if ($task) {
+                    $notificationModel->createNotification(
+                        $task['mangaka_id'],
+                        'submission_submitted',
+                        'Assistant ' . $_SESSION['username'] . ' vừa nộp bản thảo cho Task: ' . $task['title']
+                    );
+                }
             }
 
             $_SESSION['success'] = 'Nộp bản thảo thành công và đang chờ review.';

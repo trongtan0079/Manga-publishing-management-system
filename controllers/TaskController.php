@@ -17,7 +17,7 @@ use Series;
 use User;
 use Notification;
 
-class TaskController
+class TaskController extends BaseController
 {
     private $taskModel;
     private $pageModel;
@@ -32,6 +32,7 @@ class TaskController
      * Chịu trách nhiệm kiểm tra đăng nhập và phân quyền chung.
      */
     public function __construct() {
+        parent::__construct();
         // Yêu cầu người dùng phải đăng nhập trước khi thao tác
         \requireLogin();
         
@@ -175,12 +176,11 @@ class TaskController
             ]);
 
             // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc
-            $this->notificationModel->insert([
-                'user_id' => $assistantId,
-                'type' => 'task_assigned',
-                'message' => 'Bạn được giao task mới: ' . $title,
-                'is_read' => 0
-            ]);
+            $this->notificationModel->createNotification(
+                $assistantId,
+                'task_assigned',
+                'Bạn được giao công việc mới: ' . $title
+            );
 
             // Chuyển hướng quay lại trang chi tiết (page_detail) cùng thông báo thành công
             $_SESSION['success'] = 'Đã giao task thành công.';

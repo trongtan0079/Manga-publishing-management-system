@@ -14,7 +14,7 @@ use Series;
 use Task;
 use PDOException;
 
-class PageController
+class PageController extends BaseController
 {
     private $pageModel;
     private $chapterModel;
@@ -31,6 +31,7 @@ class PageController
     private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
 
     public function __construct() {
+        parent::__construct();
         \requireLogin();
         // Chỉ Mangaka mới được thao tác trong module Page
         \requireRole('mangaka');

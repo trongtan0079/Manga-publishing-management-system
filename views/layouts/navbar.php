@@ -35,11 +35,49 @@
                     </form>
                 </li>
                 
-                <li class="nav-item me-3">
-                    <a class="nav-link position-relative" href="#">
+                <li class="nav-item dropdown me-3">
+                    <a class="nav-link position-relative d-flex align-items-center" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                         <i class="fas fa-bell fs-5"></i>
-                        <span class="position-absolute top-25 start-75 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
+                        <?php if (isset($this->unreadCount) && $this->unreadCount > 0): ?>
+                            <span class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                <?= $this->unreadCount > 99 ? '99+' : $this->unreadCount ?>
+                            </span>
+                        <?php endif; ?>
                     </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3 p-0" aria-labelledby="notificationDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light sticky-top rounded-top">
+                            <span class="fw-bold text-dark">Thông báo</span>
+                            <?php if (isset($this->unreadCount) && $this->unreadCount > 0): ?>
+                                <span class="badge bg-primary rounded-pill"><?= $this->unreadCount ?> mới</span>
+                            <?php endif; ?>
+                        </li>
+                        <?php if (isset($this->latestNotifications) && !empty($this->latestNotifications)): ?>
+                            <?php foreach ($this->latestNotifications as $notif): ?>
+                                <li>
+                                    <a class="dropdown-item py-3 border-bottom <?= !$notif['is_read'] ? 'bg-light' : '' ?> text-wrap" href="#">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span class="fw-bold text-dark" style="font-size: 0.85rem;">
+                                                <?php if (!$notif['is_read']): ?>
+                                                    <span class="d-inline-block bg-primary rounded-circle me-1" style="width: 8px; height: 8px;"></span>
+                                                <?php endif; ?>
+                                                Thông báo
+                                            </span>
+                                            <small class="text-muted" style="font-size: 0.7rem;"><?= date('d/m H:i', strtotime($notif['created_at'])) ?></small>
+                                        </div>
+                                        <p class="mb-0 text-muted" style="font-size: 0.85rem; line-height: 1.4;"><?= htmlspecialchars($notif['message']) ?></p>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                            <li class="sticky-bottom bg-white rounded-bottom">
+                                <a class="dropdown-item text-center py-2 text-primary fw-bold" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=index">Xem tất cả thông báo</a>
+                            </li>
+                        <?php else: ?>
+                            <li class="p-4 text-center text-muted">
+                                <i class="fas fa-bell-slash fs-4 mb-2 opacity-50"></i>
+                                <p class="mb-0 small">Không có thông báo mới</p>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
                 </li>
                 <div class="vr mx-2 d-none d-lg-block" style="height: 30px; align-self: center;"></div>
                 <li class="nav-item dropdown ms-2">

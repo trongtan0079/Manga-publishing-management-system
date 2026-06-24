@@ -12,7 +12,7 @@ use Series;
 use Page;
 use PDOException;
 
-class ChapterController
+class ChapterController extends BaseController
 {
     private $chapterModel;
     private $seriesModel;
@@ -22,6 +22,7 @@ class ChapterController
     private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
 
     public function __construct() {
+        parent::__construct();
         // Chỉ cho phép người dùng có role 'mangaka' truy cập vào Controller này
         \requireRole('mangaka');
         
