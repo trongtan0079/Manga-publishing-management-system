@@ -60,11 +60,11 @@ $role = $_SESSION['role_name'] ?? '';
             </li>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['admin', 'board'])): ?>
+            <?php if (in_array($role, ['admin', 'board', 'mangaka', 'editor'])): ?>
             <div class="nav-category">Báo cáo & Thống kê</div>
             <li class="nav-item">
                 <a class="nav-link <?= (isset($current_page) && $current_page == 'rankings') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=seriesranking&action=index">
-                    <i class="fas fa-chart-line"></i> Xếp hạng Manga
+                    <i class="fas fa-chart-line"></i> Xếp hạng Manga <?= in_array($role, ['admin', 'editor']) ? '<small class="text-muted">(Read Only)</small>' : '' ?>
                 </a>
             </li>
             <?php endif; ?>
