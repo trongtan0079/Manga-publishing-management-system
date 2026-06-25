@@ -2,16 +2,20 @@
 /**
  * @var array $series 
  */
-include __DIR__ . '/../layouts/header.php'; 
+$pageTitle = 'Chi tiết Truyện: ' . htmlspecialchars($series['title']);
+$current_page = 'series';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <!-- Thanh điều hướng cơ bản -->
-<div class="mb-3 d-flex justify-content-between align-items-center">
-    <a href="/index.php?controller=series&action=index" class="btn btn-secondary">&larr; Back to My Series</a>
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <a href="/index.php?controller=series&action=index" class="btn btn-outline-secondary shadow-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
     
     <div>
-        <a href="/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning">
-            Edit Series
+        <a href="/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning shadow-sm text-dark">
+            <i class="fas fa-edit me-2"></i>Sửa Truyện
         </a>
     </div>
 </div>
