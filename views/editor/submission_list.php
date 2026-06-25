@@ -49,7 +49,7 @@ $role = $_SESSION['role_name'] ?? '';
 <?php endif; ?>
 
 <div class="card shadow-sm border-0 rounded-3">
-    <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+    <div class="card-header bg-white text-dark py-3 border-bottom border-light d-flex justify-content-between align-items-center">
         <h5 class="card-title mb-0"><i class="fas fa-list me-2 text-primary"></i>Danh sách bản thảo</h5>
         <span class="badge bg-primary"><?= count($submissions) ?> Bản ghi</span>
     </div>

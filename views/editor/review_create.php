@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <div class="row g-4">
     <div class="col-lg-8">
         <div class="card shadow-sm border-0 rounded-3 h-100">
-            <div class="card-header bg-dark text-white py-3">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-file-alt me-2 text-primary"></i>Nội dung Bản thảo</h5>
             </div>
             <div class="card-body">
@@ -81,7 +81,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     
     <div class="col-lg-4">
         <div class="card shadow-sm border-0 rounded-3 position-sticky" style="top: 20px;">
-            <div class="card-header bg-dark text-white py-3">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-edit me-2 text-warning"></i>Form Đánh giá</h5>
             </div>
             <div class="card-body">

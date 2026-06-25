@@ -17,7 +17,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <div class="row">
     <div class="col-lg-8 mx-auto">
         <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-dark text-white py-3 d-flex justify-content-between align-items-center">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0"><i class="fas fa-comment-dots me-2 text-primary"></i>Kết quả Đánh giá</h5>
                 <span class="badge bg-light text-dark shadow-sm"><?= date('d/m/Y H:i', strtotime($review['created_at'])) ?></span>
             </div>

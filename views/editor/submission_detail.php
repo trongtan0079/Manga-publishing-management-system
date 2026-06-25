@@ -22,7 +22,7 @@ $role = $_SESSION['role_name'] ?? '';
     <!-- Cột bên trái: Hiển thị Preview File / File info -->
     <div class="col-lg-7 mb-4">
         <div class="card shadow-sm border-0 rounded-3 h-100">
-            <div class="card-header bg-dark text-white py-3">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-file-image me-2 text-primary"></i>Xem trước sản phẩm</h5>
             </div>
             <div class="card-body d-flex flex-column align-items-center justify-content-center p-4 bg-light" style="min-height: 400px;">
@@ -74,7 +74,7 @@ $role = $_SESSION['role_name'] ?? '';
     <!-- Cột bên phải: Metadata / Hành động -->
     <div class="col-lg-5 mb-4">
         <div class="card shadow-sm border-0 rounded-3 mb-4">
-            <div class="card-header bg-dark text-white py-3">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin chi tiết</h5>
             </div>
             <div class="card-body p-4">
@@ -157,7 +157,7 @@ $role = $_SESSION['role_name'] ?? '';
 
         <!-- Khung hành động -->
         <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-dark text-white py-3">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-cogs me-2 text-primary"></i>Hành động khả dụng</h5>
             </div>
             <div class="card-body p-4 text-center">

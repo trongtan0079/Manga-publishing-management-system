@@ -19,7 +19,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <div class="row">
     <div class="col-lg-8 col-md-10 mx-auto">
         <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-dark text-white py-3">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-cloud-upload-alt me-2 text-primary"></i>Thông tin nộp bài</h5>
             </div>
             <div class="card-body p-4">

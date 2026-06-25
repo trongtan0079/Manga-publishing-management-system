@@ -12,7 +12,7 @@ include __DIR__ . '/../layouts/header.php';
   và cập nhật trực tiếp tiến độ công việc thông qua form Dropdown nội tuyến.
 -->
 <div class="card mb-4">
-    <div class="card-header bg-dark text-white">
+    <div class="card-header bg-white text-dark border-bottom border-light">
         <h4 class="mb-0">My Tasks Dashboard</h4>
         <small>Danh sách công việc được giao</small>
     </div>
