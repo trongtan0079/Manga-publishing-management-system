@@ -9,14 +9,14 @@
     --primary-color: #6366f1;     /* Màu chủ đạo (Tím chàm Indigo) */
     --primary-hover: #4f46e5;     /* Màu chủ đạo khi rê chuột (Hover) */
     --secondary-color: #8b5cf6;   /* Màu phụ trợ (Tím nhạt) */
-    --bg-color: #f8fafc;          /* Màu nền chính của toàn trang (Xám rất nhạt) */
-    --sidebar-bg: #1e1e2f;        /* Màu nền của thanh Menu bên trái (Xanh đen đậm) */
-    --sidebar-color: #94a3b8;     /* Màu chữ của các mục trong Menu chưa kích hoạt */
-    --sidebar-hover: #ffffff;     /* Màu chữ của mục Menu khi rê chuột */
+    --bg-color: #f1f5f9;          /* Màu nền chính (Slate 100) - Đã làm đậm hơn để thẻ Trắng nổi bật */
+    --sidebar-bg: #ffffff;        /* Màu nền Trắng tinh khiết */
+    --sidebar-color: #475569;     /* Slate 600 */
+    --sidebar-hover: #1e293b;     /* Slate 800 */
     --card-bg: #ffffff;           /* Màu nền của các khối Thống kê/Bảng (Trắng) */
     --text-main: #334155;         /* Màu chữ chính cho nội dung (Xám đậm) */
     --text-muted: #64748b;        /* Màu chữ mờ/chú thích (Xám nhạt hơn) */
-    --border-color: #e2e8f0;      /* Màu viền cho các bảng, thẻ */
+    --border-color: #cbd5e1;      /* Màu viền cho các bảng - Đã làm đậm hơn xíu để dễ nhìn */
 }
 
 /* Cài đặt chung cho toàn bộ thân trang (Body) */
@@ -61,116 +61,168 @@ body {
 
 /* Khung chính của Sidebar */
 .sidebar-custom {
-    width: 260px; /* Độ rộng cố định */
-    background-color: var(--sidebar-bg); /* Lấy màu nền tối từ biến */
+    width: 260px;
+    background: linear-gradient(180deg, #312e81 0%, #1e1b4b 100%); /* Xanh tím đậm sang trọng (Indigo 900) */
 }
 
 /* Định dạng Sidebar cho màn hình máy tính (PC/Laptop >= 992px) */
 @media (min-width: 992px) {
     .sidebar-custom {
-        position: fixed; /* Cố định bên trái khi cuộn trang */
-        top: 68px; /* Tránh đè lên Navbar (chiều cao Navbar là 68px) */
+        position: fixed;
+        top: 68px; /* Tránh đè lên Navbar */
         bottom: 0;
         left: 0;
         z-index: 100;
-        border-right: 1px solid var(--border-color);
+        border-right: none; /* Bỏ viền để tạo cảm giác Seamless (liền mạch) */
         transition: transform 0.3s ease;
+        display: flex;
+        flex-direction: column;
     }
 }
 
 /* Trạng thái thu nhỏ Sidebar trên desktop (Mini-sidebar) */
 body.sidebar-collapsed .sidebar-custom {
     width: 80px;
-    transform: none; /* Bỏ trượt ra ngoài */
+    transform: none;
 }
 
-/* Ẩn Text của Menu, phóng to Icon và căn giữa */
 body.sidebar-collapsed .sidebar-custom .nav-link {
-    font-size: 0; /* Ẩn chữ */
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    margin: 0.5rem auto; /* Căn giữa hoàn hảo trong khoảng 80px */
     justify-content: center;
-    padding: 0.8rem 0;
-    margin: 0.25rem 0.5rem; /* Cách viền cho đẹp */
+    border-radius: 12px; /* Bo góc vuông vắn và hiện đại hơn */
+}
+
+/* Ẩn hoàn toàn các thành phần văn bản để không đẩy lệch Icon */
+body.sidebar-collapsed .sidebar-custom .nav-link span,
+body.sidebar-collapsed .sidebar-custom .nav-link div {
+    display: none !important;
 }
 
 body.sidebar-collapsed .sidebar-custom .nav-link i {
-    font-size: 1.25rem; /* Phục hồi kích thước icon */
-    margin-right: 0;
+    font-size: 1.25rem;
+    margin: 0;
+    width: auto;
 }
 
-/* Ẩn tiêu đề danh mục và hộp thoại hỗ trợ */
 body.sidebar-collapsed .sidebar-custom .nav-category,
-body.sidebar-collapsed .sidebar-custom .mt-auto {
-    display: none;
-}
-
-/* Nút bấm Hamburger trên Navbar */
-.sidebar-toggler-btn {
-    width: 40px; 
-    height: 40px; 
-    border-radius: 50%;
-    transition: background-color 0.2s;
-}
-
-.sidebar-toggler-btn:hover {
-    background-color: var(--border-color);
+body.sidebar-collapsed .sidebar-custom .mt-auto,
+body.sidebar-collapsed .sidebar-custom .badge {
+    display: none !important;
 }
 
 /* Vùng nội dung có thể cuộn (Scroll) bên trong Sidebar */
 .sidebar-sticky {
-    height: calc(100vh - 68px); /* Chiều cao tối đa trừ đi Navbar */
-    overflow-y: auto; /* Tự động cuộn dọc nếu menu quá dài */
+    padding-top: 0.5rem;
+    scrollbar-width: thin; /* Hỗ trợ thanh cuộn cho Firefox */
+    scrollbar-color: #94a3b8 transparent; /* Slate 400 */
 }
 
-/* Tùy chỉnh thanh cuộn (Scrollbar) cho Sidebar trông xịn xò hơn */
+/* Đảm bảo chiều cao cuộn chính xác trên Desktop */
+@media (min-width: 992px) {
+    .sidebar-sticky {
+        height: calc(100vh - 68px);
+        overflow-y: auto;
+    }
+}
+
+/* Tùy chỉnh thanh cuộn (Scrollbar) cho Chrome/Edge/Safari */
 .sidebar-sticky::-webkit-scrollbar {
-    width: 6px; /* Chiều rộng thanh cuộn nhỏ nhắn */
+    width: 6px; 
 }
 .sidebar-sticky::-webkit-scrollbar-thumb {
-    background-color: #334155;
-    border-radius: 10px; /* Bo góc mượt mà */
+    background-color: rgba(255, 255, 255, 0.2); /* Sáng mờ trên nền tối */
+    border-radius: 10px; 
+}
+.sidebar-sticky::-webkit-scrollbar-track {
+    background-color: transparent; /* Nền track trong suốt */
 }
 
 /* Định dạng từng mục (Item) trong Menu */
 .sidebar-custom .nav-link {
-    color: var(--sidebar-color);
+    color: #c7d2fe; /* Chữ xám tím nhạt (Indigo 200) */
     font-weight: 500;
-    padding: 0.8rem 1rem;
-    border-radius: 12px; /* Bo góc tạo cảm giác hiện đại (Pill) */
+    font-size: 0.9rem; /* Cỡ chữ 14.4px thanh lịch hơn */
+    padding: 0.75rem 1rem;
+    border-radius: 8px; /* Bo góc cơ bản */
     margin-bottom: 0.25rem;
-    transition: all 0.2s; /* Hiệu ứng chuyển động (Animation) */
+    margin-right: 0.75rem;
+    margin-left: 0.75rem;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
+    white-space: nowrap; /* Tuyệt đối không cho phép rớt dòng */
 }
 
-/* Hiệu ứng khi rê chuột vào mục Menu (Hover) */
-.sidebar-custom .nav-link:hover {
-    color: var(--sidebar-hover);
-    background-color: rgba(255, 255, 255, 0.08); /* Nền trắng mờ */
-    transform: translateX(4px); /* Trượt nhẹ sang phải 4px */
+/* Xử lý chữ quá dài */
+.sidebar-custom .nav-link span:not(.badge):not(.nav-subtitle) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0; /* Cực kỳ quan trọng: Cho phép cắt chữ trong Flexbox */
+    margin-right: 8px; /* Giữ khoảng cách an toàn, không bao giờ dính vào Badge */
 }
 
-/* Hiệu ứng khi mục Menu đang được chọn (Active) */
-.sidebar-custom .nav-link.active {
-    color: #fff;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); /* Nền Gradient */
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); /* Đổ bóng sáng màu */
+/* Dòng phụ đề nhỏ hiển thị bên dưới khi menu được chọn */
+.sidebar-custom .nav-link .nav-subtitle {
+    display: none;
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #a5b4fc; /* Màu phụ đề sáng hơn nền một chút (Indigo 300) */
+    margin-top: 2px;
+    margin-right: 0;
+    white-space: normal; /* Cho phép rớt dòng nếu phụ đề quá dài */
+}
+.sidebar-custom .nav-link.active .nav-subtitle {
+    display: block;
+    animation: fadeInDown 0.2s ease-out forwards;
+}
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Định dạng Icon trong Menu */
 .sidebar-custom .nav-link i {
     width: 24px;
-    font-size: 1.1rem;
-    margin-right: 12px;
+    text-align: center; /* Căn giữa tất cả các Icon để tạo đường gióng thẳng tắp */
+    font-size: 1.15rem;
+    margin-right: 12px; /* Tăng khoảng cách để icon và chữ không bị dính chùm */
+    color: #818cf8; /* Xanh tím sáng (Indigo 400) */
+    transition: color 0.2s ease;
+    flex-shrink: 0; /* Không bao giờ ép nhỏ Icon */
 }
 
-/* Định dạng chữ tiêu đề Nhóm/Danh mục (Ví dụ: QUẢN LÝ XUẤT BẢN) */
+/* Hiệu ứng Hover Đơn giản, Chuyên nghiệp */
+.sidebar-custom .nav-link:hover {
+    color: #ffffff; /* Sáng rực rỡ khi hover */
+    background-color: rgba(255, 255, 255, 0.08); /* Nền sáng mờ */
+}
+
+.sidebar-custom .nav-link:hover i {
+    color: #ffffff;
+}
+
+/* Hiệu ứng Active Rõ ràng - Trở thành thẻ nổi màu trắng */
+.sidebar-custom .nav-link.active {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.15); /* Nền sáng hơn một chút */
+    font-weight: 600;
+}
+
+.sidebar-custom .nav-link.active i {
+    color: #ffffff;
+}
+
+/* Định dạng chữ tiêu đề Nhóm/Danh mục */
 .nav-category {
     font-size: 0.75rem;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #475569;
+    letter-spacing: 0.5px;
+    color: #818cf8; /* Xanh tím sáng (Indigo 400) */
     font-weight: 700;
-    margin: 1.5rem 0 0.5rem 1rem;
+    margin: 1.5rem 0 0.5rem 1.25rem;
 }
 
 /* ==========================================================================
@@ -201,18 +253,19 @@ main {
 
 /* Cấu trúc cơ bản của một ô Card (Khung thông tin, bảng biểu) */
 .card {
-    border: none;
-    border-radius: 16px; /* Bo góc cực lớn chuẩn App hiện đại */
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* Đổ bóng cực nhẹ */
-    transition: transform 0.2s, box-shadow 0.2s; /* Hiệu ứng mượt mà khi hover */
+    border: 1px solid rgba(226, 232, 240, 0.6); /* Viền cực kỳ tinh tế, gần như trong suốt */
+    border-radius: 20px; /* Bo góc tròn hơn (Squircle) */
+    box-shadow: 0 4px 24px -4px rgba(15, 23, 42, 0.03); /* Bóng đổ rất mềm và rộng */
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); /* Hiệu ứng mượt mà như app native */
     background-color: var(--card-bg);
     overflow: hidden;
 }
 
 /* Hiệu ứng nổi lên khi rê chuột vào Card */
 .card:hover {
-    transform: translateY(-5px); /* Đẩy lên trên 5px */
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Đổ bóng sâu hơn */
+    transform: translateY(-4px) scale(1.005); /* Nâng nhẹ và phóng to vi thế */
+    box-shadow: 0 20px 40px -8px rgba(15, 23, 42, 0.08), 0 12px 16px -8px rgba(15, 23, 42, 0.04); /* Bóng phân lớp xịn xò */
+    border-color: rgba(226, 232, 240, 1);
 }
 
 /* Tiêu đề của một Card */
@@ -233,45 +286,69 @@ main {
    6. CÁC THẺ THỐNG KÊ TRÊN CÙNG (STAT CARDS)
    ========================================================================== */
 
-/* Thẻ Thống kê nhỏ (Ví dụ: Tổng doanh thu, Số lượng user) */
+/* Thẻ Thống kê nhỏ (Stat Cards) - Đổ nền Gradient toàn phần cho từng thẻ */
 .stat-card {
     position: relative;
-    overflow: hidden;
+    overflow: hidden; /* Giữ lại hidden để background không tràn ra góc bo */
+    border: none;     /* Bỏ viền cho thẻ nền màu */
+    color: #ffffff;   /* Đổi màu chữ mặc định thành trắng */
 }
 
-/* Dải màu đánh dấu (Highlight dải dọc bên trái thẻ thống kê) */
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 6px;
-    height: 100%;
+/* Ghi đè chữ trong thẻ thống kê để nổi bật trên nền màu */
+.stat-card .text-xs {
+    letter-spacing: 0.8px;
+    font-size: 0.725rem;
+    color: rgba(255, 255, 255, 0.8) !important; /* Trắng mờ */
 }
-/* Các màu theo trạng thái */
-.stat-card.primary::before { background-color: var(--primary-color); }
-.stat-card.success::before { background-color: #10b981; } /* Xanh lá - Thành công */
-.stat-card.warning::before { background-color: #f59e0b; } /* Cam - Cảnh báo */
-.stat-card.danger::before  { background-color: #ef4444; } /* Đỏ - Nguy hiểm */
-.stat-card.info::before    { background-color: #0ea5e9; } /* Xanh biển - Thông tin */
 
-/* Vùng viền bo tròn chứa Icon bên phải thẻ thống kê */
+.stat-card .h3 {
+    font-size: 2.25rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    color: #ffffff !important; /* Trắng tinh */
+}
+
+/* Tùy chỉnh Gradient rực rỡ cho từng loại thẻ (Primary, Success, Warning, Danger, Info) */
+.stat-card.primary { background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%); box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4); }
+.stat-card.success { background: linear-gradient(135deg, #10b981 0%, #047857 100%); box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.4); }
+.stat-card.warning { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); box-shadow: 0 10px 20px -5px rgba(245, 158, 11, 0.4); }
+.stat-card.danger  { background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4); }
+.stat-card.info    { background: linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%); box-shadow: 0 10px 20px -5px rgba(14, 165, 233, 0.4); }
+
+/* Khi hover thì nổi bật bóng màu tương ứng lên thêm */
+.stat-card.primary:hover { box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.6); }
+.stat-card.success:hover { box-shadow: 0 15px 30px -5px rgba(16, 185, 129, 0.6); }
+.stat-card.warning:hover { box-shadow: 0 15px 30px -5px rgba(245, 158, 11, 0.6); }
+.stat-card.danger:hover  { box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.6); }
+.stat-card.info:hover    { box-shadow: 0 15px 30px -5px rgba(14, 165, 233, 0.6); }
+
+/* Vùng chứa Icon bên phải - Tái sử dụng thiết kế kính mờ (Glassmorphism) trên nền màu */
 .stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+    position: relative;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Giao diện chung cho mọi icon: Nền trong suốt, viền sáng */
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff !important;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
 }
 
-/* Màu Nền (opacity 10%) và Màu chữ cho Icon tương ứng */
-.stat-icon.primary { background-color: rgba(99, 102, 241, 0.1); color: var(--primary-color); }
-.stat-icon.success { background-color: rgba(16, 185, 129, 0.1); color: #10b981; }
-.stat-icon.warning { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; }
-.stat-icon.danger  { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; }
-.stat-icon.info    { background-color: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+.stat-card:hover .stat-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Loại bỏ hoàn toàn các màu nền cũ của từng icon vì giờ đây nền thẻ đã đổi màu */
+.stat-icon.primary, .stat-icon.success, .stat-icon.warning, .stat-icon.danger, .stat-icon.info {
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
 
 /* ==========================================================================
    7. NÚT BẤM VÀ TYPOGRAPHY (BUTTONS & TYPOGRAPHY)
