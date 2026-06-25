@@ -14,6 +14,17 @@ class Model {
             self::$sharedConn = $database->connect();
         }
         $this->conn = self::$sharedConn;
+
+        if ($this->conn === null) {
+            throw new Exception("Database connection failed.");
+        }
+    }
+
+    /**
+     * Lấy kết nối CSDL (PDO instance)
+     */
+    public function getConnection() {
+        return $this->conn;
     }
 
     /**
@@ -89,5 +100,41 @@ class Model {
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':id', $id);
         return $stmt->execute();
+    }
+
+    /**
+     * Đếm tổng số bản ghi
+     */
+    public function countAll() {
+        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return $result ? (int)$result['total'] : 0;
+    }
+
+    /**
+     * Đếm số bản ghi theo điều kiện đơn giản (AND)
+     * @param array $conditions Mảng ['column' => 'value']
+     */
+    public function countByCondition(array $conditions) {
+        $whereParts = [];
+        foreach ($conditions as $key => $value) {
+            $whereParts[] = "{$key} = :{$key}";
+        }
+        $whereClause = implode(' AND ', $whereParts);
+        
+        $sql = "SELECT COUNT(*) as total FROM {$this->table}";
+        if (!empty($whereClause)) {
+            $sql .= " WHERE {$whereClause}";
+        }
+        
+        $stmt = $this->conn->prepare($sql);
+        foreach ($conditions as $key => $value) {
+            $stmt->bindValue(':' . $key, $value);
+        }
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return $result ? (int)$result['total'] : 0;
     }
 }

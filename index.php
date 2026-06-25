@@ -71,7 +71,7 @@ switch ($relativeUri) {
         header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
         break;
     case '/admin/dashboard':
-        require_once __DIR__ . '/views/admin/dashboard.php';
+        header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=admin');
         break;
     default:
         http_response_code(404);
