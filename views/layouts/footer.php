@@ -26,5 +26,12 @@
         }
     });
 </script>
+<?php
+// Chuẩn hóa Flash Message: Đảm bảo thông báo chỉ hiển thị 1 lần
+unset($_SESSION['success']);
+unset($_SESSION['error']);
+unset($_SESSION['warning']);
+unset($_SESSION['info']);
+?>
 </body>
 </html>
