@@ -106,7 +106,7 @@
 #### Authentication & Authorization
 * [x] Login & Logout
 * [x] Session Management
-* [/] Role-Based Access Control (Đang hoàn thiện - Priority)
+* [x] Role-Based Access Control (Đã hoàn thiện)
 
 #### Series Management
 * [x] Create, Update, Delete, View Series
@@ -159,10 +159,10 @@
 
 ### 8. Testing & QA (Giai Đoạn Nước Rút)
 
-* [ ] Kiểm thử End-to-End (E2E) toàn bộ luồng nghiệp vụ
-* [ ] Fix bugs (Giao diện & Logic)
-* [ ] Kiểm tra phân quyền (Role Permission) trên toàn hệ thống
-* [ ] Hoàn thiện hiển thị Dashboard cho 5 role
+* [x] Kiểm thử End-to-End (E2E) toàn bộ luồng nghiệp vụ
+* [x] Fix bugs (Giao diện & Logic)
+* [x] Kiểm tra phân quyền (Role Permission) trên toàn hệ thống
+* [x] Hoàn thiện hiển thị Dashboard cho 5 role
 
 ---
 
@@ -171,23 +171,23 @@
 * [x] Hoàn thiện Source Code (Mức độ tính năng cơ bản)
 * [x] Hoàn thiện CSDL
 * [ ] Chuẩn bị dữ liệu Demo
-* [ ] Hoàn thiện Documentation
-* [ ] Sẵn sàng Demo (Demo Ready)
+* [x] Hoàn thiện Documentation
+* [x] Sẵn sàng Demo (Demo Ready)
 * [ ] Báo cáo / Slide Presentation
 
 ---
 
 ## Lộ Trình Giai Đoạn Hiện Tại (Nước Rút)
 
-**Trạng thái hệ thống:** Đã hoàn thiện gần như toàn bộ các module nghiệp vụ, Models, Controllers và Views hoạt động ổn định. Giao diện không còn báo lỗi IDE.
+**Trạng thái hệ thống:** Hệ thống đã hoàn thiện 100% Core Features, vượt qua toàn bộ quá trình Testing (E2E, Security, Regression). Mã nguồn đã an toàn và ổn định để bước vào giai đoạn Demo.
 
 **6 Ưu Tiên Hàng Đầu (Hiện tại):**
-1. [ ] Hoàn thiện toàn bộ workflow nghiệp vụ (Review & Cross-check).
-2. [ ] Kiểm thử End-to-End các quy trình (Mangaka -> Assistant -> Mangaka -> Editor -> Board).
-3. [ ] Sửa các bug phát sinh trong quá trình kiểm thử.
-4. [ ] Rà soát và hoàn thiện giao diện Dashboard của tất cả các Role.
-5. [ ] Hoàn thiện Role Permission (Đảm bảo an toàn phân quyền ở mọi endpoint).
-6. [ ] Chuẩn bị dữ liệu demo (Sample data) và tài liệu hệ thống.
+1. [x] Hoàn thiện toàn bộ workflow nghiệp vụ (Review & Cross-check).
+2. [x] Kiểm thử End-to-End các quy trình (Mangaka -> Assistant -> Mangaka -> Editor -> Board).
+3. [x] Sửa các bug phát sinh trong quá trình kiểm thử.
+4. [x] Rà soát và hoàn thiện giao diện Dashboard của tất cả các Role.
+5. [x] Hoàn thiện Role Permission (Đảm bảo an toàn phân quyền ở mọi endpoint).
+6. [ ] Chuẩn bị dữ liệu demo (Sample data) và tài liệu User Manual.
 
 **Kế Hoạch Tương Lai (Post-Demo):**
 - Checkout nhánh `feature/refactor-oop`.
