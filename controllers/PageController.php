@@ -77,9 +77,19 @@ class PageController extends BaseController
 
         // Kiểm tra định dạng
         $fileInfo = pathinfo($file['name']);
-        $extension = strtolower($fileInfo['extension']);
+        $extension = strtolower($fileInfo['extension'] ?? '');
         if (!in_array($extension, self::ALLOWED_EXTENSIONS)) {
             $_SESSION['error'] = "Định dạng file không được hỗ trợ. Chỉ cho phép: " . implode(', ', self::ALLOWED_EXTENSIONS);
+            return null;
+        }
+
+        // Kiểm tra MIME type thực sự
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mimeType = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+        $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        if (!in_array($mimeType, $allowedMimeTypes)) {
+            $_SESSION['error'] = "File tải lên không phải là định dạng ảnh hợp lệ.";
             return null;
         }
 
