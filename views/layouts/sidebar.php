@@ -15,7 +15,7 @@ $role = $_SESSION['role_name'] ?? '';
     <div class="sidebar-sticky offcanvas-body p-0">
         <ul class="nav flex-column w-100 px-2 mt-3">
             <li class="nav-item">
-                <a class="nav-link <?= (isset($current_page) && $current_page == 'dashboard') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=auth&action=login">
+                <a class="nav-link <?= (isset($current_page) && $current_page == 'dashboard') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=index">
                     <i class="fas fa-home"></i> <span>Bảng điều khiển</span>
                 </a>
             </li>
@@ -38,22 +38,14 @@ $role = $_SESSION['role_name'] ?? '';
                 </li>
             <?php endif; ?>
 
-            <?php if ($role === 'mangaka'): ?>
-                <li class="nav-item">
-                    <a class="nav-link <?= (isset($current_page) && $current_page == 'chapters') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=chapter&action=index">
-                        <i class="fas fa-layer-group"></i> <span>Quản lý Chương</span>
-                    </a>
-                </li>
-            <?php endif; ?>
-
-            <?php if (in_array($role, ['mangaka', 'assistant', 'editor'])): ?>
+            <?php if (in_array($role, ['assistant', 'editor'])): ?>
                 <li class="nav-item nav-category">Tiến độ & Quy trình</li>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['mangaka', 'assistant'])): ?>
+            <?php if ($role === 'assistant'): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'tasks') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=task&action=index">
-                        <i class="fas fa-tasks"></i> <span>Phân công Công việc</span>
+                        <i class="fas fa-tasks"></i> <span>Công việc của tôi</span>
                     </a>
                 </li>
             <?php endif; ?>

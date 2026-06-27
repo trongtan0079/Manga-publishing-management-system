@@ -1,4 +1,7 @@
 <?php
+/**
+ * @var array $submissions
+ */
 $pageTitle = 'Quản lý Đánh giá Bản thảo';
 $current_page = 'reviews';
 require_once __DIR__ . '/../layouts/header.php';
@@ -15,20 +18,21 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <?php if (isset($_SESSION['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-        <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+        <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
 <?php if (isset($_SESSION['error'])): ?>
     <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
+        <i class="fas fa-exclamation-circle me-2"></i><?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
 <div class="card shadow-sm border-0 rounded-3">
     <div class="card-body p-0">
+        <!-- Bảng danh sách các bản thảo đang chờ duyệt -->
         <?php if (!empty($submissions)): ?>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -68,14 +72,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <td><?= htmlspecialchars($sub['series_title'] ?? 'N/A') ?></td>
                                 <td>
                                     <?php if ($sub['task_id'] !== null): ?>
-                                        <?= htmlspecialchars($sub['task_title'] ?? 'Task #' . $sub['task_id']) ?>
+                                        <?= htmlspecialchars((string)($sub['task_title'] ?? ('Task #' . $sub['task_id']))) ?>
                                     <?php else: ?>
-                                        Ch.<?= htmlspecialchars($sub['chapter_number']) ?> - <?= htmlspecialchars($sub['chapter_title'] ?? '') ?>
+                                        Ch.<?= htmlspecialchars((string)($sub['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($sub['chapter_title'] ?? '')) ?>
                                     <?php endif; ?>
                                 </td>
                                 <td><?= date('d/m/Y H:i', strtotime($sub['submitted_at'])) ?></td>
                                 <td><span class="badge bg-secondary px-2 py-1">Pending</span></td>
                                 <td class="text-end pe-4">
+                                    <!-- Nút chuyển sang giao diện tạo đánh giá (Review) -->
                                     <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-primary shadow-sm">
                                         <i class="fas fa-edit me-1"></i> Review
                                     </a>

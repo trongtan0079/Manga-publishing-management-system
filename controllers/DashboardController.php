@@ -131,6 +131,13 @@ class DashboardController extends BaseController {
         
         // Lấy số lượng đánh giá mà Editor này đã làm
         $recentReviews = $reviewModel->countByCondition(['reviewer_id' => $userId]);
+
+        // Lấy 5 pending submissions
+        $pendingList = array_slice($submissionModel->findPendingSubmissions(), 0, 5);
+
+        // Lấy 5 recent reviews
+        $recentReviewList = array_slice($reviewModel->findByReviewerId($userId), 0, 5);
+
         
         require_once __DIR__ . '/../views/editor/dashboard.php';
     }

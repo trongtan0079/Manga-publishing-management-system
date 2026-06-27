@@ -1,4 +1,7 @@
 <?php
+/**
+ * @var array $submission
+ */
 $pageTitle = 'Chi tiết bản thảo nộp';
 $current_page = 'submissions';
 require_once __DIR__ . '/../layouts/header.php';
@@ -34,14 +37,14 @@ $role = $_SESSION['role_name'] ?? '';
 
                 <?php if ($isImage): ?>
                     <div class="img-preview-container text-center bg-white p-2 rounded border shadow-sm w-100" style="max-height: 500px; overflow: auto;">
-                        <img src="<?= htmlspecialchars($fileUrl) ?>" alt="Bản thảo" class="img-fluid rounded" style="max-height: 480px; object-fit: contain;">
+                        <img src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" alt="Bản thảo" class="img-fluid rounded" style="max-height: 480px; object-fit: contain;">
                     </div>
                 <?php elseif ($ext === 'pdf'): ?>
                     <div class="text-center py-5">
                         <i class="fas fa-file-pdf text-danger fa-5x mb-3 animate__animated animate__pulse animate__infinite"></i>
                         <h5>Tài liệu PDF hoàn chỉnh</h5>
                         <p class="text-muted">Bạn có thể tải về hoặc xem trực tiếp bằng trình đọc PDF của trình duyệt.</p>
-                        <a href="<?= htmlspecialchars($fileUrl) ?>" target="_blank" class="btn btn-danger px-4 mt-2">
+                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" target="_blank" class="btn btn-danger px-4 mt-2">
                             <i class="fas fa-external-link-alt me-2"></i>Mở trong Tab Mới
                         </a>
                     </div>
@@ -50,7 +53,7 @@ $role = $_SESSION['role_name'] ?? '';
                         <i class="fas fa-file-archive text-warning fa-5x mb-3"></i>
                         <h5>Tệp tin nén (ZIP)</h5>
                         <p class="text-muted">Tệp tin này chứa nhiều trang vẽ hoặc tài liệu được nén lại.</p>
-                        <a href="<?= htmlspecialchars($fileUrl) ?>" download class="btn btn-warning text-dark px-4 mt-2 fw-bold">
+                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" download class="btn btn-warning text-dark px-4 mt-2 fw-bold">
                             <i class="fas fa-download me-2"></i>Tải Tệp ZIP
                         </a>
                     </div>
@@ -59,10 +62,10 @@ $role = $_SESSION['role_name'] ?? '';
                 <div class="mt-4 pt-3 border-top w-100 d-flex justify-content-between align-items-center">
                     <div>
                         <small class="text-muted d-block">Tên file vật lý:</small>
-                        <strong class="text-dark text-xs"><?= htmlspecialchars(basename($submission['file_url'])) ?></strong>
+                        <strong class="text-dark text-xs"><?= htmlspecialchars(basename($submission['file_url'] ?? '')) ?></strong>
                     </div>
                     <div>
-                        <a href="<?= htmlspecialchars($fileUrl) ?>" download class="btn btn-outline-dark btn-sm">
+                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" download class="btn btn-outline-dark btn-sm">
                             <i class="fas fa-download me-1"></i>Tải xuống bản gốc
                         </a>
                     </div>
@@ -71,7 +74,7 @@ $role = $_SESSION['role_name'] ?? '';
         </div>
     </div>
 
-    <!-- Cột bên phải: Metadata / Hành động -->
+    <!-- Cột bên phải: Metadata (thông tin người gửi, trạng thái, ghi chú) / Hành động -->
     <div class="col-lg-5 mb-4">
         <div class="card shadow-sm border-0 rounded-3 mb-4">
             <div class="card-header bg-white text-dark py-3 border-bottom border-light">
@@ -86,7 +89,7 @@ $role = $_SESSION['role_name'] ?? '';
                             <?= strtoupper(substr($submission['sender_name'] ?? 'U', 0, 1)) ?>
                         </div>
                         <div>
-                            <span class="d-block fw-bold text-dark"><?= htmlspecialchars($submission['sender_name'] ?? 'Không rõ') ?></span>
+                            <span class="d-block fw-bold text-dark"><?= htmlspecialchars((string)($submission['sender_name'] ?? 'Không rõ')) ?></span>
                         </div>
                     </div>
                 </div>
@@ -96,7 +99,7 @@ $role = $_SESSION['role_name'] ?? '';
                 <div class="row">
                     <div class="col-6 mb-3">
                         <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Loại nộp bài</small>
-                        <?php if ($submission['task_id'] !== null): ?>
+                        <?php if (!empty($submission['task_id'])): ?>
                             <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
                         <?php else: ?>
                             <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
@@ -124,23 +127,23 @@ $role = $_SESSION['role_name'] ?? '';
 
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Series tác phẩm</small>
-                    <span class="text-dark fw-semibold"><?= htmlspecialchars($submission['series_title'] ?? 'Không xác định') ?></span>
+                    <span class="text-dark fw-semibold"><?= htmlspecialchars((string)($submission['series_title'] ?? 'Không xác định')) ?></span>
                 </div>
 
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Chương hoặc Task cụ thể</small>
                     <span class="text-dark">
-                        <?php if ($submission['task_id'] !== null): ?>
-                            <i class="fas fa-tasks text-muted me-1"></i><?= htmlspecialchars($submission['task_title']) ?>
+                        <?php if (!empty($submission['task_id'])): ?>
+                            <i class="fas fa-tasks text-muted me-1"></i><?= htmlspecialchars((string)($submission['task_title'] ?? '')) ?>
                         <?php else: ?>
-                            <i class="fas fa-layer-group text-muted me-1"></i>Chương <?= htmlspecialchars($submission['chapter_number']) ?> - <?= htmlspecialchars($submission['chapter_title'] ?? 'Chưa đặt tên') ?>
+                            <i class="fas fa-layer-group text-muted me-1"></i>Chương <?= htmlspecialchars((string)($submission['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($submission['chapter_title'] ?? 'Chưa đặt tên')) ?>
                         <?php endif; ?>
                     </span>
                 </div>
 
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Ngày nộp</small>
-                    <span class="text-dark"><i class="far fa-calendar-alt text-muted me-1"></i><?= htmlspecialchars(date('d/m/Y H:i:s', strtotime($submission['submitted_at']))) ?></span>
+                    <span class="text-dark"><i class="far fa-calendar-alt text-muted me-1"></i><?= htmlspecialchars(date('d/m/Y H:i:s', strtotime($submission['submitted_at'] ?? 'now'))) ?></span>
                 </div>
 
                 <hr class="my-3">
@@ -148,14 +151,14 @@ $role = $_SESSION['role_name'] ?? '';
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Ghi chú kèm theo</small>
                     <div class="bg-light p-3 rounded text-dark text-sm border-start border-primary border-3" style="white-space: pre-line;">
-                        <?= !empty($submission['notes']) ? htmlspecialchars($submission['notes']) : '<em>Không có ghi chú nào đi kèm.</em>' ?>
+                        <?= !empty($submission['notes']) ? htmlspecialchars((string)($submission['notes'] ?? '')) : '<em>Không có ghi chú nào đi kèm.</em>' ?>
                     </div>
                 </div>
 
             </div>
         </div>
 
-        <!-- Khung hành động -->
+        <!-- Khung hành động (Chuyển sang review hoặc Xóa bản thảo) -->
         <div class="card shadow-sm border-0 rounded-3">
             <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-cogs me-2 text-primary"></i>Hành động khả dụng</h5>
@@ -172,7 +175,7 @@ $role = $_SESSION['role_name'] ?? '';
                         <i class="fas fa-trash-alt me-2"></i>Xóa bản thảo nộp này
                     </a>
                 <?php else: ?>
-                    <p class="text-muted mb-0">Bản thảo này hiện ở trạng thái <strong><?= htmlspecialchars(strtoupper($submission['status'])) ?></strong> và không còn thay đổi được.</p>
+                    <p class="text-muted mb-0">Bản thảo này hiện ở trạng thái <strong><?= htmlspecialchars(strtoupper($submission['status'] ?? '')) ?></strong> và không còn thay đổi được.</p>
                 <?php endif; ?>
             </div>
         </div>

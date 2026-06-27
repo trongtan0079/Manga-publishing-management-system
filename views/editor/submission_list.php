@@ -1,4 +1,7 @@
 <?php
+/**
+ * @var array $submissions
+ */
 $pageTitle = 'Quản lý Bản thảo & Phê duyệt';
 $current_page = 'submissions';
 require_once __DIR__ . '/../layouts/header.php';
@@ -36,14 +39,14 @@ $role = $_SESSION['role_name'] ?? '';
 <!-- Thông báo thành công / lỗi -->
 <?php if (isset($_SESSION['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-        <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
+        <i class="fas fa-check-circle me-2"></i><?php echo htmlspecialchars($_SESSION['success']); unset($_SESSION['success']); ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
 
 <?php if (isset($_SESSION['error'])): ?>
     <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i><?= htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
+        <i class="fas fa-exclamation-circle me-2"></i><?php echo htmlspecialchars($_SESSION['error']); unset($_SESSION['error']); ?>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 <?php endif; ?>
@@ -55,6 +58,7 @@ $role = $_SESSION['role_name'] ?? '';
     </div>
     <div class="card-body p-0">
         <?php if (!empty($submissions)): ?>
+            <!-- Bảng danh sách bản thảo -->
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
@@ -82,22 +86,22 @@ $role = $_SESSION['role_name'] ?? '';
                                     </div>
                                 </td>
                                 <td>
-                                    <?php if ($sub['task_id'] !== null): ?>
-                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1">Task Drawing</span>
+                                    <?php if (!empty($sub['task_id'])): ?>
+                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
                                     <?php else: ?>
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1">Full Chapter</span>
+                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($sub['task_id'] !== null): ?>
+                                    <?php if (!empty($sub['task_id'])): ?>
                                         <div class="text-dark">
                                             <i class="fas fa-tasks text-muted me-1"></i>
-                                            <?= htmlspecialchars($sub['task_title'] ?? 'Task #' . $sub['task_id']) ?>
+                                            <?= htmlspecialchars((string)($sub['task_title'] ?? ('Task #' . ($sub['task_id'] ?? '')))) ?>
                                         </div>
                                     <?php else: ?>
                                         <div class="text-dark">
                                             <i class="fas fa-layer-group text-muted me-1"></i>
-                                            Ch.<?= htmlspecialchars($sub['chapter_number']) ?> - <?= htmlspecialchars($sub['chapter_title'] ?? 'Chưa đặt tên') ?>
+                                            Ch.<?= htmlspecialchars((string)($sub['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($sub['chapter_title'] ?? 'Chưa đặt tên')) ?>
                                         </div>
                                     <?php endif; ?>
                                 </td>
@@ -128,6 +132,7 @@ $role = $_SESSION['role_name'] ?? '';
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="d-inline-flex gap-1">
+                                        <!-- Các nút hành động: Xem chi tiết và Xóa (nếu thỏa điều kiện) -->
                                         <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=show&id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-outline-primary" title="Xem chi tiết">
                                             <i class="fas fa-eye"></i> Chi tiết
                                         </a>

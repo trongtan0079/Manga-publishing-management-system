@@ -1,4 +1,8 @@
 <?php
+/**
+ * @var array $review
+ * @var array $submission
+ */
 $pageTitle = 'Chi tiết Đánh giá';
 $current_page = 'reviews';
 require_once __DIR__ . '/../layouts/header.php';
@@ -11,7 +15,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <i class="fas fa-arrow-left me-1"></i> Quay lại
     </a>
     <h2 class="h3 mb-1">Chi tiết Đánh giá #<?= $review['review_id'] ?></h2>
-    <p class="text-muted">Bản thảo ID: <span class="fw-bold">#<?= $submission['submission_id'] ?></span> - Người gửi: <span class="fw-bold"><?= htmlspecialchars($submission['sender_name']) ?></span></p>
+    <p class="text-muted">Bản thảo ID: <span class="fw-bold">#<?= $submission['submission_id'] ?></span> - Người gửi: <span class="fw-bold"><?= htmlspecialchars((string)($submission['sender_name'] ?? '')) ?></span></p>
 </div>
 
 <div class="row">
@@ -22,6 +26,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <span class="badge bg-light text-dark shadow-sm"><?= date('d/m/Y H:i', strtotime($review['created_at'])) ?></span>
             </div>
             <div class="card-body p-4">
+                <!-- Phần 1: Hiển thị trạng thái quyết định và điểm số -->
                 <div class="row mb-4 bg-light p-3 rounded">
                     <div class="col-md-6 border-end">
                         <h6 class="fw-bold text-muted mb-2 text-uppercase" style="font-size: 0.8rem;">Trạng thái quyết định</h6>
@@ -43,10 +48,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     </div>
                 </div>
 
+                <!-- Phần 2: Nội dung nhận xét chi tiết (Comments) -->
                 <div class="mt-4">
                     <h6 class="fw-bold text-dark mb-3 border-bottom pb-2"><i class="fas fa-quote-left me-2 text-primary"></i>Nhận xét từ Editor/Mangaka:</h6>
                     <div class="p-4 bg-white rounded border-start border-4 border-primary shadow-sm" style="font-size: 1.05rem; line-height: 1.6;">
-                        <?= nl2br(htmlspecialchars($review['comments'])) ?>
+                        <?= nl2br(htmlspecialchars((string)($review['comments'] ?? ''))) ?>
                     </div>
                 </div>
                 
