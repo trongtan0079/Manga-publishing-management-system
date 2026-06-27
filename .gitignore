@@ -427,3 +427,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Custom project scripts
+add_phpdoc.php
+fix_views.php
+test_dashboard.php
+test_submission.php
