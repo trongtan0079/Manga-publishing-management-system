@@ -34,7 +34,7 @@ class TaskController extends BaseController
         $role = $_SESSION['role_name'] ?? '';
         if ($role !== 'mangaka' && $role !== 'assistant') {
             $_SESSION['error'] = 'Bạn không có quyền truy cập quản lý Task.';
-            header('Location: /index.php');
+            header('Location: ' . BASE_PATH . '/index.php');
             exit;
         }
 
@@ -55,6 +55,9 @@ class TaskController extends BaseController
      * @return array|false Trả về mảng chứa thông tin (page, chapter, series) nếu hợp lệ, false nếu bị lỗi quyền.
      */
     private function checkPageOwnership($pageId) {
+        $pageId = intval($pageId);
+        if ($pageId <= 0) return false;
+
         // 1. Tìm thông tin Trang truyện (Page)
         $page = $this->pageModel->findById($pageId);
         if (!$page) return false;
@@ -99,18 +102,18 @@ class TaskController extends BaseController
         \requireRole('mangaka');
         
         // Lấy ID của trang truyện từ URL
-        $pageId = $_GET['page_id'] ?? null;
-        if (!$pageId) {
-            $_SESSION['error'] = 'Thiếu thông tin page_id.';
-            header('Location: /index.php?controller=series&action=index');
+        $pageId = isset($_GET['page_id']) ? intval($_GET['page_id']) : 0;
+        if ($pageId <= 0) {
+            $_SESSION['error'] = 'Thiếu thông tin page_id hoặc page_id không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
         // Kiểm tra bảo mật: đảm bảo mangaka đang thao tác trên trang truyện của chính mình
         $ownership = $this->checkPageOwnership($pageId);
         if (!$ownership) {
-            $_SESSION['error'] = 'Bạn không có quyền thao tác trên trang truyện này.';
-            header('Location: /index.php?controller=series&action=index');
+            $_SESSION['error'] = 'Bạn không có quyền thao tác trên trang truyện này hoặc trang truyện không tồn tại.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -135,25 +138,63 @@ class TaskController extends BaseController
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Nhận dữ liệu từ form submit lên
-            $pageId = $_POST['page_id'] ?? '';
-            $assistantId = $_POST['assistant_id'] ?? '';
-            $title = trim($_POST['title'] ?? '');
-            $description = trim($_POST['description'] ?? '');
-            $priority = $_POST['priority'] ?? 'medium';
-            $dueDate = $_POST['due_date'] ?? null;
+            $pageId = isset($_POST['page_id']) ? intval($_POST['page_id']) : 0;
+            $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : 0;
+            $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+            $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+            $priority = isset($_POST['priority']) ? $_POST['priority'] : 'medium';
+            $dueDate = isset($_POST['due_date']) ? $_POST['due_date'] : null;
 
-            // Kiểm tra các trường bắt buộc không được để trống
-            if (empty($pageId) || empty($assistantId) || empty($title)) {
-                $_SESSION['error'] = 'Vui lòng nhập đầy đủ Page, Assistant và Tiêu đề.';
-                header("Location: /index.php?controller=task&action=create&page_id=$pageId");
+            // 1. Validation: Title
+            if (empty($title)) {
+                $_SESSION['error'] = 'Tiêu đề công việc không được để trống.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                exit;
+            }
+            if (mb_strlen($title) > 255) {
+                $_SESSION['error'] = 'Tiêu đề công việc không được vượt quá 255 ký tự.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
                 exit;
             }
 
-            // Kiểm tra phân quyền trước khi thực hiện lưu DB
-            if (!$this->checkPageOwnership($pageId)) {
-                $_SESSION['error'] = 'Lỗi phân quyền.';
-                header('Location: /index.php?controller=series&action=index');
+            // 2. Validation: page_id ownership
+            if ($pageId <= 0 || !$this->checkPageOwnership($pageId)) {
+                $_SESSION['error'] = 'Lỗi phân quyền hoặc trang truyện không hợp lệ.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
+            }
+
+            // 3. Validation: assistant_id exists and has role 'assistant' and is active
+            if ($assistantId <= 0) {
+                $_SESSION['error'] = 'Vui lòng chọn Assistant hợp lệ.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                exit;
+            }
+            $assistant = $this->userModel->getUserByIdWithRole($assistantId);
+            if (!$assistant || $assistant['role_name'] !== 'assistant' || $assistant['status'] !== 'active') {
+                $_SESSION['error'] = 'Assistant được giao không hợp lệ hoặc đã bị vô hiệu hóa.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                exit;
+            }
+
+            // 4. Validation: priority
+            $allowedPriorities = ['low', 'medium', 'high'];
+            if (!in_array($priority, $allowedPriorities)) {
+                $_SESSION['error'] = 'Mức độ ưu tiên không hợp lệ.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                exit;
+            }
+
+            // 5. Validation: due_date
+            $formattedDueDate = null;
+            if (!empty($dueDate)) {
+                $dueTimestamp = strtotime($dueDate);
+                if ($dueTimestamp === false) {
+                    $_SESSION['error'] = 'Hạn chót (Due Date) không đúng định dạng.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                    exit;
+                }
+                $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
             }
 
             // Thực hiện thêm mới vào bảng tasks
@@ -165,7 +206,7 @@ class TaskController extends BaseController
                 'description' => $description,
                 'priority' => $priority,
                 'status' => 'pending', // Mặc định khi vừa tạo là pending (Chưa làm)
-                'due_date' => $dueDate ?: null
+                'due_date' => $formattedDueDate
             ]);
 
             // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc
@@ -177,7 +218,10 @@ class TaskController extends BaseController
 
             // Chuyển hướng quay lại trang chi tiết (page_detail) cùng thông báo thành công
             $_SESSION['success'] = 'Đã giao task thành công.';
-            header("Location: /index.php?controller=page&action=show&id=$pageId");
+            header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=$pageId");
+            exit;
+        } else {
+            header('Location: ' . BASE_PATH . '/index.php');
             exit;
         }
     }
@@ -188,9 +232,10 @@ class TaskController extends BaseController
     public function edit() {
         \requireRole('mangaka');
         
-        $id = $_GET['id'] ?? null;
-        if (!$id) {
-            header('Location: /index.php');
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id <= 0) {
+            $_SESSION['error'] = 'ID công việc không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php');
             exit;
         }
 
@@ -199,8 +244,8 @@ class TaskController extends BaseController
         
         // Kiểm tra xem task này có tồn tại và có thuộc về mangaka đang đăng nhập không
         if (!$task || $task['mangaka_id'] != $_SESSION['user_id']) {
-            $_SESSION['error'] = 'Bạn không có quyền sửa task này.';
-            header('Location: /index.php');
+            $_SESSION['error'] = 'Bạn không có quyền sửa task này hoặc công việc không tồn tại.';
+            header('Location: ' . BASE_PATH . '/index.php');
             exit;
         }
 
@@ -221,15 +266,17 @@ class TaskController extends BaseController
      * Action này được gọi từ cả Mangaka (sửa mọi thứ) và Assistant (chỉ cập nhật status)
      */
     public function update() {
-        $id = $_GET['id'] ?? null;
-        if (!$id || $_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /index.php');
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        if ($id <= 0 || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = 'Yêu cầu không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php');
             exit;
         }
 
         $task = $this->taskModel->findById($id);
         if (!$task) {
-            header('Location: /index.php');
+            $_SESSION['error'] = 'Không tìm thấy công việc cần cập nhật.';
+            header('Location: ' . BASE_PATH . '/index.php');
             exit;
         }
 
@@ -240,23 +287,62 @@ class TaskController extends BaseController
             // Phân quyền: Kiểm tra đúng task của mangaka này tạo
             if ($task['mangaka_id'] != $_SESSION['user_id']) {
                 $_SESSION['error'] = 'Bạn không có quyền sửa task này.';
-                header('Location: /index.php');
+                header('Location: ' . BASE_PATH . '/index.php');
                 exit;
             }
 
             // Lấy toàn bộ dữ liệu mangaka có thể đổi
-            $assistantId = $_POST['assistant_id'] ?? $task['assistant_id'];
-            $title = trim($_POST['title'] ?? $task['title']);
-            $description = trim($_POST['description'] ?? $task['description']);
-            $priority = $_POST['priority'] ?? $task['priority'];
-            $status = $_POST['status'] ?? $task['status'];
-            $dueDate = $_POST['due_date'] ?? $task['due_date'];
+            $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : intval($task['assistant_id']);
+            $title = isset($_POST['title']) ? trim($_POST['title']) : $task['title'];
+            $description = isset($_POST['description']) ? trim($_POST['description']) : $task['description'];
+            $priority = isset($_POST['priority']) ? $_POST['priority'] : $task['priority'];
+            $status = isset($_POST['status']) ? $_POST['status'] : $task['status'];
+            $dueDate = isset($_POST['due_date']) ? $_POST['due_date'] : $task['due_date'];
 
-            // Validate dữ liệu trống
-            if (empty($title) || empty($assistantId)) {
-                $_SESSION['error'] = 'Tiêu đề và Assistant không được để trống.';
-                header("Location: /index.php?controller=task&action=edit&id=$id");
+            // Validate dữ liệu trống và độ dài
+            if (empty($title)) {
+                $_SESSION['error'] = 'Tiêu đề không được để trống.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
                 exit;
+            }
+            if (mb_strlen($title) > 255) {
+                $_SESSION['error'] = 'Tiêu đề không được vượt quá 255 ký tự.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                exit;
+            }
+
+            // Validate assistant
+            $assistant = $this->userModel->getUserByIdWithRole($assistantId);
+            if (!$assistant || $assistant['role_name'] !== 'assistant' || $assistant['status'] !== 'active') {
+                $_SESSION['error'] = 'Assistant được giao không hợp lệ hoặc đã bị vô hiệu hóa.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                exit;
+            }
+
+            // Validate priority
+            if (!in_array($priority, ['low', 'medium', 'high'])) {
+                $_SESSION['error'] = 'Mức độ ưu tiên không hợp lệ.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                exit;
+            }
+
+            // Validate status
+            if (!in_array($status, ['pending', 'in_progress', 'completed'])) {
+                $_SESSION['error'] = 'Trạng thái công việc không hợp lệ.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                exit;
+            }
+
+            // Validate due_date
+            $formattedDueDate = null;
+            if (!empty($dueDate)) {
+                $dueTimestamp = strtotime($dueDate);
+                if ($dueTimestamp === false) {
+                    $_SESSION['error'] = 'Hạn chót (Due Date) không hợp lệ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                    exit;
+                }
+                $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
             }
 
             // Update tất cả các trường
@@ -266,11 +352,11 @@ class TaskController extends BaseController
                 'description' => $description,
                 'priority' => $priority,
                 'status' => $status,
-                'due_date' => $dueDate ?: null
+                'due_date' => $formattedDueDate
             ]);
 
             $_SESSION['success'] = 'Cập nhật task thành công.';
-            header("Location: /index.php?controller=page&action=show&id=" . $task['page_id']);
+            header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $task['page_id']);
             exit;
 
         } 
@@ -279,21 +365,23 @@ class TaskController extends BaseController
             // Phân quyền: Đảm bảo Assistant chỉ update được Task được giao đích danh cho mình
             if ($task['assistant_id'] != $_SESSION['user_id']) {
                 $_SESSION['error'] = 'Bạn không có quyền sửa task này.';
-                header('Location: /index.php');
+                header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
                 exit;
             }
 
-            $status = $_POST['status'] ?? $task['status'];
+            $status = isset($_POST['status']) ? $_POST['status'] : $task['status'];
             $allowedStatus = ['pending', 'in_progress', 'completed'];
             
             // Validate: Assistant chỉ được quyền đổi status hợp lệ, không được sửa title/deadline...
             if (in_array($status, $allowedStatus)) {
                 $this->taskModel->update($id, ['status' => $status]);
                 $_SESSION['success'] = 'Cập nhật tiến độ thành công.';
+            } else {
+                $_SESSION['error'] = 'Trạng thái cập nhật không hợp lệ.';
             }
 
             // Trả assistant về dashboard của họ
-            header('Location: /index.php?controller=task&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
             exit;
         }
     }
@@ -305,25 +393,36 @@ class TaskController extends BaseController
         \requireRole('mangaka');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_GET['id'] ?? null;
-            if ($id) {
-                // Lấy thông tin task để kiểm tra phân quyền
-                $task = $this->taskModel->findById($id);
-                
-                // Mangaka chỉ xóa được task thuộc về mình
-                if ($task && $task['mangaka_id'] == $_SESSION['user_id']) {
-                    $this->taskModel->delete($id);
-                    $_SESSION['success'] = 'Đã xóa task thành công.';
-                    
-                    // Xóa xong quay lại trang chứa task đó
-                    header("Location: /index.php?controller=page&action=show&id=" . $task['page_id']);
-                    exit;
-                } else {
-                    $_SESSION['error'] = 'Không có quyền xóa task này.';
-                }
+            $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+            if ($id <= 0) {
+                $_SESSION['error'] = 'ID công việc không hợp lệ.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+                exit;
             }
+
+            // Lấy thông tin task để kiểm tra phân quyền
+            $task = $this->taskModel->findById($id);
+            if (!$task) {
+                $_SESSION['error'] = 'Không tìm thấy công việc cần xóa.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+                exit;
+            }
+            
+            // Mangaka chỉ xóa được task thuộc về mình
+            if ($task['mangaka_id'] == $_SESSION['user_id']) {
+                $this->taskModel->delete($id);
+                $_SESSION['success'] = 'Đã xóa task thành công.';
+                
+                // Xóa xong quay lại trang chứa task đó
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $task['page_id']);
+                exit;
+            } else {
+                $_SESSION['error'] = 'Không có quyền xóa task này.';
+            }
+        } else {
+            $_SESSION['error'] = 'Phương thức yêu cầu không hợp lệ.';
         }
-        header('Location: /index.php?controller=series&action=index');
+        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
         exit;
     }
 }

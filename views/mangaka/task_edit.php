@@ -11,7 +11,7 @@ include __DIR__ . '/../layouts/header.php';
 ?>
 
 <div class="mb-3">
-    <a href="/index.php?controller=page&action=show&id=<?= htmlspecialchars($page['page_id']) ?>" class="btn btn-secondary">&larr; Quay lại Trang</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= htmlspecialchars($page['page_id']) ?>" class="btn btn-secondary">&larr; Quay lại Trang</a>
 </div>
 
 <!-- 
@@ -25,7 +25,7 @@ include __DIR__ . '/../layouts/header.php';
         <small>Trang <?= htmlspecialchars($page['page_number']) ?> - Chapter <?= htmlspecialchars($chapter['chapter_number']) ?> (<?= htmlspecialchars($series['title']) ?>)</small>
     </div>
     <div class="card-body">
-        <form action="/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST">
+        <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST">
             <!-- Tiêu đề công việc -->
             <div class="mb-3">
                 <label for="title" class="form-label">Tiêu đề công việc <span class="text-danger">*</span></label>

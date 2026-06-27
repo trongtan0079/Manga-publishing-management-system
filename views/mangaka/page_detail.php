@@ -79,7 +79,7 @@ include __DIR__ . '/../layouts/header.php';
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Task Management</h5>
         <!-- Nút tạo Task mới, truyền sẵn page_id qua URL GET parameter -->
-        <a href="/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light">Create Task</a>
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light">Create Task</a>
     </div>
     <div class="card-body">
         <?php if (!empty($tasks)): ?>
@@ -128,9 +128,9 @@ include __DIR__ . '/../layouts/header.php';
                                 <!-- Các nút thao tác Edit và Delete dành cho Mangaka -->
                                 <td>
                                     <!-- Nút Sửa chuyển hướng sang TaskController@edit -->
-                                    <a href="/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
                                     <!-- Nút Xóa thực hiện qua form POST để bảo mật -->
-                                    <form action="/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa task này?');">
+                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa task này?');">
                                         <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                     </form>
                                 </td>
