@@ -37,9 +37,14 @@ class SubmissionController extends BaseController
         if ($role === 'editor') {
             // Editor xem toàn bộ submission đang chờ xử lý (pending)
             $submissions = $this->submissionModel->findPendingSubmissions();
-        } else {
+        } elseif ($role === 'mangaka' || $role === 'assistant') {
             // Assistant và Mangaka xem lịch sử nộp bài của chính mình
             $submissions = $this->submissionModel->findByUserId($userId);
+        } else {
+            http_response_code(403);
+            $_SESSION['error'] = 'Bạn không có quyền xem danh sách bản thảo.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
+            exit;
         }
 
         // Nạp view danh sách
@@ -180,10 +185,21 @@ class SubmissionController extends BaseController
         $validMime = false;
         if (isset($allowedMimes[$ext]) && in_array($mimeType, $allowedMimes[$ext])) {
             $validMime = true;
+        } else {
+            // Cải thiện UX: Tự động đổi đuôi file nếu MIME type hợp lệ với một định dạng khác
+            foreach ($allowedMimes as $correctExt => $mimes) {
+                if (in_array($mimeType, $mimes)) {
+                    $ext = $correctExt;
+                    $validMime = true;
+                    // Cập nhật lại tên file gốc với đuôi mới
+                    $originalName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $ext;
+                    break;
+                }
+            }
         }
 
         if (!$validMime) {
-            $_SESSION['error'] = 'Nội dung file không hợp lệ (MIME type mismatch).';
+            $_SESSION['error'] = 'Nội dung file không hợp lệ (MIME type không được hỗ trợ).';
             header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
             exit;
         }
