@@ -7,7 +7,6 @@ require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Role.php';
 require_once __DIR__ . '/BaseController.php';
 
-use App\Controllers\BaseController;
 
 
 class AuthController extends BaseController {

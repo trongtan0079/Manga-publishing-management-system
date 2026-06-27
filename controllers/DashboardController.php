@@ -1,6 +1,5 @@
 <?php
 
-namespace App\Controllers;
 
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/BaseController.php';
@@ -13,14 +12,6 @@ require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/SeriesRanking.php';
 
-use User;
-use Series;
-use Chapter;
-use Page;
-use Task;
-use Submission;
-use Review;
-use SeriesRanking;
 
 class DashboardController extends BaseController {
 

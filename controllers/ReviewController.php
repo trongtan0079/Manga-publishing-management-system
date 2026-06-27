@@ -1,14 +1,10 @@
 <?php
 
-namespace App\Controllers;
 
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Notification.php';
 
-use Review;
-use Submission;
-use Notification;
 
 class ReviewController extends BaseController
 {

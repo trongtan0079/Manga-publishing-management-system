@@ -1,6 +1,5 @@
 <?php
 
-namespace App\Controllers;
 
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Task.php';
@@ -10,12 +9,6 @@ require_once __DIR__ . '/../models/Series.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Notification.php';
 
-use Task;
-use Page;
-use Chapter;
-use Series;
-use User;
-use Notification;
 
 class TaskController extends BaseController
 {

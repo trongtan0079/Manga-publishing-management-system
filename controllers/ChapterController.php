@@ -1,16 +1,11 @@
 <?php
 
-namespace App\Controllers;
 
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Chapter.php';
 require_once __DIR__ . '/../models/Series.php';
 require_once __DIR__ . '/../models/Page.php';
 
-use Chapter;
-use Series;
-use Page;
-use PDOException;
 
 class ChapterController extends BaseController
 {

@@ -28,16 +28,8 @@ if ($controllerName && $actionName) {
     if (file_exists($controllerFile)) {
         require_once $controllerFile;
         
-        $namespacedClass = "App\\Controllers\\" . $className;
-        $controllerClass = null;
         if (class_exists($className)) {
-            $controllerClass = $className;
-        } elseif (class_exists($namespacedClass)) {
-            $controllerClass = $namespacedClass;
-        }
-        
-        if ($controllerClass) {
-            $controller = new $controllerClass();
+            $controller = new $className();
             
             // Kiểm tra xem action (hàm) có tồn tại trong class Controller không
             if (method_exists($controller, $actionName)) {

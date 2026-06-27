@@ -1,16 +1,11 @@
 <?php
 
-namespace App\Controllers;
 
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/SeriesRanking.php';
 require_once __DIR__ . '/../models/Series.php';
 require_once __DIR__ . '/../models/Notification.php';
 
-use SeriesRanking;
-use Series;
-use Notification;
-use PDOException;
 
 class SeriesRankingController extends BaseController
 {

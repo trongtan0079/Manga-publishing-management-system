@@ -1,6 +1,5 @@
 <?php
 
-namespace App\Controllers;
 
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Page.php';
@@ -8,11 +7,6 @@ require_once __DIR__ . '/../models/Chapter.php';
 require_once __DIR__ . '/../models/Series.php';
 require_once __DIR__ . '/../models/Task.php';
 
-use Page;
-use Chapter;
-use Series;
-use Task;
-use PDOException;
 
 class PageController extends BaseController
 {

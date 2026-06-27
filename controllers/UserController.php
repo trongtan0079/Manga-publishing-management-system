@@ -1,15 +1,11 @@
 <?php
 
-namespace App\Controllers;
 
 // Import các model và core cần thiết
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Role.php';
 
-use User;
-use Role;
-use PDOException;
 
 class UserController extends BaseController
 {
