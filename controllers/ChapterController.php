@@ -103,6 +103,12 @@ class ChapterController extends BaseController
                 exit;
             }
 
+            if (mb_strlen($title) > 255) {
+                $_SESSION['error'] = "Tiêu đề chapter không được vượt quá 255 ký tự!";
+                header("Location: /index.php?controller=chapter&action=create&series_id={$seriesId}");
+                exit;
+            }
+
             if ($this->chapterModel->isChapterNumberExists($seriesId, $chapterNumber)) {
                 $_SESSION['error'] = "Chapter Number {$chapterNumber} đã tồn tại trong bộ truyện này.";
                 header("Location: /index.php?controller=chapter&action=create&series_id={$seriesId}");
@@ -175,6 +181,12 @@ class ChapterController extends BaseController
             // Validation
             if ($chapterNumber === '' || !is_numeric($chapterNumber) || $chapterNumber <= 0) {
                 $_SESSION['error'] = "Chapter Number bắt buộc và phải lớn hơn 0.";
+                header("Location: /index.php?controller=chapter&action=edit&id={$id}");
+                exit;
+            }
+
+            if (mb_strlen($title) > 255) {
+                $_SESSION['error'] = "Tiêu đề chapter không được vượt quá 255 ký tự!";
                 header("Location: /index.php?controller=chapter&action=edit&id={$id}");
                 exit;
             }

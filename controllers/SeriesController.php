@@ -52,6 +52,12 @@ class SeriesController extends BaseController
                 exit;
             }
 
+            if (mb_strlen($title) > 255) {
+                $_SESSION['error'] = "Tiêu đề truyện không được vượt quá 255 ký tự!";
+                header('Location: /index.php?controller=series&action=create');
+                exit;
+            }
+
             if (!in_array($status, $this->allowedStatuses)) {
                 $_SESSION['error'] = "Trạng thái truyện không hợp lệ!";
                 header('Location: /index.php?controller=series&action=create');
@@ -119,6 +125,12 @@ class SeriesController extends BaseController
             // Validation
             if (empty($title)) {
                 $_SESSION['error'] = "Tiêu đề truyện không được để trống!";
+                header('Location: /index.php?controller=series&action=edit&id=' . $id);
+                exit;
+            }
+
+            if (mb_strlen($title) > 255) {
+                $_SESSION['error'] = "Tiêu đề truyện không được vượt quá 255 ký tự!";
                 header('Location: /index.php?controller=series&action=edit&id=' . $id);
                 exit;
             }
