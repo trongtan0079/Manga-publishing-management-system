@@ -171,9 +171,11 @@ $role = $_SESSION['role_name'] ?? '';
                     </a>
                 <?php elseif (($role === 'assistant' || $role === 'mangaka') && $submission['status'] === 'pending' && $submission['user_id'] == $_SESSION['user_id']): ?>
                     <p class="text-muted text-xs mb-3">Bạn có thể xóa bản thảo đã nộp nếu nó chưa được đánh giá bởi biên tập viên.</p>
-                    <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $submission['submission_id'] ?>" class="btn btn-danger w-100 py-2.5 shadow-sm fw-bold" onclick="return confirm('Bạn có chắc chắn muốn xóa bản thảo này không?');">
-                        <i class="fas fa-trash-alt me-2"></i>Xóa bản thảo nộp này
-                    </a>
+                    <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $submission['submission_id'] ?>" method="POST" class="d-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản thảo này không?');">
+                        <button type="submit" class="btn btn-danger w-100 py-2.5 shadow-sm fw-bold">
+                            <i class="fas fa-trash-alt me-2"></i>Xóa bản thảo nộp này
+                        </button>
+                    </form>
                 <?php else: ?>
                     <p class="text-muted mb-0">Bản thảo này hiện ở trạng thái <strong><?= htmlspecialchars(strtoupper($submission['status'] ?? '')) ?></strong> và không còn thay đổi được.</p>
                 <?php endif; ?>

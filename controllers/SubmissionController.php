@@ -50,6 +50,9 @@ class SubmissionController extends BaseController
     /**
      * Hiển thị form upload
      */
+    /**
+     * Hiển thị form upload
+     */
     public function create() {
         $role = $_SESSION['role_name'] ?? '';
         $userId = $_SESSION['user_id'];
@@ -64,7 +67,9 @@ class SubmissionController extends BaseController
             require_once __DIR__ . '/../views/mangaka/submission_create.php';
         } else {
             http_response_code(403);
-            die("Access Denied: Vai trò này không được phép tạo Submission.");
+            $_SESSION['error'] = 'Bạn không có quyền nộp bản thảo mới.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
         }
     }
 
@@ -126,7 +131,9 @@ class SubmissionController extends BaseController
             }
         } else {
             http_response_code(403);
-            die("Access Denied: Bạn không có quyền nộp sản phẩm.");
+            $_SESSION['error'] = 'Vai trò này không được phép nộp bản thảo.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
         }
 
         // 2. Validate File Upload
@@ -200,6 +207,53 @@ class SubmissionController extends BaseController
             exit;
         }
 
+        // --- BỔ SUNG KIỂM TRA ĐĂNG KÝ PHẦN MỞ RỘNG VÀ CHỮ KÝ FILE THẬT ---
+        // 1. Kiểm tra ảnh bằng getimagesize()
+        if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+            $imageInfo = @getimagesize($tmpPath);
+            if ($imageInfo === false) {
+                $_SESSION['error'] = 'File ảnh không hợp lệ hoặc bị giả mạo.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+        }
+
+        // 2. Kiểm tra PDF bằng Signature (%PDF)
+        if ($ext === 'pdf') {
+            $handle = @fopen($tmpPath, 'rb');
+            if ($handle) {
+                $firstBytes = fread($handle, 4);
+                fclose($handle);
+                if ($firstBytes !== '%PDF') {
+                    $_SESSION['error'] = 'File PDF không hợp lệ hoặc bị giả mạo.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                    exit;
+                }
+            } else {
+                $_SESSION['error'] = 'Không thể đọc file PDF để kiểm tra chữ ký.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+        }
+
+        // 3. Kiểm tra ZIP bằng Signature (PK\x03\x04)
+        if ($ext === 'zip') {
+            $handle = @fopen($tmpPath, 'rb');
+            if ($handle) {
+                $firstBytes = fread($handle, 4);
+                fclose($handle);
+                if ($firstBytes !== "PK\x03\x04") {
+                    $_SESSION['error'] = 'File ZIP không hợp lệ hoặc bị giả mạo.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                    exit;
+                }
+            } else {
+                $_SESSION['error'] = 'Không thể đọc file ZIP để kiểm tra chữ ký.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+        }
+
         // 3. Tiến hành lưu file
         $uploadDir = __DIR__ . '/../uploads/submissions/';
         if (!is_dir($uploadDir)) {
@@ -220,8 +274,8 @@ class SubmissionController extends BaseController
         // 4. Lưu vào Database
         $submissionData = [
             'user_id' => $userId,
-            'task_id' => $taskId,
-            'chapter_id' => $chapterId,
+            'task_id' => $taskId ?: null,
+            'chapter_id' => $chapterId ?: null,
             'file_url' => $dbFileUrl,
             'notes' => trim($_POST['notes'] ?? ''),
             'status' => 'pending'
@@ -275,13 +329,22 @@ class SubmissionController extends BaseController
      * Xem chi tiết Submission
      */
     public function show($id) {
+        $id = intval($id);
+        if ($id <= 0) {
+            $_SESSION['error'] = 'ID bản thảo không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
         $role = $_SESSION['role_name'] ?? '';
         $userId = $_SESSION['user_id'];
 
         $submission = $this->submissionModel->findWithMetadataById($id);
         if (!$submission) {
             http_response_code(404);
-            die("Không tìm thấy bản thảo yêu cầu.");
+            $_SESSION['error'] = 'Không tìm thấy bản thảo yêu cầu.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
         }
 
         // Kiểm tra quyền xem chi tiết bản thảo:
@@ -303,7 +366,9 @@ class SubmissionController extends BaseController
 
         if (!$hasAccess) {
             http_response_code(403);
-            die("Access Denied: Bạn không có quyền truy cập xem bản thảo này.");
+            $_SESSION['error'] = 'Bạn không có quyền truy cập xem bản thảo này.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
         }
 
         // Nạp view chi tiết
@@ -314,6 +379,13 @@ class SubmissionController extends BaseController
      * Xóa Submission chưa được review (chỉ ở trạng thái pending)
      */
     public function delete($id) {
+        $id = intval($id);
+        if ($id <= 0 || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = 'Yêu cầu không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
         $userId = $_SESSION['user_id'];
 
         $submission = $this->submissionModel->findById($id);
@@ -338,9 +410,11 @@ class SubmissionController extends BaseController
         }
 
         // Xóa file vật lý khỏi đĩa
-        $filePath = __DIR__ . '/../' . $submission['file_url'];
-        if (file_exists($filePath)) {
-            unlink($filePath);
+        if (!empty($submission['file_url'])) {
+            $filePath = __DIR__ . '/../' . $submission['file_url'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
         }
 
         // Xóa dòng trong Database

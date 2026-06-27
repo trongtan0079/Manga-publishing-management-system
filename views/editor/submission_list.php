@@ -138,9 +138,11 @@ $role = $_SESSION['role_name'] ?? '';
                                         </a>
                                         
                                         <?php if (($role === 'assistant' || $role === 'mangaka') && $sub['status'] === 'pending' && $sub['user_id'] == $_SESSION['user_id']): ?>
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa bản thảo này?');" title="Xóa bản thảo">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </a>
+                                            <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $sub['submission_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản thảo này?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa bản thảo">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
                                         <?php endif; ?>
                                     </div>
                                 </td>
