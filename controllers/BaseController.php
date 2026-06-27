@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers;
+
 
 require_once __DIR__ . '/../models/Notification.php';
 
