@@ -327,7 +327,13 @@ class PageController extends BaseController
             $this->checkChapterOwnership($chapterId);
 
             try {
-                // Yêu cầu: chỉ xóa record DB, không unlink file vật lý
+                // Xóa file vật lý trước
+                $filePath = __DIR__ . '/../' . ltrim($page['image_url'], '/');
+                if (!empty($page['image_url']) && file_exists($filePath)) {
+                    unlink($filePath);
+                }
+
+                // Xóa record DB
                 $this->pageModel->delete($id);
                 $_SESSION['success'] = "Đã xóa trang thành công!";
             } catch (PDOException $e) {
