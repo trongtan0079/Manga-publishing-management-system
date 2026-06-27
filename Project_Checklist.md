@@ -27,7 +27,7 @@
 
 ---
 
-### 3. Models
+### 3. Models (Data Access)
 
 * [x] Role.php
 * [x] User.php
@@ -39,6 +39,7 @@
 * [x] Review.php
 * [x] SeriesRanking.php
 * [x] Notification.php
+* *Lưu ý: Đang sử dụng cơ chế PDO::FETCH_ASSOC để đảm bảo tiến độ. Sẽ có nhánh riêng (feature/refactor-oop) sau khi bảo vệ dự án.*
 
 ---
 
@@ -50,118 +51,95 @@
 * [x] ChapterController.php
 * [x] PageController.php
 * [x] TaskController.php
-* [ ] SubmissionController.php
-* [ ] ReviewController.php
-* [ ] SeriesRankingController.php
-* [ ] NotificationController.php
+* [x] SubmissionController.php
+* [x] ReviewController.php
+* [x] SeriesRankingController.php
+* [x] NotificationController.php
+* [x] DashboardController.php
 
 ---
 
 ### 5. Views
 
 #### Layouts
-
-* [ ] header.php
-* [ ] footer.php
-* [ ] navbar.php
-* [ ] sidebar.php
+* [x] header.php
+* [x] footer.php
+* [x] navbar.php
+* [x] sidebar.php
 
 #### Authentication
-
-* [ ] login.php
+* [x] login.php
 
 #### Admin Module
-
-* [ ] dashboard.php
-* [ ] users.php
-* [ ] roles.php
+* [x] dashboard.php
+* [x] users.php (Create, Edit, Detail)
+* [x] roles.php
 
 #### Mangaka Module
-
-* [ ] dashboard.php
-* [ ] series.php
-* [ ] chapter.php
-* [ ] pages.php
-* [x] task_create.php
-* [x] task_edit.php
+* [x] dashboard.php
+* [x] series.php & series_detail.php
+* [x] chapter_create.php & chapter_detail.php & chapter_edit.php
+* [x] page_create.php & page_detail.php & page_edit.php
+* [x] task_create.php & task_edit.php
+* [x] rankings.php
 
 #### Assistant Module
-
-* [ ] dashboard.php
+* [x] dashboard.php
 * [x] task_list.php
-* [ ] upload_submission.php
+* [x] upload_submission.php
 
 #### Editor Module
-
-* [ ] dashboard.php
-* [ ] review_list.php
-* [ ] review_detail.php
+* [x] dashboard.php
+* [x] review_list.php & review_create.php
+* [x] submission_list.php & submission_detail.php
+* [x] review_detail.php
 
 #### Editorial Board Module
-
-* [ ] dashboard.php
-* [ ] publish_series.php
-* [ ] rankings.php
+* [x] dashboard.php
+* [x] rankings.php & ranking_detail.php
+* [x] ranking_create.php & ranking_edit.php
 
 ---
 
 ### 6. Core Features
 
 #### Authentication & Authorization
-
-* [ ] Login
-* [ ] Logout
-* [ ] Session Management
-* [ ] Role-Based Access Control
+* [x] Login & Logout
+* [x] Session Management
+* [/] Role-Based Access Control (Đang hoàn thiện - Priority)
 
 #### Series Management
-
-* [ ] Create Series
-* [ ] Update Series
-* [ ] Delete Series
-* [ ] View Series
+* [x] Create, Update, Delete, View Series
 
 #### Chapter Management
-
-* [ ] Create Chapter
-* [ ] Update Chapter
-* [ ] Publish Chapter
+* [x] Create, Update, Publish Chapter
 
 #### Page Management
-
-* [ ] Upload Page
-* [ ] Update Page
-* [ ] Delete Page
+* [x] Upload, Update, Delete Page (Đã fix lỗi trạng thái)
 
 #### Task Management
-
 * [x] Assign Task
 * [x] Update Task Status
 * [x] View Task List
 
 #### Submission Management
-
-* [ ] Upload Submission
-* [ ] View Submission
-* [ ] Resubmit Submission
+* [x] Upload Submission
+* [x] View Submission
+* [x] Resubmit Submission
 
 #### Review Management
-
-* [ ] Approve Submission
-* [ ] Reject Submission
-* [ ] Add Review Comments
+* [x] Approve/Reject Submission
+* [x] Add Review Comments
 
 #### Ranking Management
-
-* [ ] Evaluate Series
-* [ ] Create Ranking
-* [ ] View Ranking History
+* [x] Evaluate Series
+* [x] Create Ranking
+* [x] View Ranking History
 
 #### Notification Management
-
-* [ ] Create Notification
-* [ ] Mark as Read
-* [ ] View Notifications
+* [x] Create Notification
+* [x] Mark as Read
+* [x] View Notifications
 
 ---
 
@@ -175,43 +153,42 @@
 * [ ] Sequence Diagram
 * [ ] System Architecture Diagram
 * [ ] Database Documentation
-* [ ] User Manual
+* [ ] User Manual (Tài liệu hướng dẫn)
 
 ---
 
-### 8. Testing
+### 8. Testing & QA (Giai Đoạn Nước Rút)
 
-* [ ] Unit Testing
-* [ ] Integration Testing
-* [ ] User Acceptance Testing (UAT)
-* [ ] Bug Fixing
+* [ ] Kiểm thử End-to-End (E2E) toàn bộ luồng nghiệp vụ
+* [ ] Fix bugs (Giao diện & Logic)
+* [ ] Kiểm tra phân quyền (Role Permission) trên toàn hệ thống
+* [ ] Hoàn thiện hiển thị Dashboard cho 5 role
 
 ---
 
 ### 9. Final Delivery
 
-* [ ] Source Code Complete
-* [ ] Database Complete
-* [ ] Documentation Complete
-* [ ] Slide Presentation Complete
-* [ ] Demo Ready
+* [x] Hoàn thiện Source Code (Mức độ tính năng cơ bản)
+* [x] Hoàn thiện CSDL
+* [ ] Chuẩn bị dữ liệu Demo
+* [ ] Hoàn thiện Documentation
+* [ ] Sẵn sàng Demo (Demo Ready)
+* [ ] Báo cáo / Slide Presentation
 
 ---
 
-## Current Progress
+## Lộ Trình Giai Đoạn Hiện Tại (Nước Rút)
 
-Completed:
+**Trạng thái hệ thống:** Đã hoàn thiện gần như toàn bộ các module nghiệp vụ, Models, Controllers và Views hoạt động ổn định. Giao diện không còn báo lỗi IDE.
 
-* Database Design
-* ERD
-* Class Diagram
-* Data Dictionary
-* manga_workflow.sql
+**6 Ưu Tiên Hàng Đầu (Hiện tại):**
+1. [ ] Hoàn thiện toàn bộ workflow nghiệp vụ (Review & Cross-check).
+2. [ ] Kiểm thử End-to-End các quy trình (Mangaka -> Assistant -> Mangaka -> Editor -> Board).
+3. [ ] Sửa các bug phát sinh trong quá trình kiểm thử.
+4. [ ] Rà soát và hoàn thiện giao diện Dashboard của tất cả các Role.
+5. [ ] Hoàn thiện Role Permission (Đảm bảo an toàn phân quyền ở mọi endpoint).
+6. [ ] Chuẩn bị dữ liệu demo (Sample data) và tài liệu hệ thống.
 
-Current Task:
-
-* Create Models
-
-Next Task:
-
-* Create Controllers
+**Kế Hoạch Tương Lai (Post-Demo):**
+- Checkout nhánh `feature/refactor-oop`.
+- Chuyển đổi toàn bộ kiến trúc Data Access từ `PDO::FETCH_ASSOC` (Mảng) sang Object Mapping (OOP) để tuân thủ 100% `Database_design.md`.
