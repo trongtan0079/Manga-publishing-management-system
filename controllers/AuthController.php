@@ -5,7 +5,6 @@ require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Role.php';
-require_once __DIR__ . '/BaseController.php';
 
 
 
@@ -69,6 +68,16 @@ class AuthController extends BaseController {
 
             // 3. Đối chiếu mật khẩu an toàn (Bcrypt verification)
             if ($user && password_verify($password, $user['password_hash'])) {
+                // Kiểm tra trạng thái tài khoản
+                if ($user['status'] !== 'active') {
+                    $_SESSION['error'] = 'Tài khoản của bạn đã bị khóa hoặc chưa được kích hoạt.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
+                    exit;
+                }
+
+                // Bảo mật Session: Chống Session Fixation
+                session_regenerate_id(true);
+
                 // Lấy thông tin role
                 $role = $this->roleModel->findById($user['role_id']);
                 $roleName = $role ? $role['role_name'] : 'unknown';
