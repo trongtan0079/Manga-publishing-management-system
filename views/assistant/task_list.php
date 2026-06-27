@@ -72,7 +72,7 @@ include __DIR__ . '/../layouts/header.php';
                                 </td>
                                 <!-- Cột Cập nhật trạng thái: Là một form nhỏ chứa Dropdown và nút Save để cập nhật nhanh -->
                                 <td>
-                                    <form action="/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center">
+                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center">
                                         <!-- Dropdown chọn status hiện tại -->
                                         <select name="status" class="form-select form-select-sm me-2" style="width: 130px;">
                                             <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
