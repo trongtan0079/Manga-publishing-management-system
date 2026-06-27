@@ -59,9 +59,22 @@ class UserController extends BaseController
                 exit;
             }
 
-            // 2. Kiểm tra trùng lặp Email
+            // 2. Kiểm tra định dạng Email và trùng lặp
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['error'] = "Lỗi: Email không hợp lệ!";
+                header('Location: /index.php?controller=user&action=create');
+                exit;
+            }
             if ($this->userModel->findByEmail($email)) {
                 $_SESSION['error'] = "Lỗi: Email '{$email}' đã được đăng ký!";
+                header('Location: /index.php?controller=user&action=create');
+                exit;
+            }
+
+            // 3. Kiểm tra Role hợp lệ
+            $role_id = $_POST['role_id'] ?? '';
+            if (!$this->roleModel->findById($role_id)) {
+                $_SESSION['error'] = "Lỗi: Vai trò (Role) không tồn tại!";
                 header('Location: /index.php?controller=user&action=create');
                 exit;
             }
@@ -71,12 +84,17 @@ class UserController extends BaseController
                 'username'  => $username,
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'email'     => $email,
-                'role_id'   => $_POST['role_id'] ?? '',
-                'status'    => $_POST['status'] ?? 'active'
+                'role_id'   => $role_id,
+                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active'
             ];
             
-            // Xử lý mật khẩu: nếu có nhập thì băm (hash), nếu không thì dùng mật khẩu mặc định
+            // Xử lý mật khẩu: nếu có nhập thì kiểm tra độ dài và băm (hash), nếu không thì dùng mật khẩu mặc định
             if (!empty($_POST['password'])) {
+                if (strlen($_POST['password']) < 6) {
+                    $_SESSION['error'] = "Lỗi: Mật khẩu phải có ít nhất 6 ký tự!";
+                    header('Location: /index.php?controller=user&action=create');
+                    exit;
+                }
                 $data['password_hash'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
             } else {
                 $data['password_hash'] = password_hash('password123', PASSWORD_DEFAULT);
@@ -135,10 +153,23 @@ class UserController extends BaseController
                 exit;
             }
 
-            // 2. Kiểm tra trùng lặp Email (loại trừ chính user hiện tại)
+            // 2. Kiểm tra định dạng Email và trùng lặp (loại trừ chính user hiện tại)
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $_SESSION['error'] = "Lỗi: Email không hợp lệ!";
+                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                exit;
+            }
             $existingUserByEmail = $this->userModel->findByEmail($email);
             if ($existingUserByEmail && $existingUserByEmail['user_id'] != $id) {
                 $_SESSION['error'] = "Lỗi: Email '{$email}' đã được sử dụng bởi người dùng khác!";
+                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                exit;
+            }
+
+            // 3. Kiểm tra Role hợp lệ
+            $role_id = $_POST['role_id'] ?? '';
+            if (!$this->roleModel->findById($role_id)) {
+                $_SESSION['error'] = "Lỗi: Vai trò (Role) không tồn tại!";
                 header('Location: /index.php?controller=user&action=edit&id=' . $id);
                 exit;
             }
@@ -148,12 +179,17 @@ class UserController extends BaseController
                 'username'  => $username,
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'email'     => $email,
-                'role_id'   => $_POST['role_id'] ?? '',
-                'status'    => $_POST['status'] ?? 'active'
+                'role_id'   => $role_id,
+                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active'
             ];
             
             // Nếu admin có nhập mật khẩu mới thì mới cập nhật password_hash
             if (!empty($_POST['password'])) {
+                if (strlen($_POST['password']) < 6) {
+                    $_SESSION['error'] = "Lỗi: Mật khẩu mới phải có ít nhất 6 ký tự!";
+                    header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                    exit;
+                }
                 $data['password_hash'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
             }
 
@@ -194,6 +230,12 @@ class UserController extends BaseController
     public function delete($id) {
         // Chỉ chấp nhận request POST để xóa, đảm bảo an toàn
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if ($id == $_SESSION['user_id']) {
+                $_SESSION['error'] = "Bạn không thể xóa chính tài khoản của mình!";
+                header('Location: /index.php?controller=user&action=index');
+                exit;
+            }
+
             try {
                 $this->userModel->delete($id);
                 $_SESSION['success'] = "Đã xóa người dùng thành công!";
