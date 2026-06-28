@@ -7,7 +7,7 @@
  * @var array $series Thông tin series
  * @var array $assistants Danh sách assistant
  */
-$pageTitle = 'Cập nhật Task';
+$pageTitle = 'Cập nhật Công việc';
 $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 -->
 <div class="card mb-4 border-warning">
     <div class="card-header bg-warning text-dark">
-        <h4 class="mb-0">Cập nhật Task</h4>
+        <h4 class="mb-0">Cập nhật công việc</h4>
         <!-- Bối cảnh công việc -->
         <small>Trang <?= htmlspecialchars($page['page_number']) ?> - Chapter <?= htmlspecialchars($chapter['chapter_number']) ?> (<?= htmlspecialchars($series['title']) ?>)</small>
     </div>
@@ -73,16 +73,16 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div class="col-md-4">
                     <label for="status" class="form-label">Trạng thái (Status)</label>
                     <select class="form-select" id="status" name="status">
-                        <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Pending (Chưa bắt đầu)</option>
-                        <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>In Progress (Đang làm)</option>
-                        <option value="completed" <?= $task['status'] == 'completed' ? 'selected' : '' ?>>Completed (Đã xong)</option>
+                        <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Chờ xử lý (Pending)</option>
+                        <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>Đang làm (In Progress)</option>
+                        <option value="completed" <?= $task['status'] == 'completed' ? 'selected' : '' ?>>Hoàn thành (Completed)</option>
                     </select>
                 </div>
             </div>
 
             <!-- Hạn chót công việc -->
             <div class="mb-3">
-                <label for="due_date" class="form-label">Hạn chót (Due Date)</label>
+                <label for="due_date" class="form-label">Hạn chót</label>
                 <!-- Định dạng lại chuỗi datetime để gán vào input type="datetime-local" -->
                 <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="<?= $task['due_date'] ? date('Y-m-d\TH:i', strtotime($task['due_date'])) : '' ?>">
             </div>

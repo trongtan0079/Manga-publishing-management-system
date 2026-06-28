@@ -7,7 +7,7 @@
  * @var array $series Thông tin series
  * @var array $assistants Danh sách assistant
  */
-$pageTitle = 'Tạo Task Mới';
+$pageTitle = 'Tạo Công Việc Mới';
 $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 -->
 <div class="card mb-4">
     <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">Tạo Task mới</h4>
+        <h4 class="mb-0">Tạo công việc mới</h4>
         <!-- Hiển thị ngữ cảnh công việc đang được giao cho trang nào, chương nào -->
         <small>Trang <?= htmlspecialchars($page['page_number']) ?> - Chapter <?= htmlspecialchars($chapter['chapter_number']) ?> (<?= htmlspecialchars($series['title']) ?>)</small>
     </div>
@@ -70,12 +70,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
             <!-- Trường hạn chót (Sử dụng datetime-local để chọn giờ) -->
             <div class="mb-3">
-                <label for="due_date" class="form-label">Hạn chót (Due Date)</label>
+                <label for="due_date" class="form-label">Hạn chót</label>
                 <input type="datetime-local" class="form-control" id="due_date" name="due_date">
                 <div class="form-text">Bạn có thể bỏ trống nếu công việc này không có hạn chót cụ thể.</div>
             </div>
 
-            <button type="submit" class="btn btn-primary">Giao Task</button>
+            <button type="submit" class="btn btn-primary">Giao công việc</button>
         </form>
     </div>
 </div>
