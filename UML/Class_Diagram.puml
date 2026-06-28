@@ -90,8 +90,8 @@ Chapter "1" -- "*" Page : contains
 
 Page "1" -- "*" Task : requires
 
-User "1" -- "*" Task : assigns
-User "1" -- "*" Task : receives
+User "1" -- "*" Task : manager_assigns
+User "1" -- "*" Task : assistant_receives
 
 Task "1" -- "*" Submission : generates
 
