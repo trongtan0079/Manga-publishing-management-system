@@ -23,8 +23,8 @@ class ReviewController extends BaseController
     public function index() {
         $role = $_SESSION['role_name'] ?? '';
         if ($role === 'editor') {
-            // Editor sees all pending chapter submissions
-            $submissions = $this->submissionModel->findPendingSubmissions();
+            // Editor sees all chapter submissions (pending + history)
+            $submissions = $this->submissionModel->findAllChapterSubmissions();
             require_once __DIR__ . '/../views/editor/review_list.php';
         } elseif ($role === 'mangaka') {
             // Mangaka sees pending task submissions for their own tasks

@@ -78,12 +78,26 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <?php endif; ?>
                                 </td>
                                 <td><?= date('d/m/Y H:i', strtotime($sub['submitted_at'])) ?></td>
-                                <td><span class="badge bg-secondary px-2 py-1">Pending</span></td>
+                                <td>
+                                    <?php 
+                                        $statusClass = 'secondary';
+                                        $statusText = ucfirst(htmlspecialchars($sub['status'] ?? 'pending'));
+                                        if ($sub['status'] === 'approved') $statusClass = 'success';
+                                        elseif ($sub['status'] === 'rejected') $statusClass = 'danger';
+                                        elseif ($sub['status'] === 'reviewed') $statusClass = 'primary';
+                                    ?>
+                                    <span class="badge bg-<?= $statusClass ?> px-2 py-1"><?= $statusText ?></span>
+                                </td>
                                 <td class="text-end pe-4">
-                                    <!-- Nút chuyển sang giao diện tạo đánh giá (Review) -->
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-primary shadow-sm">
-                                        <i class="fas fa-edit me-1"></i> Review
-                                    </a>
+                                    <?php if ($sub['status'] === 'pending' || $sub['status'] === 'reviewed'): ?>
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-primary shadow-sm">
+                                            <i class="fas fa-edit me-1"></i> Review
+                                        </a>
+                                    <?php else: ?>
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=show&id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-outline-secondary shadow-sm">
+                                            <i class="fas fa-eye me-1"></i> Xem chi tiết
+                                        </a>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
