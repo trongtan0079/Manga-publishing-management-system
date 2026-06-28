@@ -29,6 +29,7 @@ function requireRole($roleName) {
     requireLogin();
     if (!isset($_SESSION['role_name']) || $_SESSION['role_name'] !== $roleName) {
         http_response_code(403);
-        die("Access Denied: You do not have the required role ({$roleName}) to access this page.");
+        echo "Access Denied: You do not have the required role to access this page.";
+        exit;
     }
 }

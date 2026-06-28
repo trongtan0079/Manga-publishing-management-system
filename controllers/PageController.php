@@ -114,7 +114,7 @@ class PageController extends BaseController
     }
 
     public function index() {
-        // Rediect về series
+        // Chuyển hướng về trang chi tiết series
         header('Location: /index.php?controller=series&action=index');
         exit;
     }
