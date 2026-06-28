@@ -7,7 +7,7 @@
         <?php if (!empty($this->latestNotifications)): ?>
             <div class="list-group list-group-flush">
                 <?php foreach ($this->latestNotifications as $notif): ?>
-                    <a href="#" class="list-group-item list-group-item-action d-flex gap-3 py-3 <?= !$notif['is_read'] ? 'bg-light' : '' ?>" style="border-radius: 8px; margin-bottom: 5px; border: none;">
+                    <div class="list-group-item list-group-item-action d-flex gap-3 py-3 <?= !$notif['is_read'] ? 'bg-light' : '' ?>" style="border-radius: 8px; margin-bottom: 5px; border: none;">
                         <div class="d-flex align-items-center">
                             <?php if (!$notif['is_read']): ?>
                                 <span class="badge bg-primary p-1 border border-light rounded-circle me-2" style="width: 10px; height: 10px;"><span class="visually-hidden">New alerts</span></span>
@@ -43,7 +43,7 @@
                                 </form>
                             </div>
                         <?php endif; ?>
-                    </a>
+                    </div>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>

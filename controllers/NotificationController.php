@@ -24,6 +24,14 @@ class NotificationController extends BaseController
     }
 
     public function markAsRead($id) {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = 'Phương thức không được phép.';
+            $referer = $_SERVER['HTTP_REFERER'] ?? (BASE_PATH . '/index.php?controller=notification&action=index');
+            header('Location: ' . $referer);
+            exit;
+        }
+
+        $id = (int)$id;
         if (!$id) {
             $_SESSION['error'] = 'Không tìm thấy thông báo.';
             header('Location: ' . BASE_PATH . '/index.php?controller=notification&action=index');
@@ -50,6 +58,13 @@ class NotificationController extends BaseController
     }
 
     public function markAllAsRead() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = 'Phương thức không được phép.';
+            $referer = $_SERVER['HTTP_REFERER'] ?? (BASE_PATH . '/index.php?controller=notification&action=index');
+            header('Location: ' . $referer);
+            exit;
+        }
+
         $userId = $_SESSION['user_id'];
         $this->notificationModel->markAllAsRead($userId);
         
