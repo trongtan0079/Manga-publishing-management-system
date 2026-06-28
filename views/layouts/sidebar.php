@@ -47,6 +47,14 @@ $role = $_SESSION['role_name'] ?? '';
                 <li class="nav-item nav-category">Tiến độ & Quy trình</li>
             <?php endif; ?>
 
+            <?php if ($role === 'editor'): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?= (isset($current_page) && $current_page == 'progress') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=progress">
+                        <i class="fas fa-chart-line"></i> <span>Tiến độ & Deadline</span>
+                    </a>
+                </li>
+            <?php endif; ?>
+
             <?php if ($role === 'assistant'): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'tasks') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=task&action=index">
