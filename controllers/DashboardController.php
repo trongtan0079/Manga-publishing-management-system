@@ -10,6 +10,7 @@ require_once __DIR__ . '/../models/Page.php';
 require_once __DIR__ . '/../models/Task.php';
 require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Review.php';
+require_once __DIR__ . '/../models/Notification.php';
 require_once __DIR__ . '/../models/SeriesRanking.php';
 
 
@@ -50,6 +51,35 @@ class DashboardController extends BaseController {
         $totalReviews = $reviewModel->countAll();
         $totalNotifications = $notificationModel->countAll();
         $totalRankings = $rankingModel->countAll();
+        
+        // Thống kê User theo trạng thái
+        $activeUsers = $userModel->countByCondition(['status' => 'active']);
+        $inactiveUsers = $userModel->countByCondition(['status' => 'inactive']);
+        $bannedUsers = $userModel->countByCondition(['status' => 'banned']);
+        
+        // Thống kê User theo Role (cho biểu đồ)
+        $conn = $userModel->getConnection();
+        $stmtRoles = $conn->prepare("SELECT r.role_name, COUNT(u.user_id) as user_count FROM roles r LEFT JOIN users u ON r.role_id = u.role_id GROUP BY r.role_id, r.role_name ORDER BY r.role_id");
+        $stmtRoles->execute();
+        $usersByRole = $stmtRoles->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Thống kê Task theo Status (cho biểu đồ)
+        $stmtTaskStatus = $conn->prepare("SELECT status, COUNT(*) as task_count FROM tasks GROUP BY status");
+        $stmtTaskStatus->execute();
+        $tasksByStatusRaw = $stmtTaskStatus->fetchAll(\PDO::FETCH_ASSOC);
+        $tasksByStatus = [];
+        foreach ($tasksByStatusRaw as $row) {
+            $tasksByStatus[$row['status']] = (int)$row['task_count'];
+        }
+        
+        // Thống kê Submission theo Status (cho biểu đồ)
+        $stmtSubStatus = $conn->prepare("SELECT status, COUNT(*) as sub_count FROM submissions GROUP BY status");
+        $stmtSubStatus->execute();
+        $subsByStatusRaw = $stmtSubStatus->fetchAll(\PDO::FETCH_ASSOC);
+        $subsByStatus = [];
+        foreach ($subsByStatusRaw as $row) {
+            $subsByStatus[$row['status']] = (int)$row['sub_count'];
+        }
         
         require_once __DIR__ . '/../views/admin/dashboard.php';
     }
