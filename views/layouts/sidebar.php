@@ -73,6 +73,13 @@ $role = $_SESSION['role_name'] ?? '';
 
             <?php if (in_array($role, ['admin', 'board', 'mangaka', 'editor'])): ?>
                 <li class="nav-item nav-category">Báo cáo & Thống kê</li>
+                <?php if ($role === 'board'): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?= (isset($current_page) && $current_page == 'publish_series') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=publish">
+                        <i class="fas fa-check-circle"></i> <span>Duyệt Series</span>
+                    </a>
+                </li>
+                <?php endif; ?>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'rankings') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=seriesranking&action=index">
                         <i class="fas fa-chart-line"></i>

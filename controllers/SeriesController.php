@@ -34,6 +34,12 @@ class SeriesController extends BaseController
             $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($role === 'mangaka') {
             $seriesList = $this->seriesModel->findByMangakaId($currentUserId);
+        } elseif ($role === 'board') {
+            // Board will use the 'publish' action instead, but we allow them here if needed
+            $sql = "SELECT * FROM series ORDER BY series_id DESC";
+            $stmt = $this->seriesModel->getConnection()->prepare($sql);
+            $stmt->execute();
+            $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } else {
             http_response_code(403);
             $_SESSION['error'] = 'Bạn không có quyền truy cập.';
@@ -213,6 +219,54 @@ class SeriesController extends BaseController
             }
             
             header('Location: /index.php?controller=series&action=index');
+            exit;
+        }
+    }
+    /**
+     * Xem danh sách Series để xuất bản (Dành cho Editorial Board)
+     */
+    public function publish() {
+        requireRole('board');
+        
+        // Lấy danh sách truyện đang chờ duyệt (planning) và đang xuất bản (ongoing)
+        $sql = "SELECT s.*, u.full_name as mangaka_name 
+                FROM series s 
+                JOIN users u ON s.mangaka_id = u.user_id 
+                WHERE s.status IN ('planning', 'ongoing') 
+                ORDER BY s.created_at DESC";
+        $stmt = $this->seriesModel->getConnection()->prepare($sql);
+        $stmt->execute();
+        $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        require_once __DIR__ . '/../views/board/publish_series.php';
+    }
+
+    /**
+     * Cập nhật trạng thái Series (Dành cho Editorial Board duyệt xuất bản)
+     */
+    public function updateStatus($id) {
+        requireRole('board');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $series = $this->seriesModel->findById($id);
+            if (!$series) {
+                $_SESSION['error'] = "Không tìm thấy bộ truyện.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
+            $status = $_POST['status'] ?? '';
+            if (in_array($status, $this->allowedStatuses)) {
+                try {
+                    $this->seriesModel->update($id, ['status' => $status]);
+                    $_SESSION['success'] = "Cập nhật trạng thái bộ truyện thành công.";
+                } catch (PDOException $e) {
+                    $_SESSION['error'] = "Lỗi khi cập nhật trạng thái: " . $e->getMessage();
+                }
+            } else {
+                $_SESSION['error'] = "Trạng thái không hợp lệ.";
+            }
+
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
             exit;
         }
     }
