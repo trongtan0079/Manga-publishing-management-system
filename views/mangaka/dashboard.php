@@ -55,10 +55,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Page đang thực hiện</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($totalPages) ? $totalPages : 0 ?></div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Bản thảo</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalSubmissions) ? $totalSubmissions : 0 ?></div>
                     </div>
-                    <div class="stat-icon success"><i class="fas fa-images"></i></div>
+                    <div class="stat-icon success"><i class="fas fa-file-upload"></i></div>
                 </div>
             </div>
         </div>
@@ -68,10 +68,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Task đang giao</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($totalTasks) ? $totalTasks : 0 ?></div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Đánh giá chờ xử lý</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($pendingReviews) ? $pendingReviews : 0 ?></div>
                     </div>
-                    <div class="stat-icon warning"><i class="fas fa-tasks"></i></div>
+                    <div class="stat-icon warning"><i class="fas fa-clock"></i></div>
                 </div>
             </div>
         </div>

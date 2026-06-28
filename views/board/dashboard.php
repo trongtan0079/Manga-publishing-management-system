@@ -23,43 +23,61 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <div class="row g-4 mb-4">
-    <div class="col-xl-4 col-md-6">
-        <div class="card stat-card primary h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Series đã đánh giá (Kỳ này)</div>
-                        <div class="h3 mb-0 fw-bold"><?= $evaluatedSeries ?></div>
-                    </div>
-                    <div class="stat-icon primary"><i class="fas fa-book"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-4 col-md-6">
+    <!-- Card 1: Total Rankings -->
+    <div class="col-xl-3 col-md-6">
         <div class="card stat-card info h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Kỳ Đánh Giá Hiện Tại</div>
-                        <div class="h5 mb-0 fw-bold"><?= $latestPeriod ? date('d/m/Y', strtotime($latestPeriod)) : 'Chưa có' ?></div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Xếp Hạng</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalRankings) ? $totalRankings : 0 ?></div>
                     </div>
-                    <div class="stat-icon info"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="stat-icon info"><i class="fas fa-list-ol"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-4 col-md-6">
+    <!-- Card 2: Evaluated Series -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Manga đã chấm</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($evaluatedSeries) ? $evaluatedSeries : 0 ?></div>
+                    </div>
+                    <div class="stat-icon primary"><i class="fas fa-check-circle"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 3: Ungraded Series -->
+    <div class="col-xl-3 col-md-6">
         <div class="card stat-card warning h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Series Hạng 1</div>
-                        <div class="h5 mb-0 fw-bold text-truncate" style="max-width: 150px;" title="<?= htmlspecialchars($topRankingSeriesName) ?>"><?= htmlspecialchars($topRankingSeriesName) ?></div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Manga chưa chấm</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($ungradedSeries) ? $ungradedSeries : 0 ?></div>
                     </div>
-                    <div class="stat-icon warning"><i class="fas fa-trophy"></i></div>
+                    <div class="stat-icon warning"><i class="fas fa-hourglass-half"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Card 4: Top Ranking Series -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Series Hạng 1</div>
+                        <div class="h5 mb-0 fw-bold text-truncate" style="max-width: 120px;" title="<?= htmlspecialchars($topRankingSeriesName) ?>"><?= htmlspecialchars($topRankingSeriesName) ?></div>
+                    </div>
+                    <div class="stat-icon success"><i class="fas fa-trophy"></i></div>
                 </div>
             </div>
         </div>

@@ -21,34 +21,60 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <div class="row g-4 mb-4">
     <!-- Cột 1: Thống kê tổng số Submissions chờ review -->
-    <div class="col-xl-6 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card stat-card warning h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Submissions chờ review</div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Chờ review</div>
                         <div class="h3 mb-0 fw-bold text-dark"><?= isset($pendingSubmissions) ? $pendingSubmissions : 0 ?></div>
                     </div>
-                    <div class="stat-icon warning">
-                        <i class="fas fa-inbox"></i>
-                    </div>
+                    <div class="stat-icon warning"><i class="fas fa-inbox"></i></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Cột 2: Thống kê số Reviews đã thực hiện gần đây -->
-    <div class="col-xl-6 col-md-6">
+    <div class="col-xl-3 col-md-6">
         <div class="card stat-card primary h-100">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Reviews gần đây</div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Đã Đánh Giá</div>
                         <div class="h3 mb-0 fw-bold text-dark"><?= isset($recentReviews) ? $recentReviews : 0 ?></div>
                     </div>
-                    <div class="stat-icon primary">
-                        <i class="fas fa-eye"></i>
+                    <div class="stat-icon primary"><i class="fas fa-eye"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột 3: Approved -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Phê Duyệt</div>
+                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($approvedSubmissions) ? $approvedSubmissions : 0 ?></div>
                     </div>
+                    <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột 4: Rejected -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card danger h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Từ Chối</div>
+                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($rejectedSubmissions) ? $rejectedSubmissions : 0 ?></div>
+                    </div>
+                    <div class="stat-icon danger"><i class="fas fa-times-circle"></i></div>
                 </div>
             </div>
         </div>

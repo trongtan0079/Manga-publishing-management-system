@@ -35,11 +35,21 @@ class DashboardController extends BaseController {
         $seriesModel = new Series();
         $chapterModel = new Chapter();
         $pageModel = new Page();
+        $taskModel = new Task();
+        $submissionModel = new Submission();
+        $reviewModel = new Review();
+        $notificationModel = new Notification();
+        $rankingModel = new SeriesRanking();
         
         $totalUsers = $userModel->countAll();
         $totalSeries = $seriesModel->countAll();
         $totalChapters = $chapterModel->countAll();
         $totalPages = $pageModel->countAll();
+        $totalTasks = $taskModel->countAll();
+        $totalSubmissions = $submissionModel->countAll();
+        $totalReviews = $reviewModel->countAll();
+        $totalNotifications = $notificationModel->countAll();
+        $totalRankings = $rankingModel->countAll();
         
         require_once __DIR__ . '/../views/admin/dashboard.php';
     }
@@ -59,6 +69,8 @@ class DashboardController extends BaseController {
         $taskModel = new Task();
         $rankingModel = new SeriesRanking();
         
+        $submissionModel = new Submission();
+        
         $totalSeries = $seriesModel->countByCondition(['mangaka_id' => $userId]);
         
         // Đếm tổng số chương truyện thuộc về tác giả này
@@ -66,13 +78,29 @@ class DashboardController extends BaseController {
         $stmt->execute(['mangaka_id' => $userId]);
         $totalChapters = (int)$stmt->fetchColumn();
         
-        // Đếm tổng số trang truyện thuộc về tác giả này
-        $stmt = $pageModel->getConnection()->prepare("SELECT COUNT(*) as total FROM pages p JOIN chapters c ON p.chapter_id = c.chapter_id JOIN series s ON c.series_id = s.series_id WHERE s.mangaka_id = :mangaka_id");
-        $stmt->execute(['mangaka_id' => $userId]);
-        $totalPages = (int)$stmt->fetchColumn();
+        // Đếm tổng số submissions thuộc về tác giả này
+        $stmtSub = $submissionModel->getConnection()->prepare("
+            SELECT COUNT(s.submission_id) as total 
+            FROM submissions s
+            LEFT JOIN tasks t ON s.task_id = t.task_id
+            LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
+            LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
+            WHERE t.mangaka_id = :mangaka_id1 OR ser_chap.mangaka_id = :mangaka_id2
+        ");
+        $stmtSub->execute(['mangaka_id1' => $userId, 'mangaka_id2' => $userId]);
+        $totalSubmissions = (int)$stmtSub->fetchColumn();
         
-        // Đếm số task mà tác giả này đã giao
-        $totalTasks = $taskModel->countByCondition(['mangaka_id' => $userId]);
+        // Đếm số submissions pending
+        $stmtPending = $submissionModel->getConnection()->prepare("
+            SELECT COUNT(s.submission_id) as total 
+            FROM submissions s
+            LEFT JOIN tasks t ON s.task_id = t.task_id
+            LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
+            LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
+            WHERE s.status = 'pending' AND (t.mangaka_id = :mangaka_id1 OR ser_chap.mangaka_id = :mangaka_id2)
+        ");
+        $stmtPending->execute(['mangaka_id1' => $userId, 'mangaka_id2' => $userId]);
+        $pendingReviews = (int)$stmtPending->fetchColumn();
         
         // Lấy lịch sử xếp hạng để hiển thị biến động
         $mangakaRankings = $rankingModel->findByMangakaId($userId);
@@ -123,6 +151,25 @@ class DashboardController extends BaseController {
         // Lấy số lượng đánh giá mà Editor này đã làm
         $recentReviews = $reviewModel->countByCondition(['reviewer_id' => $userId]);
 
+        // Đếm Approved và Rejected cho Editor hiện tại
+        $stmtApprove = $reviewModel->getConnection()->prepare("
+            SELECT COUNT(r.review_id) as total 
+            FROM reviews r
+            JOIN submissions s ON r.submission_id = s.submission_id
+            WHERE r.reviewer_id = :reviewer_id AND s.status = 'approved'
+        ");
+        $stmtApprove->execute(['reviewer_id' => $userId]);
+        $approvedSubmissions = (int)$stmtApprove->fetchColumn();
+
+        $stmtReject = $reviewModel->getConnection()->prepare("
+            SELECT COUNT(r.review_id) as total 
+            FROM reviews r
+            JOIN submissions s ON r.submission_id = s.submission_id
+            WHERE r.reviewer_id = :reviewer_id AND s.status = 'rejected'
+        ");
+        $stmtReject->execute(['reviewer_id' => $userId]);
+        $rejectedSubmissions = (int)$stmtReject->fetchColumn();
+
         // Lấy 5 pending submissions
         $pendingList = array_slice($submissionModel->findPendingSubmissions(), 0, 5);
 
@@ -144,6 +191,7 @@ class DashboardController extends BaseController {
         // Lấy kỳ đánh giá gần nhất
         $latestPeriod = $rankingModel->getLatestPeriod();
         
+        $totalRankings = $rankingModel->countAll();
         $evaluatedSeries = 0;
         $topRankingSeriesName = "Chưa có dữ liệu";
         $top5Series = [];
@@ -158,6 +206,10 @@ class DashboardController extends BaseController {
                 $topRankingSeriesName = $top5Series[0]['series_title'];
             }
         }
+        
+        $seriesModel = new Series();
+        $totalSeriesCount = $seriesModel->countAll();
+        $ungradedSeries = max(0, $totalSeriesCount - $evaluatedSeries);
         
         require_once __DIR__ . '/../views/board/dashboard.php';
     }

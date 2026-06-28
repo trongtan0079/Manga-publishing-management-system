@@ -30,9 +30,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng User</div>
                         <div class="h3 mb-0 fw-bold"><?= isset($totalUsers) ? $totalUsers : 0 ?></div>
                     </div>
-                    <div class="stat-icon primary">
-                        <i class="fas fa-users"></i>
-                    </div>
+                    <div class="stat-icon primary"><i class="fas fa-users"></i></div>
                 </div>
             </div>
         </div>
@@ -47,9 +45,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Series</div>
                         <div class="h3 mb-0 fw-bold"><?= isset($totalSeries) ? $totalSeries : 0 ?></div>
                     </div>
-                    <div class="stat-icon success">
-                        <i class="fas fa-book-open"></i>
-                    </div>
+                    <div class="stat-icon success"><i class="fas fa-book-open"></i></div>
                 </div>
             </div>
         </div>
@@ -64,9 +60,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Chapter</div>
                         <div class="h3 mb-0 fw-bold"><?= isset($totalChapters) ? $totalChapters : 0 ?></div>
                     </div>
-                    <div class="stat-icon warning">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
+                    <div class="stat-icon warning"><i class="fas fa-file-alt"></i></div>
                 </div>
             </div>
         </div>
@@ -81,9 +75,82 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Page</div>
                         <div class="h3 mb-0 fw-bold"><?= isset($totalPages) ? $totalPages : 0 ?></div>
                     </div>
-                    <div class="stat-icon danger">
-                        <i class="fas fa-images"></i>
+                    <div class="stat-icon danger"><i class="fas fa-images"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Card 5 -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card info h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Task</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalTasks) ? $totalTasks : 0 ?></div>
                     </div>
+                    <div class="stat-icon info"><i class="fas fa-tasks"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Card 6 -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card primary h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Bản thảo</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalSubmissions) ? $totalSubmissions : 0 ?></div>
+                    </div>
+                    <div class="stat-icon primary"><i class="fas fa-file-upload"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Card 7 -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card success h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Đánh giá</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalReviews) ? $totalReviews : 0 ?></div>
+                    </div>
+                    <div class="stat-icon success"><i class="fas fa-comment-dots"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Card 8 -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card warning h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Thông báo</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalNotifications) ? $totalNotifications : 0 ?></div>
+                    </div>
+                    <div class="stat-icon warning"><i class="fas fa-bell"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Card 9 -->
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card danger h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Xếp hạng</div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalRankings) ? $totalRankings : 0 ?></div>
+                    </div>
+                    <div class="stat-icon danger"><i class="fas fa-trophy"></i></div>
                 </div>
             </div>
         </div>
