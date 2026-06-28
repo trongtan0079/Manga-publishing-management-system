@@ -4,11 +4,15 @@
  * @var array $series Thông tin bộ truyện
  * @var array $chapter Thông tin chapter đang chỉnh sửa
  */
-include __DIR__ . '/../layouts/header.php'; 
+$pageTitle = 'Chỉnh sửa Chapter';
+$current_page = 'series';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <div class="mb-3">
-    <a href="/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Back to Series</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Back to Series</a>
 </div>
 
 <div class="card border-warning mb-4">
@@ -16,7 +20,7 @@ include __DIR__ . '/../layouts/header.php';
         <h5 class="mb-0">Edit Chapter</h5>
     </div>
     <div class="card-body">
-        <form action="/index.php?controller=chapter&action=update&id=<?= $chapter['chapter_id'] ?>" method="POST">
+        <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=update&id=<?= $chapter['chapter_id'] ?>" method="POST">
             
             <div class="mb-3">
                 <label for="chapter_number" class="form-label">Chapter Number <span class="text-danger">*</span></label>
@@ -44,4 +48,4 @@ include __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

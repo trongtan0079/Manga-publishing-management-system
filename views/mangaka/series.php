@@ -12,7 +12,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <!-- Tiêu đề trang và Nút thêm mới -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h3 mb-0 text-dark fw-bold">Dự án Truyện</h2>
-    <a href="/index.php?controller=series&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Tạo Truyện Mới</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Tạo Truyện Mới</a>
 </div>
 
 <!-- Bảng hiển thị danh sách bộ truyện -->
@@ -59,14 +59,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <!-- Actions -->
                         <td class="text-end pe-4">
                             <div class="btn-group" role="group">
-                                <a href="/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="btn btn-sm btn-info text-white" title="Xem chi tiết">
+                                <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="btn btn-sm btn-info text-white" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i> Xem
                                 </a>
-                                <a href="/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-sm btn-warning text-dark" title="Chỉnh sửa">
+                                <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-sm btn-warning text-dark" title="Chỉnh sửa">
                                     <i class="fas fa-edit"></i> Sửa
                                 </a>
                                 <!-- Form Xóa (dùng POST để bảo mật) -->
-                                <form action="/index.php?controller=series&action=delete&id=<?= $series['series_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bộ truyện này không? Hành động này không thể hoàn tác.');">
+                                <form action="<?= BASE_PATH ?>/index.php?controller=series&action=delete&id=<?= $series['series_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bộ truyện này không? Hành động này không thể hoàn tác.');">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Xóa Truyện">
                                         <i class="fas fa-trash-alt"></i> Xóa
                                     </button>

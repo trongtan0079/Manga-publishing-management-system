@@ -6,19 +6,23 @@
  * @var array $chapter Thông tin chapter chứa trang này
  * @var array $series Thông tin bộ truyện
  */
-include __DIR__ . '/../layouts/header.php'; 
+$pageTitle = 'Chi tiết Trang ' . htmlspecialchars($page['page_number']);
+$current_page = 'series';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <!-- Khối thanh điều hướng và nút hành động -->
 <div class="mb-3 d-flex justify-content-between align-items-center">
     <!-- Nút quay lại danh sách trang của chapter -->
-    <a href="/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
     
     <div>
         <!-- Nút sửa trang hiện tại -->
-        <a href="/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
+        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
         <!-- Form xóa trang, dùng onsubmit để hỏi lại trước khi xóa -->
-        <form action="/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
+        <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
             <button type="submit" class="btn btn-danger">Xóa</button>
         </form>
     </div>
@@ -54,7 +58,6 @@ include __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
-<!-- Khối hiển thị hình ảnh chi tiết của trang truyện -->
 <!-- Khối hiển thị hình ảnh chi tiết của trang truyện -->
 <div class="card border-info">
     <div class="card-header bg-info text-dark">
@@ -146,4 +149,4 @@ include __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

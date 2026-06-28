@@ -2,12 +2,16 @@
 /**
  * @var array $series 
  */
-include __DIR__ . '/../layouts/header.php'; 
+$pageTitle = 'Chỉnh sửa Series: ' . htmlspecialchars($series['title']);
+$current_page = 'series';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <!-- Nút quay lại -->
 <div class="mb-3">
-    <a href="/index.php?controller=series&action=index" class="btn btn-secondary">&larr; Back to My Series</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="btn btn-secondary">&larr; Back to My Series</a>
 </div>
 
 <div class="card">
@@ -16,7 +20,7 @@ include __DIR__ . '/../layouts/header.php';
     </div>
     <div class="card-body">
         <!-- Form cập nhật, action trỏ tới update với series_id tương ứng -->
-        <form action="/index.php?controller=series&action=update&id=<?= $series['series_id'] ?>" method="POST">
+        <form action="<?= BASE_PATH ?>/index.php?controller=series&action=update&id=<?= $series['series_id'] ?>" method="POST">
             
             <div class="mb-3">
                 <label for="title" class="form-label">Series Title <span class="text-danger">*</span></label>
@@ -54,4 +58,4 @@ include __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

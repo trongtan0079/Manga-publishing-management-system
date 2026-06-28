@@ -11,10 +11,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <!-- Thanh điều hướng cơ bản -->
 <div class="mb-4 d-flex justify-content-between align-items-center">
-    <a href="/index.php?controller=series&action=index" class="btn btn-outline-secondary shadow-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="btn btn-outline-secondary shadow-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
     
     <div>
-        <a href="/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning shadow-sm text-dark">
+        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning shadow-sm text-dark">
             <i class="fas fa-edit me-2"></i>Sửa Truyện
         </a>
     </div>
@@ -80,7 +80,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <div class="card border-primary">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Chapters</h5>
-                <a href="/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Add Chapter</a>
+                <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Add Chapter</a>
             </div>
             <div class="card-body p-0">
                 <?php if (!empty($chapters)): ?>
@@ -115,9 +115,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         </td>
                                         <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></td>
                                         <td class="text-end">
-                                            <a href="/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">View</a>
-                                            <a href="/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
-                                            <form action="/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">View</a>
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                            <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
                                                 <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                                             </form>
                                         </td>

@@ -6,12 +6,16 @@
  * @var array $chapter Thông tin chapter chứa trang này
  * @var array $series Thông tin bộ truyện
  */
-include __DIR__ . '/../layouts/header.php'; 
+$pageTitle = 'Chỉnh sửa Trang ' . htmlspecialchars($page['page_number']);
+$current_page = 'series';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <!-- Nút quay lại trang chi tiết Chapter -->
 <div class="mb-3">
-    <a href="/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
 </div>
 
 <div class="card">
@@ -20,7 +24,7 @@ include __DIR__ . '/../layouts/header.php';
     </div>
     <div class="card-body">
         <!-- Form upload cần thuộc tính enctype="multipart/form-data" để xử lý file thay thế nếu có -->
-        <form action="/index.php?controller=page&action=update&id=<?= $page['page_id'] ?>" method="POST" enctype="multipart/form-data">
+        <form action="<?= BASE_PATH ?>/index.php?controller=page&action=update&id=<?= $page['page_id'] ?>" method="POST" enctype="multipart/form-data">
             
             <!-- Trường số thứ tự trang -->
             <div class="mb-3">
@@ -63,4 +67,4 @@ include __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

@@ -7,7 +7,11 @@
  * @var array $series Thông tin series
  * @var array $assistants Danh sách assistant
  */
-include __DIR__ . '/../layouts/header.php'; 
+$pageTitle = 'Cập nhật Task';
+$current_page = 'series';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <div class="mb-3">
@@ -88,4 +92,4 @@ include __DIR__ . '/../layouts/header.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>
