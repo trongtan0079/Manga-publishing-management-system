@@ -4,15 +4,13 @@ $role = $_SESSION['role_name'] ?? '';
 <div class="sidebar-custom offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
     <div class="offcanvas-header border-bottom border-light border-opacity-25 d-lg-none">
         <h5 class="offcanvas-title text-white fw-bold d-flex align-items-center" id="sidebarLabel">
-            <div class="bg-white text-primary rounded p-1 me-2 d-flex align-items-center justify-content-center" style="width: 30px; height: 30px;">
-                <i class="fas fa-book-open fs-6"></i>
-            </div>
-            Manga<span class="text-white-50">PMS</span>
+            <i class="fas fa-book-open me-2 fs-5" style="color: #a5b4fc;"></i>
+            Manga<span style="color: #a5b4fc;">PMS</span>
         </h5>
         <button type="button" class="btn-close btn-close-white shadow-none" data-bs-dismiss="offcanvas" data-bs-target="#sidebar" aria-label="Close"></button>
     </div>
 
-    <div class="sidebar-sticky offcanvas-body p-0">
+    <div class="sidebar-sticky offcanvas-body p-0 d-flex flex-column">
         <ul class="nav flex-column w-100 px-2 mt-3">
             <li class="nav-item">
                 <a class="nav-link <?= (isset($current_page) && $current_page == 'dashboard') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=<?= htmlspecialchars($role) ?>">
@@ -34,7 +32,7 @@ $role = $_SESSION['role_name'] ?? '';
                 </li>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['admin', 'mangaka', 'editor'])): ?>
+            <?php if (in_array($role, ['mangaka', 'editor'])): ?>
                 <li class="nav-item nav-category">Quản lý Xuất bản</li>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'series') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=index">
@@ -71,7 +69,7 @@ $role = $_SESSION['role_name'] ?? '';
                 </li>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['admin', 'board', 'mangaka', 'editor'])): ?>
+            <?php if (in_array($role, ['board', 'mangaka', 'editor'])): ?>
                 <li class="nav-item nav-category">Báo cáo & Thống kê</li>
                 <?php if ($role === 'board'): ?>
                 <li class="nav-item">
@@ -81,11 +79,11 @@ $role = $_SESSION['role_name'] ?? '';
                 </li>
                 <?php endif; ?>
                 <li class="nav-item">
-                    <a class="nav-link <?= (isset($current_page) && $current_page == 'rankings') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=seriesranking&action=index">
+                    <a class="nav-link <?= (isset($current_page) && $current_page == 'rankings') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=seriesRanking&action=index">
                         <i class="fas fa-chart-line"></i>
                         <div class="d-flex flex-column overflow-hidden flex-grow-1" style="min-width: 0;">
                             <span>Xếp hạng Manga</span>
-                            <?= in_array($role, ['admin', 'editor']) ? '<span class="nav-subtitle"><i class="fas fa-lock" style="font-size: 0.55rem; width: auto; margin-right: 4px;"></i>Chỉ xem</span>' : '' ?>
+                            <?= $role === 'editor' ? '<span class="nav-subtitle"><i class="fas fa-lock" style="font-size: 0.55rem; width: auto; margin-right: 4px;"></i>Chỉ xem</span>' : '' ?>
                         </div>
                     </a>
                 </li>
@@ -98,7 +96,21 @@ $role = $_SESSION['role_name'] ?? '';
                 </a>
             </li>
         </ul>
+    </div>
 
+    <!-- Hồ sơ cá nhân - Góc dưới sidebar (Ghim cố định ở đáy) -->
+    <div class="mt-auto px-3 pb-3 pt-2 w-100">
+        <div class="border-top border-light border-opacity-25 pt-3">
+            <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=auth&action=profile" class="d-flex align-items-center text-decoration-none rounded-3 px-2 py-2 sidebar-profile-link <?= (isset($current_page) && $current_page == 'profile') ? 'active' : '' ?>">
+                <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'U') ?>&background=6366f1&color=fff&size=64&font-size=0.45&bold=true" 
+                     alt="Avatar" class="rounded-circle me-2 flex-shrink-0" width="36" height="36">
+                <div style="min-width: 0;" class="flex-grow-1">
+                    <div class="text-white fw-semibold text-truncate" style="font-size: 0.85rem;"><?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User') ?></div>
+                    <div class="text-white-50 text-truncate" style="font-size: 0.7rem;"><?= ucfirst(htmlspecialchars($role)) ?></div>
+                </div>
+                <i class="fas fa-ellipsis-v text-white-50 ms-2 flex-shrink-0" style="font-size: 0.75rem;"></i>
+            </a>
+        </div>
     </div>
 </div>
 
