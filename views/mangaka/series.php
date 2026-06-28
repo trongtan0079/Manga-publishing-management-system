@@ -12,7 +12,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <!-- Tiêu đề trang và Nút thêm mới -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h3 mb-0 text-dark fw-bold">Dự án Truyện</h2>
+    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <a href="<?= BASE_PATH ?>/index.php?controller=series&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Tạo Truyện Mới</a>
+    <?php endif; ?>
 </div>
 
 <!-- Bảng hiển thị danh sách bộ truyện -->
@@ -62,6 +64,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="btn btn-sm btn-info text-white" title="Xem chi tiết">
                                     <i class="fas fa-eye"></i> Xem
                                 </a>
+                                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
                                 <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-sm btn-warning text-dark" title="Chỉnh sửa">
                                     <i class="fas fa-edit"></i> Sửa
                                 </a>
@@ -71,6 +74,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         <i class="fas fa-trash-alt"></i> Xóa
                                     </button>
                                 </form>
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>

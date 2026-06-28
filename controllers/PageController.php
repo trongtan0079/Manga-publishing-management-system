@@ -44,14 +44,14 @@ class PageController extends BaseController
         $chapter = $this->chapterModel->findById($chapterId);
         if (!$chapter) {
             $_SESSION['error'] = "Không tìm thấy chapter.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
         $series = $this->seriesModel->findById($chapter['series_id']);
         if (!$series || $series['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên chapter này.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -115,7 +115,7 @@ class PageController extends BaseController
 
     public function index() {
         // Chuyển hướng về trang chi tiết series
-        header('Location: /index.php?controller=series&action=index');
+        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
         exit;
     }
 
@@ -126,7 +126,7 @@ class PageController extends BaseController
         $chapterId = $_GET['chapter_id'] ?? null;
         if (!$chapterId) {
             $_SESSION['error'] = "Thiếu thông tin chapter.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -144,7 +144,7 @@ class PageController extends BaseController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $chapterId = $_POST['chapter_id'] ?? null;
             if (!$chapterId) {
-                header('Location: /index.php?controller=series&action=index');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
 
@@ -157,20 +157,20 @@ class PageController extends BaseController
             // Validation: page_number bắt buộc và > 0
             if ($pageNumber === '' || !is_numeric($pageNumber) || $pageNumber <= 0) {
                 $_SESSION['error'] = "Số trang (Page Number) bắt buộc và phải lớn hơn 0.";
-                header("Location: /index.php?controller=page&action=create&chapter_id={$chapterId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=create&chapter_id={$chapterId}");
                 exit;
             }
 
             // Validation: không trùng page_number trong cùng chapter
             if ($this->pageModel->isPageNumberExists($chapterId, $pageNumber)) {
                 $_SESSION['error'] = "Số trang {$pageNumber} đã tồn tại trong chapter này.";
-                header("Location: /index.php?controller=page&action=create&chapter_id={$chapterId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=create&chapter_id={$chapterId}");
                 exit;
             }
 
             if (!in_array($status, $this->allowedStatuses)) {
                 $_SESSION['error'] = "Trạng thái trang không hợp lệ!";
-                header("Location: /index.php?controller=page&action=create&chapter_id={$chapterId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=create&chapter_id={$chapterId}");
                 exit;
             }
 
@@ -180,7 +180,7 @@ class PageController extends BaseController
                 if (!isset($_SESSION['error'])) {
                     $_SESSION['error'] = "Vui lòng chọn ảnh cho trang truyện.";
                 }
-                header("Location: /index.php?controller=page&action=create&chapter_id={$chapterId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=create&chapter_id={$chapterId}");
                 exit;
             }
 
@@ -198,7 +198,7 @@ class PageController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống: " . $e->getMessage();
             }
             
-            header("Location: /index.php?controller=chapter&action=show&id={$chapterId}");
+            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
             exit;
         }
     }
@@ -210,7 +210,7 @@ class PageController extends BaseController
         $page = $this->pageModel->findById($id);
         if (!$page) {
             $_SESSION['error'] = "Không tìm thấy trang.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -231,7 +231,7 @@ class PageController extends BaseController
         $page = $this->pageModel->findById($id);
         if (!$page) {
             $_SESSION['error'] = "Không tìm thấy trang.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -251,7 +251,7 @@ class PageController extends BaseController
             $page = $this->pageModel->findById($id);
             if (!$page) {
                 $_SESSION['error'] = "Không tìm thấy trang.";
-                header('Location: /index.php?controller=series&action=index');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
 
@@ -266,20 +266,20 @@ class PageController extends BaseController
             // Validation: page_number bắt buộc và > 0
             if ($pageNumber === '' || !is_numeric($pageNumber) || $pageNumber <= 0) {
                 $_SESSION['error'] = "Số trang bắt buộc và phải lớn hơn 0.";
-                header("Location: /index.php?controller=page&action=edit&id={$id}");
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=edit&id={$id}");
                 exit;
             }
 
             // Validation: không trùng page_number (ngoại trừ chính nó)
             if ($this->pageModel->isPageNumberExists($chapterId, $pageNumber, $id)) {
                 $_SESSION['error'] = "Số trang {$pageNumber} đã tồn tại trong chapter này.";
-                header("Location: /index.php?controller=page&action=edit&id={$id}");
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=edit&id={$id}");
                 exit;
             }
 
             if (!in_array($status, $this->allowedStatuses)) {
                 $_SESSION['error'] = "Trạng thái trang không hợp lệ!";
-                header("Location: /index.php?controller=page&action=edit&id={$id}");
+                header("Location: " . BASE_PATH . "/index.php?controller=page&action=edit&id={$id}");
                 exit;
             }
 
@@ -296,7 +296,7 @@ class PageController extends BaseController
                     // Yêu cầu: Không xóa file cũ.
                 } else {
                     // Xảy ra lỗi upload (dung lượng, định dạng)
-                    header("Location: /index.php?controller=page&action=edit&id={$id}");
+                    header("Location: " . BASE_PATH . "/index.php?controller=page&action=edit&id={$id}");
                     exit;
                 }
             }
@@ -308,7 +308,7 @@ class PageController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống: " . $e->getMessage();
             }
             
-            header("Location: /index.php?controller=chapter&action=show&id={$chapterId}");
+            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
             exit;
         }
     }
@@ -321,7 +321,7 @@ class PageController extends BaseController
             $page = $this->pageModel->findById($id);
             if (!$page) {
                 $_SESSION['error'] = "Không tìm thấy trang.";
-                header('Location: /index.php?controller=series&action=index');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
 
@@ -344,7 +344,7 @@ class PageController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống khi xóa trang: " . $e->getMessage();
             }
             
-            header("Location: /index.php?controller=chapter&action=show&id={$chapterId}");
+            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
             exit;
         }
     }

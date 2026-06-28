@@ -37,13 +37,13 @@ class ChapterController extends BaseController
         $series = $this->seriesModel->findById($seriesId);
         if (!$series) {
             $_SESSION['error'] = "Không tìm thấy bộ truyện.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện này.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
         return $series;
@@ -56,10 +56,10 @@ class ChapterController extends BaseController
     public function index() {
         $seriesId = $_GET['series_id'] ?? null;
         if ($seriesId) {
-            header('Location: /index.php?controller=series&action=show&id=' . $seriesId);
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
             exit;
         }
-        header('Location: /index.php?controller=series&action=index');
+        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
         exit;
     }
 
@@ -70,7 +70,7 @@ class ChapterController extends BaseController
         $seriesId = $_GET['series_id'] ?? null;
         if (!$seriesId) {
             $_SESSION['error'] = "Thiếu thông tin bộ truyện.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -86,7 +86,7 @@ class ChapterController extends BaseController
             $seriesId = $_POST['series_id'] ?? null;
             if (!$seriesId) {
                 $_SESSION['error'] = "Thiếu thông tin bộ truyện.";
-                header('Location: /index.php?controller=series&action=index');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
 
@@ -99,25 +99,25 @@ class ChapterController extends BaseController
             // Validation
             if ($chapterNumber === '' || !is_numeric($chapterNumber) || $chapterNumber <= 0) {
                 $_SESSION['error'] = "Chapter Number bắt buộc và phải lớn hơn 0.";
-                header("Location: /index.php?controller=chapter&action=create&series_id={$seriesId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                 exit;
             }
 
             if (mb_strlen($title) > 255) {
                 $_SESSION['error'] = "Tiêu đề chapter không được vượt quá 255 ký tự!";
-                header("Location: /index.php?controller=chapter&action=create&series_id={$seriesId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                 exit;
             }
 
             if ($this->chapterModel->isChapterNumberExists($seriesId, $chapterNumber)) {
                 $_SESSION['error'] = "Chapter Number {$chapterNumber} đã tồn tại trong bộ truyện này.";
-                header("Location: /index.php?controller=chapter&action=create&series_id={$seriesId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                 exit;
             }
 
             if (!in_array($status, $this->allowedStatuses)) {
                 $_SESSION['error'] = "Trạng thái chapter không hợp lệ!";
-                header("Location: /index.php?controller=chapter&action=create&series_id={$seriesId}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                 exit;
             }
 
@@ -135,7 +135,7 @@ class ChapterController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống khi tạo chapter: " . $e->getMessage();
             }
             
-            header("Location: /index.php?controller=series&action=show&id={$seriesId}");
+            header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
             exit;
         }
     }
@@ -149,7 +149,7 @@ class ChapterController extends BaseController
         $chapter = $this->chapterModel->findById($id);
         if (!$chapter) {
             $_SESSION['error'] = "Không tìm thấy chapter.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -167,7 +167,7 @@ class ChapterController extends BaseController
             $chapter = $this->chapterModel->findById($id);
             if (!$chapter) {
                 $_SESSION['error'] = "Không tìm thấy chapter.";
-                header('Location: /index.php?controller=series&action=index');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
 
@@ -181,25 +181,25 @@ class ChapterController extends BaseController
             // Validation
             if ($chapterNumber === '' || !is_numeric($chapterNumber) || $chapterNumber <= 0) {
                 $_SESSION['error'] = "Chapter Number bắt buộc và phải lớn hơn 0.";
-                header("Location: /index.php?controller=chapter&action=edit&id={$id}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
                 exit;
             }
 
             if (mb_strlen($title) > 255) {
                 $_SESSION['error'] = "Tiêu đề chapter không được vượt quá 255 ký tự!";
-                header("Location: /index.php?controller=chapter&action=edit&id={$id}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
                 exit;
             }
 
             if ($this->chapterModel->isChapterNumberExists($seriesId, $chapterNumber, $id)) {
                 $_SESSION['error'] = "Chapter Number {$chapterNumber} đã tồn tại trong bộ truyện này.";
-                header("Location: /index.php?controller=chapter&action=edit&id={$id}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
                 exit;
             }
 
             if (!in_array($status, $this->allowedStatuses)) {
                 $_SESSION['error'] = "Trạng thái chapter không hợp lệ!";
-                header("Location: /index.php?controller=chapter&action=edit&id={$id}");
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
                 exit;
             }
 
@@ -216,7 +216,7 @@ class ChapterController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống khi cập nhật chapter: " . $e->getMessage();
             }
             
-            header("Location: /index.php?controller=series&action=show&id={$seriesId}");
+            header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
             exit;
         }
     }
@@ -230,7 +230,7 @@ class ChapterController extends BaseController
         $chapter = $this->chapterModel->findById($id);
         if (!$chapter) {
             $_SESSION['error'] = "Không tìm thấy chapter.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
@@ -252,7 +252,7 @@ class ChapterController extends BaseController
             $chapter = $this->chapterModel->findById($id);
             if (!$chapter) {
                 $_SESSION['error'] = "Không tìm thấy chapter.";
-                header('Location: /index.php?controller=series&action=index');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
 
@@ -266,7 +266,7 @@ class ChapterController extends BaseController
                 $_SESSION['error'] = "Không thể xóa chapter vì dữ liệu đang liên kết.";
             }
             
-            header("Location: /index.php?controller=series&action=show&id={$seriesId}");
+            header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
             exit;
         }
     }

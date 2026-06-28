@@ -27,7 +27,7 @@ class SeriesController extends BaseController
         $role = $_SESSION['role_name'] ?? '';
         $currentUserId = $_SESSION['user_id'];
         
-        if ($role === 'editor' || $role === 'admin') {
+        if ($role === 'editor') {
             $sql = "SELECT * FROM series ORDER BY series_id DESC";
             $stmt = $this->seriesModel->getConnection()->prepare($sql);
             $stmt->execute();
@@ -70,19 +70,19 @@ class SeriesController extends BaseController
             // Validation cơ bản
             if (empty($title)) {
                 $_SESSION['error'] = "Tiêu đề truyện không được để trống!";
-                header('Location: /index.php?controller=series&action=create');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=create');
                 exit;
             }
 
             if (mb_strlen($title) > 255) {
                 $_SESSION['error'] = "Tiêu đề truyện không được vượt quá 255 ký tự!";
-                header('Location: /index.php?controller=series&action=create');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=create');
                 exit;
             }
 
             if (!in_array($status, $this->allowedStatuses)) {
                 $_SESSION['error'] = "Trạng thái truyện không hợp lệ!";
-                header('Location: /index.php?controller=series&action=create');
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=create');
                 exit;
             }
 
@@ -101,7 +101,7 @@ class SeriesController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống khi tạo bộ truyện: " . $e->getMessage();
             }
             
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
     }
@@ -112,18 +112,18 @@ class SeriesController extends BaseController
     private function checkOwnership($series, $id) {
         if (!$series) {
             $_SESSION['error'] = "Không tìm thấy bộ truyện (ID: {$id}).";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
 
         $role = $_SESSION['role_name'] ?? '';
-        if ($role === 'editor' || $role === 'admin') {
-            return; // Editor và Admin có quyền xem
+        if ($role === 'editor') {
+            return; // Editor có quyền xem
         }
 
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện của người khác.";
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
     }
@@ -154,19 +154,19 @@ class SeriesController extends BaseController
             // Validation
             if (empty($title)) {
                 $_SESSION['error'] = "Tiêu đề truyện không được để trống!";
-                header('Location: /index.php?controller=series&action=edit&id=' . $id);
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=edit&id=' . $id);
                 exit;
             }
 
             if (mb_strlen($title) > 255) {
                 $_SESSION['error'] = "Tiêu đề truyện không được vượt quá 255 ký tự!";
-                header('Location: /index.php?controller=series&action=edit&id=' . $id);
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=edit&id=' . $id);
                 exit;
             }
 
             if (!in_array($status, $this->allowedStatuses)) {
                 $_SESSION['error'] = "Trạng thái truyện không hợp lệ!";
-                header('Location: /index.php?controller=series&action=edit&id=' . $id);
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=edit&id=' . $id);
                 exit;
             }
 
@@ -184,7 +184,7 @@ class SeriesController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống khi cập nhật: " . $e->getMessage();
             }
             
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
     }
@@ -218,7 +218,7 @@ class SeriesController extends BaseController
                 $_SESSION['error'] = "Không thể xóa bộ truyện vì dữ liệu đang liên kết (Ví dụ: Các Chapter hoặc trang truyện).";
             }
             
-            header('Location: /index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
     }
