@@ -28,7 +28,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <img src="<?= htmlspecialchars($series['cover_image']) ?>" class="card-img-top object-fit-cover" alt="Cover Image" style="max-height: 400px;">
             <?php else: ?>
                 <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 300px;">
-                    No Cover Image
+                    Chưa có ảnh bìa
                 </div>
             <?php endif; ?>
             
@@ -37,41 +37,42 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 
                 <?php
                 $badgeClass = 'bg-secondary';
+                $sLabel = $series['status'];
                 switch ($series['status']) {
-                    case 'planning': $badgeClass = 'bg-info text-dark'; break;
-                    case 'ongoing': $badgeClass = 'bg-primary'; break;
-                    case 'completed': $badgeClass = 'bg-success'; break;
-                    case 'canceled': $badgeClass = 'bg-danger'; break;
-                    case 'suspended': $badgeClass = 'bg-warning text-dark'; break;
+                    case 'planning': $badgeClass = 'bg-info text-dark'; $sLabel = 'Kế hoạch'; break;
+                    case 'ongoing': $badgeClass = 'bg-primary'; $sLabel = 'Đang xuất bản'; break;
+                    case 'completed': $badgeClass = 'bg-success'; $sLabel = 'Hoàn thành'; break;
+                    case 'canceled': $badgeClass = 'bg-danger'; $sLabel = 'Đã hủy'; break;
+                    case 'suspended': $badgeClass = 'bg-warning text-dark'; $sLabel = 'Tạm ngưng'; break;
                 }
                 ?>
                 <p class="card-text">
-                    <strong>Status:</strong> 
-                    <span class="badge <?= $badgeClass ?>"><?= ucfirst(htmlspecialchars($series['status'])) ?></span>
+                    <strong>Trạng thái:</strong> 
+                    <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($sLabel) ?></span>
                 </p>
                 <p class="card-text">
-                    <strong>Created At:</strong> <br>
+                    <strong>Ngày tạo:</strong> <br>
                     <?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?>
                 </p>
                 <p class="card-text">
-                    <strong>Last Updated:</strong> <br>
+                    <strong>Cập nhật lần cuối:</strong> <br>
                     <?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?>
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- Cột phải: Mô tả và Danh sách Chapters (sau này) -->
+    <!-- Cột phải: Mô tả và Danh sách Chapters -->
     <div class="col-md-8 mb-4">
         <div class="card mb-4">
             <div class="card-header">
-                <h5>Description / Synopsis</h5>
+                <h5>Mô tả / Tóm tắt</h5>
             </div>
             <div class="card-body">
                 <?php if (!empty($series['description'])): ?>
                     <p class="card-text" style="white-space: pre-wrap;"><?= htmlspecialchars($series['description'] ?? '') ?></p>
                 <?php else: ?>
-                    <p class="text-muted fst-italic">No description provided.</p>
+                    <p class="text-muted fst-italic">Chưa có mô tả.</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -79,8 +80,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <!-- Chapter Management -->
         <div class="card border-primary">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Chapters</h5>
-                <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Add Chapter</a>
+                <h5 class="mb-0">Danh sách Chapter</h5>
+                <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Tạo Chapter mới</a>
             </div>
             <div class="card-body p-0">
                 <?php if (!empty($chapters)): ?>
@@ -89,10 +90,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <thead class="table-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>Title</th>
-                                    <th>Status</th>
-                                    <th>Updated At</th>
-                                    <th class="text-end">Actions</th>
+                                    <th>Tên Chapter</th>
+                                    <th>Trạng thái</th>
+                                    <th>Cập nhật lần cuối</th>
+                                    <th class="text-end">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -103,22 +104,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         <td>
                                             <?php
                                             $cBadge = 'bg-secondary';
+                                            $cLabel = $chapter['status'];
                                             switch ($chapter['status']) {
-                                                case 'drafting': $cBadge = 'bg-secondary'; break;
-                                                case 'drawing': $cBadge = 'bg-primary'; break;
-                                                case 'reviewing': $cBadge = 'bg-warning text-dark'; break;
-                                                case 'approved': $cBadge = 'bg-info text-dark'; break;
-                                                case 'published': $cBadge = 'bg-success'; break;
+                                                case 'drafting': $cBadge = 'bg-secondary'; $cLabel = 'Bản nháp'; break;
+                                                case 'drawing': $cBadge = 'bg-primary'; $cLabel = 'Đang vẽ'; break;
+                                                case 'reviewing': $cBadge = 'bg-warning text-dark'; $cLabel = 'Đang chờ duyệt'; break;
+                                                case 'approved': $cBadge = 'bg-info text-dark'; $cLabel = 'Đã duyệt'; break;
+                                                case 'published': $cBadge = 'bg-success'; $cLabel = 'Đã xuất bản'; break;
                                             }
                                             ?>
-                                            <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span>
+                                            <span class="badge <?= $cBadge ?>"><?= htmlspecialchars($cLabel) ?></span>
                                         </td>
                                         <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></td>
                                         <td class="text-end">
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">View</a>
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">Xem</a>
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                             <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
-                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
                                             </form>
                                         </td>
                                     </tr>

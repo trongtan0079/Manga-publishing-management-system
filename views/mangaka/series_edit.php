@@ -11,24 +11,24 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <!-- Nút quay lại -->
 <div class="mb-3">
-    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="btn btn-secondary">&larr; Back to My Series</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="btn btn-secondary">&larr; Quay lại Danh sách Truyện</a>
 </div>
 
 <div class="card">
     <div class="card-header">
-        <h4>Edit Series: <?= htmlspecialchars($series['title']) ?></h4>
+        <h4>Chỉnh sửa Series: <?= htmlspecialchars($series['title']) ?></h4>
     </div>
     <div class="card-body">
         <!-- Form cập nhật, action trỏ tới update với series_id tương ứng -->
         <form action="<?= BASE_PATH ?>/index.php?controller=series&action=update&id=<?= $series['series_id'] ?>" method="POST">
             
             <div class="mb-3">
-                <label for="title" class="form-label">Series Title <span class="text-danger">*</span></label>
+                <label for="title" class="form-label">Tên Series <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($series['title']) ?>" required>
             </div>
 
             <div class="mb-3">
-                <label for="cover_image" class="form-label">Cover Image URL</label>
+                <label for="cover_image" class="form-label">Đường dẫn ảnh bìa (URL)</label>
                 <input type="url" class="form-control" id="cover_image" name="cover_image" value="<?= htmlspecialchars($series['cover_image'] ?? '') ?>">
                 <?php if (!empty($series['cover_image'])): ?>
                     <div class="mt-2">
@@ -38,22 +38,22 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
 
             <div class="mb-3">
-                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
                 <select class="form-select" id="status" name="status" required>
-                    <option value="planning" <?= ($series['status'] === 'planning') ? 'selected' : '' ?>>Planning</option>
-                    <option value="ongoing" <?= ($series['status'] === 'ongoing') ? 'selected' : '' ?>>Ongoing</option>
-                    <option value="completed" <?= ($series['status'] === 'completed') ? 'selected' : '' ?>>Completed</option>
-                    <option value="suspended" <?= ($series['status'] === 'suspended') ? 'selected' : '' ?>>Suspended</option>
-                    <option value="canceled" <?= ($series['status'] === 'canceled') ? 'selected' : '' ?>>Canceled</option>
+                    <option value="planning" <?= ($series['status'] === 'planning') ? 'selected' : '' ?>>Kế hoạch (Planning)</option>
+                    <option value="ongoing" <?= ($series['status'] === 'ongoing') ? 'selected' : '' ?>>Đang xuất bản (Ongoing)</option>
+                    <option value="completed" <?= ($series['status'] === 'completed') ? 'selected' : '' ?>>Hoàn thành (Completed)</option>
+                    <option value="suspended" <?= ($series['status'] === 'suspended') ? 'selected' : '' ?>>Tạm ngưng (Suspended)</option>
+                    <option value="canceled" <?= ($series['status'] === 'canceled') ? 'selected' : '' ?>>Đã hủy (Canceled)</option>
                 </select>
             </div>
             
             <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label">Mô tả</label>
                 <textarea class="form-control" id="description" name="description" rows="5"><?= htmlspecialchars($series['description'] ?? '') ?></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
         </form>
     </div>
 </div>
