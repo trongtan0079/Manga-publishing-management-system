@@ -108,6 +108,14 @@ class DashboardController extends BaseController {
         $stmt->execute(['mangaka_id' => $userId]);
         $totalChapters = (int)$stmt->fetchColumn();
         
+        // Đếm tổng số trang truyện thuộc về tác giả này
+        $stmtPages = $pageModel->getConnection()->prepare("SELECT COUNT(*) as total FROM pages p JOIN chapters c ON p.chapter_id = c.chapter_id JOIN series s ON c.series_id = s.series_id WHERE s.mangaka_id = :mangaka_id");
+        $stmtPages->execute(['mangaka_id' => $userId]);
+        $totalPages = (int)$stmtPages->fetchColumn();
+        
+        // Đếm tổng số tasks thuộc về tác giả này
+        $totalTasks = $taskModel->countByCondition(['mangaka_id' => $userId]);
+        
         // Đếm tổng số submissions thuộc về tác giả này
         $stmtSub = $submissionModel->getConnection()->prepare("
             SELECT COUNT(s.submission_id) as total 
