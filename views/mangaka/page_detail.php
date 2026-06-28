@@ -74,15 +74,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <!-- 
-  Khối Task Management (Quản lý Công việc)
+  Khối Quản lý Công việc (Task Management)
   Được hiển thị ngay dưới nội dung chính của Trang truyện.
   Giúp Mangaka theo dõi và quản lý các công việc đang giao cho Assistant trên trang này.
 -->
 <div class="card border-primary mt-4">
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Task Management</h5>
-        <!-- Nút tạo Task mới, truyền sẵn page_id qua URL GET parameter -->
-        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light">Create Task</a>
+        <h5 class="mb-0">Quản lý công việc</h5>
+        <!-- Nút tạo công việc mới, truyền sẵn page_id qua URL GET parameter -->
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light">+ Tạo công việc</a>
     </div>
     <div class="card-body">
         <?php if (!empty($tasks)): ?>
@@ -90,12 +90,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <table class="table table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th>Title (Công việc)</th>
-                            <th>Assistant (Người phụ trách)</th>
-                            <th>Priority (Độ ưu tiên)</th>
-                            <th>Status (Trạng thái)</th>
-                            <th>Due Date (Hạn chót)</th>
-                            <th>Actions (Thao tác)</th>
+                            <th>Công việc</th>
+                            <th>Người phụ trách</th>
+                            <th>Độ ưu tiên</th>
+                            <th>Trạng thái</th>
+                            <th>Hạn chót</th>
+                            <th>Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,31 +110,33 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <td>
                                     <?php 
                                     $pColor = 'secondary';
-                                    if ($task['priority'] == 'high') $pColor = 'danger';
-                                    elseif ($task['priority'] == 'medium') $pColor = 'warning';
-                                    else $pColor = 'info';
+                                    $pLabel = $task['priority'];
+                                    if ($task['priority'] == 'high') { $pColor = 'danger'; $pLabel = 'Cao'; }
+                                    elseif ($task['priority'] == 'medium') { $pColor = 'warning'; $pLabel = 'Trung bình'; }
+                                    else { $pColor = 'info'; $pLabel = 'Thấp'; }
                                     ?>
-                                    <span class="badge bg-<?= $pColor ?>"><?= ucfirst($task['priority']) ?></span>
+                                    <span class="badge bg-<?= $pColor ?>"><?= htmlspecialchars($pLabel) ?></span>
                                 </td>
                                 <!-- Hiển thị trạng thái tiến độ với màu sắc (badge) tương ứng -->
                                 <td>
                                     <?php 
                                     $sColor = 'secondary';
-                                    if ($task['status'] == 'completed') $sColor = 'success';
-                                    elseif ($task['status'] == 'in_progress') $sColor = 'primary';
-                                    else $sColor = 'warning text-dark';
+                                    $sLabel = $task['status'];
+                                    if ($task['status'] == 'completed') { $sColor = 'success'; $sLabel = 'Hoàn thành'; }
+                                    elseif ($task['status'] == 'in_progress') { $sColor = 'primary'; $sLabel = 'Đang làm'; }
+                                    else { $sColor = 'warning text-dark'; $sLabel = 'Chờ xử lý'; }
                                     ?>
-                                    <span class="badge bg-<?= $sColor ?>"><?= ucfirst(str_replace('_', ' ', $task['status'])) ?></span>
+                                    <span class="badge bg-<?= $sColor ?>"><?= htmlspecialchars($sLabel) ?></span>
                                 </td>
                                 <!-- Hạn chót, định dạng d/m/Y -->
-                                <td><?= $task['due_date'] ? htmlspecialchars(date('d/m/Y', strtotime($task['due_date']))) : '<span class="text-muted">None</span>' ?></td>
-                                <!-- Các nút thao tác Edit và Delete dành cho Mangaka -->
+                                <td><?= $task['due_date'] ? htmlspecialchars(date('d/m/Y', strtotime($task['due_date']))) : '<span class="text-muted">Không có</span>' ?></td>
+                                <!-- Các nút thao tác Sửa và Xóa dành cho Mangaka -->
                                 <td>
                                     <!-- Nút Sửa chuyển hướng sang TaskController@edit -->
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                     <!-- Nút Xóa thực hiện qua form POST để bảo mật -->
-                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa task này?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
                                     </form>
                                 </td>
                             </tr>

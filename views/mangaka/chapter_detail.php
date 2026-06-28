@@ -42,23 +42,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             case 'published': $cBadge = 'bg-success'; break;
         }
         ?>
-        <p><strong>Status:</strong> <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span></p>
-        <p><strong>Created At:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['created_at']))) ?></p>
-        <p><strong>Last Updated:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></p>
+        <p><strong>Trạng thái:</strong> <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span></p>
+        <p><strong>Ngày tạo:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['created_at']))) ?></p>
+        <p><strong>Cập nhật lần cuối:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></p>
     </div>
 </div>
 
 <div class="card border-info">
     <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Pages / Images</h5>
-        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=create&chapter_id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-light">+ Add Page</a>
+        <h5 class="mb-0">Trang / Hình ảnh</h5>
+        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=create&chapter_id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-light">+ Thêm trang</a>
     </div>
     <div class="card-body">
         <?php if (empty($pages)): ?>
             <div class="text-center py-5">
                 <p class="text-muted mb-0">
                     <em>Chưa có trang truyện nào được thêm vào.</em><br>
-                    Hãy nhấn "+ Add Page" để tải lên hình ảnh cho chapter này.
+                    Hãy nhấn "+ Thêm trang" để tải lên hình ảnh cho chapter này.
                 </p>
             </div>
         <?php else: ?>
@@ -66,11 +66,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <table class="table table-bordered table-hover align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th scope="col" style="width: 100px;">Page #</th>
-                            <th scope="col">Thumbnail</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Updated At</th>
-                            <th scope="col" style="width: 250px;">Actions</th>
+                            <th scope="col" style="width: 100px;">Trang #</th>
+                            <th scope="col">Ảnh thu nhỏ</th>
+                            <th scope="col">Trạng thái</th>
+                            <th scope="col">Cập nhật lần cuối</th>
+                            <th scope="col" style="width: 250px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,18 +89,18 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <td class="text-center fs-5 fw-bold"><?= htmlspecialchars($page['page_number']) ?></td>
                                 <td>
                                     <?php if (!empty($page['image_url'])): ?>
-                                        <img src="<?= htmlspecialchars($page['image_url']) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-thumbnail" style="max-height: 100px;">
+                                        <img src="<?= htmlspecialchars($page['image_url']) ?>" alt="Trang <?= htmlspecialchars($page['page_number']) ?>" class="img-thumbnail" style="max-height: 100px;">
                                     <?php else: ?>
-                                        <span class="text-muted">No Image</span>
+                                        <span class="text-muted">Chưa có ảnh</span>
                                     <?php endif; ?>
                                 </td>
                                 <td><span class="badge <?= $pBadge ?>"><?= ucfirst(htmlspecialchars($page['status'])) ?></span></td>
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></td>
                                 <td>
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-info">View</a>
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-warning">Edit</a>
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-info text-white">Xem</a>
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                     <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
                                     </form>
                                 </td>
                             </tr>

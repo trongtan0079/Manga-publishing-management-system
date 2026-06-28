@@ -30,7 +30,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             
             <!-- Trường nhập số thứ tự trang -->
             <div class="mb-3">
-                <label for="page_number" class="form-label">Số trang (Page Number) <span class="text-danger">*</span></label>
+                <label for="page_number" class="form-label">Số trang <span class="text-danger">*</span></label>
                 <input type="number" class="form-control" id="page_number" name="page_number" min="1" required>
                 <div class="form-text">Số trang phải lớn hơn 0 và không được trùng với các trang đã có trong chapter.</div>
             </div>
