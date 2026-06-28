@@ -85,6 +85,7 @@ class AuthController extends BaseController {
                 // Lưu thông tin vào session
                 $_SESSION['user_id'] = $user['user_id'];
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['full_name'] = $user['full_name'];
                 $_SESSION['role_id'] = $user['role_id'];
                 $_SESSION['role_name'] = $roleName;
 
@@ -180,6 +181,122 @@ class AuthController extends BaseController {
                 break;
         }
         header('Location: ' . BASE_PATH . $url);
+        exit;
+    }
+
+    /**
+     * Action: Hiển thị trang Hồ sơ cá nhân
+     * Cho phép tất cả user đã đăng nhập xem và chỉnh sửa thông tin cá nhân.
+     */
+    public function profile() {
+        requireLogin();
+        
+        $userId = $_SESSION['user_id'];
+        $user = $this->userModel->getUserByIdWithRole($userId);
+        
+        if (!$user) {
+            $_SESSION['error'] = 'Không tìm thấy thông tin tài khoản.';
+            $this->redirectBasedOnRole($_SESSION['role_name']);
+        }
+        
+        $pageTitle = 'Hồ sơ cá nhân';
+        require_once __DIR__ . '/../views/shared/profile.php';
+    }
+
+    /**
+     * Action: Xử lý cập nhật Hồ sơ cá nhân
+     * Cho phép user tự cập nhật: Họ tên, Email, Đổi mật khẩu.
+     * Không cho phép tự đổi username, role, hoặc status.
+     */
+    public function updateProfile() {
+        requireLogin();
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+        $fullName = trim($_POST['full_name'] ?? '');
+        $email = trim($_POST['email'] ?? '');
+
+        // 1. Validate họ tên
+        if (empty($fullName)) {
+            $_SESSION['error'] = 'Họ và tên không được để trống.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+            exit;
+        }
+
+        if (mb_strlen($fullName) > 100) {
+            $_SESSION['error'] = 'Họ và tên không được vượt quá 100 ký tự.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+            exit;
+        }
+
+        // 2. Validate email
+        if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['error'] = 'Email không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+            exit;
+        }
+
+        // Kiểm tra email trùng lặp (loại trừ chính mình)
+        $existingUser = $this->userModel->findByEmail($email);
+        if ($existingUser && $existingUser['user_id'] != $userId) {
+            $_SESSION['error'] = 'Email này đã được sử dụng bởi tài khoản khác.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+            exit;
+        }
+
+        // 3. Xử lý đổi mật khẩu (nếu có)
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        $data = [
+            'full_name' => $fullName,
+            'email'     => $email,
+        ];
+
+        if (!empty($newPassword)) {
+            // Phải nhập mật khẩu hiện tại để xác thực
+            if (empty($currentPassword)) {
+                $_SESSION['error'] = 'Vui lòng nhập mật khẩu hiện tại để xác nhận đổi mật khẩu.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+                exit;
+            }
+
+            // Kiểm tra mật khẩu hiện tại có đúng không
+            $currentUser = $this->userModel->findById($userId);
+            if (!password_verify($currentPassword, $currentUser['password_hash'])) {
+                $_SESSION['error'] = 'Mật khẩu hiện tại không chính xác.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+                exit;
+            }
+
+            if (strlen($newPassword) < 6) {
+                $_SESSION['error'] = 'Mật khẩu mới phải có ít nhất 6 ký tự.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+                exit;
+            }
+
+            if ($newPassword !== $confirmPassword) {
+                $_SESSION['error'] = 'Mật khẩu mới và xác nhận mật khẩu không khớp.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+                exit;
+            }
+
+            $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+        }
+
+        try {
+            $this->userModel->update($userId, $data);
+            $_SESSION['success'] = 'Cập nhật hồ sơ cá nhân thành công!';
+        } catch (PDOException $e) {
+            $_SESSION['error'] = 'Lỗi hệ thống khi cập nhật hồ sơ: ' . $e->getMessage();
+        }
+
+        header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
         exit;
     }
 }
