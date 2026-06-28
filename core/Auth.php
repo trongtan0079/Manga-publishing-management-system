@@ -14,7 +14,8 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function requireLogin() {
     if (!isset($_SESSION['user_id'])) {
-        header('Location: /index.php?controller=auth&action=login');
+        $base = defined('BASE_PATH') ? BASE_PATH : '';
+        header('Location: ' . $base . '/index.php?controller=auth&action=login');
         exit;
     }
 }

@@ -15,7 +15,7 @@ $role = $_SESSION['role_name'] ?? '';
     <div class="sidebar-sticky offcanvas-body p-0">
         <ul class="nav flex-column w-100 px-2 mt-3">
             <li class="nav-item">
-                <a class="nav-link <?= (isset($current_page) && $current_page == 'dashboard') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=index">
+                <a class="nav-link <?= (isset($current_page) && $current_page == 'dashboard') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=<?= htmlspecialchars($role) ?>">
                     <i class="fas fa-home"></i> <span>Bảng điều khiển</span>
                 </a>
             </li>
@@ -25,6 +25,11 @@ $role = $_SESSION['role_name'] ?? '';
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'users') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=user&action=index">
                         <i class="fas fa-users"></i> <span>Quản lý Người dùng</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= (isset($current_page) && $current_page == 'roles') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=user&action=roles">
+                        <i class="fas fa-user-tag"></i> <span>Quản lý Vai trò</span>
                     </a>
                 </li>
             <?php endif; ?>
