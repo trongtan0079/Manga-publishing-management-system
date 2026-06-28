@@ -136,13 +136,5 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <!-- Optional additional charts or tables could go here -->
-    </div>
-    <div class="col-lg-4">
-        <?php require_once __DIR__ . '/../shared/dashboard_notifications.php'; ?>
-    </div>
-</div>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

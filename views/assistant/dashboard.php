@@ -69,7 +69,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="card mb-4">
             <div class="card-header">
                 <h6 class="m-0"><i class="fas fa-tasks text-primary me-2"></i>Nhiệm vụ Cần xử lý</h6>
@@ -125,9 +125,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php endif; ?>
             </div>
         </div>
-    </div>
-    <div class="col-lg-4">
-        <?php require_once __DIR__ . '/../shared/dashboard_notifications.php'; ?>
     </div>
 </div>
 

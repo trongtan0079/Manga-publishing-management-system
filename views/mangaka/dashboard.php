@@ -162,7 +162,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-12">
         <div class="card shadow-sm border-0 mb-4">
             <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
                 <h6 class="m-0 fw-bold"><i class="fas fa-history text-primary me-2"></i>Hoạt động Gần đây</h6>
@@ -172,9 +172,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <p class="text-muted mb-0">Chưa có hoạt động gần đây.</p>
             </div>
         </div>
-    </div>
-    <div class="col-lg-4">
-        <?php require_once __DIR__ . '/../shared/dashboard_notifications.php'; ?>
     </div>
 </div>
 

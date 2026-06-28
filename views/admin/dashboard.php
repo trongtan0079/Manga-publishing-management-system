@@ -18,9 +18,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <h2 class="h3 mb-1">Tổng quan Hệ thống</h2>
         <p class="text-muted text-xs mb-0">Chào mừng trở lại, theo dõi các chỉ số quan trọng của toàn bộ hệ thống xuất bản.</p>
     </div>
-    <a href="<?= BASE_PATH ?>/index.php?controller=user&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Thêm người dùng mới</a>
 </div>
 
+<h5 class="fw-bold mb-3 text-slate-700"><i class="fas fa-layer-group text-primary me-2"></i>Thống kê Tổng quan</h5>
 <!-- Row 1: Thống kê chính (4 cards) -->
 <div class="row g-4 mb-4">
     <div class="col-xl-3 col-md-6">
@@ -146,48 +146,49 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
+<h5 class="fw-bold mb-3 text-slate-700 mt-4"><i class="fas fa-users-cog text-primary me-2"></i>Trạng thái Tài khoản</h5>
 <!-- Row 3: User Status Cards -->
 <div class="row g-4 mb-4">
     <div class="col-xl-4 col-md-6">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #198754 !important;">
+        <div class="card border-0 shadow-sm h-100" style="background-color: var(--success-soft) !important; border: 1px solid var(--success-border) !important;">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-uppercase mb-2" style="color: #198754;">Active Users</div>
-                        <div class="h3 mb-0 fw-bold"><?= $activeUsers ?></div>
+                        <div class="text-xs fw-bold text-uppercase mb-2" style="color: var(--success);">Active Users</div>
+                        <div class="h3 mb-0 fw-bold" style="color: var(--slate-900);"><?= $activeUsers ?></div>
                     </div>
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(25,135,84,0.1);">
-                        <i class="fas fa-user-check" style="color: #198754;"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(25,135,84,0.15);">
+                        <i class="fas fa-user-check" style="color: var(--success);"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-xl-4 col-md-6">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #6c757d !important;">
+        <div class="card border-0 shadow-sm h-100" style="background-color: var(--slate-100) !important; border: 1px solid var(--slate-200) !important;">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-uppercase mb-2" style="color: #6c757d;">Inactive Users</div>
-                        <div class="h3 mb-0 fw-bold"><?= $inactiveUsers ?></div>
+                        <div class="text-xs fw-bold text-uppercase mb-2" style="color: var(--slate-600);">Inactive Users</div>
+                        <div class="h3 mb-0 fw-bold" style="color: var(--slate-900);"><?= $inactiveUsers ?></div>
                     </div>
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(108,117,125,0.1);">
-                        <i class="fas fa-user-clock" style="color: #6c757d;"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(108,117,125,0.15);">
+                        <i class="fas fa-user-clock" style="color: var(--slate-600);"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <div class="col-xl-4 col-md-6">
-        <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid #dc3545 !important;">
+        <div class="card border-0 shadow-sm h-100" style="background-color: var(--danger-soft) !important; border: 1px solid var(--danger-border) !important;">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="text-xs fw-bold text-uppercase mb-2" style="color: #dc3545;">Banned Users</div>
-                        <div class="h3 mb-0 fw-bold"><?= $bannedUsers ?></div>
+                        <div class="text-xs fw-bold text-uppercase mb-2" style="color: var(--danger);">Banned Users</div>
+                        <div class="h3 mb-0 fw-bold" style="color: var(--slate-900);"><?= $bannedUsers ?></div>
                     </div>
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(220,53,69,0.1);">
-                        <i class="fas fa-user-slash" style="color: #dc3545;"></i>
+                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background: rgba(220,53,69,0.15);">
+                        <i class="fas fa-user-slash" style="color: var(--danger);"></i>
                     </div>
                 </div>
             </div>
@@ -195,6 +196,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
+<h5 class="fw-bold mb-3 text-slate-700 mt-4"><i class="fas fa-chart-bar text-primary me-2"></i>Biểu đồ Phân tích</h5>
 <!-- Row 4: Charts -->
 <div class="row g-4 mb-4">
     <!-- Chart 1: User theo Role -->
@@ -229,16 +231,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <canvas id="chartSubsByStatus" style="max-height: 260px;"></canvas>
             </div>
         </div>
-    </div>
-</div>
-
-<!-- Row 5: Notifications -->
-<div class="row">
-    <div class="col-lg-8">
-        <!-- Placeholder cho phần mở rộng sau này -->
-    </div>
-    <div class="col-lg-4">
-        <?php require_once __DIR__ . '/../shared/dashboard_notifications.php'; ?>
     </div>
 </div>
 
