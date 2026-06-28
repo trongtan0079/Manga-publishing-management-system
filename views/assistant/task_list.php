@@ -3,52 +3,64 @@
  * View: Assistant Task Dashboard
  * @var array $tasks Danh sách task của assistant
  */
-include __DIR__ . '/../layouts/header.php'; 
+$pageTitle = 'Danh sách Công việc';
+$current_page = 'tasks';
+require_once __DIR__ . '/../layouts/header.php';
+require_once __DIR__ . '/../layouts/navbar.php';
+require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
-<!-- 
-  View: Dashboard hiển thị danh sách các Task dành cho Assistant.
-  Tại đây, Assistant có thể xem ngữ cảnh (Context), tên task, độ ưu tiên, hạn chót
-  và cập nhật trực tiếp tiến độ công việc thông qua form Dropdown nội tuyến.
--->
-<div class="card mb-4">
-    <div class="card-header bg-white text-dark border-bottom border-light">
-        <h4 class="mb-0">My Tasks Dashboard</h4>
-        <small>Danh sách công việc được giao</small>
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 mb-1">My Tasks Dashboard</h2>
+        <p class="text-muted text-xs mb-0">Danh sách công việc được giao.</p>
     </div>
-    <div class="card-body">
+</div>
+
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+        <h5 class="card-title mb-0"><i class="fas fa-list me-2 text-primary"></i>Danh sách Công việc</h5>
+    </div>
+    <div class="card-body p-0">
         <?php if (!empty($tasks)): ?>
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th>Context (Ngữ cảnh)</th>
+                            <th class="ps-4">Context (Ngữ cảnh)</th>
+                            <th>Tài nguyên</th>
                             <th>Task (Công việc)</th>
-                            <th>Priority (Độ ưu tiên)</th>
-                            <th>Due Date (Hạn chót)</th>
-                            <th>Status & Update (Cập nhật)</th>
+                            <th>Priority</th>
+                            <th>Due Date</th>
+                            <th class="text-end pe-4">Status & Update</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Vòng lặp duyệt qua tất cả các task được giao cho assistant -->
                         <?php foreach ($tasks as $task): ?>
                             <tr>
-                                <!-- Cột Ngữ cảnh: Hiển thị bộ truyện, chương, trang và người giao -->
-                                <td>
+                                <td class="ps-4">
                                     <strong><?= htmlspecialchars($task['series_title']) ?></strong><br>
-                                    <small class="text-muted">Ch. <?= htmlspecialchars($task['chapter_number']) ?></small><br>
+                                    <small class="text-muted">Ch. <?= htmlspecialchars($task['chapter_number']) ?> - Tr. <?= htmlspecialchars($task['page_number']) ?></small><br>
                                     <small class="text-info">By: <?= htmlspecialchars($task['mangaka_name']) ?></small>
                                 </td>
-                                <!-- Cột Công việc: Tiêu đề và mô tả vắn tắt -->
+                                <td>
+                                    <?php if (!empty($task['image_url'])): ?>
+                                        <a href="<?= BASE_PATH ?><?= htmlspecialchars($task['image_url']) ?>" download class="btn btn-sm btn-outline-dark" title="Tải trang gốc">
+                                            <i class="fas fa-download"></i> Tải Trang
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-muted text-xs">Không có file</span>
+                                    <?php endif; ?>
+                                </td>
                                 <td>
                                     <strong><?= htmlspecialchars($task['title']) ?></strong>
                                     <?php if (!empty($task['description'])): ?>
                                         <br>
-                                        <!-- Cắt ngắn mô tả nếu quá dài (giới hạn 50 ký tự) để giao diện không bị vỡ -->
-                                        <small class="text-muted"><?= htmlspecialchars(strlen($task['description']) > 50 ? substr($task['description'], 0, 50).'...' : $task['description']) ?></small>
+                                        <small class="text-muted" title="<?= htmlspecialchars($task['description']) ?>">
+                                            <?= htmlspecialchars(mb_strlen($task['description']) > 50 ? mb_substr($task['description'], 0, 50).'...' : $task['description']) ?>
+                                        </small>
                                     <?php endif; ?>
                                 </td>
-                                <!-- Cột Độ ưu tiên: Hiển thị huy hiệu (Badge) màu sắc dựa theo giá trị -->
                                 <td>
                                     <?php 
                                     $pColor = 'secondary';
@@ -58,11 +70,9 @@ include __DIR__ . '/../layouts/header.php';
                                     ?>
                                     <span class="badge bg-<?= $pColor ?>"><?= ucfirst($task['priority']) ?></span>
                                 </td>
-                                <!-- Cột Hạn chót -->
                                 <td>
                                     <?php if ($task['due_date']): ?>
                                         <?= htmlspecialchars(date('d/m/Y H:i', strtotime($task['due_date']))) ?>
-                                        <!-- Kiểm tra nếu thời gian hiện tại đã vượt qua hạn chót và task chưa hoàn thành thì báo Quá hạn -->
                                         <?php if (strtotime($task['due_date']) < time() && $task['status'] != 'completed'): ?>
                                             <br><span class="badge bg-danger">Quá hạn</span>
                                         <?php endif; ?>
@@ -70,10 +80,8 @@ include __DIR__ . '/../layouts/header.php';
                                         <span class="text-muted">None</span>
                                     <?php endif; ?>
                                 </td>
-                                <!-- Cột Cập nhật trạng thái: Là một form nhỏ chứa Dropdown và nút Save để cập nhật nhanh -->
-                                <td>
-                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center">
-                                        <!-- Dropdown chọn status hiện tại -->
+                                <td class="text-end pe-4">
+                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center justify-content-end">
                                         <select name="status" class="form-select form-select-sm me-2" style="width: 130px;">
                                             <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
                                             <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>In Progress</option>
@@ -88,12 +96,14 @@ include __DIR__ . '/../layouts/header.php';
                 </table>
             </div>
         <?php else: ?>
-            <!-- Trạng thái trống (Empty State) khi không có task nào -->
-            <div class="alert alert-info mb-0">
-                Bạn hiện chưa được giao công việc nào.
+            <div class="text-center py-5">
+                <div class="mb-3 text-muted">
+                    <i class="fas fa-tasks fa-3x"></i>
+                </div>
+                <p class="text-muted mb-0">Bạn hiện chưa được giao công việc nào.</p>
             </div>
         <?php endif; ?>
     </div>
 </div>
 
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>

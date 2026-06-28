@@ -159,7 +159,56 @@ class DashboardController extends BaseController {
         $inProgressTasks = $taskModel->countByCondition(['assistant_id' => $userId, 'status' => 'in_progress']);
         $completedTasks = $taskModel->countByCondition(['assistant_id' => $userId, 'status' => 'completed']);
         
+        $activeTasks = $taskModel->findActiveByAssistantId($userId);
+        
         require_once __DIR__ . '/../views/assistant/dashboard.php';
+    }
+
+    /**
+     * Theo dõi Tiến độ & Deadline dành cho Editor
+     */
+    public function progress() {
+        \requireRole('editor');
+        $userId = $_SESSION['user_id'];
+        
+        $seriesModel = new Series();
+        $taskModel = new Task();
+        $chapterModel = new Chapter();
+        
+        // Fetch all active series
+        $seriesList = $seriesModel->findAll();
+        $progressData = [];
+        
+        foreach ($seriesList as $series) {
+            $chapters = $chapterModel->findBySeriesId($series['series_id']);
+            // count completed chapters
+            $completedChapters = 0;
+            foreach ($chapters as $ch) {
+                if ($ch['status'] === 'approved') {
+                    $completedChapters++;
+                }
+            }
+            
+            // fetch tasks for this series to get deadlines
+            $sql = "SELECT t.*, c.chapter_number, c.title as chapter_title
+                    FROM tasks t
+                    JOIN pages p ON t.page_id = p.page_id
+                    JOIN chapters c ON p.chapter_id = c.chapter_id
+                    WHERE c.series_id = :series_id AND t.status != 'completed'
+                    ORDER BY t.due_date ASC LIMIT 5";
+            $stmt = $taskModel->getConnection()->prepare($sql);
+            $stmt->execute(['series_id' => $series['series_id']]);
+            $pendingTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            $progressData[] = [
+                'series' => $series,
+                'total_chapters' => count($chapters),
+                'completed_chapters' => $completedChapters,
+                'pending_tasks' => $pendingTasks
+            ];
+        }
+        
+        require_once __DIR__ . '/../views/editor/progress.php';
     }
 
     /**

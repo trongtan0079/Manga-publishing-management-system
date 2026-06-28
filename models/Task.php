@@ -48,7 +48,7 @@ class Task extends Model {
      * @return array Danh sách công việc, ưu tiên sắp xếp theo hạn chót (due_date) tăng dần (sắp đến hạn thì hiện trước)
      */
     public function findByAssistantId($assistantId) {
-        $sql = "SELECT t.*, p.page_number, c.chapter_number, s.title as series_title, u.full_name as mangaka_name
+        $sql = "SELECT t.*, p.page_number, p.image_url, c.chapter_number, s.title as series_title, u.full_name as mangaka_name
                 FROM {$this->table} t
                 JOIN pages p ON t.page_id = p.page_id
                 JOIN chapters c ON p.chapter_id = c.chapter_id
@@ -66,7 +66,7 @@ class Task extends Model {
      * Lấy các task chưa hoàn thành của Assistant
      */
     public function findActiveByAssistantId($assistantId) {
-        $sql = "SELECT t.*, p.page_number, c.chapter_number, s.title as series_title, u.full_name as mangaka_name
+        $sql = "SELECT t.*, p.page_number, p.image_url, c.chapter_number, s.title as series_title, u.full_name as mangaka_name
                 FROM {$this->table} t
                 JOIN pages p ON t.page_id = p.page_id
                 JOIN chapters c ON p.chapter_id = c.chapter_id

@@ -74,8 +74,55 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="card-header">
                 <h6 class="m-0"><i class="fas fa-tasks text-primary me-2"></i>Nhiệm vụ Cần xử lý</h6>
             </div>
-            <div class="card-body text-center py-5">
-                <p class="text-muted mb-0">Chưa có dữ liệu</p>
+            <div class="card-body p-0">
+                <?php if (!empty($activeTasks)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Công việc</th>
+                                    <th>Ngữ cảnh</th>
+                                    <th>Hạn chót</th>
+                                    <th class="pe-3 text-end">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($activeTasks as $task): ?>
+                                    <tr>
+                                        <td class="ps-3">
+                                            <strong><?= htmlspecialchars($task['title']) ?></strong>
+                                            <?php if ($task['priority'] === 'high'): ?>
+                                                <span class="badge bg-danger ms-1">High</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <div class="text-xs">
+                                                <span class="text-dark fw-bold"><?= htmlspecialchars($task['series_title']) ?></span><br>
+                                                <span class="text-muted">Ch.<?= htmlspecialchars($task['chapter_number']) ?> - Tr.<?= htmlspecialchars($task['page_number']) ?></span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <?php if ($task['due_date']): ?>
+                                                <small class="<?= strtotime($task['due_date']) < time() ? 'text-danger fw-bold' : 'text-muted' ?>">
+                                                    <?= date('d/m/Y H:i', strtotime($task['due_date'])) ?>
+                                                </small>
+                                            <?php else: ?>
+                                                <small class="text-muted">Không có</small>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="pe-3 text-end">
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=task&action=index" class="btn btn-sm btn-outline-primary">Xem chi tiết</a>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5">
+                        <p class="text-muted mb-0">Chưa có dữ liệu</p>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
