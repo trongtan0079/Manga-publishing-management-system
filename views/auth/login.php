@@ -195,10 +195,11 @@ if (!defined('BASE_PATH')) {
         }
 
         .alert-danger {
-            border-radius: 10px;
+            border-radius: 12px;
             border: none;
+            border-left: 4px solid #ef4444;
             background-color: #fef2f2;
-            color: #ef4444;
+            color: #991b1b;
             font-weight: 500;
         }
     </style>
@@ -234,17 +235,14 @@ if (!defined('BASE_PATH')) {
                 <div class="mb-4">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <label for="password" class="form-label mb-0">Mật khẩu</label>
-                        <a href="#" class="text-decoration-none small" style="color: var(--primary-color); font-weight: 600;">Quên mật khẩu?</a>
+                        <span class="small" style="color: var(--primary-color); font-weight: 600; cursor: help;" 
+                              data-bs-toggle="tooltip" data-bs-placement="top" 
+                              title="Vui lòng liên hệ Quản trị viên (Admin) để được cấp lại mật khẩu.">Quên mật khẩu?</span>
                     </div>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                         <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>
                     </div>
-                </div>
-
-                <div class="mb-4 form-check">
-                    <input type="checkbox" class="form-check-input" id="rememberMe" style="cursor: pointer;">
-                    <label class="form-check-label text-muted" for="rememberMe" style="cursor: pointer; font-weight: 500; font-size: 0.9rem;">Ghi nhớ phiên đăng nhập</label>
                 </div>
 
                 <div class="d-grid mt-2">
@@ -256,6 +254,11 @@ if (!defined('BASE_PATH')) {
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Khởi tạo Bootstrap Tooltip
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (el) { return new bootstrap.Tooltip(el); });
+    </script>
 </body>
 
 </html>

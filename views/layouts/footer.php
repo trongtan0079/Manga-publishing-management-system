@@ -6,10 +6,7 @@
             &copy; <?= date('Y') ?> <strong>Manga<span class="text-primary">PMS</span></strong>. All rights reserved.
         </div>
         <div>
-            <a href="#" class="text-decoration-none text-muted me-3">Chính sách bảo mật</a>
-            <a href="#" class="text-decoration-none text-muted me-3">Điều khoản sử dụng</a>
-            <a href="#" class="text-decoration-none text-muted">Trợ giúp</a>
-            <span class="ms-3 ms-md-4 text-muted border-start ps-3 border-secondary border-opacity-25">Phiên bản 1.0.0</span>
+            <span class="text-muted">Phiên bản 1.0.0</span>
         </div>
     </footer>
 </main> <!-- /main -->
