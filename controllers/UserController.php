@@ -55,19 +55,19 @@ class UserController extends BaseController
             // 1. Kiểm tra trùng lặp Username
             if ($this->userModel->findByUsername($username)) {
                 $_SESSION['error'] = "Lỗi: Username '{$username}' đã tồn tại trong hệ thống!";
-                header('Location: /index.php?controller=user&action=create');
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=create');
                 exit;
             }
 
             // 2. Kiểm tra định dạng Email và trùng lặp
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $_SESSION['error'] = "Lỗi: Email không hợp lệ!";
-                header('Location: /index.php?controller=user&action=create');
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=create');
                 exit;
             }
             if ($this->userModel->findByEmail($email)) {
                 $_SESSION['error'] = "Lỗi: Email '{$email}' đã được đăng ký!";
-                header('Location: /index.php?controller=user&action=create');
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=create');
                 exit;
             }
 
@@ -75,7 +75,7 @@ class UserController extends BaseController
             $role_id = $_POST['role_id'] ?? '';
             if (!$this->roleModel->findById($role_id)) {
                 $_SESSION['error'] = "Lỗi: Vai trò (Role) không tồn tại!";
-                header('Location: /index.php?controller=user&action=create');
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=create');
                 exit;
             }
 
@@ -85,14 +85,14 @@ class UserController extends BaseController
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'email'     => $email,
                 'role_id'   => $role_id,
-                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active'
+                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive', 'banned']) ? $_POST['status'] : 'active'
             ];
             
             // Xử lý mật khẩu: nếu có nhập thì kiểm tra độ dài và băm (hash), nếu không thì dùng mật khẩu mặc định
             if (!empty($_POST['password'])) {
                 if (strlen($_POST['password']) < 6) {
                     $_SESSION['error'] = "Lỗi: Mật khẩu phải có ít nhất 6 ký tự!";
-                    header('Location: /index.php?controller=user&action=create');
+                    header('Location: ' . BASE_PATH . '/index.php?controller=user&action=create');
                     exit;
                 }
                 $data['password_hash'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -109,7 +109,7 @@ class UserController extends BaseController
             }
             
             // Quay về trang danh sách
-            header('Location: /index.php?controller=user&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=user&action=index');
             exit;
         }
     }
@@ -128,7 +128,7 @@ class UserController extends BaseController
         // Nếu không tìm thấy user, báo lỗi
         if (!$user) {
             $_SESSION['error'] = "Không tìm thấy người dùng (ID: {$id}).";
-            header('Location: /index.php?controller=user&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=user&action=index');
             exit;
         }
         
@@ -149,20 +149,20 @@ class UserController extends BaseController
             $existingUserByUsername = $this->userModel->findByUsername($username);
             if ($existingUserByUsername && $existingUserByUsername['user_id'] != $id) {
                 $_SESSION['error'] = "Lỗi: Username '{$username}' đã được sử dụng bởi người dùng khác!";
-                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
                 exit;
             }
 
             // 2. Kiểm tra định dạng Email và trùng lặp (loại trừ chính user hiện tại)
             if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $_SESSION['error'] = "Lỗi: Email không hợp lệ!";
-                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
                 exit;
             }
             $existingUserByEmail = $this->userModel->findByEmail($email);
             if ($existingUserByEmail && $existingUserByEmail['user_id'] != $id) {
                 $_SESSION['error'] = "Lỗi: Email '{$email}' đã được sử dụng bởi người dùng khác!";
-                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
                 exit;
             }
 
@@ -170,7 +170,7 @@ class UserController extends BaseController
             $role_id = $_POST['role_id'] ?? '';
             if (!$this->roleModel->findById($role_id)) {
                 $_SESSION['error'] = "Lỗi: Vai trò (Role) không tồn tại!";
-                header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
                 exit;
             }
 
@@ -180,14 +180,14 @@ class UserController extends BaseController
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'email'     => $email,
                 'role_id'   => $role_id,
-                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive']) ? $_POST['status'] : 'active'
+                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive', 'banned']) ? $_POST['status'] : 'active'
             ];
             
             // Nếu admin có nhập mật khẩu mới thì mới cập nhật password_hash
             if (!empty($_POST['password'])) {
                 if (strlen($_POST['password']) < 6) {
                     $_SESSION['error'] = "Lỗi: Mật khẩu mới phải có ít nhất 6 ký tự!";
-                    header('Location: /index.php?controller=user&action=edit&id=' . $id);
+                    header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
                     exit;
                 }
                 $data['password_hash'] = password_hash($_POST['password'], PASSWORD_DEFAULT);
@@ -202,7 +202,7 @@ class UserController extends BaseController
             }
             
             // Quay về trang danh sách
-            header('Location: /index.php?controller=user&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=user&action=index');
             exit;
         }
     }
@@ -215,7 +215,7 @@ class UserController extends BaseController
         $user = $this->userModel->getUserByIdWithRole($id);
         if (!$user) {
             $_SESSION['error'] = "Không tìm thấy người dùng (ID: {$id}).";
-            header('Location: /index.php?controller=user&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=user&action=index');
             exit;
         }
         
@@ -232,7 +232,7 @@ class UserController extends BaseController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($id == $_SESSION['user_id']) {
                 $_SESSION['error'] = "Bạn không thể xóa chính tài khoản của mình!";
-                header('Location: /index.php?controller=user&action=index');
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=index');
                 exit;
             }
 
@@ -245,8 +245,23 @@ class UserController extends BaseController
             }
             
             // Xóa xong quay về trang danh sách
-            header('Location: /index.php?controller=user&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=user&action=index');
             exit;
         }
+    }
+    /**
+     * Hiển thị danh sách vai trò (Read Only)
+     * Chỉ hiển thị thông tin, không cho phép CRUD.
+     */
+    public function roles() {
+        $roles = $this->roleModel->findAll();
+        
+        // Đếm số user thuộc mỗi role
+        $conn = $this->userModel->getConnection();
+        $stmt = $conn->prepare("SELECT r.*, COUNT(u.user_id) as user_count FROM roles r LEFT JOIN users u ON r.role_id = u.role_id GROUP BY r.role_id, r.role_name, r.description ORDER BY r.role_id");
+        $stmt->execute();
+        $rolesWithCount = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        require_once __DIR__ . '/../views/admin/roles.php';
     }
 }
