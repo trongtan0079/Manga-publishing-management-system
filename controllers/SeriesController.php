@@ -13,8 +13,8 @@ class SeriesController extends BaseController
 
     public function __construct() {
         parent::__construct();
-        // Chỉ cho phép Mangaka truy cập toàn bộ các chức năng trong controller này
-        requireRole('mangaka');
+        // Chỉ yêu cầu đăng nhập ở constructor, phân quyền sẽ xử lý ở từng action
+        requireLogin();
         
         // Khởi tạo Model
         $this->seriesModel = new Series();
@@ -24,8 +24,22 @@ class SeriesController extends BaseController
      * Hiển thị danh sách các bộ truyện của Mangaka đang đăng nhập
      */
     public function index() {
+        $role = $_SESSION['role_name'] ?? '';
         $currentUserId = $_SESSION['user_id'];
-        $seriesList = $this->seriesModel->findByMangakaId($currentUserId);
+        
+        if ($role === 'editor' || $role === 'admin') {
+            $sql = "SELECT * FROM series ORDER BY series_id DESC";
+            $stmt = $this->seriesModel->getConnection()->prepare($sql);
+            $stmt->execute();
+            $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } elseif ($role === 'mangaka') {
+            $seriesList = $this->seriesModel->findByMangakaId($currentUserId);
+        } else {
+            http_response_code(403);
+            $_SESSION['error'] = 'Bạn không có quyền truy cập.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
+            exit;
+        }
         
         require_once __DIR__ . '/../views/mangaka/series.php';
     }
@@ -34,6 +48,7 @@ class SeriesController extends BaseController
      * Hiển thị form tạo bộ truyện mới
      */
     public function create() {
+        requireRole('mangaka');
         require_once __DIR__ . '/../views/mangaka/series_create.php';
     }
 
@@ -41,6 +56,7 @@ class SeriesController extends BaseController
      * Xử lý lưu bộ truyện mới vào DB
      */
     public function store() {
+        requireRole('mangaka');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $title = trim($_POST['title'] ?? '');
             $status = $_POST['status'] ?? 'planning';
@@ -94,6 +110,11 @@ class SeriesController extends BaseController
             exit;
         }
 
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role === 'editor' || $role === 'admin') {
+            return; // Editor và Admin có quyền xem
+        }
+
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện của người khác.";
             header('Location: /index.php?controller=series&action=index');
@@ -105,6 +126,7 @@ class SeriesController extends BaseController
      * Hiển thị form chỉnh sửa bộ truyện
      */
     public function edit($id) {
+        requireRole('mangaka');
         $series = $this->seriesModel->findById($id);
         $this->checkOwnership($series, $id);
         
@@ -115,6 +137,7 @@ class SeriesController extends BaseController
      * Cập nhật thông tin bộ truyện
      */
     public function update($id) {
+        requireRole('mangaka');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $series = $this->seriesModel->findById($id);
             $this->checkOwnership($series, $id);
@@ -177,6 +200,7 @@ class SeriesController extends BaseController
      * Xóa bộ truyện
      */
     public function delete($id) {
+        requireRole('mangaka');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $series = $this->seriesModel->findById($id);
             $this->checkOwnership($series, $id);
