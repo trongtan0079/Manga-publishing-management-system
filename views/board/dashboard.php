@@ -19,7 +19,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <h2 class="h3 mb-1">Báo cáo Ban Giám Đốc</h2>
         <p class="text-muted text-xs mb-0">Theo dõi doanh thu, bảng xếp hạng và toàn cảnh hoạt động xuất bản.</p>
     </div>
-    <button class="btn btn-success shadow-sm"><i class="fas fa-file-invoice-dollar me-2"></i>Tải Báo cáo</button>
+    <button class="btn btn-secondary shadow-sm" disabled><i class="fas fa-file-invoice-dollar me-2"></i>Tải Báo cáo (Chưa khả dụng)</button>
 </div>
 
 <div class="row g-4 mb-4">
@@ -30,7 +30,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Xếp Hạng</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($totalRankings) ? $totalRankings : 0 ?></div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($totalRankings) ? (int)$totalRankings : 0 ?></div>
                     </div>
                     <div class="stat-icon info"><i class="fas fa-list-ol"></i></div>
                 </div>
@@ -45,7 +45,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="text-xs fw-bold text-muted text-uppercase mb-2">Manga đã chấm</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($evaluatedSeries) ? $evaluatedSeries : 0 ?></div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($evaluatedSeries) ? (int)$evaluatedSeries : 0 ?></div>
                     </div>
                     <div class="stat-icon primary"><i class="fas fa-check-circle"></i></div>
                 </div>
@@ -60,7 +60,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="text-xs fw-bold text-muted text-uppercase mb-2">Manga chưa chấm</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($ungradedSeries) ? $ungradedSeries : 0 ?></div>
+                        <div class="h3 mb-0 fw-bold"><?= isset($ungradedSeries) ? (int)$ungradedSeries : 0 ?></div>
                     </div>
                     <div class="stat-icon warning"><i class="fas fa-hourglass-half"></i></div>
                 </div>
@@ -99,7 +99,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <span class="badge bg-success me-2 rounded-pill">#<?= $series['rank_position'] ?></span>
                                     <strong><?= htmlspecialchars($series['series_title']) ?></strong>
                                 </div>
-                                <span class="text-muted fw-bold"><?= $series['score'] ?> đ</span>
+                                <span class="text-muted fw-bold"><?= htmlspecialchars($series['score']) ?> đ</span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -124,7 +124,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <span class="badge bg-danger me-2 rounded-pill">#<?= $series['rank_position'] ?></span>
                                     <strong><?= htmlspecialchars($series['series_title']) ?></strong>
                                 </div>
-                                <span class="text-muted fw-bold"><?= $series['score'] ?> đ</span>
+                                <span class="text-muted fw-bold"><?= htmlspecialchars($series['score']) ?> đ</span>
                             </li>
                         <?php endforeach; ?>
                     </ul>
