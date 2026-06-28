@@ -12,7 +12,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <!-- Tiêu đề trang và Nút thêm mới -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="h3 mb-0 text-dark fw-bold">Quản lý Người dùng</h2>
-    <a href="/index.php?controller=user&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Thêm Người dùng</a>
+    <a href="<?= BASE_PATH ?>/index.php?controller=user&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Thêm Người dùng</a>
 </div>
 
 <!-- Bảng hiển thị danh sách người dùng -->
@@ -58,14 +58,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <!-- Các nút thao tác: Xem, Sửa, Xóa -->
                                 <td class="text-end pe-4">
                                     <div class="btn-group" role="group">
-                                        <a href="/index.php?controller=user&action=show&id=<?= $user['user_id'] ?>" class="btn btn-sm btn-info text-white" title="Xem chi tiết">
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=user&action=show&id=<?= $user['user_id'] ?>" class="btn btn-sm btn-info text-white" title="Xem chi tiết">
                                             <i class="fas fa-eye"></i> Xem
                                         </a>
-                                        <a href="/index.php?controller=user&action=edit&id=<?= $user['user_id'] ?>" class="btn btn-sm btn-warning text-dark" title="Chỉnh sửa">
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=user&action=edit&id=<?= $user['user_id'] ?>" class="btn btn-sm btn-warning text-dark" title="Chỉnh sửa">
                                             <i class="fas fa-edit"></i> Sửa
                                         </a>
                                         <!-- Form xóa người dùng cần sử dụng phương thức POST -->
-                                        <form action="/index.php?controller=user&action=delete&id=<?= $user['user_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa người dùng này không? Hành động này không thể hoàn tác.');">
+                                        <form action="<?= BASE_PATH ?>/index.php?controller=user&action=delete&id=<?= $user['user_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa người dùng này không? Hành động này không thể hoàn tác.');">
                                             <button type="submit" class="btn btn-sm btn-danger" title="Xóa Người dùng">
                                                 <i class="fas fa-trash-alt"></i> Xóa
                                             </button>
@@ -89,4 +89,4 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
-<?php include __DIR__ . '/../layouts/footer.php'; ?>
+<?php require_once __DIR__ . '/../layouts/footer.php'; ?>
