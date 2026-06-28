@@ -76,13 +76,35 @@ class SeriesRankingController extends BaseController
     public function store() {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $seriesId = $_POST['series_id'] ?? '';
-            $rankPosition = $_POST['rank_position'] ?? '';
-            $score = $_POST['score'] ?? '';
-            $periodStartDate = $_POST['period_start_date'] ?? '';
+            $seriesId = (int)($_POST['series_id'] ?? 0);
+            $rankPosition = (int)($_POST['rank_position'] ?? 0);
+            $score = (float)($_POST['score'] ?? -1);
+            $periodStartDate = trim($_POST['period_start_date'] ?? '');
 
-            if (!$seriesId || !$rankPosition || !$score || !$periodStartDate) {
+            if (!$seriesId || !$rankPosition || $score < 0 || !$periodStartDate) {
                 $_SESSION['error'] = 'Vui lòng nhập đầy đủ thông tin.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
+                exit;
+            }
+
+            $series = $this->seriesModel->findById($seriesId);
+            if (!$series) {
+                $_SESSION['error'] = 'Series không tồn tại.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
+                exit;
+            }
+            if ($rankPosition < 1) {
+                $_SESSION['error'] = 'Vị trí xếp hạng phải lớn hơn hoặc bằng 1.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
+                exit;
+            }
+            if ($score < 0 || $score > 100) {
+                $_SESSION['error'] = 'Điểm số phải nằm trong khoảng từ 0 đến 100.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
+                exit;
+            }
+            if (!strtotime($periodStartDate)) {
+                $_SESSION['error'] = 'Kỳ đánh giá không hợp lệ.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
                 exit;
             }
@@ -128,6 +150,7 @@ class SeriesRankingController extends BaseController
      * Nếu người dùng là Mangaka, chặn xem xếp hạng của truyện không thuộc quyền sở hữu.
      */
     public function show($id) {
+        $id = (int)$id;
         $ranking = $this->rankingModel->findById($id);
         if (!$ranking) {
             $_SESSION['error'] = 'Không tìm thấy Ranking.';
@@ -153,6 +176,7 @@ class SeriesRankingController extends BaseController
      */
     public function edit($id) {
         \requireRole('board');
+        $id = (int)$id;
         $ranking = $this->rankingModel->findById($id);
         if (!$ranking) {
             $_SESSION['error'] = 'Không tìm thấy Ranking.';
@@ -170,6 +194,7 @@ class SeriesRankingController extends BaseController
     public function update($id) {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)$id;
             $ranking = $this->rankingModel->findById($id);
             if (!$ranking) {
                 $_SESSION['error'] = 'Không tìm thấy Ranking.';
@@ -177,13 +202,35 @@ class SeriesRankingController extends BaseController
                 exit;
             }
 
-            $seriesId = $_POST['series_id'] ?? '';
-            $rankPosition = $_POST['rank_position'] ?? '';
-            $score = $_POST['score'] ?? '';
-            $periodStartDate = $_POST['period_start_date'] ?? '';
+            $seriesId = (int)($_POST['series_id'] ?? 0);
+            $rankPosition = (int)($_POST['rank_position'] ?? 0);
+            $score = (float)($_POST['score'] ?? -1);
+            $periodStartDate = trim($_POST['period_start_date'] ?? '');
 
-            if (!$seriesId || !$rankPosition || !$score || !$periodStartDate) {
+            if (!$seriesId || !$rankPosition || $score < 0 || !$periodStartDate) {
                 $_SESSION['error'] = 'Vui lòng nhập đầy đủ thông tin.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
+                exit;
+            }
+
+            $series = $this->seriesModel->findById($seriesId);
+            if (!$series) {
+                $_SESSION['error'] = 'Series không tồn tại.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
+                exit;
+            }
+            if ($rankPosition < 1) {
+                $_SESSION['error'] = 'Vị trí xếp hạng phải lớn hơn hoặc bằng 1.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
+                exit;
+            }
+            if ($score < 0 || $score > 100) {
+                $_SESSION['error'] = 'Điểm số phải nằm trong khoảng từ 0 đến 100.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
+                exit;
+            }
+            if (!strtotime($periodStartDate)) {
+                $_SESSION['error'] = 'Kỳ đánh giá không hợp lệ.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
             }
@@ -223,6 +270,7 @@ class SeriesRankingController extends BaseController
     public function delete($id) {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = (int)$id;
             $ranking = $this->rankingModel->findById($id);
             if (!$ranking) {
                 $_SESSION['error'] = 'Không tìm thấy Ranking.';
