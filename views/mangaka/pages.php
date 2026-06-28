@@ -1,4 +1,3 @@
-<?php include '../layouts/header.php'; ?>
-<h2>Manage Pages</h2>
-<!-- Pages content -->
-<?php include '../layouts/footer.php'; ?>
+<?php
+// File thừa không còn được tham chiếu ở bất kỳ đâu trong hệ thống.
+// Đã xác minh bởi Người 2. Có thể xóa file này.
