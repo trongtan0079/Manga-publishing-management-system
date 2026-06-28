@@ -184,4 +184,34 @@ $role = $_SESSION['role_name'] ?? '';
     </div>
 </div>
 
+<?php if (!empty($reviews)): ?>
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+        <h5 class="card-title mb-0"><i class="fas fa-comments me-2 text-primary"></i>Phản hồi / Đánh giá</h5>
+    </div>
+    <div class="card-body p-4">
+        <?php foreach ($reviews as $review): ?>
+            <div class="border rounded p-3 mb-3 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-bold text-dark"><i class="fas fa-user-edit me-2"></i>Đánh giá từ Biên tập viên/Mangaka</span>
+                    <small class="text-muted"><i class="far fa-clock me-1"></i><?= htmlspecialchars(date('d/m/Y H:i', strtotime($review['created_at']))) ?></small>
+                </div>
+                
+                <div class="mb-2">
+                    <strong class="text-muted text-xs text-uppercase">Nội dung đánh giá:</strong>
+                    <p class="mb-2 mt-1 bg-white p-2 border rounded" style="white-space: pre-line;"><?= htmlspecialchars($review['comments']) ?></p>
+                </div>
+
+                <?php if (!empty($review['rating'])): ?>
+                    <div class="mb-0">
+                        <strong class="text-muted text-xs text-uppercase">Chấm điểm:</strong>
+                        <span class="badge bg-primary fs-6"><?= htmlspecialchars($review['rating']) ?> / 10</span>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>
+
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

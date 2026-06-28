@@ -5,6 +5,7 @@ require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Task.php';
 require_once __DIR__ . '/../models/Chapter.php';
+require_once __DIR__ . '/../models/Review.php';
 
 
 class SubmissionController extends BaseController
@@ -31,8 +32,8 @@ class SubmissionController extends BaseController
         $userId = $_SESSION['user_id'];
 
         if ($role === 'editor') {
-            // Editor xem toàn bộ submission đang chờ xử lý (pending)
-            $submissions = $this->submissionModel->findPendingSubmissions();
+            // Editor xem toàn bộ chapter submission (kể cả pending và history)
+            $submissions = $this->submissionModel->findAllChapterSubmissions();
         } elseif ($role === 'mangaka' || $role === 'assistant') {
             // Assistant và Mangaka xem lịch sử nộp bài của chính mình
             $submissions = $this->submissionModel->findByUserId($userId);
@@ -370,6 +371,9 @@ class SubmissionController extends BaseController
             header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
             exit;
         }
+
+        $reviewModel = new \Review();
+        $reviews = $reviewModel->findBySubmissionId($id);
 
         // Nạp view chi tiết
         require_once __DIR__ . '/../views/editor/submission_detail.php';
