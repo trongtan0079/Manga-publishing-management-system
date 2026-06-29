@@ -1,7 +1,11 @@
 <?php 
 /**
- * @var array $user 
- * @var array $roles 
+ * View: Giao diện chỉnh sửa tài khoản người dùng (user_edit.php)
+ * Vai trò: Admin (Quản trị viên)
+ * Chức năng: Cho phép quản trị viên chỉnh sửa thông tin cá nhân, cập nhật mật khẩu, vai trò và trạng thái hoạt động của một tài khoản.
+ * 
+ * @var array $user Thông tin tài khoản người dùng cần sửa đổi
+ * @var array $roles Danh sách vai trò để chọn phân quyền
  */
 $pageTitle = 'Chỉnh sửa người dùng';
 $current_page = 'users';

@@ -1,6 +1,10 @@
 <?php
 /**
- * @var array $submission
+ * View: Giao diện tạo đánh giá nhận xét cho bản thảo (review_create.php)
+ * Vai trò: Editor (Biên tập viên) / Mangaka (Họa sĩ chính)
+ * Chức năng: Cho phép người kiểm duyệt nhập ý kiến, cho điểm và quyết định phê duyệt (Approve) hoặc từ chối (Reject) bản thảo.
+ * 
+ * @var array $submission Thông tin bản thảo được chọn để đánh giá
  */
 $pageTitle = 'Tạo Đánh giá (Review)';
 $current_page = 'reviews';

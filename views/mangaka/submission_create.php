@@ -1,4 +1,11 @@
 <?php
+/**
+ * View: Giao diện nộp sản phẩm chương truyện (submission_create.php)
+ * Vai trò: Mangaka (Họa sĩ chính)
+ * Chức năng: Cho phép họa sĩ chính nộp toàn bộ chương truyện (Chapter) hoàn thiện lên Biên tập viên để xét duyệt và xuất bản.
+ * 
+ * @var array $chapters Danh sách các chương truyện thuộc quyền sở hữu của Mangaka này đang chờ nộp/duyệt
+ */
 $pageTitle = 'Nộp sản phẩm Chapter';
 $current_page = 'submissions';
 require_once __DIR__ . '/../layouts/header.php';

@@ -1,6 +1,10 @@
 <?php 
 /**
- * @var array $seriesList 
+ * View: Giao diện quản lý danh sách dự án truyện (series.php)
+ * Vai trò: Mangaka (Họa sĩ chính)
+ * Chức năng: Hiển thị toàn bộ danh sách các bộ truyện (Series) do họa sĩ chính sáng tác hoặc được phân quyền xem.
+ * 
+ * @var array $seriesList Danh sách các bộ truyện
  */
 $pageTitle = 'Dự án Truyện';
 $current_page = 'series';

@@ -1,4 +1,12 @@
 <?php 
+/**
+ * View: Giao diện quản lý danh sách xếp hạng các bộ truyện (rankings.php)
+ * Vai trò: Board (Hội đồng/Ban giám đốc) / Mangaka (Họa sĩ)
+ * Chức năng: Hiển thị danh sách các kỳ đánh giá xếp hạng và điểm số của từng bộ truyện. Hội đồng có quyền tạo mới/chỉnh sửa.
+ * 
+ * @var string $role Vai trò của người dùng hiện tại
+ * @var array $rankings Danh sách xếp hạng các bộ truyện được truyền từ SeriesRankingController
+ */
 require_once __DIR__ . '/../../core/Auth.php';
 $role = $_SESSION['role_name'];
 $pageTitle = 'Quản lý Xếp hạng (Rankings)';

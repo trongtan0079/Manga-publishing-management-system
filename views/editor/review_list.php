@@ -1,6 +1,10 @@
 <?php
 /**
- * @var array $submissions
+ * View: Giao diện danh sách bản thảo chờ đánh giá và lịch sử đánh giá (review_list.php)
+ * Vai trò: Editor (Biên tập viên) / Mangaka (Họa sĩ chính)
+ * Chức năng: Hiển thị các chương truyện hoặc sản phẩm nhiệm vụ của trợ lý đang chờ đánh giá kèm theo lịch sử.
+ * 
+ * @var array $submissions Danh sách các bản thảo chờ duyệt hoặc đã đánh giá liên quan đến người dùng hiện tại
  */
 $pageTitle = 'Quản lý Đánh giá Bản thảo';
 $current_page = 'reviews';

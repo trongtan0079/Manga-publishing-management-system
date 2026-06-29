@@ -1,6 +1,10 @@
 <?php 
 /**
- * @var array $user 
+ * View: Giao diện hiển thị thông tin chi tiết người dùng (user_detail.php)
+ * Vai trò: Admin (Quản trị viên)
+ * Chức năng: Hiển thị chi tiết toàn bộ hồ sơ, vai trò, trạng thái hoạt động của một tài khoản người dùng cụ thể.
+ * 
+ * @var array $user Thông tin chi tiết của người dùng cần xem
  */
 $pageTitle = 'Chi tiết người dùng';
 $current_page = 'users';

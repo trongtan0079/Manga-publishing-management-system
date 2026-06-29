@@ -1,6 +1,10 @@
 <?php
 /**
- * @var array $seriesList
+ * View: Giao diện duyệt và xuất bản các bộ truyện (publish_series.php)
+ * Vai trò: Board (Hội đồng/Ban giám đốc)
+ * Chức năng: Cho phép Hội đồng xem xét và duyệt các bộ truyện (Series) để đưa vào xuất bản hoặc đổi trạng thái hoạt động.
+ * 
+ * @var array $seriesList Danh sách các bộ truyện cần duyệt hoặc thay đổi trạng thái
  */
 $pageTitle = 'Duyệt Series (Publish Series)';
 $current_page = 'publish_series';

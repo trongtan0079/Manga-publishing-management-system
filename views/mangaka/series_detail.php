@@ -1,6 +1,10 @@
 <?php 
 /**
- * @var array $series 
+ * View: Giao diện chi tiết thông tin bộ truyện (series_detail.php)
+ * Vai trò: Mangaka (Họa sĩ chính)
+ * Chức năng: Hiển thị chi tiết về một bộ truyện cụ thể bao gồm tên, tác giả, mô tả, trạng thái xuất bản và danh sách các chương truyện đã tạo.
+ * 
+ * @var array $series Thông tin chi tiết của bộ truyện đang xem
  */
 $pageTitle = 'Chi tiết Truyện: ' . htmlspecialchars($series['title']);
 $current_page = 'series';

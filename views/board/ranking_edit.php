@@ -1,4 +1,12 @@
 <?php 
+/**
+ * View: Giao diện chỉnh sửa đánh giá xếp hạng bộ truyện (ranking_edit.php)
+ * Vai trò: Board (Ban biên tập/Hội đồng)
+ * Chức năng: Cho phép hội đồng/ban biên tập cập nhật thông tin xếp hạng, điểm số của một bộ truyện trong kỳ đánh giá.
+ * 
+ * @var array $ranking Thông tin bản ghi xếp hạng hiện tại đang cần chỉnh sửa
+ * @var array $seriesList Danh sách các bộ truyện để lựa chọn
+ */
 require_once __DIR__ . '/../../core/Auth.php';
 $role = $_SESSION['role_name'];
 $pageTitle = 'Sửa Đánh giá Xếp hạng';

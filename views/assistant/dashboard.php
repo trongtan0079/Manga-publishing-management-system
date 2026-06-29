@@ -1,8 +1,12 @@
 <?php 
 /**
- * @var int $assignedTasks
- * @var int $inProgressTasks
- * @var int $completedTasks
+ * View: Giao diện bảng điều khiển dành cho Trợ lý (dashboard.php)
+ * Vai trò: Assistant (Trợ lý)
+ * Chức năng: Hiển thị thống kê tổng quan về số lượng công việc được giao, công việc đang thực hiện, hoàn thành và các lối tắt hành động nhanh.
+ * 
+ * @var int $assignedTasks Tổng số công việc đã được giao
+ * @var int $inProgressTasks Số công việc đang trong quá trình thực hiện
+ * @var int $completedTasks Số công việc đã hoàn thành xuất sắc
  */
 $pageTitle = 'Bảng theo dõi Trợ lý (Assistant)';
 $current_page = 'dashboard';

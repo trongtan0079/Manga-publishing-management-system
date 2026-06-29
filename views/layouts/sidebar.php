@@ -1,4 +1,10 @@
 <?php
+/**
+ * Layout: Thanh công cụ/Thanh bên điều hướng (sidebar.php)
+ * Chức năng: Hiển thị các liên kết chức năng của hệ thống dựa trên phân quyền vai trò (Role) của người dùng đang đăng nhập.
+ * 
+ * @var string $role Vai trò của người dùng hiện tại lấy từ session
+ */
 $role = $_SESSION['role_name'] ?? '';
 ?>
 <div class="sidebar-custom offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">

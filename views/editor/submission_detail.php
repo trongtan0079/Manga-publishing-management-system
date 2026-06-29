@@ -1,6 +1,10 @@
 <?php
 /**
- * @var array $submission
+ * View: Giao diện chi tiết thông tin bản thảo đã nộp (submission_detail.php)
+ * Vai trò: Các vai trò liên quan (Editor, Mangaka, Assistant)
+ * Chức năng: Hiển thị chi tiết file bản vẽ nộp lên, ghi chú, người gửi, thông tin kiểm duyệt và các đánh giá (Review) đi kèm.
+ * 
+ * @var array $submission Thông tin chi tiết của bản thảo đang xem
  */
 $pageTitle = 'Chi tiết bản thảo nộp';
 $current_page = 'submissions';

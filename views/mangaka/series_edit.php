@@ -1,6 +1,10 @@
 <?php 
 /**
- * @var array $series 
+ * View: Giao diện chỉnh sửa bộ truyện (series_edit.php)
+ * Vai trò: Mangaka (Họa sĩ chính)
+ * Chức năng: Cho phép tác giả cập nhật thông tin tên bộ truyện, mô tả của bộ truyện đang chọn.
+ * 
+ * @var array $series Thông tin bộ truyện hiện tại cần cập nhật
  */
 $pageTitle = 'Chỉnh sửa Series: ' . htmlspecialchars($series['title']);
 $current_page = 'series';

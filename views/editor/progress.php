@@ -1,4 +1,11 @@
 <?php
+/**
+ * View: Giao diện theo dõi tiến độ & deadline xuất bản các bộ truyện (progress.php)
+ * Vai trò: Editor (Biên tập viên) / Các vai trò khác
+ * Chức năng: Theo dõi tiến độ hoàn thành chương truyện và các công việc (Task) sắp đến hạn hoặc trễ hạn của từng bộ truyện.
+ * 
+ * @var array $progressData Danh sách tiến độ và thông tin Task của từng bộ truyện
+ */
 $pageTitle = 'Tiến độ & Deadline';
 $current_page = 'progress';
 require_once __DIR__ . '/../layouts/header.php';

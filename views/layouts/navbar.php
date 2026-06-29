@@ -1,3 +1,9 @@
+<?php
+/**
+ * Layout: Thanh điều hướng phía trên (navbar.php)
+ * Chức năng: Hiển thị thương hiệu/logo, nút chuyển đổi menu (sidebar togglers) và thông tin tài khoản người dùng cùng dropdown thông báo.
+ */
+?>
 <nav class="navbar navbar-expand-lg bg-white fixed-top">
     <div class="container-fluid px-3 px-lg-0 ps-lg-2 pe-lg-4">
         <!-- Nút bật tắt menu cho mobile -->

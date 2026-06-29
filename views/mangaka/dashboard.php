@@ -1,11 +1,15 @@
 <?php 
 /**
- * @var int $totalSeries
- * @var int $totalChapters
- * @var int $totalPages
- * @var int $totalTasks
- * @var array $latestRankings
- * @var \SeriesRanking $rankingModel
+ * View: Giao diện bảng điều khiển dành cho Họa sĩ chính (dashboard.php)
+ * Vai trò: Mangaka (Họa sĩ chính)
+ * Chức năng: Thống kê số lượng tác phẩm, chương truyện, số trang vẽ đã tạo, tổng số công việc và bảng xếp hạng xếp hạng truyện mới nhất của họa sĩ.
+ * 
+ * @var int $totalSeries Tổng số bộ truyện họa sĩ sở hữu
+ * @var int $totalChapters Tổng số chương truyện họa sĩ sở hữu
+ * @var int $totalPages Tổng số trang vẽ
+ * @var int $totalTasks Tổng số công việc đã giao cho trợ lý
+ * @var array $latestRankings Danh sách xếp hạng mới nhất của các bộ truyện thuộc họa sĩ
+ * @var \SeriesRanking $rankingModel Thực thể mô hình xếp hạng dùng để lấy thêm thông tin
  */
 $pageTitle = 'Không gian sáng tác (Mangaka)';
 $current_page = 'dashboard';

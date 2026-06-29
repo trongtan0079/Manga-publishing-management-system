@@ -1,4 +1,11 @@
 <?php
+/**
+ * View: Giao diện nộp sản phẩm cho công việc (upload_submission.php)
+ * Vai trò: Assistant (Trợ lý)
+ * Chức năng: Cho phép trợ lý tải lên file bản thảo (hình ảnh, tài liệu, zip) cho công việc được giao.
+ * 
+ * @var array $tasks Danh sách các công việc (Task) được phân công đang chờ xử lý
+ */
 $pageTitle = 'Nộp sản phẩm Task';
 $current_page = 'submissions';
 require_once __DIR__ . '/../layouts/header.php';

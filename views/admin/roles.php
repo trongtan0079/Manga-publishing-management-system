@@ -1,7 +1,7 @@
 <?php 
 /**
- * Roles Management (Read Only)
- * @var array $rolesWithCount
+ * Quản lý Vai trò (Chỉ đọc) - Hiển thị thông tin và số lượng người dùng của từng vai trò trong hệ thống.
+ * @var array $rolesWithCount Danh sách các vai trò kèm theo số lượng thành viên tương ứng
  */
 $pageTitle = 'Quản lý Vai trò';
 $current_page = 'roles';

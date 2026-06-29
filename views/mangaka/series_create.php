@@ -1,4 +1,9 @@
 <?php 
+/**
+ * View: Giao diện tạo mới bộ truyện (series_create.php)
+ * Vai trò: Mangaka (Họa sĩ chính)
+ * Chức năng: Cung cấp biểu mẫu (form) nhập thông tin chi tiết (tên truyện, mô tả) để tạo một dự án truyện mới.
+ */
 $pageTitle = 'Tạo Series Mới';
 $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';

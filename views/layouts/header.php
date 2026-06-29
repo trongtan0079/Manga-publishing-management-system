@@ -1,4 +1,8 @@
 <?php
+/**
+ * Layout: Phần đầu trang HTML chung (header.php)
+ * Chức năng: Khởi động session nếu chưa có, định nghĩa BASE_PATH động, nhúng các thư viện CSS (Bootstrap 5, FontAwesome) và cấu hình thẻ head.
+ */
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }

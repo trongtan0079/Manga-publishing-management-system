@@ -1,6 +1,10 @@
 <?php 
 /**
- * @var array $users 
+ * View: Giao diện quản lý danh sách người dùng (users.php)
+ * Vai trò: Admin (Quản trị viên)
+ * Chức năng: Hiển thị danh sách tất cả các tài khoản người dùng trong hệ thống kèm các chức năng tìm kiếm, sửa, xóa, xem chi tiết.
+ * 
+ * @var array $users Danh sách thông tin tài khoản người dùng được truyền từ UserController
  */
 $pageTitle = 'Quản lý Người dùng';
 $current_page = 'users';

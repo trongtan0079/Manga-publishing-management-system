@@ -1,4 +1,11 @@
 <?php 
+/**
+ * View: Giao diện tạo đánh giá xếp hạng mới cho bộ truyện (ranking_create.php)
+ * Vai trò: Board (Ban biên tập/Hội đồng)
+ * Chức năng: Cho phép hội đồng/ban biên tập tạo xếp hạng và nhập điểm cho bộ truyện theo chu kỳ.
+ * 
+ * @var array $seriesList Danh sách các bộ truyện có trong hệ thống để chọn xếp hạng
+ */
 require_once __DIR__ . '/../../core/Auth.php';
 $role = $_SESSION['role_name'];
 $pageTitle = 'Tạo Đánh giá Xếp hạng Mới';

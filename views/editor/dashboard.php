@@ -1,9 +1,13 @@
 <?php 
 /**
- * @var int $pendingSubmissions
- * @var int $recentReviews
- * @var array $pendingList
- * @var array $recentReviewList
+ * View: Giao diện bảng điều khiển của Biên tập viên (dashboard.php)
+ * Vai trò: Editor (Biên tập viên)
+ * Chức năng: Thống kê số bản thảo đang chờ duyệt, các đánh giá gần đây, hiển thị chi tiết danh sách chờ và lịch sử đánh giá.
+ * 
+ * @var int $pendingSubmissions Số lượng bản thảo đang chờ xét duyệt
+ * @var int $recentReviews Số lượng bài đánh giá được thực hiện gần đây
+ * @var array $pendingList Danh sách các bản thảo đang chờ duyệt
+ * @var array $recentReviewList Danh sách các đánh giá đã thực hiện gần đây
  */
 $pageTitle = 'Góc Biên tập (Editor)';
 $current_page = 'dashboard';

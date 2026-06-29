@@ -1,3 +1,10 @@
+<?php
+/**
+ * Component View: Danh sách thông báo thu gọn hiển thị trên Dashboard (dashboard_notifications.php)
+ * Vai trò: Tất cả người dùng sau khi đăng nhập
+ * Chức năng: Hiển thị nhanh các thông báo chưa đọc và danh sách thông báo mới nhất kèm các tác vụ đánh dấu đã đọc.
+ */
+?>
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
         <h6 class="m-0 fw-bold"><i class="fas fa-bell text-primary me-2"></i>Thông báo mới (<?= $this->unreadCount ?>)</h6>

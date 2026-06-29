@@ -1,6 +1,10 @@
 <?php 
 /**
- * @var array $roles 
+ * View: Giao diện tạo mới tài khoản người dùng (user_create.php)
+ * Vai trò: Admin (Quản trị viên)
+ * Chức năng: Cho phép quản trị viên nhập thông tin cơ bản và phân quyền vai trò để tạo tài khoản mới.
+ * 
+ * @var array $roles Danh sách các vai trò (roles) hiện có trong hệ thống để lựa chọn phân quyền
  */
 $pageTitle = 'Thêm người dùng mới';
 $current_page = 'users';

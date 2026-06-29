@@ -1,4 +1,11 @@
 <?php 
+/**
+ * View: Giao diện chi tiết xếp hạng bộ truyện (ranking_detail.php)
+ * Vai trò: Board (Ban biên tập/Hội đồng) / Các vai trò khác có quyền xem
+ * Chức năng: Hiển thị chi tiết điểm số, thứ hạng và kỳ đánh giá cụ thể của bộ truyện được chọn.
+ * 
+ * @var array $ranking Thông tin chi tiết xếp hạng của bộ truyện
+ */
 require_once __DIR__ . '/../../core/Auth.php';
 $role = $_SESSION['role_name'];
 $pageTitle = 'Chi tiết Xếp hạng';
@@ -32,14 +39,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <tr>
                             <th class="bg-light">Bộ truyện (Series)</th>
                             <td>
-                                <strong><?= htmlspecialchars($series['title']) ?></strong> 
-                                <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="btn btn-sm btn-link text-decoration-none p-0 ms-2">(Xem chi tiết truyện)</a>
+                                <strong><?= htmlspecialchars($ranking['series_title'] ?? 'Không xác định') ?></strong> 
+                                <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $ranking['series_id'] ?>" class="btn btn-sm btn-link text-decoration-none p-0 ms-2">(Xem chi tiết truyện)</a>
                             </td>
                         </tr>
                         <tr>
                             <th class="bg-light">Kỳ Đánh giá</th>
                             <td>
-                                <span class="badge bg-secondary fs-6"><?= htmlspecialchars(date('d/m/Y', strtotime($ranking['period_start_date']))) ?></span>
+                                <span class="badge bg-secondary fs-6"><?= $ranking['period_start_date'] ? htmlspecialchars(date('d/m/Y', strtotime($ranking['period_start_date']))) : 'Chưa cập nhật' ?></span>
                             </td>
                         </tr>
                         <tr>
@@ -56,11 +63,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </tr>
                         <tr>
                             <th class="bg-light">Người Đánh giá</th>
-                            <td>ID: <?= htmlspecialchars($ranking['board_member_id']) ?></td>
+                            <td><?= htmlspecialchars($ranking['board_member_name'] ?? 'Không xác định') ?> (ID: <?= htmlspecialchars($ranking['board_member_id']) ?>)</td>
                         </tr>
                         <tr>
                             <th class="bg-light">Ngày tạo</th>
-                            <td><?= htmlspecialchars(date('d/m/Y H:i:s', strtotime($ranking['created_at']))) ?></td>
+                            <td><?= $ranking['created_at'] ? htmlspecialchars(date('d/m/Y H:i:s', strtotime($ranking['created_at']))) : 'Chưa cập nhật' ?></td>
                         </tr>
                     </tbody>
                 </table>

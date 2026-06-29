@@ -1,10 +1,14 @@
 <?php 
 /**
- * @var int $evaluatedSeries
- * @var string|null $latestPeriod
- * @var string $topRankingSeriesName
- * @var array $top5Series
- * @var array $bottom5Series
+ * View: Giao diện bảng điều khiển dành cho Ban Giám đốc / Hội đồng (dashboard.php)
+ * Vai trò: Board (Hội đồng/Ban giám đốc)
+ * Chức năng: Thống kê số lượng bộ truyện được đánh giá, kỳ đánh giá gần nhất, bộ truyện đứng đầu, và bảng xếp hạng Top 5 bán chạy/yêu thích.
+ * 
+ * @var int $evaluatedSeries Số lượng truyện đã đánh giá xếp hạng
+ * @var string|null $latestPeriod Kỳ đánh giá gần đây nhất
+ * @var string $topRankingSeriesName Tên truyện đang dẫn đầu bảng xếp hạng
+ * @var array $top5Series Danh sách 5 tác phẩm có điểm số cao nhất
+ * @var array $bottom5Series Danh sách 5 tác phẩm cần chú ý (điểm thấp nhất)
  */
 $pageTitle = 'Bảng Giám đốc (Board)';
 $current_page = 'dashboard';

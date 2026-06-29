@@ -1,6 +1,10 @@
 <?php
 /**
- * @var array $submissions
+ * View: Giao diện danh sách lịch sử nộp bản thảo và phê duyệt (submission_list.php)
+ * Vai trò: Editor (Biên tập viên) / Mangaka (Họa sĩ chính) / Assistant (Trợ lý)
+ * Chức năng: Hiển thị danh sách các bản thảo đã nộp trong dự án cùng với trạng thái phê duyệt và liên kết xem chi tiết/kiểm duyệt.
+ * 
+ * @var array $submissions Danh sách các bản thảo được truyền từ SubmissionController
  */
 $pageTitle = 'Quản lý Bản thảo & Phê duyệt';
 $current_page = 'submissions';
