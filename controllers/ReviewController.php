@@ -6,12 +6,22 @@ require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Notification.php';
 
 
+/**
+ * Class ReviewController
+ * 
+ * Quản lý hoạt động đánh giá (Review) các bản thảo (Submission).
+ * Cho phép Editor đánh giá bản thảo chương truyện (Chapter) và Mangaka đánh giá sản phẩm của Assistant.
+ */
 class ReviewController extends BaseController
 {
     private $reviewModel;
     private $submissionModel;
     private $notificationModel;
 
+    /**
+     * Khởi tạo ReviewController.
+     * Xác thực đăng nhập và khởi tạo các Model cần thiết.
+     */
     public function __construct() {
         parent::__construct();
         \requireLogin();
@@ -20,14 +30,17 @@ class ReviewController extends BaseController
         $this->notificationModel = new Notification();
     }
 
+    /**
+     * Hiển thị danh sách các bản thảo cần đánh giá dựa trên vai trò của người dùng.
+     */
     public function index() {
         $role = $_SESSION['role_name'] ?? '';
         if ($role === 'editor') {
-            // Editor sees all chapter submissions (pending + history)
+            // Editor (Biên tập viên) xem tất cả các bản thảo chương truyện (chờ duyệt + lịch sử)
             $submissions = $this->submissionModel->findAllChapterSubmissions();
             require_once __DIR__ . '/../views/editor/review_list.php';
         } elseif ($role === 'mangaka') {
-            // Mangaka sees pending task submissions for their own tasks
+            // Mangaka xem các bản thảo của Task đang chờ duyệt thuộc về các Task do họ giao
             $userId = $_SESSION['user_id'];
             $submissions = $this->submissionModel->findPendingSubmissionsByMangakaId($userId);
             require_once __DIR__ . '/../views/editor/review_list.php';
@@ -38,13 +51,21 @@ class ReviewController extends BaseController
         }
     }
 
+    /**
+     * Kiểm tra quyền đánh giá bản thảo của người dùng hiện tại.
+     * 
+     * @param array $submission Thông tin bản thảo cần kiểm tra
+     * @return bool Trả về true nếu có quyền, ngược lại trả về false
+     */
     private function checkReviewPermission($submission) {
         $role = $_SESSION['role_name'] ?? '';
+        // Editor có quyền đánh giá bản thảo của Chương truyện (chapter_id không rỗng)
         if ($role === 'editor' && $submission['chapter_id']) {
-            return true; // Editor reviews chapters
+            return true;
         }
+        // Mangaka có quyền đánh giá bản thảo của Nhiệm vụ (task_id không rỗng)
         if ($role === 'mangaka' && $submission['task_id']) {
-            // Check if task belongs to this mangaka
+            // Kiểm tra xem nhiệm vụ này có phải do Mangaka này giao hay không
             require_once __DIR__ . '/../models/Task.php';
             $taskModel = new \Task();
             $task = $taskModel->findById($submission['task_id']);
@@ -55,6 +76,9 @@ class ReviewController extends BaseController
         return false;
     }
 
+    /**
+     * Hiển thị giao diện tạo đánh giá mới cho bản thảo.
+     */
     public function create() {
         if (!isset($_GET['submission_id'])) {
             header('Location: ' . BASE_PATH . '/index.php?controller=review&action=index');
@@ -73,6 +97,9 @@ class ReviewController extends BaseController
         require_once __DIR__ . '/../views/editor/review_create.php';
     }
 
+    /**
+     * Lưu thông tin đánh giá mới vào cơ sở dữ liệu và cập nhật trạng thái bản thảo.
+     */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $submissionId = $_POST['submission_id'] ?? null;
@@ -93,7 +120,7 @@ class ReviewController extends BaseController
                 exit;
             }
 
-            // Insert review
+            // Thêm mới thông tin đánh giá
             $reviewerId = $_SESSION['user_id'];
             $data = [
                 'submission_id' => $submissionId,
@@ -103,11 +130,11 @@ class ReviewController extends BaseController
             ];
             $this->reviewModel->insert($data);
 
-            // Update submission status
+            // Cập nhật trạng thái của bản thảo (Phê duyệt hoặc Từ chối)
             $status = ($decision === 'approved') ? 'approved' : 'rejected';
             $this->submissionModel->update($submissionId, ['status' => $status]);
 
-            // Create notifications
+            // Gửi thông báo đến người nộp bản thảo
             $this->notificationModel->createNotification(
                 $submission['user_id'],
                 'review_created',
@@ -123,14 +150,14 @@ class ReviewController extends BaseController
                 "Bản thảo của bạn đã bị {$statusText}. Nhận xét: " . mb_substr($comments, 0, 50) . "..."
             );
 
-            // If it's a task submission and it's approved, update the task to completed
+            // Nếu là bản thảo nhiệm vụ (Task) và được duyệt, cập nhật trạng thái Task thành 'completed'
             if ($submission['task_id'] && $status === 'approved') {
                 require_once __DIR__ . '/../models/Task.php';
                 $taskModel = new \Task();
                 $taskModel->update($submission['task_id'], ['status' => 'completed']);
             }
 
-            // If it's a chapter submission and it's approved, update chapter to approved
+            // Nếu là bản thảo chương truyện (Chapter) và được duyệt, cập nhật trạng thái Chapter thành 'approved'
             if ($submission['chapter_id'] && $status === 'approved') {
                 require_once __DIR__ . '/../models/Chapter.php';
                 $chapterModel = new \Chapter();
@@ -143,6 +170,9 @@ class ReviewController extends BaseController
         }
     }
 
+    /**
+     * Hiển thị chi tiết một đánh giá cụ thể.
+     */
     public function show() {
         if (!isset($_GET['id'])) {
             header('Location: ' . BASE_PATH . '/index.php?controller=review&action=index');
@@ -160,7 +190,7 @@ class ReviewController extends BaseController
 
         $submission = $this->submissionModel->findWithMetadataById($review['submission_id']);
         
-        // Anyone involved in the submission process can see the review
+        // Kiểm tra quyền xem đánh giá: Chỉ những người liên quan trực tiếp mới được xem
         $role = $_SESSION['role_name'] ?? '';
         $userId = $_SESSION['user_id'];
         $hasAccess = false;

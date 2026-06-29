@@ -19,6 +19,21 @@ class SeriesRanking extends Model {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Lấy thông tin chi tiết xếp hạng kèm tên bộ truyện, tác giả, và tên người đánh giá (board member)
+     */
+    public function findWithDetails($id) {
+        $sql = "SELECT sr.*, s.title as series_title, s.mangaka_id, u.full_name as board_member_name 
+                FROM {$this->table} sr
+                JOIN series s ON sr.series_id = s.series_id
+                JOIN users u ON sr.board_member_id = u.user_id
+                WHERE sr.ranking_id = :id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     public function findAllWithSeries() {
         $sql = "SELECT sr.*, s.title as series_title, u.full_name as mangaka_name 
                 FROM {$this->table} sr

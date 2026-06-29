@@ -117,13 +117,14 @@ class SeriesController extends BaseController
         }
 
         $role = $_SESSION['role_name'] ?? '';
-        if ($role === 'editor') {
-            return; // Editor có quyền xem
+        // Admin, Editor, Board có quyền xem thông tin chi tiết bộ truyện
+        if ($role === 'admin' || $role === 'editor' || $role === 'board') {
+            return;
         }
 
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện của người khác.";
-            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             exit;
         }
     }

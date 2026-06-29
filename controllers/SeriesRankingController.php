@@ -151,17 +151,15 @@ class SeriesRankingController extends BaseController
      */
     public function show($id) {
         $id = (int)$id;
-        $ranking = $this->rankingModel->findById($id);
+        $ranking = $this->rankingModel->findWithDetails($id);
         if (!$ranking) {
             $_SESSION['error'] = 'Không tìm thấy Ranking.';
             header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=index');
             exit;
         }
 
-        $series = $this->seriesModel->findById($ranking['series_id']);
-        
         $role = $_SESSION['role_name'];
-        if ($role === 'mangaka' && $series['mangaka_id'] != $_SESSION['user_id']) {
+        if ($role === 'mangaka' && $ranking['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = 'Truy cập bị từ chối.';
             header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=index');
             exit;
