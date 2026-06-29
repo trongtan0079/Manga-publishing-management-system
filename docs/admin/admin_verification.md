@@ -1,14 +1,14 @@
 # Admin Verification Checklist
 
-- [x] Sidebar Dashboard link di?u hu?ng d�ng cho t?t c? 5 role.
-- [x] N�t Th�m ngu?i d�ng m?i ho?t d?ng tr�n Dashboard.
-- [x] CRUD User ho?t d?ng b�nh thu?ng (Create, Read, Update, Delete).
-- [x] Status `banned` du?c luu d�ng khi t?o/s?a user.
-- [x] Giao di?n th?ng nh?t gi?a user_create, user_edit, user_detail v?i Dashboard.
-- [x] Admin Dashboard hi?n th? d?y d? 12 stat cards.
-- [x] Bi?u d? Chart.js render d�ng d? li?u.
-- [x] Trang Roles Management hi?n th? d�ng (Read Only).
-- [x] Sidebar hi?n th? menu Vai tr� cho Admin.
-- [x] Kh�ng c�n hardcoded URL trong Admin views v� controller.
-- [x] Kh�ng c�n die(), var_dump(), print_r(), TODO trong code.
-- [x] Kh�ng ph�t sinh Regression Bug.
+- [x] Sidebar Dashboard link điều hướng đúng cho tất cả 5 vai trò.
+- [x] Nút Thêm người dùng mới hoạt động trên Dashboard.
+- [x] CRUD User hoạt động bình thường (Create, Read, Update, Delete).
+- [x] Trạng thái `banned` được lưu đúng khi tạo/sửa user.
+- [x] Giao diện thống nhất giữa user_create, user_edit, user_detail với Dashboard.
+- [x] Admin Dashboard hiển thị đầy đủ 12 stat cards.
+- [x] Biểu đồ Chart.js render đúng dữ liệu.
+- [x] Trang Roles Management hiển thị đúng (Read Only).
+- [x] Sidebar hiển thị menu Vai trò cho Admin.
+- [x] Không còn đường dẫn cứng (hardcoded URL) trong Admin views và controller.
+- [x] Không còn die(), var_dump(), print_r(), TODO trong code.
+- [x] Không phát sinh lỗi hồi quy (Regression Bug).

@@ -1,18 +1,18 @@
 # Roles Management Report
 
-## Ch?c nang
-Trang Roles Management ch? hi?n th? th�ng tin (Read Only), bao g?m:
-- Danh s�ch t?t c? vai tr� trong h? th?ng.
-- M� t? chi ti?t t?ng vai tr�.
-- S? lu?ng user thu?c m?i vai tr�.
-- Summary cards th?ng k� tr?c quan.
+## Chức năng
+Trang Roles Management chỉ hiển thị thông tin (Read Only), bao gồm:
+- Danh sách tất cả vai trò trong hệ thống.
+- Mô tả chi tiết từng vai trò.
+- Số lượng người dùng thuộc mỗi vai trò.
+- Summary cards thống kê trực quan.
 
-## Thi?t k?
+## Thiết kế
 - Route: `?controller=user&action=roles`
 - Controller: `UserController::roles()`
 - View: `views/admin/roles.php`
-- Sidebar: Menu Qu?n l� Vai tr� (ch? Admin).
+- Sidebar: Menu Quản lý Vai trò (Chỉ hiển thị với Admin).
 
-## Gi?i h?n
-- Kh�ng cho ph�p Create, Update, Delete role.
-- Role l� d? li?u c? d?nh trong h? th?ng.
+## Giới hạn
+- Không cho phép Create, Update, Delete vai trò.
+- Vai trò là dữ liệu cố định trong hệ thống.

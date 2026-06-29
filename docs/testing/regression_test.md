@@ -1,39 +1,104 @@
-# Danh sách Kịch bản Kiểm thử Hồi quy (Regression Test Cases)
+# Danh sách Kịch bản Kiểm thử Hồi quy (Regression Test Cases)
+
+Quá trình Regression Testing được thực hiện sau Giai đoạn Bug Fix và Security Audit nhằm đảm bảo 100% tính nguyên vẹn của luồng nghiệp vụ. Dưới đây là kết quả rà soát:
+
+## 1. Authentication
+### ID: RT-01
+- **Kịch bản**: Đăng nhập Admin / Mangaka / Assistant / Editor / Board
+- **Mong đợi**: Chuyển đúng Dashboard của Role
+- **Kết quả thực tế**: Chuyển đúng Role, tạo đúng Session
+- **Trạng thái**: **PASS**
 
-Quá trình Regression Testing được thực hiện sau Giai đoạn Bug Fix và Security Audit nhằm đảm bảo 100% tính nguyên vẹn của luồng nghiệp vụ. Dưới đây là kết quả rà soát:
+### ID: RT-02
+- **Kịch bản**: Đăng xuất
+- **Mong đợi**: Chuyển về trang chủ, xóa Session
+- **Kết quả thực tế**: Session xóa sạch
+- **Trạng thái**: **PASS**
 
-## 1. Authentication
-| ID | Kịch bản | Mong đợi | Kết quả thực tế | Trạng thái |
-|----|----------|----------|-----------------|------------|
-| RT-01 | Đăng nhập Admin / Mangaka / Assistant / Editor / Board | Chuyển đúng Dashboard của Role | Chuyển đúng Role, tạo đúng Session | **PASS** |
-| RT-02 | Đăng xuất | Chuyển về trang chủ, xóa Session | Session xóa sạch | **PASS** |
-| RT-03 | Quản lý Flash Message sau Login | Chỉ hiện thông báo thành công 1 lần | Thông báo biến mất sau khi tải lại | **PASS** |
+### ID: RT-03
+- **Kịch bản**: Quản lý Flash Message sau Login
+- **Mong đợi**: Chỉ hiện thông báo thành công 1 lần
+- **Kết quả thực tế**: Thông báo biến mất sau khi tải lại
+- **Trạng thái**: **PASS**
+
+## 2. Manga Production Workflow
+### ID: RT-04
+- **Kịch bản**: Mangaka tạo và xóa Page
+- **Mong đợi**: Tạo Page thành công, khi xóa phải dọn dẹp file vật lý
+- **Kết quả thực tế**: File trong thư mục `uploads/pages` bị xóa
+- **Trạng thái**: **PASS**
 
-## 2. Manga Production Workflow
-| ID | Kịch bản | Mong đợi | Kết quả thực tế | Trạng thái |
-|----|----------|----------|-----------------|------------|
-| RT-04 | Mangaka tạo và xóa Page | Tạo Page thành công, khi xóa phải dọn dẹp file vật lý | File trong thư mục `uploads/pages` bị xóa | **PASS** |
-| RT-05 | Mangaka giao Task cho Assistant | Task lưu vào DB với đúng trạng thái | Phân bổ Task đúng | **PASS** |
-| RT-06 | Assistant Submit Submission | Nộp file khác đuôi nhưng cùng MIME type vẫn được lưu tự động | File tự động đổi đuôi và lưu thành công | **PASS** |
-| RT-07 | Mangaka Approve Submission | Task đổi status thành `completed` | Trạng thái cập nhật chính xác | **PASS** |
-| RT-08 | Editor duyệt Chapter | Chapter cập nhật sang `published` hoặc `rejected` | Luồng review Chapter nguyên vẹn | **PASS** |
+### ID: RT-05
+- **Kịch bản**: Mangaka giao Task cho Assistant
+- **Mong đợi**: Task lưu vào DB với đúng trạng thái
+- **Kết quả thực tế**: Phân bổ Task đúng
+- **Trạng thái**: **PASS**
 
-## 3. Notification Module
-| ID | Kịch bản | Mong đợi | Kết quả thực tế | Trạng thái |
-|----|----------|----------|-----------------|------------|
-| RT-09 | Push Notification khi giao Task | Có chuông báo, đúng ID | Thông báo nhảy đúng người | **PASS** |
-| RT-10 | Mark as Read / Mark All As Read | Badge số lượng giảm xuống 0 | Trạng thái 'is_read' trong DB đổi thành 1 | **PASS** |
-| RT-11 | Check Notification Ownership | Người khác không đọc được thông báo | Chặn 403 nếu URL bị sửa | **PASS** |
+### ID: RT-06
+- **Kịch bản**: Assistant Submit Submission
+- **Mong đợi**: Nộp file khác đuôi nhưng cùng MIME type vẫn được lưu tự động
+- **Kết quả thực tế**: File tự động đổi đuôi và lưu thành công
+- **Trạng thái**: **PASS**
 
-## 4. Dashboard & Ranking
-| ID | Kịch bản | Mong đợi | Kết quả thực tế | Trạng thái |
-|----|----------|----------|-----------------|------------|
-| RT-12 | Thống kê Dashboard các Role | Tổng số chính xác, không biến Undefined | Tất cả số liệu render đúng | **PASS** |
-| RT-13 | Board CRUD Ranking | Tạo, sửa, xóa Ranking thành công | Bảng SeriesRanking lưu dữ liệu chuẩn | **PASS** |
+### ID: RT-07
+- **Kịch bản**: Mangaka Approve Submission
+- **Mong đợi**: Task đổi status thành `completed`
+- **Kết quả thực tế**: Trạng thái cập nhật chính xác
+- **Trạng thái**: **PASS**
 
-## 5. Security & DB Integrity
-| ID | Kịch bản | Mong đợi | Kết quả thực tế | Trạng thái |
-|----|----------|----------|-----------------|------------|
-| RT-14 | Chạy lại 30 Test Cases Giai đoạn 2 | Chặn 100% các Role cấm | Mọi RBAC checks vẫn hoạt động tốt | **PASS** |
-| RT-15 | Dữ liệu rác (Orphan Data) | Không có page ảo khi bị xóa | Khóa ngoại DB không bị vỡ | **PASS** |
-| RT-16 | UI Validation | Giao diện Bootstrap không vỡ hạt | Form Upload và Bảng Dashboard căn lề chuẩn | **PASS** |
+### ID: RT-08
+- **Kịch bản**: Editor duyệt Chapter
+- **Mong đợi**: Chapter cập nhật sang `published` hoặc `rejected`
+- **Kết quả thực tế**: Luồng review Chapter nguyên vẹn
+- **Trạng thái**: **PASS**
+
+## 3. Notification Module
+### ID: RT-09
+- **Kịch bản**: Push Notification khi giao Task
+- **Mong đợi**: Có chuông báo, đúng ID
+- **Kết quả thực tế**: Thông báo nhảy đúng người
+- **Trạng thái**: **PASS**
+
+### ID: RT-10
+- **Kịch bản**: Mark as Read / Mark All As Read
+- **Mong đợi**: Badge số lượng giảm xuống 0
+- **Kết quả thực tế**: Trạng thái 'is_read' trong DB đổi thành 1
+- **Trạng thái**: **PASS**
+
+### ID: RT-11
+- **Kịch bản**: Check Notification Ownership
+- **Mong đợi**: Người khác không đọc được thông báo
+- **Kết quả thực tế**: Chặn 403 nếu URL bị sửa
+- **Trạng thái**: **PASS**
+
+## 4. Dashboard & Ranking
+### ID: RT-12
+- **Kịch bản**: Thống kê Dashboard các Role
+- **Mong đợi**: Tổng số chính xác, không biến Undefined
+- **Kết quả thực tế**: Tất cả số liệu render đúng
+- **Trạng thái**: **PASS**
+
+### ID: RT-13
+- **Kịch bản**: Board CRUD Ranking
+- **Mong đợi**: Tạo, sửa, xóa Ranking thành công
+- **Kết quả thực tế**: Bảng SeriesRanking lưu dữ liệu chuẩn
+- **Trạng thái**: **PASS**
+
+## 5. Security & DB Integrity
+### ID: RT-14
+- **Kịch bản**: Chạy lại 30 Test Cases Giai đoạn 2
+- **Mong đợi**: Chặn 100% các Role cấm
+- **Kết quả thực tế**: Mọi RBAC checks vẫn hoạt động tốt
+- **Trạng thái**: **PASS**
+
+### ID: RT-15
+- **Kịch bản**: Dữ liệu rác (Orphan Data)
+- **Mong đợi**: Không có page ảo khi bị xóa
+- **Kết quả thực tế**: Khóa ngoại DB không bị vỡ
+- **Trạng thái**: **PASS**
+
+### ID: RT-16
+- **Kịch bản**: UI Validation
+- **Mong đợi**: Giao diện Bootstrap không vỡ hạt
+- **Kết quả thực tế**: Form Upload và Bảng Dashboard căn lề chuẩn
+- **Trạng thái**: **PASS**

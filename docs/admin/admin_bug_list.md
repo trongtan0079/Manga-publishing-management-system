@@ -1,29 +1,29 @@
 # Admin Bug List & Fixes
 
 ## BUG-01: Sidebar Dashboard Link
-- **M� t?**: Sidebar tr? d?n `action=index` nhung DashboardController kh�ng c� action `index()`.
-- **?nh hu?ng**: T?t c? role kh�ng th? quay v? Dashboard t? Sidebar.
-- **S?a**: Thay d?i link sang `action=<role_name>` d?a theo session hi?n t?i.
+- **Mô tả**: Sidebar trỏ đến `action=index` nhưng DashboardController không có action `index()`.
+- **Ảnh hưởng**: Tất cả các vai trò không thể quay về Dashboard từ Sidebar.
+- **Sửa**: Thay đổi link sang `action=<role_name>` dựa theo session hiện tại.
 - **File**: `views/layouts/sidebar.php`
 
-## BUG-02: N�t "Th�m ngu?i d�ng m?i"
-- **M� t?**: S? d?ng `<button>` kh�ng c� href, kh�ng di?u hu?ng.
-- **S?a**: �?i th�nh `<a>` tr? d?n `controller=user&action=create`.
+## BUG-02: Nút "Thêm người dùng mới"
+- **Mô tả**: Sử dụng `<button>` không có href, không điều hướng.
+- **Sửa**: Đổi thành `<a>` trỏ đến `controller=user&action=create`.
 - **File**: `views/admin/dashboard.php`
 
-## BUG-03: Status banned kh�ng du?c ch?p nh?n
-- **M� t?**: Validation ch? accept `active` v� `inactive`, thi?u `banned`.
-- **?nh hu?ng**: Admin kh�ng th? t?o/s?a user v?i tr?ng th�i banned.
-- **S?a**: Th�m `banned` v�o whitelist `in_array()` ? c? `store()` v� `update()`.
+## BUG-03: Trạng thái banned không được chấp nhận
+- **Mô tả**: Validation chỉ chấp nhận `active` và `inactive`, thiếu `banned`.
+- **Ảnh hưởng**: Admin không thể tạo/sửa người dùng với trạng thái banned.
+- **Sửa**: Thêm `banned` vào whitelist `in_array()` ở cả `store()` và `update()`.
 - **File**: `controllers/UserController.php`
 
-## BUG-04: Thi?u require Notification Model
-- **M� t?**: DashboardController s? d?ng `new Notification()` nhung thi?u require_once.
-- **S?a**: Th�m `require_once Notification.php` v�o ph?n import.
+## BUG-04: Thiếu import Notification Model
+- **Mô tả**: DashboardController sử dụng `new Notification()` nhưng thiếu require_once.
+- **Sửa**: Thêm `require_once Notification.php` vào phần import.
 - **File**: `controllers/DashboardController.php`
 
-## BUG-05: Hardcoded URLs
-- **M� t?**: C�c redirect v� href s? d?ng `/index.php` c?ng, kh�ng d�ng BASE_PATH.
-- **?nh hu?ng**: L?i khi deploy trong thu m?c con (VD: localhost/manga/).
-- **S?a**: Thay t?t c? b?ng `BASE_PATH . '/index.php'`.
+## BUG-05: Đường dẫn cứng (Hardcoded URLs)
+- **Mô tả**: Các redirect và href sử dụng `/index.php` cứng, không dùng BASE_PATH.
+- **Ảnh hưởng**: Lỗi khi triển khai trong thư mục con (Ví dụ: localhost/manga/).
+- **Sửa**: Thay tất cả bằng `BASE_PATH . '/index.php'`.
 - **File**: `controllers/UserController.php`, `views/admin/users.php`

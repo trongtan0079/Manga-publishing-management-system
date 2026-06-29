@@ -1,5 +1,5 @@
 # Final Test Results
-- **T�nh tr?ng**: PASS 100%.
-- Kh�ng c� l?i SQL Injection, URL Tampering.
-- C�c ch?c nang ph�n quy?n ho?t d?ng ch�nh x�c theo d?c t?.
-- Giao di?n Admin, Mangaka, Editor, Assistant, Board hi?n th? d�ng s? li?u th?ng k�.
+- **Tình trạng**: PASS 100%.
+- Không còn lỗ hổng bảo mật SQL Injection hay giả mạo tham số URL Tampering.
+- Các chức năng phân quyền hoạt động chính xác theo đặc tả.
+- Giao diện Admin, Mangaka, Editor, Assistant, Board hiển thị đúng số liệu thống kê thực tế từ DB.

@@ -1,17 +1,17 @@
 # Admin Dashboard Report
 
-## T?ng quan
-Dashboard Admin hi?n th? to�n b? th?ng k� h? th?ng bao g?m:
-- 9 Stat Cards ch�nh: User, Series, Chapter, Page, Task, Submission, Review, Notification, Ranking.
-- 3 Stat Cards ph?: Active Users, Inactive Users, Banned Users.
-- 3 Bi?u d? Chart.js: User theo Role (Bar), Task theo Status (Doughnut), Submission theo Status (Doughnut).
-- Widget th�ng b�o g?n d�y.
+## Tổng quan
+Dashboard Admin hiển thị toàn bộ thống kê hệ thống bao gồm:
+- 9 Stat Cards chính: User, Series, Chapter, Page, Task, Submission, Review, Notification, Ranking.
+- 3 Stat Cards phụ: Active Users, Inactive Users, Banned Users.
+- 3 Biểu đồ Chart.js: User theo Vai trò (Bar), Task theo Trạng thái (Doughnut), Bản thảo theo Trạng thái (Doughnut).
+- Widget thông báo gần đây.
 
-## D? li?u
-- T?t c? d? li?u du?c truy v?n tr?c ti?p t? Database th�ng qua c�c Model.
-- Kh�ng s? d?ng cache hay b?ng t?m.
-- Bi?u d? s? d?ng Chart.js v4 qua CDN, kh�ng c�i d?t package.
+## Dữ liệu
+- Tất cả dữ liệu được truy vấn trực tiếp từ Database thông qua các Model.
+- Không sử dụng cache hay bảng tạm.
+- Biểu đồ sử dụng Chart.js v4 qua CDN, không cài đặt package.
 
-## Ph�n quy?n
-- Ch? Admin m?i c� quy?n truy c?p Dashboard Admin.
-- S? d?ng `requireRole('admin')` d? ki?m tra quy?n.
+## Phân quyền
+- Chỉ Admin mới có quyền truy cập Dashboard Admin.
+- Sử dụng `requireRole('admin')` để kiểm tra quyền.

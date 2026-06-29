@@ -1,5 +1,5 @@
 # Notification Module Report
-- Ch?c nang t? d?ng th�ng b�o ho?t d?ng ?n d?nh.
-- Ch?c nang Mark As Read v� Mark All As Read d� du?c chuy?n d?i sang POST request.
-- �p d?ng c�c bi?n ph�p ch?ng URL Tampering v� ki?m tra quy?n s? h?u d?i v?i th�ng b�o.
-- Thay th? c�c li�n k?t <a> kh�ng an to�n b?ng form POST d? tr�nh l?i HTML l?ng nhau v� n�ng cao b?o m?t.
+- Chức năng tự động gửi và hiển thị thông báo hoạt động ổn định.
+- Chức năng Mark As Read và Mark All As Read đã được chuyển đổi sang POST request để tăng cường bảo mật.
+- Áp dụng các biện pháp chống giả mạo tham số (URL Tampering) và kiểm tra quyền sở hữu đối với thông báo.
+- Thay thế các liên kết `<a>` không an toàn bằng form POST để tránh lỗi HTML lồng nhau và nâng cao tính bảo mật.

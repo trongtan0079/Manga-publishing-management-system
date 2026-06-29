@@ -1,6 +1,6 @@
 # Demo Checklist
-- [x] Chu?n b? Data test d? c�c tru?ng h?p.
-- [x] Ki?m tra hi?n th? d? c�c th?ng k� ? 5 Dashboard.
-- [x] Tr�nh b�y validation c?a X?p h?ng (di?m <0 ho?c >100).
-- [x] Tr�nh b�y lu?ng t?o th�ng b�o khi Board t?o X?p h?ng m?i.
-- [x] Th? nh?p '��nh d?u d� d?c' v� gi?i th�ch vi?c chuy?n qua form POST.
+- [x] Chuẩn bị đầy đủ dữ liệu thử nghiệm cho các trường hợp.
+- [x] Kiểm tra hiển thị đầy đủ các thống kê ở cả 5 Dashboard.
+- [x] Trình bày validation của Xếp hạng (điểm < 0 hoặc > 100).
+- [x] Trình bày luồng tự động tạo thông báo khi Hội đồng (Board) tạo Xếp hạng mới.
+- [x] Thử nghiệm tính năng 'Đánh dấu đã đọc' và giải thích việc chuyển qua form POST để tăng tính bảo mật.

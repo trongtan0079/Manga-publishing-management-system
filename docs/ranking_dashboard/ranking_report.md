@@ -1,5 +1,5 @@
 # Ranking Module Report
-- �� ho�n thi?n to�n b? t�nh nang CRUD cho X?p h?ng Truy?n.
-- Role Board c� quy?n Th�m, S?a, X�a.
-- C�c role kh�c c� quy?n xem. Mangaka ch? du?c xem x?p h?ng truy?n c?a m�nh.
-- T? d?ng g?i th�ng b�o cho t�c gi? khi c� x?p h?ng m?i.
+- Đã hoàn thiện toàn bộ tính năng CRUD cho Xếp hạng Truyện (Series Ranking).
+- Vai trò Hội đồng (Board) có đầy đủ quyền Thêm, Sửa, Xóa xếp hạng.
+- Các vai trò khác chỉ có quyền xem. Mangaka chỉ được xem xếp hạng đối với các bộ truyện do mình sáng tác.
+- Tự động gửi thông báo cho tác giả khi có bản xếp hạng mới được tạo lập.

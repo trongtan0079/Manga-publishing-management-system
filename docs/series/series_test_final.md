@@ -1,15 +1,36 @@
-# Báo Cáo Kiểm Thử Cuối Cùng (Final Test) - Module Series
+# Báo Cáo Kiểm Thử Cuối Cùng (Final Test) - Module Series
+
+**Ngày kiểm thử:** Theo timestamp hệ thống
+**Kết quả chung:** PASS
+
+### Hạng mục Kiểm thử: CRUD Series
+- **Các Case**: Create, Read, Update, Delete.
+- **Kết quả (PASS/FAIL)**: **PASS**
+- **Ghi chú**: Kiểm tra độ dài title hoạt động.
 
-**Ngày kiểm thử:** Theo timestamp hệ thống
-**Kết quả chung:** PASS
+### Hạng mục Kiểm thử: CRUD Chapter
+- **Các Case**: Create, Read, Update, Delete.
+- **Kết quả (PASS/FAIL)**: **PASS**
+- **Ghi chú**: Kiểm tra trùng `chapter_number` hoạt động.
 
-| Hạng mục Kiểm thử | Các Case | Kết quả (PASS/FAIL) | Ghi chú |
-| --- | --- | --- | --- |
-| CRUD Series | Create, Read, Update, Delete. | **PASS** | Kiểm tra độ dài title hoạt động. |
-| CRUD Chapter | Create, Read, Update, Delete. | **PASS** | Kiểm tra trùng `chapter_number` hoạt động. |
-| CRUD Page | Upload ảnh mới, Đổi ảnh cũ, Xóa trang. | **PASS** | Xóa vật lý (unlink) chạy bình thường. |
-| Role Check | Đăng nhập bằng tài khoản không phải Mangaka. | **PASS** | Nhận lỗi 403 hoặc Redirect ra ngoài. |
-| Ownership Tamper | Cố tình truyền ID bài của người khác. | **PASS** | Bị từ chối và báo lỗi sở hữu. |
-| Malicious Upload | Upload tệp `.php` đuôi `.jpg`. | **PASS** | Bị chặn bởi `finfo_file` MIME validation. |
+### Hạng mục Kiểm thử: CRUD Page
+- **Các Case**: Upload ảnh mới, Đổi ảnh cũ, Xóa trang.
+- **Kết quả (PASS/FAIL)**: **PASS**
+- **Ghi chú**: Xóa vật lý (unlink) chạy bình thường.
 
-**Quyết định:** Mọi tính năng cốt lõi và giới hạn an ninh đã được nghiệm thu và cho kết quả XANH (PASS). Sẵn sàng đi vào hoạt động (Go-Live).
+### Hạng mục Kiểm thử: Role Check
+- **Các Case**: Đăng nhập bằng tài khoản không phải Mangaka.
+- **Kết quả (PASS/FAIL)**: **PASS**
+- **Ghi chú**: Nhận lỗi 403 hoặc Redirect ra ngoài.
+
+### Hạng mục Kiểm thử: Ownership Tamper
+- **Các Case**: Cố tình truyền ID bài của người khác.
+- **Kết quả (PASS/FAIL)**: **PASS**
+- **Ghi chú**: Bị từ chối và báo lỗi sở hữu.
+
+### Hạng mục Kiểm thử: Malicious Upload
+- **Các Case**: Upload tệp `.php` đuôi `.jpg`.
+- **Kết quả (PASS/FAIL)**: **PASS**
+- **Ghi chú**: Bị chặn bởi `finfo_file` MIME validation.
+
+**Quyết định:** Mọi tính năng cốt lõi và giới hạn an ninh đã được nghiệm thu và cho kết quả XANH (PASS). Sẵn sàng đi vào hoạt động (Go-Live).
