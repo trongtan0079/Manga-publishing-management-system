@@ -149,10 +149,10 @@
 * [x] Class Diagram
 * [ ] Use Case Diagram
 * [ ] Use Case Description
-* [ ] Activity Diagram
-* [ ] Sequence Diagram
+* [x] Activity Diagram
+* [x] Sequence Diagram
 * [ ] System Architecture Diagram
-* [ ] Database Documentation
+* [x] Database Documentation
 * [ ] User Manual (Tài liệu hướng dẫn)
 
 ---
