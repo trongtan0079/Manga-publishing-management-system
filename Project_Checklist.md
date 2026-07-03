@@ -147,7 +147,7 @@
 
 * [x] ERD
 * [x] Class Diagram
-* [ ] Use Case Diagram
+* [x] Use Case Diagram
 * [ ] Use Case Description
 * [x] Activity Diagram
 * [x] Sequence Diagram
