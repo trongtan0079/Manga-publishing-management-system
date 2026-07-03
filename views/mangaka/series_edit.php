@@ -34,9 +34,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="mb-3">
                 <label for="cover_image" class="form-label">Đường dẫn ảnh bìa (URL)</label>
                 <input type="url" class="form-control" id="cover_image" name="cover_image" value="<?= htmlspecialchars($series['cover_image'] ?? '') ?>">
-                <?php if (!empty($series['cover_image'])): ?>
+                <?php if (!empty($series['cover_image'])): 
+                    $coverUrl = $series['cover_image'];
+                    $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
+                ?>
                     <div class="mt-2">
-                        <img src="<?= htmlspecialchars($series['cover_image']) ?>" alt="Cover Preview" class="img-thumbnail" style="max-height: 150px;">
+                        <img src="<?= htmlspecialchars($resolvedCover) ?>" alt="Cover Preview" class="img-thumbnail" style="max-height: 150px;">
                     </div>
                 <?php endif; ?>
             </div>

@@ -38,7 +38,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div>
                     <!-- Nếu trang đã có ảnh thì hiển thị Thumbnail -->
                     <?php if (!empty($page['image_url'])): ?>
-                        <img src="<?= htmlspecialchars($page['image_url']) ?>" alt="Current Page Image" class="img-thumbnail mb-2" style="max-height: 200px;">
+                        <img src="<?= BASE_PATH . '/' . ltrim($page['image_url'], '/') ?>" alt="Current Page Image" class="img-thumbnail mb-2" style="max-height: 200px;">
                     <?php else: ?>
                         <p class="text-muted">Chưa có ảnh</p>
                     <?php endif; ?>

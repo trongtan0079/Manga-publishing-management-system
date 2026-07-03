@@ -41,8 +41,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <tr>
                         <td><?= htmlspecialchars($series['series_id']) ?></td>
                         <td>
-                            <?php if (!empty($series['cover_image'])): ?>
-                                <img src="<?= htmlspecialchars($series['cover_image']) ?>" alt="Cover" width="40" height="60" class="me-2 object-fit-cover rounded">
+                            <?php if (!empty($series['cover_image'])): 
+                                $coverUrl = $series['cover_image'];
+                                $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
+                            ?>
+                                <img src="<?= htmlspecialchars($resolvedCover) ?>" alt="Cover" width="40" height="60" class="me-2 object-fit-cover rounded">
                             <?php endif; ?>
                             <strong><?= htmlspecialchars($series['title']) ?></strong>
                         </td>

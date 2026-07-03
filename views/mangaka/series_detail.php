@@ -30,8 +30,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
     <div class="col-md-4 mb-4">
         <div class="card h-100">
-            <?php if (!empty($series['cover_image'])): ?>
-                <img src="<?= htmlspecialchars($series['cover_image']) ?>" class="card-img-top object-fit-cover" alt="Cover Image" style="max-height: 400px;">
+            <?php if (!empty($series['cover_image'])): 
+                $coverUrl = $series['cover_image'];
+                $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
+            ?>
+                <img src="<?= htmlspecialchars($resolvedCover) ?>" class="card-img-top object-fit-cover" alt="Cover Image" style="max-height: 400px;">
             <?php else: ?>
                 <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 300px;">
                     Chưa có ảnh bìa
