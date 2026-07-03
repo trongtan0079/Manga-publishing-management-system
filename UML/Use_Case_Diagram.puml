@@ -20,6 +20,7 @@ rectangle "Manga Creation & Publishing System" {
   usecase "Phân công & Giao việc (Task)" as UC_Mangaka_Task
   usecase "Kiểm duyệt kết quả của Trợ lý" as UC_Mangaka_Review_Task
   usecase "Nộp Bản thảo Chương truyện" as UC_Mangaka_Submit_Chapter
+  usecase "Chạy quét phân đoạn vùng bằng AI" as UC_Mangaka_AI
 
   ' Assistant Use Cases
   usecase "Xem Công việc được giao" as UC_Assistant_Tasks
@@ -42,6 +43,7 @@ Mangaka --> UC_Mangaka_Chapter
 Mangaka --> UC_Mangaka_Task
 Mangaka --> UC_Mangaka_Review_Task
 Mangaka --> UC_Mangaka_Submit_Chapter
+Mangaka --> UC_Mangaka_AI
 
 Assistant --> UC_Assistant_Tasks
 Assistant --> UC_Assistant_Submit

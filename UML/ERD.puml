@@ -29,6 +29,7 @@ entity series {
   title : varchar
   description : text
   status : enum
+  publish_type : varchar
   cover_image : varchar
   created_at : timestamp
   updated_at : timestamp
@@ -41,9 +42,25 @@ entity chapters {
   chapter_number : int
   title : varchar
   status : enum
+  due_date : datetime
   published_at : datetime
   created_at : timestamp
   updated_at : timestamp
+}
+
+entity page_regions {
+  *region_id : int <<PK>>
+  --
+  page_id : int <<FK>>
+  region_type : enum
+  x : int
+  y : int
+  width : int
+  height : int
+  confidence : decimal
+  is_ai_generated : boolean
+  status : enum
+  created_at : timestamp
 }
 
 entity pages {
@@ -61,10 +78,13 @@ entity tasks {
   *task_id : int <<PK>>
   --
   page_id : int <<FK>>
+  page_region_id : int <<FK>> <<NULL>>
   mangaka_id : int <<FK>>
   assistant_id : int <<FK>>
   title : varchar
+  task_type : enum
   description : text
+  resource_url : varchar
   priority : enum
   status : enum
   due_date : datetime
@@ -134,7 +154,9 @@ series ||--o{ series_rankings : ranked
 chapters ||--o{ pages : contains
 chapters ||--o{ submissions : submitted
 
+pages ||--o{ page_regions : segment
 pages ||--o{ tasks : requires
+page_regions ||--o{ tasks : targetedAt
 tasks ||--o{ submissions : generates
 
 submissions ||--o{ reviews : receives
