@@ -105,8 +105,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <tr>
                                 <td class="text-center fs-5 fw-bold"><?= htmlspecialchars($page['page_number']) ?></td>
                                 <td>
-                                    <?php if (!empty($page['image_url'])): ?>
-                                        <img src="<?= BASE_PATH . '/' . ltrim($page['image_url'], '/') ?>" alt="Trang <?= htmlspecialchars($page['page_number']) ?>" class="img-thumbnail" style="max-height: 100px;">
+                                    <?php if (!empty($page['image_url'])): 
+                                        $imageUrl = $page['image_url'];
+                                        $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                                    ?>
+                                        <img src="<?= htmlspecialchars($resolvedImage) ?>" alt="Trang <?= htmlspecialchars($page['page_number']) ?>" class="img-thumbnail" style="max-height: 100px;">
                                     <?php else: ?>
                                         <span class="text-muted">Chưa có ảnh</span>
                                     <?php endif; ?>

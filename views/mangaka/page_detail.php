@@ -86,10 +86,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php endif; ?>
             </div>
             <div class="card-body text-center bg-light d-flex align-items-center justify-content-center p-2" style="min-height: 400px;">
-                <?php if (!empty($page['image_url'])): ?>
+                <?php if (!empty($page['image_url'])): 
+                    $imageUrl = $page['image_url'];
+                    $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                ?>
                     <?php if (!empty($regions)): ?>
                         <div class="position-relative d-inline-block text-start" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <img id="mangaPageImage" src="<?= BASE_PATH . '/' . ltrim($page['image_url'], '/') ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
+                            <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
                             <?php foreach ($regions as $region): 
                                 // Tỷ lệ phần trăm dựa trên kích thước giả định 800 x 1000
                                 $l = ($region['x'] / 800) * 100;
@@ -122,7 +125,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </div>
                     <?php else: ?>
                         <div class="position-relative d-inline-block text-start" style="max-width: 100%;">
-                            <img src="<?= BASE_PATH . '/' . ltrim($page['image_url'], '/') ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid border shadow-sm">
+                            <img src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid border shadow-sm">
                         </div>
                     <?php endif; ?>
                 <?php else: ?>
