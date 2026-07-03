@@ -41,18 +41,41 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <td class="ps-4">
                                     <strong><?= htmlspecialchars($task['series_title']) ?></strong><br>
                                     <small class="text-muted">Ch. <?= htmlspecialchars($task['chapter_number']) ?> - Tr. <?= htmlspecialchars($task['page_number']) ?></small><br>
+                                    <?php if (!empty($task['page_region_id'])): ?>
+                                        <span class="badge bg-light text-dark border border-secondary mt-1">Phân vùng #<?= $task['page_region_id'] ?> (AI)</span><br>
+                                    <?php endif; ?>
                                     <small class="text-info">By: <?= htmlspecialchars($task['mangaka_name']) ?></small>
                                 </td>
                                 <td>
                                     <?php if (!empty($task['image_url'])): ?>
-                                        <a href="<?= BASE_PATH ?><?= htmlspecialchars($task['image_url']) ?>" download class="btn btn-sm btn-outline-dark" title="Tải trang gốc">
-                                            <i class="fas fa-download"></i> Tải Trang
+                                        <a href="<?= BASE_PATH ?><?= htmlspecialchars($task['image_url']) ?>" download class="btn btn-sm btn-outline-dark mb-1 d-block" title="Tải trang gốc">
+                                            <i class="fas fa-download me-1"></i> Tải Trang
                                         </a>
-                                    <?php else: ?>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($task['resource_url'])): ?>
+                                        <a href="<?= htmlspecialchars($task['resource_url']) ?>" target="_blank" class="btn btn-sm btn-info text-white d-block" title="Liên kết tài nguyên hỗ trợ">
+                                            <i class="fas fa-external-link-alt me-1"></i> Tài nguyên
+                                        </a>
+                                    <?php endif; ?>
+
+                                    <?php if (empty($task['image_url']) && empty($task['resource_url'])): ?>
                                         <span class="text-muted text-xs">Không có file</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
+                                    <?php
+                                    $typeLabel = 'Khác';
+                                    $typeBadge = 'bg-secondary';
+                                    switch ($task['task_type'] ?? 'other') {
+                                        case 'background': $typeLabel = 'Vẽ nền (Background)'; $typeBadge = 'bg-dark'; break;
+                                        case 'inking': $typeLabel = 'Đi nét (Inking)'; $typeBadge = 'bg-secondary'; break;
+                                        case 'coloring': $typeLabel = 'Lên màu (Coloring)'; $typeBadge = 'bg-success'; break;
+                                        case 'effects': $typeLabel = 'Hiệu ứng (Effects)'; $typeBadge = 'bg-info text-dark'; break;
+                                        case 'other': $typeLabel = 'Khác (Other)'; $typeBadge = 'bg-secondary'; break;
+                                    }
+                                    ?>
+                                    <span class="badge <?= $typeBadge ?> mb-1"><?= $typeLabel ?></span><br>
                                     <strong><?= htmlspecialchars($task['title']) ?></strong>
                                     <?php if (!empty($task['description'])): ?>
                                         <br>

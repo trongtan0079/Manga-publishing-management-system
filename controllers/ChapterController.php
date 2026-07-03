@@ -125,6 +125,7 @@ class ChapterController extends BaseController
                 'series_id' => $seriesId,
                 'chapter_number' => $chapterNumber,
                 'title' => $title,
+                'due_date' => !empty($_POST['due_date']) ? $_POST['due_date'] : null,
                 'status' => $status
             ];
 
@@ -206,6 +207,7 @@ class ChapterController extends BaseController
             $data = [
                 'chapter_number' => $chapterNumber,
                 'title' => $title,
+                'due_date' => !empty($_POST['due_date']) ? $_POST['due_date'] : null,
                 'status' => $status
             ];
 

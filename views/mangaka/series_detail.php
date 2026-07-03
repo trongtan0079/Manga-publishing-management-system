@@ -57,6 +57,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($sLabel) ?></span>
                 </p>
                 <p class="card-text">
+                    <strong>Lịch xuất bản:</strong> 
+                    <span class="badge bg-secondary"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                </p>
+                <p class="card-text">
                     <strong>Ngày tạo:</strong> <br>
                     <?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?>
                 </p>

@@ -122,6 +122,11 @@ class TaskController extends BaseController
         $chapter = $ownership['chapter'];
         $series = $ownership['series'];
         
+        // Lấy danh sách các vùng của trang truyện (PageRegion) đã phân đoạn
+        require_once __DIR__ . '/../models/PageRegion.php';
+        $pageRegionModel = new PageRegion();
+        $regions = $pageRegionModel->findByPageId($pageId);
+        
         // Lấy danh sách tất cả Assistant để Mangaka chọn người giao việc
         $assistants = $this->userModel->findByRoleName('assistant');
 
@@ -140,8 +145,11 @@ class TaskController extends BaseController
             // Nhận dữ liệu từ form submit lên
             $pageId = isset($_POST['page_id']) ? intval($_POST['page_id']) : 0;
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : 0;
+            $pageRegionId = !empty($_POST['page_region_id']) ? intval($_POST['page_region_id']) : null;
             $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+            $taskType = isset($_POST['task_type']) ? $_POST['task_type'] : 'other';
             $description = isset($_POST['description']) ? trim($_POST['description']) : '';
+            $resourceUrl = isset($_POST['resource_url']) ? trim($_POST['resource_url']) : '';
             $priority = isset($_POST['priority']) ? $_POST['priority'] : 'medium';
             $dueDate = isset($_POST['due_date']) ? $_POST['due_date'] : null;
 
@@ -185,6 +193,14 @@ class TaskController extends BaseController
                 exit;
             }
 
+            // Validate task_type
+            $allowedTypes = ['background', 'inking', 'coloring', 'effects', 'other'];
+            if (!in_array($taskType, $allowedTypes)) {
+                $_SESSION['error'] = 'Loại công việc không hợp lệ.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                exit;
+            }
+
             // 5. Validation: due_date
             $formattedDueDate = null;
             if (!empty($dueDate)) {
@@ -200,10 +216,13 @@ class TaskController extends BaseController
             // Thực hiện thêm mới vào bảng tasks
             $this->taskModel->insert([
                 'page_id' => $pageId,
+                'page_region_id' => $pageRegionId,
                 'mangaka_id' => $_SESSION['user_id'], // Lấy ID của Mangaka đang tạo task
                 'assistant_id' => $assistantId,
                 'title' => $title,
+                'task_type' => $taskType,
                 'description' => $description,
+                'resource_url' => $resourceUrl,
                 'priority' => $priority,
                 'status' => 'pending', // Mặc định khi vừa tạo là pending (Chưa làm)
                 'due_date' => $formattedDueDate
@@ -254,6 +273,11 @@ class TaskController extends BaseController
         $chapter = $this->chapterModel->findById($page['chapter_id']);
         $series = $this->seriesModel->findById($chapter['series_id']);
         
+        // Lấy danh sách các vùng của trang truyện (PageRegion) đã phân đoạn
+        require_once __DIR__ . '/../models/PageRegion.php';
+        $pageRegionModel = new PageRegion();
+        $regions = $pageRegionModel->findByPageId($task['page_id']);
+        
         // Lấy danh sách Assistant để Mangaka có quyền đổi người thực hiện (Re-assign)
         $assistants = $this->userModel->findByRoleName('assistant');
 
@@ -293,8 +317,11 @@ class TaskController extends BaseController
 
             // Lấy toàn bộ dữ liệu mangaka có thể đổi
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : intval($task['assistant_id']);
+            $pageRegionId = !empty($_POST['page_region_id']) ? intval($_POST['page_region_id']) : null;
             $title = isset($_POST['title']) ? trim($_POST['title']) : $task['title'];
+            $taskType = isset($_POST['task_type']) ? $_POST['task_type'] : $task['task_type'];
             $description = isset($_POST['description']) ? trim($_POST['description']) : $task['description'];
+            $resourceUrl = isset($_POST['resource_url']) ? trim($_POST['resource_url']) : $task['resource_url'];
             $priority = isset($_POST['priority']) ? $_POST['priority'] : $task['priority'];
             $status = isset($_POST['status']) ? $_POST['status'] : $task['status'];
             $dueDate = isset($_POST['due_date']) ? $_POST['due_date'] : $task['due_date'];
@@ -326,6 +353,13 @@ class TaskController extends BaseController
                 exit;
             }
 
+            // Validate task_type
+            if (!in_array($taskType, ['background', 'inking', 'coloring', 'effects', 'other'])) {
+                $_SESSION['error'] = 'Loại công việc không hợp lệ.';
+                header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                exit;
+            }
+
             // Validate status
             if (!in_array($status, ['pending', 'in_progress', 'completed'])) {
                 $_SESSION['error'] = 'Trạng thái công việc không hợp lệ.';
@@ -348,8 +382,11 @@ class TaskController extends BaseController
             // Update tất cả các trường
             $this->taskModel->update($id, [
                 'assistant_id' => $assistantId,
+                'page_region_id' => $pageRegionId,
                 'title' => $title,
+                'task_type' => $taskType,
                 'description' => $description,
+                'resource_url' => $resourceUrl,
                 'priority' => $priority,
                 'status' => $status,
                 'due_date' => $formattedDueDate

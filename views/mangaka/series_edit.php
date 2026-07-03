@@ -51,6 +51,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <option value="canceled" <?= ($series['status'] === 'canceled') ? 'selected' : '' ?>>Đã hủy (Canceled)</option>
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label for="publish_type" class="form-label">Lịch xuất bản <span class="text-danger">*</span></label>
+                <select class="form-select" id="publish_type" name="publish_type" required>
+                    <option value="weekly" <?= (($series['publish_type'] ?? 'weekly') === 'weekly') ? 'selected' : '' ?>>Hàng tuần (Weekly)</option>
+                    <option value="monthly" <?= (($series['publish_type'] ?? 'weekly') === 'monthly') ? 'selected' : '' ?>>Hàng tháng (Monthly)</option>
+                </select>
+            </div>
             
             <div class="mb-3">
                 <label for="description" class="form-label">Mô tả</label>

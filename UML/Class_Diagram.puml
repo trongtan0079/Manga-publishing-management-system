@@ -1,112 +1,142 @@
 @startuml
 
-title Manga Creation and Publishing Management System
+title Manga Creation Workflow and Publishing Management System - Class Diagram
 
 skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam linetype ortho
+skinparam nodesep 80
+skinparam ranksep 80
+
+'====================================================
+' CLASSES
+'====================================================
 
 class Role {
-  +roleId : int
-  +roleName : string
-  +description : string
+    +roleId : int
+    +roleName : string
+    +description : string
 }
 
 class User {
-  +userId : int
-  +username : string
-  +fullName : string
-  +email : string
-  +passwordHash : string
-  +status : string
+    +userId : int
+    +username : string
+    +fullName : string
+    +email : string
+    +passwordHash : string
+    +status : string
 }
 
 class Series {
-  +seriesId : int
-  +title : string
-  +description : string
-  +status : string
-  +coverImage : string
+    +seriesId : int
+    +title : string
+    +description : string
+    +coverImage : string
+    +status : string
+    +publishType : string ' Hàng tuần hoặc Hàng tháng
 }
 
 class Chapter {
-  +chapterId : int
-  +chapterNumber : int
-  +title : string
-  +status : string
-  +publishedAt : datetime
+    +chapterId : int
+    +chapterNumber : int
+    +title : string
+    +status : string
+    +publishedAt : datetime
+    +dueDate : datetime ' Hạn chót nộp bản thảo
 }
 
 class Page {
-  +pageId : int
-  +pageNumber : int
-  +imageUrl : string
-  +status : string
+    +pageId : int
+    +pageNumber : int
+    +imageUrl : string
+    +status : string
+}
+
+' Lớp mới đại diện cho vùng cắt tự động bằng AI (Panel, Speech Bubble, Character)
+class PageRegion {
+    +regionId : int
+    +regionType : string ' panel | bubble | character
+    +x : int
+    +y : int
+    +width : int
+    +height : int
+    +confidence : decimal ' Độ tin cậy của AI (0.00 đến 1.00)
+    +isAiGenerated : boolean ' Đánh dấu vùng tạo bởi AI hay vẽ thủ công
+    +status : string
 }
 
 class Task {
-  +taskId : int
-  +title : string
-  +description : string
-  +priority : string
-  +status : string
-  +dueDate : datetime
+    +taskId : int
+    +title : string
+    +description : string
+    +priority : string
+    +status : string
+    +dueDate : datetime
+    +taskType : string ' vẽ nền, tô bóng, hiệu ứng...
+    +resourceUrl : string ' Link tài nguyên đính kèm
 }
 
 class Submission {
-  +submissionId : int
-  +fileUrl : string
-  +notes : string
-  +status : string
-  +submittedAt : datetime
+    +submissionId : int
+    +fileUrl : string
+    +notes : string
+    +status : string
+    +submittedAt : datetime
 }
 
 class Review {
-  +reviewId : int
-  +comments : string
-  +rating : int
-  +createdAt : datetime
+    +reviewId : int
+    +comments : string
+    +rating : int
+    +createdAt : datetime
 }
 
 class SeriesRanking {
-  +rankingId : int
-  +rankPosition : int
-  +score : decimal
-  +periodStartDate : date
+    +rankingId : int
+    +rankPosition : int
+    +score : decimal
+    +periodStartDate : date
 }
 
 class Notification {
-  +notificationId : int
-  +type : string
-  +message : string
-  +isRead : boolean
+    +notificationId : int
+    +type : string
+    +message : string
+    +isRead : boolean
+    +createdAt : datetime
 }
 
-Role "1" -- "*" User : assigned
+'====================================================
+' RELATIONSHIPS
+'====================================================
 
-User "1" -- "*" Series : creates
+User "*" --> "1" Role : has
 
-Series "1" -- "*" Chapter : contains
+User "1" --> "*" Series : creates
 
-Chapter "1" -- "*" Page : contains
+Series "1" *-- "*" Chapter : contains
 
-Page "1" -- "*" Task : requires
+Chapter "1" *-- "*" Page : contains
 
-User "1" -- "*" Task : manager_assigns
-User "1" -- "*" Task : assistant_receives
+Page "1" *-- "*" PageRegion : contains
 
-Task "1" -- "*" Submission : generates
+' Mangaka giao việc trên từng vùng cụ thể của trang
+PageRegion "1" --> "*" Task : targetedAt
 
-Chapter "1" -- "*" Submission : submitted
+User "1" --> "*" Task : assignedBy
+User "1" --> "*" Task : assignedTo
 
-User "1" -- "*" Submission : submits
+Task "0..1" --> "*" Submission : generates
+Chapter "0..1" --> "*" Submission : submits
 
-Submission "1" -- "*" Review : receives
+User "1" --> "*" Submission : uploads
 
-User "1" -- "*" Review : writes
+Submission "1" *-- "*" Review : receives
+User "1" --> "*" Review : writes
 
-Series "1" -- "*" SeriesRanking : ranked
+Series "1" --> "*" SeriesRanking : ranked
+User "1" --> "*" SeriesRanking : evaluates
 
-User "1" -- "*" SeriesRanking : evaluates
-
-User "1" -- "*" Notification : receives
+User "1" --> "*" Notification : receives
 
 @enduml

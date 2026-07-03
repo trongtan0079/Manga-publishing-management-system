@@ -40,6 +40,7 @@ CREATE TABLE series (
     title VARCHAR(255) NOT NULL,
     description TEXT,
     status ENUM('planning', 'ongoing', 'completed', 'canceled', 'suspended') DEFAULT 'planning',
+    publish_type VARCHAR(50) DEFAULT 'weekly',
     cover_image VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -55,6 +56,7 @@ CREATE TABLE chapters (
     chapter_number INT NOT NULL,
     title VARCHAR(255),
     status ENUM('drafting', 'drawing', 'reviewing', 'approved', 'published') DEFAULT 'drafting',
+    due_date DATETIME,
     published_at DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -78,24 +80,46 @@ CREATE TABLE pages (
 ) COMMENT 'Lưu trữ các trang truyện. UNIQUE constraint đảm bảo 1 chương không bị trùng lặp số thứ tự trang';
 
 -- ------------------------------------------------------------------------------
+-- 5b. Bảng page_regions: Lưu trữ các vùng phân đoạn (khung truyện, bong bóng thoại...)
+-- ------------------------------------------------------------------------------
+CREATE TABLE page_regions (
+    region_id INT AUTO_INCREMENT PRIMARY KEY,
+    page_id INT NOT NULL,
+    region_type ENUM('panel', 'bubble', 'character') NOT NULL,
+    x INT NOT NULL,
+    y INT NOT NULL,
+    width INT NOT NULL,
+    height INT NOT NULL,
+    confidence DECIMAL(5,4) NULL,
+    is_ai_generated BOOLEAN DEFAULT TRUE,
+    status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_regions_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE
+) COMMENT 'Lưu trữ thông tin chi tiết về từng vùng trên trang truyện đã phân đoạn qua AI';
+
+-- ------------------------------------------------------------------------------
 -- 6. Bảng tasks: Quản lý công việc do Mangaka phân công cho Assistant
 -- ------------------------------------------------------------------------------
 CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     page_id INT NOT NULL,
+    page_region_id INT NULL,
     mangaka_id INT NOT NULL,
     assistant_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
+    task_type ENUM('background', 'inking', 'coloring', 'effects', 'other') DEFAULT 'other',
     description TEXT,
+    resource_url VARCHAR(255) NULL,
     priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
     status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
     due_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_tasks_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE,
+    CONSTRAINT fk_tasks_region FOREIGN KEY (page_region_id) REFERENCES page_regions(region_id) ON DELETE SET NULL,
     CONSTRAINT fk_tasks_mangaka FOREIGN KEY (mangaka_id) REFERENCES users(user_id) ON DELETE RESTRICT,
     CONSTRAINT fk_tasks_assistant FOREIGN KEY (assistant_id) REFERENCES users(user_id) ON DELETE RESTRICT
-) COMMENT 'Lưu trữ công việc (như đổ tone, vẽ nền) được giao cho các trợ lý trên một trang cụ thể';
+) COMMENT 'Lưu trữ công việc (như đổ tone, vẽ nền) được giao cho các trợ lý trên một trang hoặc một vùng cụ thể';
 
 -- ------------------------------------------------------------------------------
 -- 7. Bảng submissions: Quản lý việc nộp sản phẩm 

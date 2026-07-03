@@ -221,6 +221,10 @@ class PageController extends BaseController
 
         $tasks = $this->taskModel->findByPageId($id);
 
+        require_once __DIR__ . '/../models/PageRegion.php';
+        $pageRegionModel = new PageRegion();
+        $regions = $pageRegionModel->findByPageId($id);
+
         require_once __DIR__ . '/../views/mangaka/page_detail.php';
     }
 

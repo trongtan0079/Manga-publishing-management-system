@@ -45,6 +45,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <option value="canceled">Đã hủy (Canceled)</option>
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label for="publish_type" class="form-label">Lịch xuất bản <span class="text-danger">*</span></label>
+                <select class="form-select" id="publish_type" name="publish_type" required>
+                    <option value="weekly" selected>Hàng tuần (Weekly)</option>
+                    <option value="monthly">Hàng tháng (Monthly)</option>
+                </select>
+            </div>
             
             <div class="mb-3">
                 <label for="description" class="form-label">Mô tả</label>

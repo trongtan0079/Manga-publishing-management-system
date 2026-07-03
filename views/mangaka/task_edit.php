@@ -44,6 +44,41 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <textarea class="form-control" id="description" name="description" rows="3"><?= htmlspecialchars($task['description'] ?? '') ?></textarea>
             </div>
 
+            <!-- Loại công việc và Phân vùng (New) -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="task_type" class="form-label">Loại công việc <span class="text-danger">*</span></label>
+                    <select class="form-select" id="task_type" name="task_type" required>
+                        <option value="background" <?= ($task['task_type'] ?? 'other') === 'background' ? 'selected' : '' ?>>Vẽ nền (Background)</option>
+                        <option value="inking" <?= ($task['task_type'] ?? 'other') === 'inking' ? 'selected' : '' ?>>Đi nét (Inking)</option>
+                        <option value="coloring" <?= ($task['task_type'] ?? 'other') === 'coloring' ? 'selected' : '' ?>>Lên màu (Coloring)</option>
+                        <option value="effects" <?= ($task['task_type'] ?? 'other') === 'effects' ? 'selected' : '' ?>>Hiệu ứng (Effects)</option>
+                        <option value="other" <?= ($task['task_type'] ?? 'other') === 'other' ? 'selected' : '' ?>>Khác (Other)</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="page_region_id" class="form-label">Phân vùng ảnh</label>
+                    <select class="form-select" id="page_region_id" name="page_region_id">
+                        <option value="">-- Toàn bộ trang truyện --</option>
+                        <?php if (!empty($regions)): ?>
+                            <?php foreach ($regions as $region): 
+                                $lbl = ucfirst($region['region_type']) . " #" . $region['region_id'] . " (" . $region['width'] . "x" . $region['height'] . ")";
+                                $selected = ($region['region_id'] == ($task['page_region_id'] ?? 0)) ? 'selected' : '';
+                            ?>
+                                <option value="<?= $region['region_id'] ?>" <?= $selected ?>><?= htmlspecialchars($lbl) ?></option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Link tài nguyên đính kèm (New) -->
+            <div class="mb-3">
+                <label for="resource_url" class="form-label">Tài nguyên hỗ trợ đính kèm (URL)</label>
+                <input type="url" class="form-control" id="resource_url" name="resource_url" value="<?= htmlspecialchars($task['resource_url'] ?? '') ?>" placeholder="https://drive.google.com/drive/folders/... hoặc liên kết khác">
+                <div class="form-text">Đường dẫn Google Drive, Figma... chứa tài liệu mẫu hoặc asset hỗ trợ vẽ.</div>
+            </div>
+
             <div class="row mb-3">
                 <!-- Dropdown chọn Assistant -->
                 <div class="col-md-4">

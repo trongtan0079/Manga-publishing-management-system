@@ -43,6 +43,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 </select>
             </div>
             
+            <div class="mb-3">
+                <label for="due_date" class="form-label">Hạn chót (Due Date)</label>
+                <input type="datetime-local" class="form-control" id="due_date" name="due_date">
+            </div>
+            
             <button type="submit" class="btn btn-primary">Tạo Chapter</button>
         </form>
     </div>

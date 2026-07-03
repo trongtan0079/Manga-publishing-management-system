@@ -91,6 +91,7 @@ class SeriesController extends BaseController
                 'title'       => $title,
                 'description' => trim($_POST['description'] ?? ''),
                 'status'      => $status,
+                'publish_type'=> trim($_POST['publish_type'] ?? 'weekly'),
                 'cover_image' => trim($_POST['cover_image'] ?? '')
             ];
 
@@ -175,6 +176,7 @@ class SeriesController extends BaseController
                 'title'       => $title,
                 'description' => trim($_POST['description'] ?? ''),
                 'status'      => $status,
+                'publish_type'=> trim($_POST['publish_type'] ?? 'weekly'),
                 'cover_image' => trim($_POST['cover_image'] ?? '')
             ];
 

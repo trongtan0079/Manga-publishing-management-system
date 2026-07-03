@@ -1,0 +1,17 @@
+@startuml
+title State Machine Diagram - Chapter Lifecycle Status
+
+[*] --> Drafting : Mangaka tạo Chapter mới\n[ChapterController::store()]
+
+Drafting --> Drawing : Mangaka upload trang phác thảo & giao Task\n[PageController::store() / TaskController::store()]
+
+Drawing --> Reviewing : Mangaka nộp bản thảo hoàn thiện (.zip)\n[SubmissionController::store()]
+
+Reviewing --> Drafting : Editor từ chối / yêu cầu sửa\n[ReviewController::store() status='rejected']
+
+Reviewing --> Approved : Editor phê duyệt bản thảo\n[ReviewController::store() status='approved']
+
+Approved --> Published : Editorial Board duyệt xuất bản và đăng truyện\n[SeriesController::updateStatus()]
+
+Published --> [*]
+@enduml

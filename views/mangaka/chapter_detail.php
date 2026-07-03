@@ -43,6 +43,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         }
         ?>
         <p><strong>Trạng thái:</strong> <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span></p>
+        <p><strong>Hạn chót (Deadline):</strong> <?= !empty($chapter['due_date']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['due_date']))) : '<span class="text-muted">Chưa thiết lập</span>' ?></p>
         <p><strong>Ngày tạo:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['created_at']))) ?></p>
         <p><strong>Cập nhật lần cuối:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></p>
     </div>

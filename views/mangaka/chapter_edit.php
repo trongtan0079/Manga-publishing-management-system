@@ -42,6 +42,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <option value="published" <?= $chapter['status'] === 'published' ? 'selected' : '' ?>>Đã xuất bản (Published)</option>
                 </select>
             </div>
+
+            <div class="mb-3">
+                <label for="due_date" class="form-label">Hạn chót (Due Date)</label>
+                <?php 
+                $dueDateVal = '';
+                if (!empty($chapter['due_date'])) {
+                    $dueDateVal = date('Y-m-d\TH:i', strtotime($chapter['due_date']));
+                }
+                ?>
+                <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="<?= $dueDateVal ?>">
+            </div>
             
             <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
         </form>
