@@ -13,6 +13,22 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<?php if (isset($_SESSION['success'])): ?>
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+        <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($_SESSION['success']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error'])): ?>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i><?= htmlspecialchars($_SESSION['error']) ?>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>
+
 <!-- Khối thanh điều hướng và nút hành động -->
 <div class="mb-3 d-flex justify-content-between align-items-center">
     <!-- Nút quay lại danh sách trang của chapter -->
@@ -73,7 +89,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php if (!empty($page['image_url'])): ?>
                     <?php if (!empty($regions)): ?>
                         <div class="position-relative d-inline-block text-start" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <img id="mangaPageImage" src="<?= htmlspecialchars($page['image_url']) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
+                            <img id="mangaPageImage" src="<?= BASE_PATH . '/' . ltrim($page['image_url'], '/') ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
                             <?php foreach ($regions as $region): 
                                 // Tỷ lệ phần trăm dựa trên kích thước giả định 800 x 1000
                                 $l = ($region['x'] / 800) * 100;
@@ -106,7 +122,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </div>
                     <?php else: ?>
                         <div class="position-relative d-inline-block text-start" style="max-width: 100%;">
-                            <img src="<?= htmlspecialchars($page['image_url']) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid border shadow-sm">
+                            <img src="<?= BASE_PATH . '/' . ltrim($page['image_url'], '/') ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid border shadow-sm">
                         </div>
                     <?php endif; ?>
                 <?php else: ?>
