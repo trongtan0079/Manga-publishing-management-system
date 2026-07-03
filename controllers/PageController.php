@@ -338,7 +338,7 @@ class PageController extends BaseController
                 // Xóa file vật lý trước
                 $filePath = __DIR__ . '/../' . ltrim($page['image_url'], '/');
                 if (!empty($page['image_url']) && file_exists($filePath)) {
-                    unlink($filePath);
+                    @unlink($filePath);
                 }
 
                 // Xóa record DB

@@ -317,7 +317,7 @@ class SubmissionController extends BaseController
         } else {
             // Xóa file đã upload nếu chèn database thất bại
             if (file_exists($targetPath)) {
-                unlink($targetPath);
+                @unlink($targetPath);
             }
             $_SESSION['error'] = 'Không thể lưu thông tin Submission vào Database.';
         }
@@ -417,7 +417,7 @@ class SubmissionController extends BaseController
         if (!empty($submission['file_url'])) {
             $filePath = __DIR__ . '/../' . $submission['file_url'];
             if (file_exists($filePath)) {
-                unlink($filePath);
+                @unlink($filePath);
             }
         }
 
