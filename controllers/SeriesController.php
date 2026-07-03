@@ -258,12 +258,16 @@ class SeriesController extends BaseController
             }
 
             $status = $_POST['status'] ?? '';
+            $publishType = $_POST['publish_type'] ?? 'weekly';
             if (in_array($status, $this->allowedStatuses)) {
                 try {
-                    $this->seriesModel->update($id, ['status' => $status]);
-                    $_SESSION['success'] = "Cập nhật trạng thái bộ truyện thành công.";
+                    $this->seriesModel->update($id, [
+                        'status' => $status,
+                        'publish_type' => $publishType
+                    ]);
+                    $_SESSION['success'] = "Cập nhật trạng thái và lịch xuất bản bộ truyện thành công.";
                 } catch (PDOException $e) {
-                    $_SESSION['error'] = "Lỗi khi cập nhật trạng thái: " . $e->getMessage();
+                    $_SESSION['error'] = "Lỗi khi cập nhật: " . $e->getMessage();
                 }
             } else {
                 $_SESSION['error'] = "Trạng thái không hợp lệ.";

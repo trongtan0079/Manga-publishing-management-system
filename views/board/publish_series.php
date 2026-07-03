@@ -46,8 +46,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <th>Tên Truyện</th>
                         <th>Tác giả</th>
                         <th>Trạng thái hiện tại</th>
+                        <th>Lịch xuất bản</th>
                         <th>Ngày tạo</th>
-                        <th class="text-end pe-4">Cập nhật trạng thái</th>
+                        <th class="text-end pe-4">Cập nhật Trạng thái & Lịch phát hành</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,15 +77,22 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     ?>
                                     <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($statusLabel) ?></span>
                                 </td>
+                                <td>
+                                    <span class="badge bg-secondary"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                                </td>
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></td>
                                 <td class="text-end pe-4">
                                     <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2">
-                                        <select name="status" class="form-select form-select-sm w-auto">
+                                        <select name="status" class="form-select form-select-sm w-auto" title="Trạng thái">
                                             <option value="planning" <?= $series['status'] == 'planning' ? 'selected' : '' ?>>Kế hoạch (Chờ duyệt)</option>
                                             <option value="ongoing" <?= $series['status'] == 'ongoing' ? 'selected' : '' ?>>Đang xuất bản (Ongoing)</option>
                                             <option value="completed" <?= $series['status'] == 'completed' ? 'selected' : '' ?>>Hoàn thành</option>
                                             <option value="canceled" <?= $series['status'] == 'canceled' ? 'selected' : '' ?>>Đã hủy (Canceled)</option>
                                             <option value="suspended" <?= $series['status'] == 'suspended' ? 'selected' : '' ?>>Tạm ngưng (Suspended)</option>
+                                        </select>
+                                        <select name="publish_type" class="form-select form-select-sm w-auto" title="Lịch xuất bản">
+                                            <option value="weekly" <?= ($series['publish_type'] ?? 'weekly') == 'weekly' ? 'selected' : '' ?>>Hàng tuần</option>
+                                            <option value="monthly" <?= ($series['publish_type'] ?? 'weekly') == 'monthly' ? 'selected' : '' ?>>Hàng tháng</option>
                                         </select>
                                         <button type="submit" class="btn btn-sm btn-primary" title="Cập nhật">
                                             <i class="fas fa-save"></i>

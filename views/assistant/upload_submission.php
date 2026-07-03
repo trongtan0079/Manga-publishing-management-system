@@ -43,11 +43,16 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <!-- Chọn Nhiệm vụ (Task) -->
                     <div class="mb-4">
                         <label for="task_id" class="form-label fw-bold text-dark"><i class="fas fa-tasks me-2 text-muted"></i>Chọn Công việc (Task) <span class="text-danger">*</span></label>
+                        <?php 
+                        $selectedTaskId = isset($_GET['task_id']) ? intval($_GET['task_id']) : 0;
+                        ?>
                         <select class="form-select" id="task_id" name="task_id" required>
-                            <option value="" disabled selected>-- Chọn công việc đang xử lý --</option>
+                            <option value="" disabled <?= $selectedTaskId === 0 ? 'selected' : '' ?>>-- Chọn công việc đang xử lý --</option>
                             <?php if (!empty($tasks)): ?>
-                                <?php foreach ($tasks as $t): ?>
-                                    <option value="<?= $t['task_id'] ?>">
+                                <?php foreach ($tasks as $t): 
+                                    $selected = ($t['task_id'] == $selectedTaskId) ? 'selected' : '';
+                                ?>
+                                    <option value="<?= $t['task_id'] ?>" <?= $selected ?>>
                                         <?= htmlspecialchars($t['series_title']) ?> - Ch.<?= htmlspecialchars($t['chapter_number']) ?> (<?= htmlspecialchars($t['title']) ?>)
                                     </option>
                                 <?php endforeach; ?>

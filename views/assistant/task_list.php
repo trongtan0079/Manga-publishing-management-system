@@ -104,14 +104,21 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <?php endif; ?>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center justify-content-end">
-                                        <select name="status" class="form-select form-select-sm me-2" style="width: 130px;">
-                                            <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                                            <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>In Progress</option>
-                                            <option value="completed" <?= $task['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
-                                        </select>
-                                        <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                                    </form>
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center gap-2 m-0">
+                                            <select name="status" class="form-select form-select-sm" style="width: 120px;" title="Trạng thái">
+                                                <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
+                                                <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>In Progress</option>
+                                                <option value="completed" <?= $task['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
+                                            </select>
+                                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                                        </form>
+                                        <?php if ($task['status'] !== 'completed'): ?>
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&task_id=<?= $task['task_id'] ?>" class="btn btn-sm btn-outline-success">
+                                                <i class="fas fa-paper-plane me-1"></i>Nộp bài
+                                            </a>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
