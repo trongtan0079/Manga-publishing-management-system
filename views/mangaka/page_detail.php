@@ -34,6 +34,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <!-- Nút quay lại danh sách trang của chapter -->
     <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
     
+    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div>
         <!-- Nút sửa trang hiện tại -->
         <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
@@ -42,6 +43,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <button type="submit" class="btn btn-danger">Xóa</button>
         </form>
     </div>
+    <?php endif; ?>
 </div>
 
 <!-- Khối thông tin chung của trang -->
@@ -143,7 +145,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <div class="card border-secondary h-100">
             <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Trình phân đoạn AI</h5>
-                <?php if (!empty($regions)): ?>
+                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !empty($regions)): ?>
                     <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light" onclick="return confirm('Bạn có chắc muốn chạy lại thuật toán quét phân đoạn AI? Dữ liệu cũ sẽ được làm mới.');">
                         <i class="fas fa-sync-alt me-1"></i>Quét lại
                     </a>
@@ -155,9 +157,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <i class="fas fa-brain fa-3x text-muted mb-3"></i>
                         <h6 class="fw-bold">Hệ thống AI Phân đoạn chưa chạy</h6>
                         <p class="text-muted small px-3">Sử dụng mô hình AI (YOLOv8-Segmentation & SAM) để tự động phát hiện và đánh dấu các vùng Khung truyện (Panel), Bong bóng thoại (Bubble), Nhân vật trên trang.</p>
+                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
                         <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-primary mt-2">
                             <i class="fas fa-play me-2"></i>Chạy AI phân đoạn vùng
                         </a>
+                        <?php endif; ?>
                     </div>
                 <?php else: ?>
                     <div>
@@ -193,9 +197,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <span class="badge bg-light text-dark border">AI Generated</span>
+                                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
                                         <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
                                             <i class="fas fa-plus me-1"></i>Giao việc trên vùng này
                                         </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -260,7 +266,9 @@ function highlightTableRecord(regionId) {
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Quản lý công việc</h5>
         <!-- Nút tạo công việc mới, truyền sẵn page_id qua URL GET parameter -->
+        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light">+ Tạo công việc</a>
+        <?php endif; ?>
     </div>
     <div class="card-body">
         <?php if (!empty($tasks)): ?>
@@ -347,12 +355,16 @@ function highlightTableRecord(regionId) {
                                 <td><?= $task['due_date'] ? htmlspecialchars(date('d/m/Y', strtotime($task['due_date']))) : '<span class="text-muted">Không có</span>' ?></td>
                                 <!-- Các nút thao tác Sửa và Xóa dành cho Mangaka -->
                                 <td>
+                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
                                     <!-- Nút Sửa chuyển hướng sang TaskController@edit -->
                                     <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                     <!-- Nút Xóa thực hiện qua form POST để bảo mật -->
                                     <form action="<?= BASE_PATH ?>/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
                                         <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
                                     </form>
+                                    <?php else: ?>
+                                        <span class="text-muted small">-</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

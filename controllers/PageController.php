@@ -27,8 +27,19 @@ class PageController extends BaseController
     public function __construct() {
         parent::__construct();
         \requireLogin();
-        // Chỉ Mangaka mới được thao tác trong module Page
-        \requireRole('mangaka');
+        
+        $action = $_GET['action'] ?? 'index';
+        $allowedViewRoles = ['mangaka', 'editor', 'board', 'admin'];
+        
+        if (in_array($action, ['show', 'index'])) {
+            if (!in_array($_SESSION['role_name'], $allowedViewRoles)) {
+                http_response_code(403);
+                echo "Access Denied: You do not have the required role to access this page.";
+                exit;
+            }
+        } else {
+            \requireRole('mangaka');
+        }
         
         $this->pageModel = new Page();
         $this->chapterModel = new Chapter();
@@ -49,9 +60,21 @@ class PageController extends BaseController
         }
 
         $series = $this->seriesModel->findById($chapter['series_id']);
-        if (!$series || $series['mangaka_id'] != $_SESSION['user_id']) {
-            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên chapter này.";
+        if (!$series) {
+            $_SESSION['error'] = "Không tìm thấy bộ truyện.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        // Admin, Editor, Board có quyền xem chi tiết chapter/page
+        if ($role === 'admin' || $role === 'editor' || $role === 'board') {
+            return ['chapter' => $chapter, 'series' => $series];
+        }
+
+        if ($series['mangaka_id'] != $_SESSION['user_id']) {
+            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên chapter này.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             exit;
         }
 
@@ -335,10 +358,30 @@ class PageController extends BaseController
             $this->checkChapterOwnership($chapterId);
 
             try {
-                // Xóa file vật lý trước
+                // Xóa file vật lý của trang trước
                 $filePath = __DIR__ . '/../' . ltrim($page['image_url'], '/');
                 if (!empty($page['image_url']) && file_exists($filePath)) {
                     @unlink($filePath);
+                }
+
+                // Xóa file các bản nộp của các task thuộc trang này
+                require_once __DIR__ . '/../models/Submission.php';
+                $submissionModel = new \Submission();
+                $tasks = $this->taskModel->findByPageId($id);
+                if (!empty($tasks)) {
+                    foreach ($tasks as $task) {
+                        $subs = $submissionModel->findByTaskId($task['task_id']);
+                        if (!empty($subs)) {
+                            foreach ($subs as $sub) {
+                                if (!empty($sub['file_url'])) {
+                                    $subFilePath = __DIR__ . '/../' . ltrim($sub['file_url'], '/');
+                                    if (file_exists($subFilePath)) {
+                                        @unlink($subFilePath);
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 // Xóa record DB

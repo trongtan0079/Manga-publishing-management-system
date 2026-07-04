@@ -18,8 +18,20 @@ class ChapterController extends BaseController
 
     public function __construct() {
         parent::__construct();
-        // Chỉ cho phép người dùng có role 'mangaka' truy cập vào Controller này
-        \requireRole('mangaka');
+        requireLogin();
+        
+        $action = $_GET['action'] ?? 'index';
+        $allowedViewRoles = ['mangaka', 'editor', 'board', 'admin'];
+        
+        if (in_array($action, ['show', 'index'])) {
+            if (!in_array($_SESSION['role_name'], $allowedViewRoles)) {
+                http_response_code(403);
+                echo "Access Denied: You do not have the required role to access this page.";
+                exit;
+            }
+        } else {
+            requireRole('mangaka');
+        }
         
         $this->chapterModel = new Chapter();
         $this->seriesModel = new Series();
@@ -41,9 +53,15 @@ class ChapterController extends BaseController
             exit;
         }
 
+        $role = $_SESSION['role_name'] ?? '';
+        // Admin, Editor, Board có quyền xem chi tiết bộ truyện/chapter
+        if ($role === 'admin' || $role === 'editor' || $role === 'board') {
+            return $series;
+        }
+
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện này.";
-            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             exit;
         }
         return $series;
@@ -115,7 +133,7 @@ class ChapterController extends BaseController
                 exit;
             }
 
-            if (!in_array($status, $this->allowedStatuses)) {
+            if (!in_array($status, ['drafting', 'drawing', 'reviewing'])) {
                 $_SESSION['error'] = "Trạng thái chapter không hợp lệ!";
                 header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                 exit;
@@ -198,7 +216,11 @@ class ChapterController extends BaseController
                 exit;
             }
 
-            if (!in_array($status, $this->allowedStatuses)) {
+            $allowed = ['drafting', 'drawing', 'reviewing'];
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                $allowed[] = $chapter['status'];
+            }
+            if (!in_array($status, $allowed)) {
                 $_SESSION['error'] = "Trạng thái chapter không hợp lệ!";
                 header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
                 exit;
@@ -262,10 +284,58 @@ class ChapterController extends BaseController
             $this->checkSeriesOwnership($seriesId);
 
             try {
+                // Đăng nhập các model cần thiết để dọn dẹp file
+                require_once __DIR__ . '/../models/Task.php';
+                require_once __DIR__ . '/../models/Submission.php';
+                $taskModel = new \Task();
+                $submissionModel = new \Submission();
+
+                // 1. Lấy danh sách các trang vẽ thuộc chapter này và xóa file ảnh + file nộp của task
+                $pages = $this->pageModel->findByChapterId($id);
+                if (!empty($pages)) {
+                    foreach ($pages as $page) {
+                        if (!empty($page['image_url'])) {
+                            $filePath = __DIR__ . '/../' . ltrim($page['image_url'], '/');
+                            if (file_exists($filePath)) {
+                                @unlink($filePath);
+                            }
+                        }
+                        $tasks = $taskModel->findByPageId($page['page_id']);
+                        if (!empty($tasks)) {
+                            foreach ($tasks as $task) {
+                                $subs = $submissionModel->findByTaskId($task['task_id']);
+                                if (!empty($subs)) {
+                                    foreach ($subs as $sub) {
+                                        if (!empty($sub['file_url'])) {
+                                            $subFilePath = __DIR__ . '/../' . ltrim($sub['file_url'], '/');
+                                            if (file_exists($subFilePath)) {
+                                                @unlink($subFilePath);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 2. Lấy danh sách bản thảo nộp nguyên chương của chapter này và xóa file zip/pdf
+                $chapterSubs = $submissionModel->findByChapterId($id);
+                if (!empty($chapterSubs)) {
+                    foreach ($chapterSubs as $cSub) {
+                        if (!empty($cSub['file_url'])) {
+                            $cSubFilePath = __DIR__ . '/../' . ltrim($cSub['file_url'], '/');
+                            if (file_exists($cSubFilePath)) {
+                                @unlink($cSubFilePath);
+                            }
+                        }
+                    }
+                }
+
                 $this->chapterModel->delete($id);
                 $_SESSION['success'] = "Đã xóa chapter thành công!";
             } catch (PDOException $e) {
-                $_SESSION['error'] = "Không thể xóa chapter vì dữ liệu đang liên kết.";
+                $_SESSION['error'] = "Lỗi hệ thống khi xóa chapter: " . $e->getMessage();
             }
             
             header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
