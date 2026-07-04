@@ -80,6 +80,24 @@ class DashboardController extends BaseController {
         foreach ($subsByStatusRaw as $row) {
             $subsByStatus[$row['status']] = (int)$row['sub_count'];
         }
+
+        // Lấy danh sách 5 người dùng mới đăng ký gần đây nhất
+        $recentUsers = $userModel->getConnection()->query("
+            SELECT u.*, r.role_name 
+            FROM users u 
+            JOIN roles r ON u.role_id = r.role_id 
+            ORDER BY u.user_id DESC 
+            LIMIT 5
+        ")->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Nhật ký truy cập hệ thống giả lập (IP, thời gian, browser) cho Admin
+        $recentLogins = [
+            ['username' => 'admin', 'role' => 'admin', 'ip' => '192.168.1.100', 'browser' => 'Chrome (Windows)', 'time' => date('H:i d/m/Y', time() - 1800)],
+            ['username' => 'mangaka1', 'role' => 'mangaka', 'ip' => '192.168.1.105', 'browser' => 'Safari (macOS)', 'time' => date('H:i d/m/Y', time() - 3600)],
+            ['username' => 'assistant1', 'role' => 'assistant', 'ip' => '192.168.1.112', 'browser' => 'Firefox (Linux)', 'time' => date('H:i d/m/Y', time() - 7200)],
+            ['username' => 'editor1', 'role' => 'editor', 'ip' => '192.168.1.120', 'browser' => 'Chrome (Windows)', 'time' => date('H:i d/m/Y', time() - 10800)],
+            ['username' => 'board1', 'role' => 'board', 'ip' => '192.168.1.130', 'browser' => 'Edge (Windows)', 'time' => date('H:i d/m/Y', time() - 14400)],
+        ];
         
         require_once __DIR__ . '/../views/admin/dashboard.php';
     }
@@ -150,6 +168,73 @@ class DashboardController extends BaseController {
                 $seenSeries[$r['series_id']] = true;
             }
         }
+
+        // Lấy danh sách Series đang thực hiện của họa sĩ này
+        $mySeries = $seriesModel->findByMangakaId($userId);
+
+        // Lấy danh sách Task sắp đến hạn (chưa hoàn thành) của họa sĩ này
+        $stmtRecentTasks = $taskModel->getConnection()->prepare("
+            SELECT t.*, p.page_number, c.chapter_number, u.full_name as assistant_name 
+            FROM tasks t 
+            JOIN pages p ON t.page_id = p.page_id 
+            JOIN chapters c ON p.chapter_id = c.chapter_id 
+            LEFT JOIN users u ON t.assistant_id = u.user_id 
+            WHERE t.mangaka_id = :mangaka_id AND t.status != 'completed' 
+            ORDER BY t.due_date ASC 
+            LIMIT 5
+        ");
+        $stmtRecentTasks->execute(['mangaka_id' => $userId]);
+        $recentTasks = $stmtRecentTasks->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Lấy danh sách bản thảo (Submissions) gần đây nhất của họa sĩ này
+        $stmtRecentSubmissions = $submissionModel->getConnection()->prepare("
+            SELECT s.*, p.page_number, c.chapter_number, u.full_name as assistant_name, p.image_url 
+            FROM submissions s 
+            LEFT JOIN tasks t ON s.task_id = t.task_id 
+            LEFT JOIN pages p ON t.page_id = p.page_id 
+            LEFT JOIN chapters c ON p.chapter_id = c.chapter_id 
+            LEFT JOIN users u ON s.user_id = u.user_id 
+            WHERE t.mangaka_id = :mangaka_id1 OR s.chapter_id IN (
+                SELECT chapter_id FROM chapters ch JOIN series se ON ch.series_id = se.series_id WHERE se.mangaka_id = :mangaka_id2
+            )
+            ORDER BY s.submitted_at DESC 
+            LIMIT 4
+        ");
+        $stmtRecentSubmissions->execute(['mangaka_id1' => $userId, 'mangaka_id2' => $userId]);
+        $recentSubmissions = $stmtRecentSubmissions->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Lấy lịch sử thông báo gần đây của họa sĩ này làm nhật ký hoạt động
+        $notificationModel = new Notification();
+        $recentActivities = $notificationModel->getConnection()->prepare("
+            SELECT * FROM notifications 
+            WHERE user_id = :user_id 
+            ORDER BY created_at DESC 
+            LIMIT 6
+        ");
+        $recentActivities->execute(['user_id' => $userId]);
+        $recentActivitiesData = $recentActivities->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Ước tính chi phí thù lao tác giả cần trả tháng này
+        $stmtRemuneration = $taskModel->getConnection()->prepare("
+            SELECT COUNT(*) * 300000 as total_cost 
+            FROM tasks 
+            WHERE mangaka_id = :mangaka_id AND status = 'completed'
+        ");
+        $stmtRemuneration->execute(['mangaka_id' => $userId]);
+        $remunerationCost = (int)$stmtRemuneration->fetchColumn();
+
+        // Lấy bảng xếp hạng hiệu suất trợ lý vẽ
+        $stmtAssistantsPerf = $taskModel->getConnection()->prepare("
+            SELECT u.full_name as assistant_name, COUNT(t.task_id) as completed_tasks, COUNT(t.task_id) * 300000 as total_earned
+            FROM tasks t
+            JOIN users u ON t.assistant_id = u.user_id
+            WHERE t.mangaka_id = :mangaka_id AND t.status = 'completed'
+            GROUP BY t.assistant_id, u.full_name
+            ORDER BY completed_tasks DESC
+            LIMIT 3
+        ");
+        $stmtAssistantsPerf->execute(['mangaka_id' => $userId]);
+        $assistantsPerf = $stmtAssistantsPerf->fetchAll(\PDO::FETCH_ASSOC);
         
         require_once __DIR__ . '/../views/mangaka/dashboard.php';
     }
@@ -182,7 +267,26 @@ class DashboardController extends BaseController {
             ORDER BY MIN(t.updated_at) DESC
         ");
         $stmtIncome->execute(['assistant_id' => $userId]);
-        $monthlyIncomeStats = $stmtIncome->fetchAll(PDO::FETCH_ASSOC);
+        $monthlyIncomeStats = $stmtIncome->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Nhật ký hoạt động của trợ lý
+        $notificationModel = new Notification();
+        $recentActivities = $notificationModel->getConnection()->prepare("
+            SELECT * FROM notifications 
+            WHERE user_id = :user_id 
+            ORDER BY created_at DESC 
+            LIMIT 5
+        ");
+        $recentActivities->execute(['user_id' => $userId]);
+        $recentActivitiesData = $recentActivities->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Hộp tài nguyên chung dùng trong Studio
+        $quickResources = [
+            ['title' => 'Character Model Sheets (Original Style).pdf', 'size' => '14.2 MB', 'icon' => 'fa-file-pdf text-danger'],
+            ['title' => 'Background & Perspective Grid Guidelines.pdf', 'size' => '8.5 MB', 'icon' => 'fa-file-pdf text-danger'],
+            ['title' => 'Ink Brushes & Screentones Pack (Clip Studio).sut', 'size' => '2.1 MB', 'icon' => 'fa-paint-brush text-primary'],
+            ['title' => 'Chapter 1 Script & Storyboards Layout.zip', 'size' => '45.0 MB', 'icon' => 'fa-file-archive text-warning'],
+        ];
         
         require_once __DIR__ . '/../views/assistant/dashboard.php';
     }
@@ -272,12 +376,35 @@ class DashboardController extends BaseController {
         $stmtReject->execute(['reviewer_id' => $userId]);
         $rejectedSubmissions = (int)$stmtReject->fetchColumn();
 
-        // Lấy 5 pending submissions
-        $pendingList = array_slice($submissionModel->findPendingSubmissions(), 0, 5);
+        // Lấy danh sách các bản thảo đang chờ duyệt kèm tên tác giả và ảnh bìa
+        $stmtPendingList = $submissionModel->getConnection()->prepare("
+            SELECT s.*, c.chapter_number, ser.title as series_title, u.full_name as author_name, ser.cover_image
+            FROM submissions s
+            JOIN chapters c ON s.chapter_id = c.chapter_id
+            JOIN series ser ON c.series_id = ser.series_id
+            JOIN users u ON ser.mangaka_id = u.user_id
+            WHERE s.status = 'pending'
+            ORDER BY s.submitted_at DESC
+            LIMIT 5
+        ");
+        $stmtPendingList->execute();
+        $pendingList = $stmtPendingList->fetchAll(\PDO::FETCH_ASSOC);
 
         // Lấy 5 recent reviews
         $recentReviewList = array_slice($reviewModel->findByReviewerId($userId), 0, 5);
 
+        // Thống kê Studio Workload (Giám sát tải sáng tác của họa sĩ)
+        $stmtWorkload = $submissionModel->getConnection()->query("
+            SELECT u.full_name as mangaka_name, COUNT(c.chapter_id) as active_chapters
+            FROM users u
+            LEFT JOIN series s ON u.user_id = s.mangaka_id
+            LEFT JOIN chapters c ON s.series_id = c.series_id AND c.status = 'reviewing'
+            WHERE u.role_id = (SELECT role_id FROM roles WHERE role_name = 'mangaka')
+            GROUP BY u.user_id, u.full_name
+            ORDER BY active_chapters DESC
+            LIMIT 5
+        ");
+        $studioWorkload = $stmtWorkload->fetchAll(\PDO::FETCH_ASSOC);
         
         require_once __DIR__ . '/../views/editor/dashboard.php';
     }
@@ -290,6 +417,9 @@ class DashboardController extends BaseController {
         \requireRole('board');
         
         $rankingModel = new SeriesRanking();
+        $chapterModel = new Chapter();
+        $seriesModel = new Series();
+
         // Lấy kỳ đánh giá gần nhất
         $latestPeriod = $rankingModel->getLatestPeriod();
         
@@ -309,9 +439,19 @@ class DashboardController extends BaseController {
             }
         }
         
-        $seriesModel = new Series();
         $totalSeriesCount = $seriesModel->countAll();
         $ungradedSeries = max(0, $totalSeriesCount - $evaluatedSeries);
+
+        // Lấy danh sách lịch xuất bản các chương truyện trong tuần này (Scheduled releases)
+        $stmtScheduled = $chapterModel->getConnection()->query("
+            SELECT c.*, s.title as series_title
+            FROM chapters c
+            JOIN series s ON c.series_id = s.series_id
+            WHERE c.status = 'approved' OR c.status = 'published'
+            ORDER BY c.updated_at DESC
+            LIMIT 5
+        ");
+        $scheduledReleases = $stmtScheduled->fetchAll(\PDO::FETCH_ASSOC);
         
         require_once __DIR__ . '/../views/board/dashboard.php';
     }

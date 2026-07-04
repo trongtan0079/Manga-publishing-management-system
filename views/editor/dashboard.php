@@ -1,200 +1,227 @@
-<?php 
-/**
- * View: Giao diện bảng điều khiển của Biên tập viên (dashboard.php)
- * Vai trò: Editor (Biên tập viên)
- * Chức năng: Thống kê số bản thảo đang chờ duyệt, các đánh giá gần đây, hiển thị chi tiết danh sách chờ và lịch sử đánh giá.
- * 
- * @var int $pendingSubmissions Số lượng bản thảo đang chờ xét duyệt
- * @var int $recentReviews Số lượng bài đánh giá được thực hiện gần đây
- * @var array $pendingList Danh sách các bản thảo đang chờ duyệt
- * @var array $recentReviewList Danh sách các đánh giá đã thực hiện gần đây
- */
-$pageTitle = 'Góc Biên tập (Editor)';
+<?php
+if (!defined('BASE_PATH')) {
+    header('Location: /index.php');
+    exit;
+}
+$pageTitle = 'Bảng điều khiển Biên tập viên';
 $current_page = 'dashboard';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="h3 mb-1">Kiểm duyệt Bản thảo</h2>
-        <p class="text-muted text-xs mb-0">Theo dõi, phản hồi và duyệt các chương truyện được nộp từ tác giả.</p>
+<style>
+    .welcome-banner {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+        background-size: 20px 20px;
+        color: #fff;
+        border-radius: 16px;
+        position: relative;
+        overflow: hidden;
+    }
+    .stat-card-glow {
+        transition: all 0.3s ease;
+        border-radius: 14px;
+        background: #ffffff;
+    }
+    .stat-card-glow:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05) !important;
+    }
+    .soft-bg-primary { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+    .soft-bg-success { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .soft-bg-warning { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+    .soft-bg-danger { background: rgba(239, 68, 68, 0.1); color: #ef4848; }
+</style>
+
+<!-- Banner Chào Mừng -->
+<div class="welcome-banner p-4 mb-4 shadow-sm">
+    <div class="row align-items-center">
+        <div class="col-lg-8">
+            <h1 class="h3 fw-bold mb-2">Xin chào Biên tập viên, <?= htmlspecialchars($_SESSION['full_name'] ?? 'Biên tập') ?>!</h1>
+            <p class="text-slate-300 mb-0 opacity-80" style="font-size: 14px;">Giám sát chất lượng bản thảo, đưa ra phản hồi đánh giá và phát hành các chương truyện đúng lịch xuất bản.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+            <a href="<?= BASE_PATH ?>/index.php?controller=dashboard&action=progress" class="btn btn-light btn-sm fw-bold px-3 py-2" style="border-radius: 8px;">
+                <i class="fas fa-chart-line me-1"></i>Xem tiến độ Studio
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 4 KPI Stats -->
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card-glow border-0 shadow-sm h-100">
+            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-xs fw-bold text-muted text-uppercase d-block mb-1">Chờ đánh giá</span>
+                    <h3 class="fw-bold mb-0 text-slate-800"><?= $pendingSubmissions ?></h3>
+                    <small class="text-warning text-xs">Bản thảo mới</small>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center soft-bg-warning" style="width: 48px; height: 48px;">
+                    <i class="fas fa-inbox fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card-glow border-0 shadow-sm h-100">
+            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-xs fw-bold text-muted text-uppercase d-block mb-1">Đã Đánh Giá</span>
+                    <h3 class="fw-bold mb-0 text-slate-800"><?= $recentReviews ?></h3>
+                    <small class="text-muted text-xs">Tổng số review</small>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center soft-bg-primary" style="width: 48px; height: 48px;">
+                    <i class="fas fa-eye fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card-glow border-0 shadow-sm h-100">
+            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-xs fw-bold text-muted text-uppercase d-block mb-1">Đã Phê Duyệt</span>
+                    <h3 class="fw-bold mb-0 text-slate-800"><?= $approvedSubmissions ?></h3>
+                    <small class="text-success text-xs">Approved</small>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center soft-bg-success" style="width: 48px; height: 48px;">
+                    <i class="fas fa-check-circle fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stat-card-glow border-0 shadow-sm h-100">
+            <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-xs fw-bold text-muted text-uppercase d-block mb-1">Đã Từ Chối</span>
+                    <h3 class="fw-bold mb-0 text-slate-800"><?= $rejectedSubmissions ?></h3>
+                    <small class="text-danger text-xs">Rejected</small>
+                </div>
+                <div class="rounded-circle d-flex align-items-center justify-content-center soft-bg-danger" style="width: 48px; height: 48px;">
+                    <i class="fas fa-times-circle fa-lg"></i>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <div class="row g-4 mb-4">
-    <!-- Cột 1: Thống kê tổng số Submissions chờ review -->
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card warning h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Chờ review</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($pendingSubmissions) ? $pendingSubmissions : 0 ?></div>
-                    </div>
-                    <div class="stat-icon warning"><i class="fas fa-inbox"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cột 2: Thống kê số Reviews đã thực hiện gần đây -->
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card primary h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Đã Đánh Giá</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($recentReviews) ? $recentReviews : 0 ?></div>
-                    </div>
-                    <div class="stat-icon primary"><i class="fas fa-eye"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cột 3: Approved -->
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card success h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Phê Duyệt</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($approvedSubmissions) ? $approvedSubmissions : 0 ?></div>
-                    </div>
-                    <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cột 4: Rejected -->
-    <div class="col-xl-3 col-md-6">
-        <div class="card stat-card danger h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Từ Chối</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($rejectedSubmissions) ? $rejectedSubmissions : 0 ?></div>
-                    </div>
-                    <div class="stat-icon danger"><i class="fas fa-times-circle"></i></div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mb-4">
-    <!-- Bảng danh sách các bản thảo đang chờ phê duyệt -->
-    <div class="col-lg-12">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="m-0"><i class="fas fa-clipboard-check text-primary me-2"></i>Danh sách Submissions chờ review</h6>
+    <!-- Trái: Danh sách bản thảo chờ phê duyệt -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100" style="border-radius: 12px;">
+            <div class="card-header bg-white border-0 pt-3">
+                <h6 class="m-0 fw-bold text-slate-700"><i class="fas fa-clipboard-check text-primary me-2"></i>Danh sách bản thảo nộp đang chờ duyệt</h6>
             </div>
             <div class="card-body p-0">
-                <?php if (!empty($pendingList)): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="ps-4">Người gửi</th>
-                                    <th>Mục tiêu</th>
-                                    <th>Ngày nộp</th>
-                                    <th class="text-end pe-4">Hành động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr class="table-light text-muted" style="font-size: 11px;">
+                                <th class="ps-3">Tác phẩm</th>
+                                <th>Chương nộp</th>
+                                <th>Tác giả nộp</th>
+                                <th>Thời gian nộp</th>
+                                <th class="pe-3 text-end">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($pendingList)): ?>
                                 <?php foreach ($pendingList as $sub): ?>
+                                    <?php 
+                                        $cover = !empty($sub['cover_image']) ? BASE_PATH . '/' . ltrim($sub['cover_image'], '/') : BASE_PATH . '/assets/images/default_cover.jpg';
+                                    ?>
                                     <tr>
-                                        <td class="ps-4">
-                                            <div class="fw-bold text-dark"><?= htmlspecialchars((string)($sub['sender_name'] ?? 'Không rõ')) ?></div>
-                                            <div class="small text-muted"><?= htmlspecialchars((string)($sub['series_title'] ?? '')) ?></div>
+                                        <td class="ps-3 d-flex align-items-center gap-2">
+                                            <img src="<?= $cover ?>" alt="Cover" class="rounded shadow-sm" style="width: 32px; height: 44px; object-fit: cover;" onerror="this.src='<?= BASE_PATH ?>/assets/images/default_cover.jpg'">
+                                            <div class="fw-bold text-slate-800" style="font-size: 13px;"><?= htmlspecialchars($sub['series_title']) ?></div>
                                         </td>
                                         <td>
-                                            <?php if ($sub['task_id'] !== null): ?>
-                                                <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 mb-1">Task</span>
-                                                <div class="text-xs"><?= htmlspecialchars((string)($sub['task_title'] ?? '')) ?></div>
-                                            <?php else: ?>
-                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1 mb-1">Chapter</span>
-                                                <div class="text-xs">Ch.<?= htmlspecialchars((string)($sub['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($sub['chapter_title'] ?? '')) ?></div>
-                                            <?php endif; ?>
+                                            <span class="text-slate-800" style="font-size: 12px;">Chương <?= htmlspecialchars($sub['chapter_number']) ?></span>
                                         </td>
                                         <td>
-                                            <small class="text-muted"><?= date('d/m/Y H:i', strtotime($sub['submitted_at'])) ?></small>
+                                            <span class="text-slate-800" style="font-size: 12px;"><?= htmlspecialchars($sub['author_name']) ?></span>
                                         </td>
-                                        <td class="text-end pe-4">
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i> Review
+                                        <td class="text-muted" style="font-size: 11px;">
+                                            <?= date('H:i d/m/Y', strtotime($sub['submitted_at'])) ?>
+                                        </td>
+                                        <td class="pe-3 text-end">
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $sub['submission_id'] ?>" class="btn btn-outline-primary btn-xs fw-bold">
+                                                <i class="fas fa-edit me-1"></i>Kiểm duyệt
                                             </a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                <?php else: ?>
-                    <div class="text-center py-5">
-                        <p class="text-muted mb-0">Chưa có dữ liệu</p>
-                    </div>
-                <?php endif; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted small">Hiện tại không có bản thảo nào chờ kiểm duyệt.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h6 class="m-0"><i class="fas fa-history text-primary me-2"></i>Danh sách Reviews gần đây</h6>
+    <!-- Phải: Giám sát tải công việc Studio & Lịch sử lời bình đánh giá -->
+    <div class="col-lg-4">
+        <!-- Widget 1: Giám sát tải sáng tác -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius: 12px;">
+            <div class="card-header bg-white border-0 pt-3">
+                <h6 class="m-0 fw-bold text-slate-700"><i class="fas fa-tachometer-alt text-danger me-2"></i>Giám sát tải làm việc Studio</h6>
             </div>
-            <div class="card-body p-0">
+            <div class="card-body py-2">
+                <div class="list-group list-group-flush">
+                    <?php if (!empty($studioWorkload)): ?>
+                        <?php foreach ($studioWorkload as $wl): ?>
+                            <div class="list-group-item px-0 py-2 border-0 bg-transparent d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-light text-slate-500" style="width: 32px; height: 32px;">
+                                        <i class="fas fa-paint-brush"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-slate-800" style="font-size: 12px;"><?= htmlspecialchars($wl['mangaka_name']) ?></div>
+                                        <small class="text-muted" style="font-size: 10px;">Vai trò: Mangaka</small>
+                                    </div>
+                                </div>
+                                <span class="badge <?= $wl['active_chapters'] > 1 ? 'bg-danger-soft text-danger' : 'bg-success-soft text-success' ?> text-xs"><?= $wl['active_chapters'] ?> chapter đang vẽ</span>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="text-center text-muted small py-2">Không có dữ liệu studio.</div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Widget 2: Đánh giá vừa thực hiện -->
+        <div class="card shadow-sm border-0" style="border-radius: 12px;">
+            <div class="card-header bg-white border-0 pt-3">
+                <h6 class="m-0 fw-bold text-slate-700"><i class="fas fa-history text-info me-2"></i>Lời bình kiểm duyệt gần đây</h6>
+            </div>
+            <div class="card-body py-2" style="max-height: 200px; overflow-y: auto;">
                 <?php if (!empty($recentReviewList)): ?>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="ps-4">Bản thảo ID</th>
-                                    <th>Đánh giá</th>
-                                    <th>Điểm</th>
-                                    <th>Ngày</th>
-                                    <th class="text-end pe-4">Chi tiết</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($recentReviewList as $rev): ?>
-                                    <tr>
-                                        <td class="ps-4 fw-bold text-muted">#<?= $rev['submission_id'] ?></td>
-                                        <td>
-                                            <div class="text-truncate" style="max-width: 200px;" title="<?= htmlspecialchars((string)($rev['comments'] ?? '')) ?>">
-                                                <?= htmlspecialchars((string)($rev['comments'] ?? '')) ?>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <?php if ($rev['rating']): ?>
-                                                <span class="badge bg-warning text-dark"><i class="fas fa-star me-1"></i><?= $rev['rating'] ?></span>
-                                            <?php else: ?>
-                                                <span class="text-muted">-</span>
-                                            <?php endif; ?>
-                                        </td>
-                                        <td>
-                                            <small class="text-muted"><?= date('d/m/Y', strtotime($rev['created_at'])) ?></small>
-                                        </td>
-                                        <td class="text-end pe-4">
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=review&action=show&id=<?= $rev['review_id'] ?>" class="btn btn-sm btn-outline-secondary">
-                                                <i class="fas fa-eye"></i> Xem
-                                            </a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($recentReviewList as $rev): ?>
+                            <div class="list-group-item px-0 py-2 border-light bg-transparent">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <span class="badge bg-success-soft text-success text-xs">Score: <?= $rev['score'] ?></span>
+                                    <span class="text-muted" style="font-size: 10px;"><?= date('d/m/Y', strtotime($rev['reviewed_at'])) ?></span>
+                                </div>
+                                <div class="small text-slate-800 text-truncate" style="font-size: 11px;"><?= htmlspecialchars($rev['comments']) ?></div>
+                            </div>
+                        <?php endforeach; ?>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-5">
-                        <p class="text-muted mb-0">Chưa có dữ liệu</p>
-                    </div>
+                    <div class="text-center text-muted small py-4">Chưa có đánh giá nào được gửi đi.</div>
                 <?php endif; ?>
             </div>
         </div>
