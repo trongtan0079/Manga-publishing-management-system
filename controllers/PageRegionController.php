@@ -88,7 +88,7 @@ class PageRegionController {
         }
 
         $_SESSION['success'] = "Chạy thuật toán AI phân đoạn vùng thành công! Nhận diện được 2 Khung truyện (Panel) và 1 Bong bóng thoại (Bubble) với độ chính xác >91%.";
-        header("Location: " . BASE_PATH . "/index.php?controller=page&action=detail&id=" . $pageId);
+        header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $pageId);
         exit();
     }
 }
