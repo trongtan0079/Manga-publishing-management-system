@@ -27,19 +27,13 @@ class SeriesController extends BaseController
         $role = $_SESSION['role_name'] ?? '';
         $currentUserId = $_SESSION['user_id'];
         
-        if ($role === 'editor') {
+        if ($role === 'editor' || $role === 'board' || $role === 'admin') {
             $sql = "SELECT * FROM series ORDER BY series_id DESC";
             $stmt = $this->seriesModel->getConnection()->prepare($sql);
             $stmt->execute();
             $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($role === 'mangaka') {
             $seriesList = $this->seriesModel->findByMangakaId($currentUserId);
-        } elseif ($role === 'board') {
-            // Board will use the 'publish' action instead, but we allow them here if needed
-            $sql = "SELECT * FROM series ORDER BY series_id DESC";
-            $stmt = $this->seriesModel->getConnection()->prepare($sql);
-            $stmt->execute();
-            $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } else {
             http_response_code(403);
             $_SESSION['error'] = 'Bạn không có quyền truy cập.';
