@@ -12,13 +12,42 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <style>
     .welcome-banner {
-        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-        background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
-        background-size: 20px 20px;
-        color: #fff;
+        background-color: #ffffff !important;
+        border: 1px solid #e2e8f0;
         border-radius: 16px;
         position: relative;
         overflow: hidden;
+        min-height: 220px;
+    }
+    .continue-card {
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        background-color: #ffffff;
+        max-width: 280px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .continue-btn {
+        background-color: #e63946;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 16px;
+        font-size: 11px;
+        font-weight: bold;
+        transition: background-color var(--transition);
+        text-decoration: none;
+        display: inline-block;
+    }
+    .continue-btn:hover {
+        background-color: #d62828;
+        color: #ffffff;
+    }
+    .quote-card {
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        background-color: #ffffff;
+        max-width: 240px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     .stat-card-glow {
         transition: all 0.3s ease;
@@ -76,17 +105,53 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <!-- Banner Chào Mừng -->
 <div class="welcome-banner p-4 mb-4 shadow-sm">
-    <div class="row align-items-center">
-        <div class="col-lg-8">
-            <h1 class="h3 fw-bold mb-2">Xin chào họa sĩ, <?= htmlspecialchars($_SESSION['full_name'] ?? 'Tác giả') ?>!</h1>
-            <p class="text-slate-300 mb-0 opacity-80" style="font-size: 14px;">Hôm nay là một ngày tuyệt vời để tiếp tục hoàn thiện các khung tranh vẽ. Chúc bạn có nhiều cảm hứng sáng tác!</p>
+    <div class="row align-items-center" style="position: relative; z-index: 2;">
+        <!-- Left: Greetings & Continue Work -->
+        <div class="col-lg-4 col-md-6 mb-3 mb-lg-0">
+            <h1 class="h4 fw-bold mb-1 text-slate-800">Xin chào, <span style="color: #e63946;"><?= htmlspecialchars($_SESSION['full_name'] ?? 'Tác giả') ?></span>! 👋</h1>
+            <p class="text-muted mb-3" style="font-size: 12px;">Tiếp tục hành trình sáng tác của bạn hôm nay.</p>
+            
+            <div class="continue-card p-3 shadow-xs">
+                <span class="text-uppercase fw-bold text-muted d-block mb-1" style="font-size: 9px; letter-spacing: 0.05em;">Tiếp tục công việc</span>
+                <?php
+                    $firstSeriesTitle = "Huyết Kiếm Thiên Hạ";
+                    $firstContext = "Chapter 12 - Page 15";
+                    if (!empty($mySeries)) {
+                        $firstSeriesTitle = $mySeries[0]['title'];
+                        if (!empty($recentTasks)) {
+                            $firstContext = "Chapter " . $recentTasks[0]['chapter_number'] . " - Page " . $recentTasks[0]['page_number'];
+                        } else {
+                            $firstContext = "Chương 1 - Trang 1";
+                        }
+                    }
+                ?>
+                <h6 class="fw-bold mb-1 text-slate-800" style="font-size: 13px;"><?= htmlspecialchars($firstSeriesTitle) ?></h6>
+                <p class="text-muted mb-2" style="font-size: 11px;"><?= htmlspecialchars($firstContext) ?></p>
+                <div class="progress mb-2 bg-light" style="height: 4px; border-radius: 2px;">
+                    <div class="progress-bar" role="progressbar" style="width: 60%; background-color: #e63946;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="small fw-bold text-muted" style="font-size: 11px;">60%</span>
+                    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="continue-btn">Tiếp tục ngay <i class="fas fa-chevron-right ms-1" style="font-size: 8px;"></i></a>
+                </div>
+            </div>
         </div>
-        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-            <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="btn btn-light btn-sm fw-bold px-3 py-2" style="border-radius: 8px;">
-                Quản lý Series truyện
-            </a>
+        
+        <!-- Middle space for center alignment of floating illustration -->
+        <div class="col-lg-5 col-md-1 d-none d-lg-block"></div>
+        
+        <!-- Right: Quote Card -->
+        <div class="col-lg-3 col-md-5 d-none d-md-block text-end ms-auto">
+            <div class="quote-card p-3 text-start d-inline-block">
+                <i class="fas fa-quote-left text-muted opacity-30 mb-2 d-block" style="font-size: 16px;"></i>
+                <p class="text-slate-600 mb-2" style="font-size: 11px; line-height: 1.5; font-style: italic;">Mỗi trang truyện là một bước gần hơn đến tác phẩm hoàn hảo.</p>
+                <div class="text-end text-muted font-monospace" style="font-size: 9px;">- Keep Drawing ✍</div>
+            </div>
         </div>
     </div>
+    
+    <!-- Floating Black & White Character Artwork in the middle -->
+    <img src="<?= BASE_PATH ?>/assets/images/manga_sketch_banner.png" alt="Manga Character" style="position: absolute; left: 52%; top: 50%; transform: translate(-50%, -50%); height: 115%; width: auto; opacity: 0.95; pointer-events: none; z-index: 1;">
 </div>
 
 <!-- 5 KPI hàng ngang -->
