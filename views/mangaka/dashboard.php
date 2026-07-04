@@ -127,11 +127,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 ?>
                 <h6 class="fw-bold mb-1 text-slate-800" style="font-size: 13px;"><?= htmlspecialchars($firstSeriesTitle) ?></h6>
                 <p class="text-muted mb-2" style="font-size: 11px;"><?= htmlspecialchars($firstContext) ?></p>
-                <div class="progress mb-2 bg-light" style="height: 4px; border-radius: 2px;">
-                    <div class="progress-bar" role="progressbar" style="width: 60%; background-color: #e63946;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="progress flex-grow-1 bg-light shadow-none" style="height: 4px; border-radius: 2px;">
+                        <div class="progress-bar" role="progressbar" style="width: 60%; background-color: #e63946;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <span class="small fw-bold text-muted ms-2" style="font-size: 11px;">60%</span>
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="small fw-bold text-muted" style="font-size: 11px;">60%</span>
+                <div>
                     <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="continue-btn">Tiếp tục ngay <i class="fas fa-chevron-right ms-1" style="font-size: 8px;"></i></a>
                 </div>
             </div>
