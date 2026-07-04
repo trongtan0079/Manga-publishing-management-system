@@ -1,0 +1,30 @@
+@startuml
+title State Machine Diagram - Vòng Đời Trạng Thái Của Task (Công việc Trợ lý)
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+
+[*] --> pending : Mangaka tạo Task mới
+
+state pending {
+    description : Công việc đang chờ Trợ lý tiếp nhận
+}
+
+state in_progress {
+    description : Trợ lý đang thực hiện vẽ phác thảo / đi nét / lên màu...
+}
+
+state completed {
+    description : Công việc hoàn thành xuất sắc & được Mangaka duyệt
+}
+
+pending --> in_progress : Assistant xem Task / Bắt đầu vẽ
+
+in_progress --> pending : Mangaka từ chối bản thảo (Rejected)\n[Yêu cầu sửa đổi / Làm lại]
+
+in_progress --> completed : Assistant nộp Submission -> Mangaka duyệt (Approved)
+
+completed --> [*]
+
+@enduml

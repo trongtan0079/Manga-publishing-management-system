@@ -42,7 +42,7 @@
 
 ## 🏗️ 2. THUYẾT MINH CÁC BIỂU ĐỒ UML BỔ SUNG (PUML MỚI TẠO)
 
-Để phục vụ tốt nhất cho việc bảo vệ đồ án, hai biểu đồ UML quan trọng còn thiếu đã được tạo mới bằng PlantUML:
+Để phục vụ tốt nhất cho việc bảo vệ đồ án, bốn biểu đồ UML quan trọng còn thiếu đã được tạo mới bằng PlantUML:
 
 ### 🎭 2.1. Use Case Diagram (Biểu đồ ca sử dụng)
 * **Tệp thiết kế:** [UML/Use_Case_Diagram.puml](file:///d:/XAMPP/htdocs/Manga-publishing-management-system/UML/Use_Case_Diagram.puml)
@@ -68,6 +68,25 @@
 * **Liên hệ với Database:** Ánh xạ 1-1 với cột `chapters.status` kiểu dữ liệu `ENUM('drafting', 'drawing', 'reviewing', 'approved', 'published')`.
 * **Liên hệ với Tài liệu Đặc tả:** Cụ thể hóa luồng sản xuất Manga từ studio (vẽ phác thảo, đi nét, đổ tone) đến khi xuất bản thành phẩm.
 
+### 🌐 2.3. Deployment Diagram (Biểu đồ triển khai vật lý)
+* **Tệp thiết kế:** [UML/Deployment_Diagram.puml](file:///d:/XAMPP/htdocs/Manga-publishing-management-system/UML/Deployment_Diagram.puml)
+* **Mục đích:** Mô tả cấu trúc phân tầng hạ tầng vật lý chạy phần mềm thực tế, chứng minh tính khả thi khi triển khai hệ thống web MVC.
+* **Liên hệ với Hạ tầng và Code:**
+  * **Client Node**: Trình duyệt web (Chrome, Firefox...) chạy các file tài nguyên tĩnh được render từ PHP (HTML5, CSS3, JS).
+  * **Application Server Node**: Máy chủ Apache chạy PHP Engine (v8.x), xử lý mã nguồn lõi Manga PMS và điều phối MVC.
+  * **Database Server Node**: Hệ quản trị MySQL lưu trữ cơ sở dữ liệu `manga_workflow` giao tiếp với ứng dụng qua PDO driver trên cổng 3307.
+* **Liên hệ với Tài liệu Đặc tả:** Sơ đồ hóa mô hình phân tầng Client - Server và các giao thức kết nối trong thực tế.
+
+### 📋 2.4. State Machine Diagram cho Task (Biểu đồ trạng thái công việc)
+* **Tệp thiết kế:** [UML/State_Machine_Task.puml](file:///d:/XAMPP/htdocs/Manga-publishing-management-system/UML/State_Machine_Task.puml)
+* **Mục đích:** Mô tả chi tiết vòng đời của một công việc (Task) được phân công giữa Mangaka và Assistant.
+* **Liên hệ với Code và DB:**
+  * Khởi tạo ở trạng thái `pending`: `TaskController::store()`.
+  * Chuyển sang `in_progress` khi Assistant tiếp nhận công việc trên giao diện: `views/assistant/task_list.php`.
+  * Hoàn thành (`completed`) khi Mangaka duyệt bản thảo (Approved): `SubmissionController::review()`.
+  * Quay lại trạng thái sửa đổi nếu bị từ chối (Rejected): `SubmissionController::review()` (gửi kèm feedback yêu cầu làm lại).
+  * Ánh xạ 1-1 với cột `tasks.status` dạng `ENUM('pending', 'in_progress', 'completed')`.
+
 ---
 
 ## 📊 3. BẢNG TỔNG HỢP KIỂM TOÁN UML ALIGNMENT
@@ -76,8 +95,10 @@
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ERD** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Khớp chuẩn xác cấu hình khóa ngoại của cơ sở dữ liệu. |
 | **Class Diagram** | Có | Khớp 80% | Có | Không | 🔴 Rất cao | Lưu ý sự khác biệt giữa `camelCase` trên UML và `snake_case` trong PHP code. |
-| **Use Case Diagram** | Chưa | -- | Không | **Có (Đã tạo)** | 🔴 Rất cao | Biểu đồ nền tảng để bắt đầu bài thuyết trình bảo vệ. |
-| **State Machine Chapter** | Chưa | -- | Không | **Có (Đã tạo)** | 🟡 Trung bình | Giải thích vòng đời của Chapter tương ứng với ENUM status. |
+| **Use Case Diagram** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Biểu đồ nền tảng để bắt đầu bài thuyết trình bảo vệ. |
+| **State Machine Chapter** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Giải thích vòng đời của Chapter tương ứng với ENUM status. |
+| **State Machine Task** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Giải thích vòng đời của Task tương ứng với ENUM status. |
+| **Deployment Diagram** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Chứng minh kiến trúc Client-Server vật lý thực tế của ứng dụng. |
 | **Sequence Diagram** | Có | Khớp 85% | Không | Không | 🟡 Trung bình | `ReviewManager` trên UML tương ứng với `ReviewController` trong mã nguồn. |
 | **Activity/Swimlane** | Có | Khớp 100% | Không | Không | 🟢 Thấp | Dùng để minh họa quy trình làm việc thực tế ngoài studio. |
 

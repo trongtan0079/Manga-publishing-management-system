@@ -168,20 +168,25 @@ $role = $_SESSION['role_name'] ?? '';
                 <h5 class="card-title mb-0"><i class="fas fa-cogs me-2 text-primary"></i>Hành động khả dụng</h5>
             </div>
             <div class="card-body p-4 text-center">
-                <?php if ($role === 'editor'): ?>
+                <?php if ($role === 'editor' && !empty($submission['chapter_id'])): ?>
                     <p class="text-muted text-xs mb-3">Chuyển sang module đánh giá để ghi nhận xét, chấm điểm hoặc phê duyệt chương truyện này.</p>
                     <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $submission['submission_id'] ?>" class="btn btn-success w-100 py-2.5 shadow-sm fw-bold">
                         <i class="fas fa-clipboard-check me-2"></i>Chuyển sang Review (Đánh giá)
                     </a>
+                <?php elseif ($role === 'mangaka' && !empty($submission['task_id']) && $submission['mangaka_id'] == $_SESSION['user_id'] && $submission['status'] === 'pending'): ?>
+                    <p class="text-muted text-xs mb-3">Đánh giá bản thảo nộp từ trợ lý (Assistant) của bạn để phê duyệt hoàn thành công việc.</p>
+                    <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $submission['submission_id'] ?>" class="btn btn-success w-100 py-2.5 shadow-sm fw-bold">
+                        <i class="fas fa-clipboard-check me-2"></i>Đánh giá & Phê duyệt
+                    </a>
                 <?php elseif (($role === 'assistant' || $role === 'mangaka') && $submission['status'] === 'pending' && $submission['user_id'] == $_SESSION['user_id']): ?>
-                    <p class="text-muted text-xs mb-3">Bạn có thể xóa bản thảo đã nộp nếu nó chưa được đánh giá bởi biên tập viên.</p>
+                    <p class="text-muted text-xs mb-3">Bạn có thể xóa bản thảo đã nộp nếu nó chưa được đánh giá.</p>
                     <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $submission['submission_id'] ?>" method="POST" class="d-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản thảo này không?');">
                         <button type="submit" class="btn btn-danger w-100 py-2.5 shadow-sm fw-bold">
                             <i class="fas fa-trash-alt me-2"></i>Xóa bản thảo nộp này
                         </button>
                     </form>
                 <?php else: ?>
-                    <p class="text-muted mb-0">Bản thảo này hiện ở trạng thái <strong><?= htmlspecialchars(strtoupper($submission['status'] ?? '')) ?></strong> và không còn thay đổi được.</p>
+                    <p class="text-muted mb-0">Bản thảo này hiện ở trạng thái <strong><?= htmlspecialchars(strtoupper($submission['status'] ?? '')) ?></strong>.</p>
                 <?php endif; ?>
             </div>
         </div>
