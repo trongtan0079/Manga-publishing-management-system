@@ -50,7 +50,15 @@ class UserController extends BaseController
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');
+            $fullName = trim($_POST['full_name'] ?? '');
             $email = trim($_POST['email'] ?? '');
+
+            // Kiểm tra trường rỗng
+            if (empty($username) || empty($fullName)) {
+                $_SESSION['error'] = "Lỗi: Tên đăng nhập và Họ tên không được để trống!";
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=create');
+                exit;
+            }
 
             // 1. Kiểm tra trùng lặp Username
             if ($this->userModel->findByUsername($username)) {
@@ -143,7 +151,15 @@ class UserController extends BaseController
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');
+            $fullName = trim($_POST['full_name'] ?? '');
             $email = trim($_POST['email'] ?? '');
+
+            // Kiểm tra trường rỗng
+            if (empty($username) || empty($fullName)) {
+                $_SESSION['error'] = "Lỗi: Tên đăng nhập và Họ tên không được để trống!";
+                header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
+                exit;
+            }
 
             // 1. Kiểm tra trùng lặp Username (loại trừ chính user hiện tại đang sửa)
             $existingUserByUsername = $this->userModel->findByUsername($username);

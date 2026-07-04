@@ -291,6 +291,7 @@ class AuthController extends BaseController {
 
         try {
             $this->userModel->update($userId, $data);
+            $_SESSION['full_name'] = $fullName;
             $_SESSION['success'] = 'Cập nhật hồ sơ cá nhân thành công!';
         } catch (PDOException $e) {
             $_SESSION['error'] = 'Lỗi hệ thống khi cập nhật hồ sơ: ' . $e->getMessage();
