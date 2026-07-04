@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Bao Cao Chi Tiet Ma Nguon MangaPMS</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif, Arial, sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            margin: 40px;
+            font-size: 15px;
+        }
+        h1, h2, h3, h4 {
+            color: #0f172a;
+            font-weight: bold;
+        }
+        h1 {
+            font-size: 26px;
+            border-bottom: 2px solid #1e3a8a;
+            padding-bottom: 8px;
+            margin-top: 35px;
+            text-transform: uppercase;
+        }
+        h2 {
+            font-size: 20px;
+            border-bottom: 1px solid #cbd5e1;
+            padding-bottom: 6px;
+            margin-top: 25px;
+        }
+        h3 {
+            font-size: 16px;
+            margin-top: 18px;
+            color: #1d4ed8;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #94a3b8;
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 14px;
+        }
+        th {
+            background-color: #f8fafc;
+            font-weight: bold;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+        .title-page {
+            text-align: center;
+            padding-top: 120px;
+            height: 900px;
+        }
+        .title-page h1 {
+            font-size: 30px;
+            border-bottom: none;
+            margin-bottom: 15px;
+            color: #1e3a8a;
+        }
+        .title-page h2 {
+            font-size: 18px;
+            border-bottom: none;
+            color: #475569;
+            margin-bottom: 120px;
+        }
+        .meta-info {
+            margin-top: 180px;
+            font-size: 16px;
+            line-height: 2;
+        }
+        .code-file {
+            background-color: #f1f5f9;
+            padding: 10px 15px;
+            border-left: 4px solid #1e3a8a;
+            font-family: Consolas, monospace;
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        ul {
+            margin-top: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TRANG BÌA -->
+    <div class="title-page">
+        <p style="font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 100px;">
+            TRƯỜNG ĐẠI HỌC BÁCH KHOA / CÔNG NGHỆ THÔNG TIN
+        </p>
+        
+        <h1>BÁO CÁO PHÂN TÍCH CHI TIẾT MÃ NGUỒN DỰ ÁN</h1>
+        <h2 style="text-transform: uppercase;">
+            HỆ THỐNG QUẢN LÝ QUY TRÌNH SÁNG TÁC VÀ XUẤT BẢN MANGA (MANGAPMS)
+        </h2>
+        
+        <p style="font-size: 15px; font-style: italic; margin-top: 40px;">
+            Tài liệu hướng dẫn triển khai, vận hành và phân tích cấu trúc mã nguồn toàn diện
+        </p>
+
+        <div class="meta-info">
+            <p><strong>Môn học:</strong> Đồ án chuyên ngành / Phát triển Hệ thống Web</p>
+            <p><strong>Nền tảng phát triển:</strong> PHP MVC, PDO, MySQL, Bootstrap</p>
+            <p><strong>Ngày hoàn thành:</strong> 04 tháng 07 năm 2026</p>
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- MỤC LỤC -->
+    <h2>MỤC LỤC BÁO CÁO</h2>
+    <ul>
+        <li><strong>Phần 1:</strong> Hướng dẫn Cài đặt, Triển khai & Tài khoản Kiểm thử</li>
+        <li><strong>Phần 2:</strong> Kiến trúc Hệ thống & Chu kỳ Yêu cầu (Request Lifecycle)</li>
+        <li><strong>Phần 3:</strong> Giải thích Chi tiết cấu trúc thư mục Core & Config</li>
+        <li><strong>Phần 4:</strong> Phân tích Chi tiết toàn bộ Controllers (Tầng Nghiệp vụ)</li>
+        <li><strong>Phần 5:</strong> Phân tích Chi tiết toàn bộ Models (Tầng Truy xuất Dữ liệu)</li>
+        <li><strong>Phần 6:</strong> Phân tích Chi tiết luồng Giao diện Views & Layouts</li>
+        <li><strong>Phần 7:</strong> Giải trình Phản biện Kiến trúc Data Access (Mảng vs. OOP)</li>
+        <li><strong>Phần 8:</strong> Các Cơ chế Bảo mật và Dọn dẹp tài nguyên đặc biệt trong mã nguồn</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 1 -->
+    <h1>PHẦN 1: HƯỚNG DẪN CÀI ĐẶT, TRIỂN KHAI & TÀI KHOẢN KIỂM THỬ</h1>
+    <p>Hệ thống được phát triển trên kiến trúc web nguyên bản (Native PHP) không phụ thuộc vào framework cồng kềnh, chạy mượt mà trên môi trường máy chủ cục bộ XAMPP.</p>
+    
+    <h3>1. Triển khai hệ thống cục bộ:</h3>
+    <ul>
+        <li>Sao chép toàn bộ thư mục dự án vào thư mục của XAMPP: <code>C:\xampp\htdocs\Manga-publishing-management-system</code>.</li>
+        <li>Khởi động dịch vụ Apache và MySQL trong XAMPP Control Panel.</li>
+        <li>Truy cập <code>http://localhost/phpmyadmin/</code>, tạo cơ sở dữ liệu trống có tên <code>manga_workflow</code>.</li>
+        <li>Chọn database <code>manga_workflow</code>, ấn nút <strong>Import</strong> và tải lên tệp tin SQL tại: <code>database/manga_workflow.sql</code>.</li>
+        <li>Mở file <code>config/database.php</code> để xác minh các tham số kết nối database (host, user, password mặc định).</li>
+        <li>Truy cập vào ứng dụng qua trình duyệt web bằng đường dẫn: <code>http://localhost/Manga-publishing-management-system/</code>.</li>
+    </ul>
+
+    <h3>2. Danh sách các tài khoản phân quyền để báo cáo (Demo Accounts):</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Vai trò (Role)</th>
+                <th>Tên Đăng nhập (Username)</th>
+                <th>Mật khẩu mặc định</th>
+                <th>Chức năng Demo chính</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>Admin</strong></td>
+                <td><code>admin</code></td>
+                <td><code>admin123</code></td>
+                <td>Quản trị thành viên, cấp quyền vai trò, khóa tài khoản.</td>
+            </tr>
+            <tr>
+                <td><strong>Mangaka</strong></td>
+                <td><code>mangaka1</code></td>
+                <td><code>password123</code></td>
+                <td>Tạo mới Series/Chapter, chạy AI phân vùng, giao việc cho Trợ lý, duyệt bản vẽ.</td>
+            </tr>
+            <tr>
+                <td><strong>Assistant</strong></td>
+                <td><code>assistant1</code></td>
+                <td><code>password123</code></td>
+                <td>Xem việc được giao, nộp file vẽ (ZIP/Ảnh), theo dõi số trang đã duyệt & thù lao sản phẩm.</td>
+            </tr>
+            <tr>
+                <td><strong>Tantou Editor</strong></td>
+                <td><code>editor1</code></td>
+                <td><code>password123</code></td>
+                <td>Xem báo cáo tiến độ real-time của studio, viết đánh giá chương, duyệt bản thảo sơ bộ.</td>
+            </tr>
+            <tr>
+                <td><strong>Editorial Board</strong></td>
+                <td><code>board1</code></td>
+                <td><code>password123</code></td>
+                <td>Phê duyệt xuất bản bộ truyện mới, cấu hình lịch phát hành, nhập điểm xếp hạng bình chọn.</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 2 -->
+    <h1>PHẦN 2: KIẾN TRÚC HỆ THỐNG & CHU KỲ YÊU CẦU (Request Lifecycle)</h1>
+    <p>Hệ thống vận hành theo kiến trúc <strong>Front Controller</strong> thông qua tệp tin trung tâm <code>index.php</code>.</p>
+    
+    <h3>Chu kỳ xử lý một yêu cầu (Request Lifecycle):</h3>
+    <ol>
+        <li><strong>Định tuyến (Routing):</strong> Người dùng tương tác gửi yêu cầu (Ví dụ: click vào đường dẫn xem chương <code>index.php?controller=chapter&action=show&id=3</code>).</li>
+        <li><strong>Xác thực (Authentication Middleware):</strong> Tệp <code>index.php</code> kích hoạt <code>core/Auth.php</code> để kiểm tra người dùng đã đăng nhập chưa và có vai trò phù hợp hay không.</li>
+        <li><strong>Khởi tạo Controller (Controller Dispatching):</strong> <code>index.php</code> tự động tạo mới đối tượng Controller tương ứng (Ví dụ: <code>ChapterController</code>) và thực thi action (phương thức <code>show(3)</code>).</li>
+        <li><strong>Lấy dữ liệu (Data Retrieval):</strong> Controller gọi Model tương ứng (Ví dụ: <code>ChapterModel->findById(3)</code>) để lấy dữ liệu.</li>
+        <li><strong>Động bộ giao diện (Rendering View):</strong> Controller nhận dữ liệu dưới dạng mảng liên kết PHP từ Model, sau đó nạp file View thích hợp trong thư mục <code>views/</code>, truyền các biến dữ liệu để render HTML gửi lại trình duyệt của người dùng.</li>
+    </ol>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 3 -->
+    <h1>PHẦN 3: GIẢI THÍCH CHI TIẾT CẤU TRÚC THƯ MỤC CORE & CONFIG</h1>
+
+    <div class="code-file">config/database.php</div>
+    <p><strong>Mô tả chi tiết:</strong> Chứa class kết nối cơ sở dữ liệu. Khởi tạo một đối tượng <code>PDO</code> với các thiết lập tối ưu bao gồm: kích hoạt hiển thị lỗi ngoại lệ ngoại vi, tắt mô phỏng câu lệnh chuẩn bị (emulate prepares) để tăng tính an toàn, cấu hình bộ giải mã ký tự UTF-8 cho ngôn ngữ tiếng Việt.</p>
+
+    <div class="code-file">core/Auth.php</div>
+    <p><strong>Mô tả chi tiết:</strong> Đóng vai trò là hệ thống Middleware bảo mật. Chứa hai hàm tĩnh:</p>
+    <ul>
+        <li><code>requireLogin()</code>: Kiểm tra sự tồn tại của session ID, nếu không có sẽ đưa người dùng về trang login.</li>
+        <li><code>requireRole($roleName)</code>: Đọc thông tin quyền hạn của người dùng từ Session, so khớp để chặn đứng truy cập trái phép bằng cách trả lỗi 403.</li>
+    </ul>
+
+    <div class="code-file">core/Model.php</div>
+    <p><strong>Mô tả chi tiết:</strong> Lớp cha của toàn bộ các Model. Điểm đặc sắc là việc khai báo biến kết nối dạng tĩnh <code>protected static $sharedConn = null</code>. Cơ chế này đảm bảo trong suốt một chu trình tải trang (Request Lifecycle), dù có bao nhiêu model được gọi thì hệ thống cũng chỉ tạo đúng 1 kết nối cơ sở dữ liệu MySQL duy nhất, tối ưu tài nguyên máy chủ. Nó định nghĩa sẵn các câu lệnh SQL tự động sinh để thêm, sửa, xóa, tìm kiếm theo ID dùng chung cho các lớp kế thừa.</p>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 4 -->
+    <h1>PHẦN 4: PHÂN TÍCH CHI TIẾT TOÀN BỘ CONTROLLERS (Tầng Nghiệp vụ)</h1>
+
+    <div class="code-file">controllers/BaseController.php</div>
+    <p><strong>Chức năng:</strong> Lớp cơ sở cho toàn bộ Controller. Tự động kiểm tra trạng thái session để đếm số thông báo mới chưa đọc và nạp danh sách 5 thông báo gần nhất để hiển thị trực quan lên giao diện thanh công cụ dùng chung.</p>
+
+    <div class="code-file">controllers/AuthController.php</div>
+    <p><strong>Chức năng:</strong> Điều phối đăng nhập, kiểm tra mật khẩu đã được mã hóa bằng hàm <code>password_verify()</code>. Cập nhật hồ sơ cá nhân và lập tức ghi đè session hiển thị họ tên mới để đồng bộ thanh header của giao diện.</p>
+
+    <div class="code-file">controllers/DashboardController.php</div>
+    <p><strong>Chức năng:</strong> Phân phối trang tổng quan theo từng vai trò của người dùng. Đặc biệt chứa thuật toán đếm tiến độ thời gian thực của các chương thuộc Series trong phương thức <code>progress()</code> (đếm cả chương đã duyệt và đã xuất bản) và lấy thống kê thù lao theo từng tháng của trợ lý.</p>
+
+    <div class="code-file">controllers/SeriesController.php</div>
+    <p><strong>Chức năng:</strong> CRUD Series. Khóa chặt các trường thay đổi trạng thái truyện và lịch xuất bản (chỉ Board mới có quyền). Có hàm <code>checkOwnership` để chặn tác giả sửa truyện của người khác.</p>
+
+    <div class="code-file">controllers/ChapterController.php</div>
+    <p><strong>Chức năng:</strong> Quản lý chương truyện. Cho phép xem bản thảo nguyên chương. Khi xóa chương, tích hợp gọi dọn dẹp vật lý toàn bộ file ảnh các trang vẽ và tệp tin nộp thuộc chương đó.</p>
+
+    <div class="code-file">controllers/PageController.php</div>
+    <p><strong>Chức năng:</strong> Quản lý trang vẽ. Điều hướng luồng kích hoạt AI (gọi API phân đoạn trang vẽ và lưu tọa độ khung hình, bóng thoại). Dọn sạch file ảnh của trang trên ổ cứng khi trang bị xóa.</p>
+
+    <div class="code-file">controllers/PageRegionController.php</div>
+    <p><strong>Chức năng:</strong> Quản lý vùng trang truyện do AI phân đoạn. Sửa lỗi chuyển hướng luồng AI từ 404 về trang chi tiết trang truyện chuẩn xác.</p>
+
+    <div class="code-file">controllers/TaskController.php</div>
+    <p><strong>Chức năng:</strong> Phân công nhiệm vụ cho trợ lý vẽ nền, tô bóng. Chứa logic validation bắt buộc nhập tiêu đề, kiểm tra trạng thái hoạt động của trợ lý, chặn trợ lý tự ý bấm nút hoàn thành task nếu chưa được tác giả duyệt bản vẽ.</p>
+
+    <div class="code-file">controllers/SubmissionController.php</div>
+    <p><strong>Chức năng:</strong> Tiếp nhận file nộp bài (ZIP/PDF/Ảnh). Sử dụng thư viện backend để đọc Magic Bytes chữ ký nhị phân của tệp tin nhằm chống upload webshell nguy hiểm. Chặn việc nộp bài mới khi task/chapter đã đóng.</p>
+
+    <div class="code-file">controllers/ReviewController.php</div>
+    <p><strong>Chức năng:</strong> Editor/Mangaka đánh giá bản vẽ. Khi bấm Duyệt (Approve) sản phẩm của Trợ lý, tự động chuyển đổi trạng thái của Task liên quan sang hoàn thành (`completed`).</p>
+
+    <div class="code-file">controllers/SeriesRankingController.php</div>
+    <p><strong>Chức năng:</strong> Hội đồng biên tập nhập điểm xếp hạng độc giả bình chọn. Hệ thống tự động quét thứ hạng để gửi cảnh báo đỏ tam giác nguy cơ hủy truyện cho Mangaka sở hữu nếu điểm số dưới 50 hoặc thứ hạng nằm ngoài Top 5.</p>
+
+    <div class="code-file">controllers/NotificationController.php</div>
+    <p><strong>Chức năng:</strong> Xem danh sách thông báo và đánh dấu đã đọc.</p>
+
+    <div class="code-file">controllers/UserController.php</div>
+    <p><strong>Chức năng:</strong> Cho phép Admin quản trị thành viên hệ thống, phân bổ quyền và cấu hình trạng thái hoạt động của tài khoản.</p>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 5 -->
+    <h1>PHẦN 5: PHÂN TÍCH CHI TIẾT TOÀN BỘ MODELS (Tầng Truy xuất Dữ liệu)</h1>
+    <p>Mỗi file Model quản lý một thực thể dữ liệu tương ứng trong MySQL, kế thừa các hàm cơ bản từ <code>Model.php</code> và phát triển thêm các truy vấn JOIN phức tạp:</p>
+    <ul>
+        <li><strong><code>User.php</code></strong>: Quản lý bảng <code>users</code>. Cung cấp hàm băm mật khẩu, đăng nhập và lấy tài khoản kèm thông tin vai trò.</li>
+        <li><strong><code>Series.php</code></strong>: Quản lý bảng <code>series</code>. Hỗ trợ tìm dự án theo tác giả và lấy toàn bộ dự án kèm tên tác giả.</li>
+        <li><strong><code>Chapter.php</code></strong>: Quản lý bảng <code>chapters</code>.</li>
+        <li><strong><code>Page.php</code></strong>: Quản lý bảng <code>pages</code>. Chứa ràng buộc duy nhất để số thứ tự các trang trong một chương không bị trùng lặp.</li>
+        <li><strong><code>PageRegion.php</code></strong>: Quản lý bảng <code>page_regions</code> chứa thông tin tọa độ x, y, width, height của khung hình phân đoạn.</li>
+        <li><strong><code>Task.php</code></strong>: Quản lý bảng <code>tasks</code>. Truy vấn các task chưa hoàn tất của trợ lý.</li>
+        <li><strong><code>Submission.php</code></strong>: Quản lý bảng <code>submissions</code> lưu đường dẫn file nộp của thành viên.</li>
+        <li><strong><code>Review.php</code></strong>: Quản lý bảng <code>reviews</code> lưu điểm số và lời nhận xét đánh giá của Editor/Mangaka.</li>
+        <li><strong><code>SeriesRanking.php</code></strong>: Quản lý bảng <code>series_rankings</code> để tính toán thống kê xếp hạng tuần/tháng.</li>
+        <li><strong><code>Notification.php</code></strong>: Quản lý bảng <code>notifications</code> để gửi thông báo đẩy trong hệ thống.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 6 -->
+    <h1>PHẦN 6: PHÂN TÍCH CHI TIẾT LUỒNG GIAO DIỆN VIEWS & LAYOUTS</h1>
+    <p>Thư mục giao diện <code>views/</code> được chia thành các vai trò rõ rệt để tăng tính chuyên nghiệp:</p>
+    
+    <h3>1. Thư mục Layouts dùng chung (`views/layouts/`):</h3>
+    <ul>
+        <li><code>header.php</code>: Chứa khai báo HTML5, thẻ meta SEO và tải các thư viện CSS Bootstrap 5, FontAwesome icon.</li>
+        <li><code>navbar.php</code>: Thanh đầu trang chứa menu thông báo và lối tắt tài khoản.</li>
+        <li><code>sidebar.php</code>: Thực hiện vẽ thanh điều hướng động (chỉ hiển thị những liên kết mà role hiện tại được phép truy cập).</li>
+        <li><code>footer.php</code>: Đóng các thẻ HTML và tải thư viện JavaScript hỗ trợ giao diện.</li>
+    </ul>
+
+    <h3>2. Các màn hình chức năng chính theo vai trò:</h3>
+    <ul>
+        <li><strong>Admin (`views/admin/`)</strong>: Bảng điều khiển tài khoản và phân quyền.</li>
+        <li><strong>Mangaka (`views/mangaka/`)</strong>: Chi tiết trang vẽ, nơi tác giả có thể xem toàn bộ các vùng phân mảnh AI, click chọn vùng để giao việc cho trợ lý và xem tổng thể sau khi trợ lý nộp bài để nhấn duyệt.</li>
+        <li><strong>Assistant (`views/assistant/`)</strong>: Nơi trợ lý theo dõi danh sách việc được giao và thẻ thù lao tạm tính theo tháng.</li>
+        <li><strong>Editor (`views/editor/`)</strong>: Giao diện xem tiến độ tổng thể của các studio và form nhập lời phê bình, đánh giá.</li>
+        <li><strong>Board (`views/board/`)</strong>: Nơi hội đồng duyệt dự án và nhập dữ liệu bảng xếp hạng Manga.</li>
+    </ul>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 7 -->
+    <h1>PHẦN 7: GIẢI TRÌNH PHẢN BIỆN KIẾN TRÚC DATA ACCESS (Mảng vs. OOP)</h1>
+    <p>Nếu Hội đồng chấm đề án thắc mắc tại sao không ánh xạ dữ liệu trực tiếp sang đối tượng OOP Class cho từng thực thể (Object Mapping) mà lại sử dụng mảng liên kết (FETCH_ASSOC), dưới đây là các câu trả lời kỹ thuật vững chắc:</p>
+    
+    <h3>1. Biện hộ kỹ thuật về hiệu năng và tài nguyên:</h3>
+    <ul>
+        <li><strong>Tốc độ xử lý CPU:</strong> Việc khởi tạo hàng trăm đối tượng Class trong một yêu cầu làm tăng dung lượng RAM tiêu thụ và CPU overhead của máy chủ. Việc sử dụng mảng liên kết nguyên bản trong PHP được viết trực tiếp bằng ngôn ngữ C ở lõi PHP nên mang lại tốc độ phản hồi nhanh hơn gấp 2 đến 3 lần.</li>
+        <li><strong>Khớp nối tự nhiên:</strong> Giao diện PHP và API phản hồi dưới dạng JSON dễ dàng chuyển đổi trực tiếp từ mảng gốc mà không phải qua lớp trung gian ánh xạ phức tạp, hạn chế lỗi kiểu dữ liệu.</li>
+    </ul>
+
+    <h3>2. Khẳng định tính hướng đối tượng:</h3>
+    <p>Mặc dù lớp truy xuất dữ liệu trả về mảng, toàn bộ hệ thống vẫn tuân thủ mô hình OOP chặt chẽ ở tầng điều khiển (Controller) và cấu trúc kế thừa dùng chung từ lớp cha `core/Model.php` để tái sử dụng mã nguồn CRUD tốt.</p>
+
+    <div class="page-break"></div>
+
+    <!-- PHẦN 8 -->
+    <h1>PHẦN 8: CÁC CƠ CHẾ BẢO MẬT VÀ DỌN DẸP TÀI NGUYÊN ĐẶC BIỆT</h1>
+    
+    <h3>1. Cơ chế dọn sạch file rác (Physical File Cleanup):</h3>
+    <p>Để tối ưu ổ cứng máy chủ, hệ thống được cấu hình tự động xóa tệp tin vật lý bằng hàm <code>@unlink</code> trên ổ cứng khi bản ghi tương ứng bị xóa ở DB:</p>
+    <ul>
+        <li>Xóa Page: Xóa file ảnh của trang vẽ và file của các task thuộc trang đó.</li>
+        <li>Xóa Chapter: Xóa tệp của tất cả các trang con, task con và zip/pdf nộp chương.</li>
+        <li>Xóa Series: Xóa tệp ảnh bìa và dọn dẹp đệ quy toàn bộ file của tất cả các chương thuộc series.</li>
+        <li>Xóa Task: Tự động dọn sạch các file bản vẽ nộp liên quan của task đó trên đĩa cứng.</li>
+    </ul>
+
+    <h3>2. Cơ chế chặn Upload Webshell nguy hại:</h3>
+    <p>Tại <code>SubmissionController.php</code>, hệ thống thực hiện đọc 4 byte đầu tiên của tệp tin để so khớp chữ ký định dạng thực tế (Magic Bytes) nhằm chống lại tin tặc đổi đuôi file mã độc thành file ảnh hay PDF để tải lên máy chủ.</p>
+
+</body>
+</html>
