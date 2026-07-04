@@ -9,8 +9,10 @@ Khi hệ thống có nhiều tác giả (Mangaka), trợ lý (Assistant), biên 
 * **Tính riêng tư của Bộ truyện (Series):**
   * Mỗi Series thuộc về một Mangaka duy nhất thông qua cột `series.mangaka_id`. 
   * Mangaka A **chỉ nhìn thấy và có quyền chỉnh sửa** các Series của mình. Họ không thể xem bản thảo nháp hay giao việc trên các bộ truyện của Mangaka B (Được kiểm soát bởi hàm `checkOwnership` và `checkChapterOwnership` trong Controllers).
-* **Định danh Giao việc (Task Assignment):**
-  * Khi Mangaka A tạo một Task trên trang vẽ, họ sẽ chọn đích danh 1 Assistant (ví dụ: Assistant B) từ danh sách người dùng có vai trò `assistant` hoạt động trong hệ thống.
+* **Định danh Giao việc (Task Assignment) & Cơ chế Bể trợ lý (Freelance Assistant Pool):**
+  * Khi Mangaka A tạo một Task trên trang vẽ, họ sẽ chọn đích danh 1 Assistant (ví dụ: Assistant B) từ danh sách người dùng có vai trò `assistant` đang hoạt động (`active`) trong hệ thống.
+  * **Cơ chế Bể trợ lý chung (Freelance Assistant Pool):** Tác giả được phép chọn bất kỳ trợ lý nào có trên hệ thống. Điều này mô phỏng mô hình vận hành linh hoạt của các tòa soạn truyện tranh lớn, nơi nhà xuất bản duy trì một danh sách trợ lý/cộng tác viên đã được kiểm định chất lượng đầu vào, cho phép tác giả tự do lựa chọn người phù hợp nhất cho từng phong cách vẽ của Task (ví dụ: trợ lý chuyên vẽ cảnh nền, chuyên đi nét, hoặc lên màu).
+  * **Định hướng mở rộng tương lai (Scoping Team/Studio):** Khi quy mô dự án tăng lên và cần tính cách ly cao hơn (mỗi tác giả sở hữu một studio riêng với các trợ lý ruột), hệ thống có thể tích hợp thêm thực thể `teams` (Nhóm sáng tác) để liên kết cố định danh sách trợ lý khả dụng cho từng tác giả cụ thể.
   * Thông tin giao việc được lưu ở cột `tasks.assistant_id`. Lúc này, chỉ Assistant B mới nhìn thấy task này trong màn hình **"Công việc của tôi"** để nộp bài. Assistant C sẽ không hề thấy task này.
 * **Biên tập viên (Tantou Editor):**
   * Editor C theo dõi tiến độ của các studio và viết đánh giá cho Chapter. Các đánh giá được lưu lại với thuộc tính `reviews.reviewer_id` để phân biệt Editor nào viết nhận xét nào.
