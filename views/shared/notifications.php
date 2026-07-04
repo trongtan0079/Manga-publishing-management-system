@@ -44,6 +44,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     case 'submission_approved': $icon = 'fa-check-circle'; $color = 'text-success'; $typeLabel = 'Phê duyệt'; break;
                                     case 'submission_rejected': $icon = 'fa-times-circle'; $color = 'text-danger'; $typeLabel = 'Từ chối'; break;
                                     case 'ranking_published': $icon = 'fa-trophy'; $color = 'text-warning'; $typeLabel = 'Xếp hạng'; break;
+                                    case 'series_warning': $icon = 'fa-exclamation-triangle'; $color = 'text-danger'; $typeLabel = 'Cảnh báo'; break;
                                 }
                             ?>
                             <div class="bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center border" style="width: 48px; height: 48px;">

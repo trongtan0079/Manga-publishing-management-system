@@ -192,7 +192,7 @@ class DashboardController extends BaseController {
             // count completed chapters
             $completedChapters = 0;
             foreach ($chapters as $ch) {
-                if ($ch['status'] === 'approved') {
+                if ($ch['status'] === 'approved' || $ch['status'] === 'published') {
                     $completedChapters++;
                 }
             }

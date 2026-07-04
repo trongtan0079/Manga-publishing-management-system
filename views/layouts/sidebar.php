@@ -38,7 +38,7 @@ $role = $_SESSION['role_name'] ?? '';
                 </li>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['mangaka', 'editor'])): ?>
+            <?php if (in_array($role, ['mangaka', 'editor', 'board', 'admin'])): ?>
                 <li class="nav-item nav-category">Quản lý Xuất bản</li>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'series') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=index">
@@ -75,7 +75,7 @@ $role = $_SESSION['role_name'] ?? '';
                 </li>
             <?php endif; ?>
 
-            <?php if (in_array($role, ['board', 'mangaka', 'editor'])): ?>
+            <?php if (in_array($role, ['board', 'mangaka', 'editor', 'admin'])): ?>
                 <li class="nav-item nav-category">Báo cáo & Thống kê</li>
                 <?php if ($role === 'board'): ?>
                 <li class="nav-item">

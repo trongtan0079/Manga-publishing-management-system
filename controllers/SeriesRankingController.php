@@ -132,6 +132,12 @@ class SeriesRankingController extends BaseController
                     $mangakaId = $series['mangaka_id'];
                     $message = "Bộ truyện {$series['title']} của bạn đã được xếp hạng {$rankPosition} với điểm số {$score}.";
                     $this->notificationModel->createNotification($mangakaId, 'ranking_published', $message);
+
+                    // Nhận thông báo khi series có nguy cơ bị huỷ (Nếu điểm số < 50 hoặc thứ hạng >= 5)
+                    if ($score < 50 || $rankPosition >= 5) {
+                        $warningMsg = "Cảnh báo: Bộ truyện '{$series['title']}' của bạn đang xếp hạng thấp (Hạng {$rankPosition}, Điểm {$score}). Có nguy cơ bị Hội đồng Biên tập xem xét ngưng xuất bản hoặc hủy dự án.";
+                        $this->notificationModel->createNotification($mangakaId, 'series_warning', $warningMsg);
+                    }
                 }
 
                 $_SESSION['success'] = 'Tạo Ranking mới thành công!';
