@@ -150,7 +150,52 @@ class DashboardController extends BaseController {
                 $seenSeries[$r['series_id']] = true;
             }
         }
-        
+
+        // Lấy danh sách Series đang thực hiện của họa sĩ này
+        $mySeries = $seriesModel->findByCondition(['mangaka_id' => $userId]);
+
+        // Lấy danh sách Task sắp đến hạn (chưa hoàn thành) của họa sĩ này
+        $stmtRecentTasks = $taskModel->getConnection()->prepare("
+            SELECT t.*, p.page_number, c.chapter_number, u.full_name as assistant_name 
+            FROM tasks t 
+            JOIN pages p ON t.page_id = p.page_id 
+            JOIN chapters c ON p.chapter_id = c.chapter_id 
+            LEFT JOIN users u ON t.assistant_id = u.user_id 
+            WHERE t.mangaka_id = :mangaka_id AND t.status != 'completed' 
+            ORDER BY t.due_date ASC 
+            LIMIT 5
+        ");
+        $stmtRecentTasks->execute(['mangaka_id' => $userId]);
+        $recentTasks = $stmtRecentTasks->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Lấy danh sách bản thảo (Submissions) gần đây nhất của họa sĩ này
+        $stmtRecentSubmissions = $submissionModel->getConnection()->prepare("
+            SELECT s.*, p.page_number, c.chapter_number, u.full_name as assistant_name, p.image_url 
+            FROM submissions s 
+            LEFT JOIN tasks t ON s.task_id = t.task_id 
+            LEFT JOIN pages p ON t.page_id = p.page_id 
+            LEFT JOIN chapters c ON p.chapter_id = c.chapter_id 
+            LEFT JOIN users u ON s.submitted_by = u.user_id 
+            WHERE t.mangaka_id = :mangaka_id1 OR s.chapter_id IN (
+                SELECT chapter_id FROM chapters ch JOIN series se ON ch.series_id = se.series_id WHERE se.mangaka_id = :mangaka_id2
+            )
+            ORDER BY s.submitted_at DESC 
+            LIMIT 4
+        ");
+        $stmtRecentSubmissions->execute(['mangaka_id1' => $userId, 'mangaka_id2' => $userId]);
+        $recentSubmissions = $stmtRecentSubmissions->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Lấy lịch sử thông báo gần đây của họa sĩ này làm nhật ký hoạt động
+        $notificationModel = new Notification();
+        $recentActivities = $notificationModel->getConnection()->prepare("
+            SELECT * FROM notifications 
+            WHERE user_id = :user_id 
+            ORDER BY created_at DESC 
+            LIMIT 6
+        ");
+        $recentActivities->execute(['user_id' => $userId]);
+        $recentActivitiesData = $recentActivities->fetchAll(\PDO::FETCH_ASSOC);
+
         require_once __DIR__ . '/../views/mangaka/dashboard.php';
     }
 
