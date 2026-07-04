@@ -486,14 +486,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <?php foreach ($recentActivitiesData as $act): ?>
                             <?php 
                                 $warnClass = 'info';
-                                if (strpos(strtolower($act['content']), 'cảnh báo') !== false || strpos(strtolower($act['content']), 'nguy cơ') !== false) {
+                                if (strpos(strtolower($act['message']), 'cảnh báo') !== false || strpos(strtolower($act['message']), 'nguy cơ') !== false) {
                                     $warnClass = 'danger';
-                                } elseif (strpos(strtolower($act['content']), 'giao việc') !== false) {
+                                } elseif (strpos(strtolower($act['message']), 'giao việc') !== false) {
                                     $warnClass = 'warning';
                                 }
                             ?>
                             <div class="timeline-item <?= $warnClass ?>">
-                                <div class="small fw-bold text-dark" style="font-size: 11px;"><?= htmlspecialchars($act['content']) ?></div>
+                                <div class="small fw-bold text-dark" style="font-size: 11px;"><?= htmlspecialchars($act['message']) ?></div>
                                 <div class="text-muted" style="font-size: 9px;"><?= date('H:i d/m/Y', strtotime($act['created_at'])) ?></div>
                             </div>
                         <?php endforeach; ?>

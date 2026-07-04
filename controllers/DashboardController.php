@@ -152,7 +152,7 @@ class DashboardController extends BaseController {
         }
 
         // Lấy danh sách Series đang thực hiện của họa sĩ này
-        $mySeries = $seriesModel->findByCondition(['mangaka_id' => $userId]);
+        $mySeries = $seriesModel->findByMangakaId($userId);
 
         // Lấy danh sách Task sắp đến hạn (chưa hoàn thành) của họa sĩ này
         $stmtRecentTasks = $taskModel->getConnection()->prepare("
@@ -175,7 +175,7 @@ class DashboardController extends BaseController {
             LEFT JOIN tasks t ON s.task_id = t.task_id 
             LEFT JOIN pages p ON t.page_id = p.page_id 
             LEFT JOIN chapters c ON p.chapter_id = c.chapter_id 
-            LEFT JOIN users u ON s.submitted_by = u.user_id 
+            LEFT JOIN users u ON s.user_id = u.user_id 
             WHERE t.mangaka_id = :mangaka_id1 OR s.chapter_id IN (
                 SELECT chapter_id FROM chapters ch JOIN series se ON ch.series_id = se.series_id WHERE se.mangaka_id = :mangaka_id2
             )
