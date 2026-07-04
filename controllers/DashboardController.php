@@ -169,6 +169,21 @@ class DashboardController extends BaseController {
         
         $activeTasks = $taskModel->findActiveByAssistantId($userId);
         
+        // Tính toán thống kê trang đã duyệt và thu nhập theo từng tháng
+        $stmtIncome = $taskModel->getConnection()->prepare("
+            SELECT 
+                DATE_FORMAT(t.updated_at, '%m/%Y') as period,
+                COUNT(DISTINCT t.page_id) as approved_pages_count,
+                COUNT(t.task_id) as completed_tasks_count,
+                COUNT(t.task_id) * 300000 as estimated_income
+            FROM tasks t
+            WHERE t.assistant_id = :assistant_id AND t.status = 'completed'
+            GROUP BY DATE_FORMAT(t.updated_at, '%m/%Y')
+            ORDER BY MIN(t.updated_at) DESC
+        ");
+        $stmtIncome->execute(['assistant_id' => $userId]);
+        $monthlyIncomeStats = $stmtIncome->fetchAll(PDO::FETCH_ASSOC);
+        
         require_once __DIR__ . '/../views/assistant/dashboard.php';
     }
 

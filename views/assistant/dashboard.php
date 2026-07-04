@@ -72,9 +72,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
-<div class="row">
-    <div class="col-lg-12">
-        <div class="card mb-4">
+<div class="row g-4">
+    <!-- Cột bên trái: Danh sách Task cần xử lý -->
+    <div class="col-lg-8">
+        <div class="card mb-4 h-100">
             <div class="card-header">
                 <h6 class="m-0"><i class="fas fa-tasks text-primary me-2"></i>Nhiệm vụ Cần xử lý</h6>
             </div>
@@ -127,6 +128,46 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <p class="text-muted mb-0">Chưa có dữ liệu</p>
                     </div>
                 <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột bên phải: Thống kê Thu nhập & Trang đã duyệt -->
+    <div class="col-lg-4">
+        <div class="card mb-4 h-100">
+            <div class="card-header">
+                <h6 class="m-0"><i class="fas fa-hand-holding-usd text-success me-2"></i>Thu nhập & Trang đã duyệt</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 text-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Tháng</th>
+                                <th class="text-center">Số trang</th>
+                                <th class="text-end">Thu nhập</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (!empty($monthlyIncomeStats)): ?>
+                                <?php foreach ($monthlyIncomeStats as $stat): ?>
+                                    <tr>
+                                        <td><strong><?= htmlspecialchars($stat['period']) ?></strong></td>
+                                        <td class="text-center"><?= htmlspecialchars($stat['approved_pages_count']) ?> trang</td>
+                                        <td class="text-end text-success fw-semibold"><?= number_format($stat['estimated_income'], 0, ',', '.') ?> đ</td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">Chưa có thu nhập phát sinh trong kỳ</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="alert alert-light border mt-3 text-xs mb-0">
+                    <i class="fas fa-info-circle me-1 text-primary"></i> Định mức thanh toán: <strong>300.000 đ</strong> / công việc trên mỗi trang vẽ được tác giả duyệt hoàn tất.
+                </div>
             </div>
         </div>
     </div>
