@@ -132,11 +132,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </div>
     </div>
 
-    <!-- Cột bên phải: Thống kê Thu nhập & Trang đã duyệt -->
+    <!-- Cột bên phải: Thống kê Thù lao & Trang đã duyệt -->
     <div class="col-lg-4">
         <div class="card mb-4 h-100">
             <div class="card-header">
-                <h6 class="m-0"><i class="fas fa-hand-holding-usd text-success me-2"></i>Thu nhập & Trang đã duyệt</h6>
+                <h6 class="m-0"><i class="fas fa-hand-holding-usd text-success me-2"></i>Thù lao & Trang đã duyệt</h6>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -145,7 +145,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <tr>
                                 <th>Tháng</th>
                                 <th class="text-center">Số trang</th>
-                                <th class="text-end">Thu nhập</th>
+                                <th class="text-end">Thù lao</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -159,7 +159,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="3" class="text-center text-muted py-4">Chưa có thu nhập phát sinh trong kỳ</td>
+                                    <td colspan="3" class="text-center text-muted py-4">Chưa phát sinh thù lao trong kỳ</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
