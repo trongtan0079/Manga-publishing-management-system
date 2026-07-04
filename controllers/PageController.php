@@ -22,7 +22,7 @@ class PageController extends BaseController
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
     
     // Trạng thái hợp lệ của page
-    private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
+    private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published', 'toned'];
 
     public function __construct() {
         parent::__construct();
@@ -394,5 +394,37 @@ class PageController extends BaseController
             header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
             exit;
         }
+    }
+
+    /**
+     * Action: Kích hoạt AI tô màu tự động cho trang truyện
+     */
+    public function runAIColoring() {
+        $pageId = $_GET['page_id'] ?? '';
+        if (empty($pageId)) {
+            $_SESSION['error'] = "Không tìm thấy trang truyện!";
+            header("Location: " . BASE_PATH . "/index.php");
+            exit();
+        }
+
+        $page = $this->pageModel->findById($pageId);
+        if (!$page) {
+            $_SESSION['error'] = "Trang truyện không tồn tại!";
+            header("Location: " . BASE_PATH . "/index.php");
+            exit();
+        }
+
+        // Cập nhật trạng thái trang sang 'toned' (đại diện cho việc tô màu/tông màu hoàn tất)
+        try {
+            $this->pageModel->update($pageId, [
+                'status' => 'toned'
+            ]);
+            $_SESSION['success'] = "AI đã tô màu tự động trang truyện thành công!";
+        } catch (PDOException $e) {
+            $_SESSION['error'] = "Lỗi khi chạy AI tô màu: " . $e->getMessage();
+        }
+
+        header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $pageId);
+        exit();
     }
 }

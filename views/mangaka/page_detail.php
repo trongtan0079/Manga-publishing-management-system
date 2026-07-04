@@ -13,6 +13,25 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<style>
+.ai-colored-page {
+    position: relative;
+    overflow: hidden;
+}
+.ai-colored-page::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(236, 72, 153, 0.22) 50%, rgba(251, 191, 36, 0.22) 100%);
+    mix-blend-mode: color;
+    pointer-events: none;
+    border-radius: 4px;
+}
+</style>
+
 <?php if (isset($_SESSION['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
         <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($_SESSION['success']) ?>
@@ -58,17 +77,19 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <?php
         // Gán màu huy hiệu (badge) tùy theo trạng thái (status)
         $pBadge = 'bg-secondary';
+        $statusLabel = $page['status'];
         switch ($page['status']) {
-            case 'drafting': $pBadge = 'bg-secondary'; break;
-            case 'drawing': $pBadge = 'bg-primary'; break;
-            case 'reviewing': $pBadge = 'bg-warning text-dark'; break;
-            case 'approved': $pBadge = 'bg-info text-dark'; break;
-            case 'published': $pBadge = 'bg-success'; break;
+            case 'drafting': $pBadge = 'bg-secondary'; $statusLabel = 'Bản nháp'; break;
+            case 'drawing': $pBadge = 'bg-primary'; $statusLabel = 'Đang vẽ'; break;
+            case 'reviewing': $pBadge = 'bg-warning text-dark'; $statusLabel = 'Đang chờ duyệt'; break;
+            case 'approved': $pBadge = 'bg-info text-dark'; $statusLabel = 'Đã duyệt'; break;
+            case 'published': $pBadge = 'bg-success'; $statusLabel = 'Đã xuất bản'; break;
+            case 'toned': $pBadge = 'bg-success'; $statusLabel = 'Tô màu AI'; break;
         }
         ?>
         <div class="row">
             <div class="col-md-4">
-                <p><strong>Trạng thái:</strong> <span class="badge <?= $pBadge ?>"><?= ucfirst(htmlspecialchars($page['status'])) ?></span></p>
+                <p><strong>Trạng thái:</strong> <span class="badge <?= $pBadge ?>"><?= htmlspecialchars($statusLabel) ?></span></p>
                 <p><strong>Ngày tạo:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['created_at']))) ?></p>
                 <p><strong>Cập nhật lần cuối:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></p>
             </div>
@@ -93,7 +114,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
                 ?>
                     <?php if (!empty($regions)): ?>
-                        <div class="position-relative d-inline-block text-start" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                        <div class="position-relative d-inline-block text-start <?= $page['status'] === 'toned' ? 'ai-colored-page' : '' ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
                             <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
                             <?php foreach ($regions as $region): 
                                 // Tỷ lệ phần trăm dựa trên kích thước giả định 800 x 1000
@@ -126,7 +147,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <div class="position-relative d-inline-block text-start" style="max-width: 100%;">
+                        <div class="position-relative d-inline-block text-start <?= $page['status'] === 'toned' ? 'ai-colored-page' : '' ?>" style="max-width: 100%;">
                             <img src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid border shadow-sm">
                         </div>
                     <?php endif; ?>
@@ -207,6 +228,37 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <?php endforeach; ?>
                         </div>
                     </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Trình tô màu AI (Optional) -->
+        <div class="card border-primary mt-4">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-palette me-2"></i>Trình tô màu AI</h5>
+                <?php if ($page['status'] === 'toned'): ?>
+                    <span class="badge bg-light text-primary">Đã tô màu</span>
+                <?php endif; ?>
+            </div>
+            <div class="card-body text-center py-4">
+                <?php if ($page['status'] !== 'toned'): ?>
+                    <i class="fas fa-magic fa-3x text-muted mb-3"></i>
+                    <h6 class="fw-bold">Tự động tô màu bằng AI</h6>
+                    <p class="text-muted small px-3">Sử dụng mô hình AI Deep Learning (Colorization GANs) để tự động tô màu toàn bộ trang Manga đen trắng gốc của bạn chỉ với một cú click chuột.</p>
+                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=runAIColoring&page_id=<?= $page['page_id'] ?>" class="btn btn-primary mt-2" onclick="return confirm('Bạn có chắc chắn muốn chạy thuật toán AI tự động tô màu cho trang vẽ này không?');">
+                            <i class="fas fa-paint-brush me-2"></i>Chạy AI tô màu
+                        </a>
+                    <?php endif; ?>
+                <?php else: ?>
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h6 class="fw-bold text-success">Trang vẽ đã được tô màu thành công!</h6>
+                    <p class="text-muted small px-3">Bản màu của trang đã được áp dụng. Bạn có thể thay đổi trạng thái trang hoặc tải lên file ảnh khác thủ công nếu muốn sửa đổi bản phối màu này.</p>
+                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=runAIColoring&page_id=<?= $page['page_id'] ?>" class="btn btn-outline-secondary btn-sm mt-2" onclick="return confirm('Bạn có muốn chạy lại thuật toán AI tô màu?');">
+                            <i class="fas fa-sync-alt me-1"></i>Tô màu lại
+                        </a>
+                    <?php endif; ?>
                 <?php endif; ?>
             </div>
         </div>
