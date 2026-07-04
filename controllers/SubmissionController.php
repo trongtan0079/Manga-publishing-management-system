@@ -63,8 +63,11 @@ class SubmissionController extends BaseController
             $tasks = $this->taskModel->findActiveByAssistantId($userId);
             require_once __DIR__ . '/../views/assistant/upload_submission.php';
         } elseif ($role === 'mangaka') {
-            // Chỉ hiển thị chapter thuộc series của mangaka
-            $chapters = $this->chapterModel->findByMangakaId($userId);
+            // Chỉ hiển thị chapter thuộc series của mangaka và chưa được duyệt/xuất bản
+            $allChapters = $this->chapterModel->findByMangakaId($userId);
+            $chapters = array_filter($allChapters, function($c) {
+                return $c['status'] !== 'approved' && $c['status'] !== 'published';
+            });
             require_once __DIR__ . '/../views/mangaka/submission_create.php';
         } else {
             http_response_code(403);
@@ -105,6 +108,11 @@ class SubmissionController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }
+            if ($task['status'] === 'completed') {
+                $_SESSION['error'] = 'Công việc này đã hoàn thành, không thể nộp thêm bản thảo.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
         } elseif ($role === 'mangaka') {
             $chapterId = isset($_POST['chapter_id']) ? intval($_POST['chapter_id']) : 0;
             if ($chapterId <= 0) {
@@ -127,6 +135,11 @@ class SubmissionController extends BaseController
             $series = $seriesModel->findById($chapter['series_id']);
             if (!$series || $series['mangaka_id'] != $userId) {
                 $_SESSION['error'] = 'Chương truyện không thuộc Series của bạn.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                $_SESSION['error'] = 'Chương truyện này đã được phê duyệt hoặc xuất bản, không thể nộp thêm bản thảo.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }

@@ -407,14 +407,17 @@ class TaskController extends BaseController
             }
 
             $status = isset($_POST['status']) ? $_POST['status'] : $task['status'];
-            $allowedStatus = ['pending', 'in_progress', 'completed'];
+            $allowedStatus = ['pending', 'in_progress'];
+            if ($task['status'] === 'completed') {
+                $allowedStatus[] = 'completed'; // Cho phép giữ nguyên completed nếu trước đó đã completed
+            }
             
             // Validate: Assistant chỉ được quyền đổi status hợp lệ, không được sửa title/deadline...
             if (in_array($status, $allowedStatus)) {
                 $this->taskModel->update($id, ['status' => $status]);
                 $_SESSION['success'] = 'Cập nhật tiến độ thành công.';
             } else {
-                $_SESSION['error'] = 'Trạng thái cập nhật không hợp lệ.';
+                $_SESSION['error'] = 'Trạng thái cập nhật không hợp lệ hoặc bạn không có quyền tự đánh dấu hoàn thành.';
             }
 
             // Trả assistant về dashboard của họ
@@ -447,6 +450,21 @@ class TaskController extends BaseController
             
             // Mangaka chỉ xóa được task thuộc về mình
             if ($task['mangaka_id'] == $_SESSION['user_id']) {
+                // Xóa các file vật lý của bản nộp thuộc task này trước
+                require_once __DIR__ . '/../models/Submission.php';
+                $submissionModel = new \Submission();
+                $subs = $submissionModel->findByTaskId($id);
+                if (!empty($subs)) {
+                    foreach ($subs as $sub) {
+                        if (!empty($sub['file_url'])) {
+                            $subFilePath = __DIR__ . '/../' . ltrim($sub['file_url'], '/');
+                            if (file_exists($subFilePath)) {
+                                @unlink($subFilePath);
+                            }
+                        }
+                    }
+                }
+
                 $this->taskModel->delete($id);
                 $_SESSION['success'] = 'Đã xóa task thành công.';
                 

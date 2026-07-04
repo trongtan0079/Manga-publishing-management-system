@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <div class="card-body">
         <!-- Form cập nhật, action trỏ tới update với series_id tương ứng -->
-        <form action="<?= BASE_PATH ?>/index.php?controller=series&action=update&id=<?= $series['series_id'] ?>" method="POST">
+        <form action="<?= BASE_PATH ?>/index.php?controller=series&action=update&id=<?= $series['series_id'] ?>" method="POST" enctype="multipart/form-data">
             
             <div class="mb-3">
                 <label for="title" class="form-label">Tên Series <span class="text-danger">*</span></label>
@@ -32,8 +32,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
 
             <div class="mb-3">
-                <label for="cover_image" class="form-label">Đường dẫn ảnh bìa (URL)</label>
-                <input type="url" class="form-control" id="cover_image" name="cover_image" value="<?= htmlspecialchars($series['cover_image'] ?? '') ?>">
+                <label for="cover_file" class="form-label">Tải ảnh bìa mới (từ thiết bị)</label>
+                <input type="file" class="form-control" id="cover_file" name="cover_file" accept=".jpg,.jpeg,.png,.webp">
+                <div class="form-text">Chọn file ảnh mới nếu muốn thay đổi ảnh bìa hiện tại.</div>
+            </div>
+
+            <div class="mb-3">
+                <label for="cover_image" class="form-label">Hoặc nhập đường dẫn ảnh bìa (URL)</label>
+                <input type="text" class="form-control" id="cover_image" name="cover_image" value="<?= htmlspecialchars($series['cover_image'] ?? '') ?>">
+                <div class="form-text">Có thể để trống nếu đã tải file ảnh bìa lên ở trên.</div>
                 <?php if (!empty($series['cover_image'])): 
                     $coverUrl = $series['cover_image'];
                     $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
@@ -45,22 +52,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
 
             <div class="mb-3">
-                <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                <select class="form-select" id="status" name="status" required>
-                    <option value="planning" <?= ($series['status'] === 'planning') ? 'selected' : '' ?>>Kế hoạch (Planning)</option>
-                    <option value="ongoing" <?= ($series['status'] === 'ongoing') ? 'selected' : '' ?>>Đang xuất bản (Ongoing)</option>
-                    <option value="completed" <?= ($series['status'] === 'completed') ? 'selected' : '' ?>>Hoàn thành (Completed)</option>
-                    <option value="suspended" <?= ($series['status'] === 'suspended') ? 'selected' : '' ?>>Tạm ngưng (Suspended)</option>
-                    <option value="canceled" <?= ($series['status'] === 'canceled') ? 'selected' : '' ?>>Đã hủy (Canceled)</option>
-                </select>
+                <label class="form-label d-block fw-bold">Trạng thái hiện tại</label>
+                <?php
+                $statusClass = 'bg-secondary';
+                if ($series['status'] === 'ongoing') $statusClass = 'bg-success';
+                elseif ($series['status'] === 'planning') $statusClass = 'bg-warning text-dark';
+                elseif ($series['status'] === 'completed') $statusClass = 'bg-info text-dark';
+                elseif ($series['status'] === 'suspended') $statusClass = 'bg-dark';
+                elseif ($series['status'] === 'canceled') $statusClass = 'bg-danger';
+                ?>
+                <span class="badge <?= $statusClass ?> px-3 py-2 fs-6"><?= ucfirst(htmlspecialchars($series['status'])) ?></span>
+                <div class="form-text">Trạng thái này được phê duyệt và quản lý bởi Hội đồng Biên tập (Editorial Board).</div>
             </div>
 
             <div class="mb-3">
-                <label for="publish_type" class="form-label">Lịch xuất bản <span class="text-danger">*</span></label>
-                <select class="form-select" id="publish_type" name="publish_type" required>
-                    <option value="weekly" <?= (($series['publish_type'] ?? 'weekly') === 'weekly') ? 'selected' : '' ?>>Hàng tuần (Weekly)</option>
-                    <option value="monthly" <?= (($series['publish_type'] ?? 'weekly') === 'monthly') ? 'selected' : '' ?>>Hàng tháng (Monthly)</option>
-                </select>
+                <label class="form-label d-block fw-bold">Lịch xuất bản</label>
+                <span class="badge bg-secondary px-3 py-2 fs-6"><?= ucfirst(htmlspecialchars($series['publish_type'] ?? 'Chưa quyết định')) ?></span>
+                <div class="form-text">Lịch xuất bản do Hội đồng Biên tập quyết định khi phê duyệt tác phẩm.</div>
             </div>
             
             <div class="mb-3">

@@ -109,7 +109,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             <select name="status" class="form-select form-select-sm" style="width: 120px;" title="Trạng thái">
                                                 <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
                                                 <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>In Progress</option>
-                                                <option value="completed" <?= $task['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
+                                                <?php if ($task['status'] == 'completed'): ?>
+                                                    <option value="completed" selected disabled>Completed</option>
+                                                <?php endif; ?>
                                             </select>
                                             <button type="submit" class="btn btn-sm btn-primary">Save</button>
                                         </form>

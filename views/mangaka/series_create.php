@@ -22,7 +22,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <div class="card-body">
         <!-- Form thêm mới, action trỏ tới method store -->
-        <form action="<?= BASE_PATH ?>/index.php?controller=series&action=store" method="POST">
+        <form action="<?= BASE_PATH ?>/index.php?controller=series&action=store" method="POST" enctype="multipart/form-data">
             
             <div class="mb-3">
                 <label for="title" class="form-label">Tên Series <span class="text-danger">*</span></label>
@@ -30,29 +30,18 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
 
             <div class="mb-3">
-                <label for="cover_image" class="form-label">Đường dẫn ảnh bìa (URL)</label>
-                <input type="url" class="form-control" id="cover_image" name="cover_image" placeholder="https://example.com/image.jpg">
-                <div class="form-text">Cung cấp đường dẫn trực tiếp đến ảnh bìa.</div>
+                <label for="cover_file" class="form-label">Tải ảnh bìa lên (từ thiết bị)</label>
+                <input type="file" class="form-control" id="cover_file" name="cover_file" accept=".jpg,.jpeg,.png,.webp">
+                <div class="form-text">Chọn file ảnh (jpg, jpeg, png, webp) để tải lên làm ảnh bìa.</div>
             </div>
 
             <div class="mb-3">
-                <label for="status" class="form-label">Trạng thái <span class="text-danger">*</span></label>
-                <select class="form-select" id="status" name="status" required>
-                    <option value="planning" selected>Kế hoạch (Planning)</option>
-                    <option value="ongoing">Đang xuất bản (Ongoing)</option>
-                    <option value="completed">Hoàn thành (Completed)</option>
-                    <option value="suspended">Tạm ngưng (Suspended)</option>
-                    <option value="canceled">Đã hủy (Canceled)</option>
-                </select>
+                <label for="cover_image" class="form-label">Hoặc nhập đường dẫn ảnh bìa (URL)</label>
+                <input type="text" class="form-control" id="cover_image" name="cover_image" placeholder="https://example.com/image.jpg">
+                <div class="form-text">Hoặc cung cấp đường dẫn trực tiếp đến ảnh bìa từ internet.</div>
             </div>
 
-            <div class="mb-3">
-                <label for="publish_type" class="form-label">Lịch xuất bản <span class="text-danger">*</span></label>
-                <select class="form-select" id="publish_type" name="publish_type" required>
-                    <option value="weekly" selected>Hàng tuần (Weekly)</option>
-                    <option value="monthly">Hàng tháng (Monthly)</option>
-                </select>
-            </div>
+            <!-- Status and Publish Type will be managed by the Editorial Board -->
             
             <div class="mb-3">
                 <label for="description" class="form-label">Mô tả</label>

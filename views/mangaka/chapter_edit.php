@@ -38,8 +38,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <option value="drafting" <?= $chapter['status'] === 'drafting' ? 'selected' : '' ?>>Bản nháp (Drafting)</option>
                     <option value="drawing" <?= $chapter['status'] === 'drawing' ? 'selected' : '' ?>>Đang vẽ (Drawing)</option>
                     <option value="reviewing" <?= $chapter['status'] === 'reviewing' ? 'selected' : '' ?>>Đang chờ duyệt (Reviewing)</option>
-                    <option value="approved" <?= $chapter['status'] === 'approved' ? 'selected' : '' ?>>Đã duyệt (Approved)</option>
-                    <option value="published" <?= $chapter['status'] === 'published' ? 'selected' : '' ?>>Đã xuất bản (Published)</option>
+                    <?php if ($chapter['status'] === 'approved' || $chapter['status'] === 'published'): ?>
+                        <option value="approved" <?= $chapter['status'] === 'approved' ? 'selected' : '' ?> disabled>Đã duyệt (Approved)</option>
+                        <option value="published" <?= $chapter['status'] === 'published' ? 'selected' : '' ?> disabled>Đã xuất bản (Published)</option>
+                    <?php endif; ?>
                 </select>
             </div>
 
