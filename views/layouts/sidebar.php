@@ -42,7 +42,11 @@ $role = $_SESSION['role_name'] ?? '';
                 <li class="nav-item nav-category">Quản lý Xuất bản</li>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'series') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=index">
-                        <i class="fas fa-book"></i> <span>Dự án Truyện</span>
+                        <i class="fas fa-book"></i>
+                        <div class="d-flex flex-column overflow-hidden flex-grow-1" style="min-width: 0;">
+                            <span>Dự án Truyện</span>
+                            <?= $role !== 'mangaka' ? '<span class="nav-subtitle"><i class="fas fa-lock" style="font-size: 0.55rem; width: auto; margin-right: 4px;"></i>Chỉ xem</span>' : '' ?>
+                        </div>
                     </a>
                 </li>
             <?php endif; ?>
@@ -89,7 +93,7 @@ $role = $_SESSION['role_name'] ?? '';
                         <i class="fas fa-chart-line"></i>
                         <div class="d-flex flex-column overflow-hidden flex-grow-1" style="min-width: 0;">
                             <span>Xếp hạng Manga</span>
-                            <?= $role === 'editor' ? '<span class="nav-subtitle"><i class="fas fa-lock" style="font-size: 0.55rem; width: auto; margin-right: 4px;"></i>Chỉ xem</span>' : '' ?>
+                            <?= $role !== 'board' ? '<span class="nav-subtitle"><i class="fas fa-lock" style="font-size: 0.55rem; width: auto; margin-right: 4px;"></i>Chỉ xem</span>' : '' ?>
                         </div>
                     </a>
                 </li>
