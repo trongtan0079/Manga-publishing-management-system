@@ -38,6 +38,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <i class="fas fa-times me-1"></i>Hủy tìm kiếm
             </a>
         <?php endif; ?>
+        <?php if (isset($_GET['from']) && $_GET['from'] === 'roles'): ?>
+            <a href="<?= BASE_PATH ?>/index.php?controller=user&action=roles" class="btn btn-sm btn-outline-primary ms-2 align-middle py-1 px-2.5" style="font-size: 0.72rem; border-radius: var(--radius-sm);">
+                <i class="fas fa-arrow-left me-1"></i>Quay lại Vai trò
+            </a>
+        <?php endif; ?>
     </div>
     <a href="<?= BASE_PATH ?>/index.php?controller=user&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Thêm Người dùng</a>
 </div>

@@ -441,7 +441,7 @@ foreach ($rolesWithCount as $r) {
                         </div>
                     </div>
                     <div>
-                        <a href="<?= BASE_PATH ?>/index.php?controller=user&action=index&search=${encodeURIComponent(data.role_name.toLowerCase())}" class="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" style="border-radius: var(--radius); font-size: 0.85rem; background: linear-gradient(135deg, ${data.color} 0%, #1e1b4b 100%); border: none;">
+                        <a href="<?= BASE_PATH ?>/index.php?controller=user&action=index&search=${encodeURIComponent(data.role_name.toLowerCase())}&from=roles" class="btn btn-primary d-flex align-items-center gap-2 px-4 shadow-sm" style="border-radius: var(--radius); font-size: 0.85rem; background: linear-gradient(135deg, ${data.color} 0%, #1e1b4b 100%); border: none;">
                             <i class="fas fa-users"></i> Xem ${data.user_count} thành viên
                         </a>
                     </div>
