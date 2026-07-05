@@ -78,7 +78,7 @@ class User extends Model {
         $params = [];
 
         if (!empty($search)) {
-            $whereClauses[] = "(u.username LIKE :search OR u.full_name LIKE :search OR u.email LIKE :search)";
+            $whereClauses[] = "(u.username LIKE :search OR u.full_name LIKE :search OR u.email LIKE :search OR r.role_name LIKE :search)";
             $params['search'] = '%' . $search . '%';
         }
 
@@ -93,7 +93,7 @@ class User extends Model {
         }
 
         // 1. Đếm tổng số bản ghi
-        $countSql = "SELECT COUNT(*) FROM {$this->table} u {$whereSql}";
+        $countSql = "SELECT COUNT(*) FROM {$this->table} u LEFT JOIN roles r ON u.role_id = r.role_id {$whereSql}";
         $countStmt = $this->conn->prepare($countSql);
         foreach ($params as $key => $val) {
             $countStmt->bindValue(':' . $key, $val);
