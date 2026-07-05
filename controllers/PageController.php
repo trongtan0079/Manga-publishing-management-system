@@ -156,6 +156,13 @@ class PageController extends BaseController
         $ownership = $this->checkChapterOwnership($chapterId);
         $chapter = $ownership['chapter'];
         $series = $ownership['series'];
+
+        // Khóa tạo trang nếu chapter đã duyệt hoặc xuất bản
+        if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+            $_SESSION['error'] = "Chương truyện đã phê duyệt hoặc xuất bản, không thể thêm trang vẽ mới.";
+            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
+            exit;
+        }
         
         require_once __DIR__ . '/../views/mangaka/page_create.php';
     }
@@ -172,7 +179,15 @@ class PageController extends BaseController
             }
 
             // Kiểm tra quyền sở hữu
-            $this->checkChapterOwnership($chapterId);
+            $ownership = $this->checkChapterOwnership($chapterId);
+            $chapter = $ownership['chapter'];
+
+            // Khóa tạo trang nếu chapter đã duyệt hoặc xuất bản
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                $_SESSION['error'] = "Chương truyện đã phê duyệt hoặc xuất bản, không thể thêm trang vẽ mới.";
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
+                exit;
+            }
 
             $pageNumber = trim($_POST['page_number'] ?? '');
             $status = $_POST['status'] ?? 'drafting';
@@ -267,6 +282,13 @@ class PageController extends BaseController
         $chapter = $ownership['chapter'];
         $series = $ownership['series'];
 
+        // Khóa sửa trang nếu trang/chapter đã duyệt hoặc xuất bản
+        if ($chapter['status'] === 'approved' || $chapter['status'] === 'published' || $page['status'] === 'approved' || $page['status'] === 'published') {
+            $_SESSION['error'] = "Trang truyện hoặc chương truyện đã phê duyệt/xuất bản, không thể chỉnh sửa.";
+            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$page['chapter_id']}");
+            exit;
+        }
+
         require_once __DIR__ . '/../views/mangaka/page_edit.php';
     }
 
@@ -285,7 +307,15 @@ class PageController extends BaseController
             $chapterId = $page['chapter_id'];
             
             // Ủy quyền
-            $this->checkChapterOwnership($chapterId);
+            $ownership = $this->checkChapterOwnership($chapterId);
+            $chapter = $ownership['chapter'];
+
+            // Khóa sửa trang nếu trang/chapter đã duyệt hoặc xuất bản
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published' || $page['status'] === 'approved' || $page['status'] === 'published') {
+                $_SESSION['error'] = "Trang truyện hoặc chương truyện đã phê duyệt/xuất bản, không thể chỉnh sửa.";
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
+                exit;
+            }
 
             $pageNumber = trim($_POST['page_number'] ?? '');
             $status = $_POST['status'] ?? 'drafting';
@@ -359,7 +389,15 @@ class PageController extends BaseController
             $chapterId = $page['chapter_id'];
             
             // Ủy quyền
-            $this->checkChapterOwnership($chapterId);
+            $ownership = $this->checkChapterOwnership($chapterId);
+            $chapter = $ownership['chapter'];
+
+            // Khóa xóa trang nếu trang/chapter đã duyệt hoặc xuất bản
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published' || $page['status'] === 'approved' || $page['status'] === 'published') {
+                $_SESSION['error'] = "Trang truyện hoặc chương truyện đã phê duyệt/xuất bản, không thể xóa.";
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
+                exit;
+            }
 
             try {
                 // Xóa file vật lý của trang trước

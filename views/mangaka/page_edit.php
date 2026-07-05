@@ -11,6 +11,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
+$isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published' || $page['status'] === 'approved' || $page['status'] === 'published');
 ?>
 
 <!-- Nút quay lại trang chi tiết Chapter -->
@@ -25,11 +26,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <div class="card-body">
         <!-- Form upload cần thuộc tính enctype="multipart/form-data" để xử lý file thay thế nếu có -->
         <form action="<?= BASE_PATH ?>/index.php?controller=page&action=update&id=<?= $page['page_id'] ?>" method="POST" enctype="multipart/form-data">
+            <?php if ($isLocked): ?>
+                <div class="alert alert-warning border-0 py-2.5 px-3 mb-4 d-flex align-items-center gap-2" style="font-size: 0.85rem; border-radius: 8px; background-color: #fffbeb; color: #b45309;">
+                    <i class="fas fa-lock fs-6"></i>
+                    <div><strong>Lưu ý:</strong> Trang vẽ này hoặc chương truyện chứa nó đã được duyệt hoặc xuất bản. Biểu mẫu chỉnh sửa đã bị khóa để bảo toàn dữ liệu.</div>
+                </div>
+            <?php endif; ?>
             
             <!-- Trường số thứ tự trang -->
             <div class="mb-3">
                 <label for="page_number" class="form-label">Số trang <span class="text-danger">*</span></label>
-                <input type="number" class="form-control" id="page_number" name="page_number" value="<?= htmlspecialchars($page['page_number']) ?>" min="1" required>
+                <input type="number" class="form-control" id="page_number" name="page_number" value="<?= htmlspecialchars($page['page_number']) ?>" min="1" required <?= $isLocked ? 'disabled' : '' ?>>
             </div>
             
             <!-- Khối hiển thị ảnh hiện tại và tùy chọn thay thế -->
@@ -46,14 +53,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 
                 <!-- Input để tải lên ảnh mới -->
                 <label for="image" class="form-label mt-2">Thay đổi file ảnh (Không bắt buộc)</label>
-                <input class="form-control" type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp">
+                <input class="form-control" type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp" <?= $isLocked ? 'disabled' : '' ?>>
                 <div class="form-text">Để trống nếu không muốn thay đổi ảnh. Chỉ chấp nhận JPG, JPEG, PNG, WEBP. Tối đa 10MB. Việc thay đổi sẽ ghi đè lên đường dẫn ảnh cũ trong CSDL.</div>
             </div>
 
             <!-- Trường chọn trạng thái -->
             <div class="mb-3">
                 <label for="status" class="form-label">Trạng thái</label>
-                <select class="form-select" id="status" name="status">
+                <select class="form-select" id="status" name="status" <?= $isLocked ? 'disabled' : '' ?>>
                     <option value="drafting" <?= $page['status'] === 'drafting' ? 'selected' : '' ?>>Bản nháp (Drafting)</option>
                     <option value="drawing" <?= $page['status'] === 'drawing' ? 'selected' : '' ?>>Đang vẽ (Drawing)</option>
                     <option value="reviewing" <?= $page['status'] === 'reviewing' ? 'selected' : '' ?>>Đang chờ duyệt (Reviewing)</option>
@@ -64,7 +71,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 </select>
             </div>
             
-            <button type="submit" class="btn btn-warning">Cập nhật Trang</button>
+            <button type="submit" class="btn btn-warning" <?= $isLocked ? 'disabled' : '' ?>><i class="fas fa-save me-1"></i>Cập nhật Trang</button>
         </form>
     </div>
 </div>

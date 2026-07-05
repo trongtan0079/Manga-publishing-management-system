@@ -9,8 +9,8 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
+$isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published');
 ?>
-
 <div class="mb-3">
     <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Quay lại Bộ truyện</a>
 </div>
@@ -21,20 +21,26 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <div class="card-body">
         <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=update&id=<?= $chapter['chapter_id'] ?>" method="POST">
+            <?php if ($isLocked): ?>
+                <div class="alert alert-warning border-0 py-2.5 px-3 mb-4 d-flex align-items-center gap-2" style="font-size: 0.85rem; border-radius: 8px; background-color: #fffbeb; color: #b45309;">
+                    <i class="fas fa-lock fs-6"></i>
+                    <div><strong>Lưu ý:</strong> Chương truyện này đã được phê duyệt hoặc xuất bản. Biểu mẫu chỉnh sửa đã bị khóa để bảo toàn dữ liệu.</div>
+                </div>
+            <?php endif; ?>
             
             <div class="mb-3">
                 <label for="chapter_number" class="form-label">Số Chapter <span class="text-danger">*</span></label>
-                <input type="number" step="any" min="0" class="form-control" id="chapter_number" name="chapter_number" value="<?= htmlspecialchars($chapter['chapter_number']) ?>" required>
+                <input type="number" step="any" min="0" class="form-control" id="chapter_number" name="chapter_number" value="<?= htmlspecialchars($chapter['chapter_number']) ?>" required <?= $isLocked ? 'disabled' : '' ?>>
             </div>
             
             <div class="mb-3">
                 <label for="title" class="form-label">Tên Chapter</label>
-                <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($chapter['title'] ?? '') ?>" placeholder="Không bắt buộc">
+                <input type="text" class="form-control" id="title" name="title" value="<?= htmlspecialchars($chapter['title'] ?? '') ?>" placeholder="Không bắt buộc" <?= $isLocked ? 'disabled' : '' ?>>
             </div>
             
             <div class="mb-3">
                 <label for="status" class="form-label">Trạng thái</label>
-                <select class="form-select" id="status" name="status">
+                <select class="form-select" id="status" name="status" <?= $isLocked ? 'disabled' : '' ?>>
                     <option value="drafting" <?= $chapter['status'] === 'drafting' ? 'selected' : '' ?>>Bản nháp (Drafting)</option>
                     <option value="drawing" <?= $chapter['status'] === 'drawing' ? 'selected' : '' ?>>Đang vẽ (Drawing)</option>
                     <option value="reviewing" <?= $chapter['status'] === 'reviewing' ? 'selected' : '' ?>>Đang chờ duyệt (Reviewing)</option>
@@ -54,10 +60,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     $dueDateVal = date('Y-m-d\TH:i', strtotime($chapter['due_date']));
                 }
                 ?>
-                <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="<?= $dueDateVal ?>">
+                <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="<?= $dueDateVal ?>" <?= $isLocked ? 'disabled' : '' ?>>
             </div>
             
-            <button type="submit" class="btn btn-warning">Lưu thay đổi</button>
+            <button type="submit" class="btn btn-warning" <?= $isLocked ? 'disabled' : '' ?>><i class="fas fa-save me-1"></i>Lưu thay đổi</button>
         </form>
     </div>
 </div>

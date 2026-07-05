@@ -227,14 +227,28 @@ class ChapterController extends BaseController
                 exit;
             }
 
-            $allowed = ['drafting', 'drawing', 'reviewing'];
+            // Khóa cập nhật nếu chương đã duyệt hoặc xuất bản
             if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
-                $allowed[] = $chapter['status'];
+                $_SESSION['error'] = "Chương truyện đã được phê duyệt hoặc xuất bản, không thể chỉnh sửa.";
+                header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
+                exit;
             }
+
+            $allowed = ['drafting', 'drawing', 'reviewing'];
             if (!in_array($status, $allowed)) {
                 $_SESSION['error'] = "Trạng thái chapter không hợp lệ!";
                 header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
                 exit;
+            }
+
+            // Ngăn nộp chương rỗng chưa có bất kỳ trang nào
+            if ($status === 'reviewing') {
+                $pages = $this->pageModel->findByChapterId($id);
+                if (empty($pages)) {
+                    $_SESSION['error'] = "Chương truyện phải có ít nhất 1 trang vẽ mới có thể nộp duyệt.";
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
+                    exit;
+                }
             }
 
             $formattedDueDate = null;
@@ -328,6 +342,13 @@ class ChapterController extends BaseController
 
             $seriesId = $chapter['series_id'];
             $this->checkSeriesOwnership($seriesId);
+
+            // Khóa xóa nếu chương đã duyệt hoặc xuất bản
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                $_SESSION['error'] = "Chương truyện đã được phê duyệt hoặc xuất bản, không thể xóa.";
+                header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
+                exit;
+            }
 
             try {
                 // Đăng nhập các model cần thiết để dọn dẹp file
