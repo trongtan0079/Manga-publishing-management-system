@@ -113,6 +113,21 @@ class SubmissionController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }
+
+            // Kiểm tra xem chapter có bị khóa không
+            require_once __DIR__ . '/../models/Page.php';
+            $pageModel = new \Page();
+            $page = $pageModel->findById($task['page_id']);
+            if ($page) {
+                require_once __DIR__ . '/../models/Chapter.php';
+                $chapterModel = new \Chapter();
+                $chapter = $chapterModel->findById($page['chapter_id']);
+                if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
+                    $_SESSION['error'] = 'Chương truyện chứa công việc này đã được phê duyệt hoặc xuất bản, không thể nộp bản thảo.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                    exit;
+                }
+            }
         } elseif ($role === 'mangaka') {
             $chapterId = isset($_POST['chapter_id']) ? intval($_POST['chapter_id']) : 0;
             if ($chapterId <= 0) {

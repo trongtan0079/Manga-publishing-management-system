@@ -64,6 +64,15 @@ class ChapterController extends BaseController
             header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             exit;
         }
+
+        // Chặn tạo chapter mới cho các bộ truyện đã hủy, tạm ngưng hoặc hoàn thành
+        $action = $_GET['action'] ?? '';
+        if (($action === 'create' || $action === 'store') && !in_array($series['status'], ['planning', 'ongoing'])) {
+            $_SESSION['error'] = "Bộ truyện đang tạm ngưng, đã hoàn thành hoặc đã hủy. Không thể tạo thêm chapter mới.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
+            exit;
+        }
+
         return $series;
     }
 

@@ -59,6 +59,35 @@ class ReviewController extends BaseController
      */
     private function checkReviewPermission($submission) {
         $role = $_SESSION['role_name'] ?? '';
+
+        // 1. Xác định chapter_id tương ứng
+        $chapterId = null;
+        if ($submission['chapter_id']) {
+            $chapterId = $submission['chapter_id'];
+        } elseif ($submission['task_id']) {
+            require_once __DIR__ . '/../models/Task.php';
+            $taskModel = new \Task();
+            $task = $taskModel->findById($submission['task_id']);
+            if ($task) {
+                require_once __DIR__ . '/../models/Page.php';
+                $pageModel = new \Page();
+                $page = $pageModel->findById($task['page_id']);
+                if ($page) {
+                    $chapterId = $page['chapter_id'];
+                }
+            }
+        }
+
+        // 2. Kiểm tra xem chapter có bị khóa (approved / published) không
+        if ($chapterId) {
+            require_once __DIR__ . '/../models/Chapter.php';
+            $chapterModel = new \Chapter();
+            $chapter = $chapterModel->findById($chapterId);
+            if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
+                return false;
+            }
+        }
+
         // Editor có quyền đánh giá bản thảo của Chương truyện (chapter_id không rỗng)
         if ($role === 'editor' && $submission['chapter_id']) {
             return true;

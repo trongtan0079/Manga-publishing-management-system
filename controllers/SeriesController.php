@@ -284,6 +284,13 @@ class SeriesController extends BaseController
             $series = $this->seriesModel->findById($id);
             $this->checkOwnership($series, $id);
 
+            // Chặn xóa bộ truyện nếu trạng thái không phải planning
+            if ($series['status'] !== 'planning') {
+                $_SESSION['error'] = "Không thể xóa bộ truyện đã được duyệt hoặc xuất bản! Chỉ có thể xóa bộ truyện ở trạng thái Kế hoạch (Planning).";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+                exit;
+            }
+
             try {
                 // Đăng nhập các model cần thiết để dọn dẹp file
                 require_once __DIR__ . '/../models/Chapter.php';

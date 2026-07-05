@@ -92,11 +92,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <i class="fas fa-edit"></i> Sửa
                                 </a>
                                 <!-- Form Xóa (dùng POST để bảo mật) -->
+                                <?php if ($series['status'] === 'planning'): ?>
                                 <form action="<?= BASE_PATH ?>/index.php?controller=series&action=delete&id=<?= $series['series_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bộ truyện này không? Hành động này không thể hoàn tác.');">
                                     <button type="submit" class="btn btn-sm btn-danger" title="Xóa Truyện">
                                         <i class="fas fa-trash-alt"></i> Xóa
                                     </button>
                                 </form>
+                                <?php endif; ?>
                                 <?php endif; ?>
                             </div>
                         </td>

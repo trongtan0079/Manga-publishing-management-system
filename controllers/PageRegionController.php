@@ -33,6 +33,11 @@ class PageRegionController extends BaseController {
         $chapter = $this->chapterModel->findById($page['chapter_id']);
         if (!$chapter) return false;
 
+        // Chặn sửa đổi phân vùng nếu chapter đã khóa (approved / published)
+        if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+            return false;
+        }
+
         $series = $this->seriesModel->findById($chapter['series_id']);
         if (!$series) return false;
 

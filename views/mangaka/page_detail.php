@@ -11,6 +11,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
+$isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published');
 ?>
 
 
@@ -36,7 +37,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <!-- Nút quay lại danh sách trang của chapter -->
     <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
     
-    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
     <div>
         <!-- Nút sửa trang hiện tại -->
         <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
@@ -153,7 +154,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Trình phân đoạn AI</h5>
                 <div class="d-flex gap-2">
-                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
                         <button id="btnDrawToggle" class="btn btn-sm btn-info text-white">
                             <i class="fas fa-edit me-1"></i>Vẽ thủ công
                         </button>
@@ -171,7 +172,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <i class="fas fa-brain fa-3x text-muted mb-3"></i>
                         <h6 class="fw-bold">Hệ thống AI Phân đoạn chưa chạy</h6>
                         <p class="text-muted small px-3">Sử dụng mô hình AI (YOLOv8-Segmentation & SAM) để tự động phát hiện và đánh dấu các vùng Khung truyện (Panel), Bong bóng thoại (Bubble), Nhân vật trên trang.</p>
-                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
                         <div class="d-flex gap-2 justify-content-center mt-2">
                             <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-primary">
                                 <i class="fas fa-play me-2"></i>Chạy AI phân đoạn vùng
@@ -221,7 +222,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <span class="badge bg-light text-dark border"><?= $region['is_ai_generated'] ? 'AI Generated' : 'Manual' ?></span>
-                                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
                                         <div class="btn-group">
                                             <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
                                                 <i class="fas fa-plus me-1"></i>Giao việc
@@ -483,7 +484,7 @@ function resetDrawingMode() {
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Quản lý công việc</h5>
         <!-- Nút tạo công việc mới, truyền sẵn page_id qua URL GET parameter -->
-        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light">+ Tạo công việc</a>
         <?php endif; ?>
     </div>
@@ -572,7 +573,7 @@ function resetDrawingMode() {
                                 <td><?= $task['due_date'] ? htmlspecialchars(date('d/m/Y', strtotime($task['due_date']))) : '<span class="text-muted">Không có</span>' ?></td>
                                 <!-- Các nút thao tác Sửa và Xóa dành cho Mangaka -->
                                 <td>
-                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
                                     <!-- Nút Sửa chuyển hướng sang TaskController@edit -->
                                     <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                     <!-- Nút Xóa thực hiện qua form POST để bảo mật -->
@@ -580,7 +581,7 @@ function resetDrawingMode() {
                                         <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
                                     </form>
                                     <?php else: ?>
-                                        <span class="text-muted small">-</span>
+                                        <span class="text-muted small"><?= $isLocked ? 'Khóa' : '-' ?></span>
                                     <?php endif; ?>
                                 </td>
                             </tr>

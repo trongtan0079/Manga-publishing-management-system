@@ -117,6 +117,13 @@ class TaskController extends BaseController
             exit;
         }
 
+        $chapter = $ownership['chapter'];
+        if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+            $_SESSION['error'] = 'Chương truyện chứa trang này đã được duyệt hoặc xuất bản, không thể giao thêm việc.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapter['chapter_id']);
+            exit;
+        }
+
         // Lấy các dữ liệu ngữ cảnh để hiển thị trên giao diện (Tên truyện, Tên chapter, số trang)
         $page = $ownership['page'];
         $chapter = $ownership['chapter'];
@@ -173,6 +180,11 @@ class TaskController extends BaseController
                 exit;
             }
             $chapter = $ownership['chapter'];
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                $_SESSION['error'] = 'Chương truyện chứa trang này đã được duyệt hoặc xuất bản, không thể giao thêm việc.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapter['chapter_id']);
+                exit;
+            }
             $isDraft = ($chapter['status'] === 'drafting');
 
             // Validation: pageRegionId belongs to pageId
@@ -292,6 +304,16 @@ class TaskController extends BaseController
             exit;
         }
 
+        $page = $this->pageModel->findById($task['page_id']);
+        if ($page) {
+            $chapter = $this->chapterModel->findById($page['chapter_id']);
+            if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
+                $_SESSION['error'] = 'Chương truyện chứa công việc này đã được duyệt hoặc xuất bản, không thể sửa công việc.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
+                exit;
+            }
+        }
+
         // Lấy toàn bộ thông tin bối cảnh (page, chapter, series) để hiện trên Form
         $page = $this->pageModel->findById($task['page_id']);
         $chapter = $this->chapterModel->findById($page['chapter_id']);
@@ -326,6 +348,21 @@ class TaskController extends BaseController
             $_SESSION['error'] = 'Không tìm thấy công việc cần cập nhật.';
             header('Location: ' . BASE_PATH . '/index.php');
             exit;
+        }
+
+        // Kiểm tra xem chapter có bị khóa không
+        $page = $this->pageModel->findById($task['page_id']);
+        if ($page) {
+            $chapter = $this->chapterModel->findById($page['chapter_id']);
+            if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
+                $_SESSION['error'] = 'Chương truyện chứa công việc này đã được duyệt hoặc xuất bản, không thể cập nhật.';
+                if ($_SESSION['role_name'] === 'assistant') {
+                    header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
+                } else {
+                    header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
+                }
+                exit;
+            }
         }
 
         $role = $_SESSION['role_name'] ?? '';
@@ -490,7 +527,18 @@ class TaskController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
-            
+
+            // Kiểm tra xem chapter có bị khóa không
+            $page = $this->pageModel->findById($task['page_id']);
+            if ($page) {
+                $chapter = $this->chapterModel->findById($page['chapter_id']);
+                if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
+                    $_SESSION['error'] = 'Chương truyện chứa công việc này đã được duyệt hoặc xuất bản, không thể xóa.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
+                    exit;
+                }
+            }
+
             // Mangaka chỉ xóa được task thuộc về mình
             if ($task['mangaka_id'] == $_SESSION['user_id']) {
                 // Xóa các file vật lý của bản nộp thuộc task này trước
@@ -506,6 +554,13 @@ class TaskController extends BaseController
                             }
                         }
                     }
+                }
+
+                // Hoàn trả trạng thái phân vùng liên kết (nếu có)
+                if (!empty($task['page_region_id'])) {
+                    require_once __DIR__ . '/../models/PageRegion.php';
+                    $pageRegionModel = new \PageRegion();
+                    $pageRegionModel->update($task['page_region_id'], ['status' => 'pending']);
                 }
 
                 $this->taskModel->delete($id);
