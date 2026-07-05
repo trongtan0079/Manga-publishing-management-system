@@ -104,3 +104,25 @@ Editorial Board là hội đồng biên tập chịu trách nhiệm đánh giá 
 - Xem báo cáo thống kê kết quả phát hành
 - Đưa ra quyết định tiếp tục xuất bản hoặc ngừng phát hành Series
 - Theo dõi các thông báo liên quan đến hoạt động xuất bản
+
+---
+
+## 1.5 Quy trình Quản lý Trạng thái Chương truyện (Chapter Lifecycles & Workflows)
+
+Hệ thống áp dụng cơ chế quản lý vòng đời chặt chẽ đối với các Chương truyện (Chapters) để tối ưu hóa hiệu suất cộng tác giữa Họa sĩ chính (Mangaka) và Trợ lý (Assistant), đồng thời đảm bảo tính bảo mật và kiểm duyệt của Tòa soạn:
+
+### 1.5.1 Trạng thái khởi tạo (Tạo mới Chapter)
+- Khi Mangaka tạo mới một chương truyện, hệ thống chỉ cho phép khởi tạo dưới 2 trạng thái: **Bản nháp (Drafting)** hoặc **Đang vẽ (Drawing)**. 
+- Trạng thái **Đang chờ duyệt (Reviewing)** bị cấm sử dụng ở khâu tạo mới để ngăn chặn việc gửi một chương rỗng chưa có nội dung vẽ lên Biên tập viên.
+
+### 1.5.2 Vận hành phân quyền nhiệm vụ (Tasks & Notifications Visibility)
+- **Giai đoạn Bản nháp (Drafting)**:
+  - Đây là không gian lập kế hoạch riêng tư của Mangaka. Mangaka có thể tạo các phân cảnh, trang truyện và giao việc (Tasks) thử nghiệm cho Trợ lý.
+  - Các công việc này tạm thời **ẩn hoàn toàn** đối với Trợ lý (Assistant không nhìn thấy trên dashboard công việc) và hệ thống **không gửi thông báo** giao việc, tránh gây nhiễu thông tin.
+- **Giai đoạn Đang vẽ (Drawing)**:
+  - Khi Mangaka chỉnh sửa chương và nâng trạng thái từ *Bản nháp (Drafting)* sang *Đang vẽ (Drawing)*, hệ thống sẽ chính thức **kích hoạt hiển thị công khai** tất cả các công việc đã phân công cho Trợ lý.
+  - Đồng thời, một loạt **thông báo tự động sẽ gửi đến các Trợ lý** tương ứng để báo hiệu bắt đầu làm việc.
+- **Giai đoạn Đang chờ duyệt (Reviewing)**:
+  - Khi toàn bộ trang vẽ hoàn thành, Mangaka nộp bản thảo và chuyển trạng thái chương sang *Đang chờ duyệt (Reviewing)* để gửi tới Biên tập viên (Tantou Editor) đánh giá chất lượng.
+- **Giai đoạn Đã duyệt (Approved) & Đã xuất bản (Published)**:
+  - Biên tập viên phê duyệt đưa chương truyện vào trạng thái sẵn sàng phát hành hoặc xuất bản thương mại. Các trạng thái này là cuối cùng và bị khóa chỉnh sửa.
