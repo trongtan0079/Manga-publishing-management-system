@@ -103,13 +103,15 @@ class SeriesRankingController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
                 exit;
             }
-            if (!strtotime($periodStartDate)) {
+            $periodStartTimestamp = strtotime($periodStartDate);
+            if ($periodStartTimestamp === false) {
                 $_SESSION['error'] = 'Kỳ đánh giá không hợp lệ.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
                 exit;
             }
+            $periodStartDateFormatted = date('Y-m-d', $periodStartTimestamp);
 
-            if ($this->rankingModel->checkDuplicateRanking($seriesId, $periodStartDate)) {
+            if ($this->rankingModel->checkDuplicateRanking($seriesId, $periodStartDateFormatted)) {
                 $_SESSION['error'] = 'Series này đã có đánh giá trong kỳ này (trùng lặp Rank Period).';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
                 exit;
@@ -120,7 +122,7 @@ class SeriesRankingController extends BaseController
                 'board_member_id' => $_SESSION['user_id'],
                 'rank_position' => $rankPosition,
                 'score' => $score,
-                'period_start_date' => $periodStartDate
+                'period_start_date' => $periodStartDateFormatted
             ];
 
             try {
@@ -233,15 +235,17 @@ class SeriesRankingController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
             }
-            if (!strtotime($periodStartDate)) {
+            $periodStartTimestamp = strtotime($periodStartDate);
+            if ($periodStartTimestamp === false) {
                 $_SESSION['error'] = 'Kỳ đánh giá không hợp lệ.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
             }
+            $periodStartDateFormatted = date('Y-m-d', $periodStartTimestamp);
 
             // Chỉ kiểm tra trùng lặp dữ liệu (Duplicate) nếu Series hoặc Kỳ đánh giá bị thay đổi
-            if (($seriesId != $ranking['series_id'] || $periodStartDate != $ranking['period_start_date']) && 
-                $this->rankingModel->checkDuplicateRanking($seriesId, $periodStartDate)) {
+            if (($seriesId != $ranking['series_id'] || $periodStartDateFormatted != $ranking['period_start_date']) && 
+                $this->rankingModel->checkDuplicateRanking($seriesId, $periodStartDateFormatted)) {
                 $_SESSION['error'] = 'Series này đã có đánh giá trong kỳ này.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
@@ -251,7 +255,7 @@ class SeriesRankingController extends BaseController
                 'series_id' => $seriesId,
                 'rank_position' => $rankPosition,
                 'score' => $score,
-                'period_start_date' => $periodStartDate
+                'period_start_date' => $periodStartDateFormatted
             ];
 
             try {

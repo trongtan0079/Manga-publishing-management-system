@@ -47,7 +47,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <!-- Input để tải lên ảnh mới -->
                 <label for="image" class="form-label mt-2">Thay đổi file ảnh (Không bắt buộc)</label>
                 <input class="form-control" type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp">
-                <div class="form-text">Để trống nếu không muốn thay đổi ảnh. Chỉ chấp nhận JPG, JPEG, PNG, WEBP. Tối đa 2MB. Việc thay đổi sẽ ghi đè lên đường dẫn ảnh cũ trong CSDL.</div>
+                <div class="form-text">Để trống nếu không muốn thay đổi ảnh. Chỉ chấp nhận JPG, JPEG, PNG, WEBP. Tối đa 10MB. Việc thay đổi sẽ ghi đè lên đường dẫn ảnh cũ trong CSDL.</div>
             </div>
 
             <!-- Trường chọn trạng thái -->

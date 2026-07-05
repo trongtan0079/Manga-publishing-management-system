@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 /**
  * Hồ sơ cá nhân - Dùng chung cho tất cả vai trò
  * @var array $user Thông tin user hiện tại (kèm role_name)
@@ -61,8 +62,8 @@ $roleName = strtolower($user['role_name'] ?? '');
             <div class="card-body py-5">
                 <!-- Avatar -->
                 <div class="mb-3">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($user['full_name']) ?>&background=6366f1&color=fff&size=128&font-size=0.4&bold=true" 
-                         alt="Avatar" class="rounded-circle shadow" width="100" height="100">
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($user['full_name']) ?>&background=6366f1&color=fff&size=128&font-size=0.4&bold=true"
+                        alt="Avatar" class="rounded-circle shadow" width="100" height="100">
                 </div>
                 <h5 class="fw-bold mb-1"><?= htmlspecialchars($user['full_name']) ?></h5>
                 <p class="text-muted mb-2" style="font-size: 0.9rem;">@<?= htmlspecialchars($user['username']) ?></p>
@@ -134,8 +135,8 @@ $roleName = strtolower($user['role_name'] ?? '');
                         <label for="full_name" class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fas fa-user text-muted"></i></span>
-                            <input type="text" class="form-control" id="full_name" name="full_name" 
-                                   value="<?= htmlspecialchars($user['full_name']) ?>" required maxlength="100" placeholder="Nhập họ và tên">
+                            <input type="text" class="form-control" id="full_name" name="full_name"
+                                value="<?= htmlspecialchars($user['full_name']) ?>" required maxlength="100" placeholder="Nhập họ và tên">
                         </div>
                     </div>
 
@@ -144,15 +145,15 @@ $roleName = strtolower($user['role_name'] ?? '');
                         <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fas fa-envelope text-muted"></i></span>
-                            <input type="email" class="form-control" id="email" name="email" 
-                                   value="<?= htmlspecialchars($user['email']) ?>" required maxlength="100" placeholder="Nhập email">
+                            <input type="email" class="form-control" id="email" name="email"
+                                value="<?= htmlspecialchars($user['email']) ?>" required maxlength="100" placeholder="Nhập email">
                         </div>
                     </div>
 
                     <hr class="my-4">
 
                     <!-- Đổi mật khẩu (tùy chọn) -->
-                    <h6 class="fw-bold mb-3"><i class="fas fa-key text-warning me-2"></i>Đổi mật khẩu <span class="text-muted fw-normal" style="font-size: 0.8rem;">(để trống nếu không muốn đổi)</span></h6>
+                    <h6 class="fw-bold mb-3"> Đổi mật khẩu <span class="text-muted fw-normal" style="font-size: 0.8rem;">(để trống nếu không muốn đổi)</span></h6>
 
                     <div class="mb-3">
                         <label for="current_password" class="form-label fw-semibold">Mật khẩu hiện tại</label>

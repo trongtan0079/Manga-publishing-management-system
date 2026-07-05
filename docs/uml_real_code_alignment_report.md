@@ -87,7 +87,27 @@
   * Quay lại trạng thái sửa đổi nếu bị từ chối (Rejected): `SubmissionController::review()` (gửi kèm feedback yêu cầu làm lại).
   * Ánh xạ 1-1 với cột `tasks.status` dạng `ENUM('pending', 'in_progress', 'completed')`.
 
+### 🖼️ 2.5. State Machine Diagram cho Page Region (Biểu đồ trạng thái Phân vùng)
+* **Tệp thiết kế:** [UML/State_Machine_Page_Region.puml](file:///d:/XAMPP/htdocs/Manga-publishing-management-system/UML/State_Machine_Page_Region.puml)
+* **Mục đích:** Mô tả chi tiết vòng đời và sự đồng bộ trạng thái của một Phân vùng tranh (`PageRegion`) vẽ thủ công hoặc AI quét.
+* **Liên hệ với Code và DB:**
+  * Khởi tạo ở trạng thái `pending`: `PageRegionController::runAI()` (AI) hoặc `PageRegionController::store()` (Vẽ tay).
+  * Chuyển sang `in_progress` khi Mangaka giao Task tương ứng: `TaskController::store()`.
+  * Hoàn thành (`completed`) khi Mangaka phê duyệt bản thảo của trợ lý: `ReviewController::store()`.
+  * Ánh xạ 1-1 với cột `page_regions.status` kiểu dữ liệu `ENUM('pending', 'in_progress', 'completed')`.
+
+### 📄 2.6. State Machine Diagram cho Page (Biểu đồ trạng thái Trang truyện)
+* **Tệp thiết kế:** [UML/State_Machine_Page.puml](file:///d:/XAMPP/htdocs/Manga-publishing-management-system/UML/State_Machine_Page.puml)
+* **Mục đích:** Mô tả sự chuyển trạng thái của Trang vẽ gốc (`Page`) trong quy trình cộng tác vẽ đa vai trò.
+* **Liên hệ với Code và DB:**
+  * Trạng thái `drafting`: Tải lên trang vẽ thô.
+  * Chuyển sang `drawing`: Khi tạo task trên các phân vùng.
+  * Tự động chuyển sang `approved` khi tất cả phân vùng (`PageRegions`) thuộc trang đó đạt trạng thái `completed`: `ReviewController::store()`.
+  * Chuyển sang `published`: Khi xuất bản cùng Chapter chứa nó.
+  * Ánh xạ 1-1 với cột `pages.status` kiểu dữ liệu `ENUM('drafting', 'drawing', 'reviewing', 'approved', 'published')`.
+
 ---
+
 
 ## 📊 3. BẢNG TỔNG HỢP KIỂM TOÁN UML ALIGNMENT
 
@@ -98,6 +118,8 @@
 | **Use Case Diagram** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Biểu đồ nền tảng để bắt đầu bài thuyết trình bảo vệ. |
 | **State Machine Chapter** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Giải thích vòng đời của Chapter tương ứng với ENUM status. |
 | **State Machine Task** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Giải thích vòng đời của Task tương ứng với ENUM status. |
+| **State Machine Page Region** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Thể hiện vòng đời phân vùng (pending ➔ in_progress ➔ completed) |
+| **State Machine Page** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Thể hiện trạng thái của trang truyện khi hoàn thành các phân vùng. |
 | **Deployment Diagram** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Chứng minh kiến trúc Client-Server vật lý thực tế của ứng dụng. |
 | **Sequence Diagram** | Có | Khớp 85% | Không | Không | 🟡 Trung bình | `ReviewManager` trên UML tương ứng với `ReviewController` trong mã nguồn. |
 | **Activity/Swimlane** | Có | Khớp 100% | Không | Không | 🟢 Thấp | Dùng để minh họa quy trình làm việc thực tế ngoài studio. |

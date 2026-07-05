@@ -1,12 +1,18 @@
     </div> <!-- /container-fluid -->
 
     <!-- Footer -->
-    <footer class="bg-white px-lg-5 px-4 py-3 border-top text-muted d-flex justify-content-between align-items-center flex-wrap mt-auto" style="font-size: 0.85rem;">
-        <div class="mb-2 mb-md-0">
-            &copy; <?= date('Y') ?> <strong>Manga<span class="text-primary">PMS</span></strong>. All rights reserved.
-        </div>
-        <div>
-            <span class="text-muted">Phiên bản 1.0.0</span>
+    <footer class="py-3 mt-auto bg-white border-top border-light-subtle" style="font-size: 0.825rem; color: var(--slate-500);">
+        <div class="container-fluid px-lg-5">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    &copy; <?= date('Y') ?> <strong class="text-dark">Manga<span style="color: #6366f1;">PMS</span></strong>. Toàn bộ bản quyền được bảo lưu.
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span>Phiên bản <strong>1.1.0 Stable</strong></span>
+                    <span style="opacity: 0.5;">|</span>
+                    <span>Hệ thống quản lý quy trình xuất bản</span>
+                </div>
+            </div>
         </div>
     </footer>
 </main> <!-- /main -->

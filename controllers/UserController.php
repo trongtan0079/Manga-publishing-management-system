@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/User.php';
 require_once __DIR__ . '/../models/Role.php';
+require_once __DIR__ . '/../models/SystemLog.php';
 
 
 class UserController extends BaseController
@@ -23,11 +24,21 @@ class UserController extends BaseController
     }
 
     /**
-     * Hiển thị danh sách tất cả người dùng
+     * Hiển thị danh sách tất cả người dùng kèm tìm kiếm và phân trang
      */
     public function index() {
-        // Lấy toàn bộ người dùng (kèm theo tên role từ bảng roles)
-        $users = $this->userModel->getAllUsersWithRole();
+        $search = trim($_GET['search'] ?? '');
+        $status = trim($_GET['status'] ?? '');
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        
+        $limit = 10; // 10 bản ghi mỗi trang
+        $offset = ($page - 1) * $limit;
+        
+        $result = $this->userModel->getPaginatedUsers($search, $status, $limit, $offset);
+        $users = $result['users'];
+        $totalUsers = $result['total'];
+        $totalPages = ceil($totalUsers / $limit);
         
         // Gọi view hiển thị danh sách
         require_once __DIR__ . '/../views/admin/users.php';
@@ -111,6 +122,10 @@ class UserController extends BaseController
             try {
                 // Thực hiện thêm mới vào DB
                 $this->userModel->insert($data);
+                
+                // Ghi nhật ký hoạt động
+                SystemLog::logAction($_SESSION['user_id'], 'Tạo người dùng', "Đã tạo thành công tài khoản '{$username}' (Họ tên: '{$data['full_name']}', Email: '{$data['email']}')");
+                
                 $_SESSION['success'] = "Tạo người dùng '{$username}' thành công!";
             } catch (PDOException $e) {
                 $_SESSION['error'] = "Lỗi hệ thống khi tạo người dùng: " . $e->getMessage();
@@ -190,6 +205,21 @@ class UserController extends BaseController
                 exit;
             }
 
+            // Ngăn chặn admin tự khóa/đình chỉ bản thân hoặc tự đổi vai trò của mình để tránh bị lockout khỏi hệ thống
+            if ($id == $_SESSION['user_id']) {
+                $selectedRole = $this->roleModel->findById($role_id);
+                if (!$selectedRole || strtolower($selectedRole['role_name']) !== 'admin') {
+                    $_SESSION['error'] = "Lỗi: Bạn không thể tự thay đổi vai trò Admin của chính mình sang vai trò khác!";
+                    header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
+                    exit;
+                }
+                if (isset($_POST['status']) && $_POST['status'] !== 'active') {
+                    $_SESSION['error'] = "Lỗi: Bạn không thể tự khóa hoặc đình chỉ tài khoản đang đăng nhập của chính mình!";
+                    header('Location: ' . BASE_PATH . '/index.php?controller=user&action=edit&id=' . $id);
+                    exit;
+                }
+            }
+
             // Thu thập dữ liệu từ form
             $data = [
                 'username'  => $username,
@@ -212,6 +242,10 @@ class UserController extends BaseController
             try {
                 // Thực hiện update trong DB
                 $this->userModel->update($id, $data);
+                
+                // Ghi nhật ký hoạt động
+                SystemLog::logAction($_SESSION['user_id'], 'Cập nhật người dùng', "Đã cập nhật thông tin tài khoản '{$username}' (ID: {$id}, Trạng thái: '{$data['status']}')");
+                
                 $_SESSION['success'] = "Cập nhật người dùng '{$username}' thành công!";
             } catch (PDOException $e) {
                 $_SESSION['error'] = "Lỗi hệ thống khi cập nhật: " . $e->getMessage();
@@ -253,7 +287,14 @@ class UserController extends BaseController
             }
 
             try {
+                $user = $this->userModel->findById($id);
+                $targetUsername = $user ? $user['username'] : 'ID: ' . $id;
+                
                 $this->userModel->delete($id);
+                
+                // Ghi nhật ký hoạt động
+                SystemLog::logAction($_SESSION['user_id'], 'Xóa người dùng', "Đã xóa tài khoản '{$targetUsername}' (ID: {$id}) khỏi hệ thống");
+                
                 $_SESSION['success'] = "Đã xóa người dùng thành công!";
             } catch (PDOException $e) {
                 // Bắt lỗi nếu có ràng buộc khóa ngoại (VD: User đang giữ Role hoặc liên quan tới bảng khác)

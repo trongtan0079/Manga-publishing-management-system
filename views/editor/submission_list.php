@@ -1,4 +1,11 @@
 <?php
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện danh sách lịch sử nộp bản thảo và phê duyệt (submission_list.php)
  * Vai trò: Editor (Biên tập viên) / Mangaka (Họa sĩ chính) / Assistant (Trợ lý)
@@ -20,6 +27,8 @@ $role = $_SESSION['role_name'] ?? '';
         <h2 class="h3 mb-1">
             <?php if ($role === 'editor'): ?>
                 Danh sách Bản thảo chờ duyệt
+            <?php elseif ($role === 'assistant'): ?>
+                Lịch sử nộp bản vẽ của tôi
             <?php else: ?>
                 Lịch sử nộp Bản thảo của tôi
             <?php endif; ?>
@@ -27,6 +36,8 @@ $role = $_SESSION['role_name'] ?? '';
         <p class="text-muted text-xs mb-0">
             <?php if ($role === 'editor'): ?>
                 Xem và kiểm duyệt các chương truyện & bản vẽ cần đánh giá.
+            <?php elseif ($role === 'assistant'): ?>
+                Theo dõi tiến độ và trạng thái phê duyệt các bản vẽ công việc đã nộp.
             <?php else: ?>
                 Theo dõi tiến độ, trạng thái phê duyệt các bản thảo đã nộp.
             <?php endif; ?>
@@ -34,8 +45,8 @@ $role = $_SESSION['role_name'] ?? '';
     </div>
     
     <?php if ($role === 'assistant' || $role === 'mangaka'): ?>
-        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create" class="btn btn-primary shadow-sm">
-            <i class="fas fa-upload me-2"></i>Nộp Bản Thảo Mới
+        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create" class="btn btn-primary shadow-sm" style="border-radius: 8px;">
+            <i class="fas fa-upload me-2"></i><?= $role === 'assistant' ? 'Nộp bản vẽ mới' : 'Nộp Bản Thảo Mới' ?>
         </a>
     <?php endif; ?>
 </div>
@@ -57,8 +68,13 @@ $role = $_SESSION['role_name'] ?? '';
 
 <div class="card shadow-sm border-0 rounded-3">
     <div class="card-header bg-white text-dark py-3 border-bottom border-light d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0"><i class="fas fa-list me-2 text-primary"></i>Danh sách bản thảo</h5>
-        <span class="badge bg-primary"><?= count($submissions) ?> Bản ghi</span>
+        <h5 class="card-title mb-0">
+            <i class="fas fa-list me-2 text-primary"></i>
+            <?= $role === 'assistant' ? 'Danh sách bản vẽ đã nộp' : 'Danh sách bản thảo' ?>
+        </h5>
+        <span class="badge bg-primary">
+            <?= count($submissions) ?> <?= $role === 'assistant' ? 'Bản vẽ' : 'Bản ghi' ?>
+        </span>
     </div>
     <div class="card-body p-0">
         <?php if (!empty($submissions)): ?>
@@ -67,9 +83,11 @@ $role = $_SESSION['role_name'] ?? '';
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Người gửi</th>
-                            <th>Loại Submission</th>
-                            <th>Mục tiêu (Task / Chapter)</th>
+                            <?php if ($role !== 'assistant'): ?>
+                                <th class="ps-4">Người gửi</th>
+                                <th>Loại Submission</th>
+                            <?php endif; ?>
+                            <th class="<?= $role === 'assistant' ? 'ps-4' : '' ?>">Mục tiêu (Task / Chapter)</th>
                             <th>Series</th>
                             <th>Ngày nộp</th>
                             <th>Trạng thái</th>
@@ -79,24 +97,26 @@ $role = $_SESSION['role_name'] ?? '';
                     <tbody>
                         <?php foreach ($submissions as $sub): ?>
                             <tr>
-                                <td class="ps-4">
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-sm bg-light text-dark rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: bold;">
-                                            <?= strtoupper(substr($sub['sender_name'] ?? 'U', 0, 1)) ?>
+                                <?php if ($role !== 'assistant'): ?>
+                                    <td class="ps-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light text-dark rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px; font-weight: bold;">
+                                                <?= strtoupper(substr($sub['sender_name'] ?? 'U', 0, 1)) ?>
+                                            </div>
+                                            <div>
+                                                <span class="fw-bold text-dark"><?= htmlspecialchars($sub['sender_name'] ?? 'Không rõ') ?></span>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <span class="fw-bold text-dark"><?= htmlspecialchars($sub['sender_name'] ?? 'Không rõ') ?></span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <?php if (!empty($sub['task_id'])): ?>
-                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td>
+                                    </td>
+                                    <td>
+                                        <?php if (!empty($sub['task_id'])): ?>
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endif; ?>
+                                <td class="<?= $role === 'assistant' ? 'ps-4' : '' ?>">
                                     <?php if (!empty($sub['task_id'])): ?>
                                         <div class="text-dark">
                                             <i class="fas fa-tasks text-muted me-1"></i>
@@ -160,10 +180,51 @@ $role = $_SESSION['role_name'] ?? '';
                 <div class="mb-3 text-muted">
                     <i class="fas fa-inbox fa-3x"></i>
                 </div>
-                <p class="text-muted mb-0">Chưa có bản thảo nào được ghi nhận.</p>
+                <p class="text-muted mb-0">
+                    <?= $role === 'assistant' ? 'Chưa có bản vẽ nào được ghi nhận.' : 'Chưa có bản thảo nào được ghi nhận.' ?>
+                </p>
             </div>
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterStatus = urlParams.get('status');
+    if (filterStatus) {
+        const rows = document.querySelectorAll("tbody tr");
+        let foundCount = 0;
+        rows.forEach(row => {
+            const badge = row.querySelector("td span.badge");
+            if (badge) {
+                const text = badge.textContent.trim().toLowerCase();
+                if (text === filterStatus.toLowerCase()) {
+                    row.style.display = "";
+                    foundCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
+        
+        const headerBadge = document.querySelector(".card-header span.badge");
+        if (headerBadge) {
+            headerBadge.textContent = foundCount + " Bản ghi (đã lọc)";
+            headerBadge.className = "badge bg-info";
+        }
+        
+        const cardHeader = document.querySelector(".card-header h5");
+        if (cardHeader) {
+            const clearBtn = document.createElement("a");
+            clearBtn.href = window.location.pathname + "?controller=submission&action=index";
+            clearBtn.className = "btn btn-sm btn-outline-secondary ms-3 py-1 px-2";
+            clearBtn.style.fontSize = "0.75rem";
+            clearBtn.innerHTML = "<i class='fas fa-times me-1'></i>Xóa bộ lọc";
+            cardHeader.appendChild(clearBtn);
+        }
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

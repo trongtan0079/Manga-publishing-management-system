@@ -4,6 +4,14 @@ $current_page = 'notifications';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
+
+$unreadCount = 0;
+$vars = get_defined_vars();
+if (array_key_exists('this', $vars) && is_object($vars['this'])) {
+    $unreadCount = $vars['this']->unreadCount ?? 0;
+} elseif (isset($GLOBALS['controller']) && is_object($GLOBALS['controller'])) {
+    $unreadCount = $GLOBALS['controller']->unreadCount ?? 0;
+}
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -11,7 +19,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <h2 class="h3 mb-1">Tất cả thông báo</h2>
         <p class="text-muted text-xs mb-0">Quản lý và xem lịch sử thông báo của bạn.</p>
     </div>
-    <?php if ($this->unreadCount > 0): ?>
+    <?php if ($unreadCount > 0): ?>
         <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=markAllAsRead" method="POST" class="m-0">
             <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fas fa-check-double me-2"></i>Đánh dấu tất cả đã đọc</button>
         </form>

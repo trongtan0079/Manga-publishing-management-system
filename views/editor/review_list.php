@@ -1,4 +1,11 @@
 <?php
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện danh sách bản thảo chờ đánh giá và lịch sử đánh giá (review_list.php)
  * Vai trò: Editor (Biên tập viên) / Mangaka (Họa sĩ chính)
@@ -13,10 +20,18 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<?php
+$role = $_SESSION['role_name'] ?? '';
+?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="h3 mb-1">Danh sách Bản thảo chờ duyệt</h2>
-        <p class="text-muted text-xs mb-0">Xem và đánh giá các bản thảo được nộp.</p>
+        <h2 class="h3 mb-1">
+            <?= $role === 'mangaka' ? 'Duyệt sản phẩm vẽ của Trợ lý' : 'Danh sách Bản thảo chờ duyệt' ?>
+        </h2>
+        <p class="text-muted text-xs mb-0">
+            <?= $role === 'mangaka' ? 'Xem và đánh giá các sản phẩm hoàn thành từ trợ lý của bạn.' : 'Xem và đánh giá các bản thảo được nộp.' ?>
+        </p>
     </div>
 </div>
 
@@ -44,7 +59,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <tr>
                             <th class="ps-4">Submission ID</th>
                             <th>Người gửi</th>
-                            <th>Loại</th>
+                            <?php if ($role !== 'mangaka'): ?>
+                                <th>Loại</th>
+                            <?php endif; ?>
                             <th>Series</th>
                             <th>Mục tiêu (Task/Chapter)</th>
                             <th>Ngày nộp</th>
@@ -66,13 +83,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         </div>
                                     </div>
                                 </td>
-                                <td>
-                                    <?php if ($sub['task_id'] !== null): ?>
-                                        <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task</span>
-                                    <?php else: ?>
-                                        <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Chapter</span>
-                                    <?php endif; ?>
-                                </td>
+                                <?php if ($role !== 'mangaka'): ?>
+                                    <td>
+                                        <?php if ($sub['task_id'] !== null): ?>
+                                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task</span>
+                                        <?php else: ?>
+                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Chapter</span>
+                                        <?php endif; ?>
+                                    </td>
+                                <?php endif; ?>
                                 <td><?= htmlspecialchars($sub['series_title'] ?? 'N/A') ?></td>
                                 <td>
                                     <?php if ($sub['task_id'] !== null): ?>
@@ -94,11 +113,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                                 <td class="text-end pe-4">
                                     <?php if ($sub['status'] === 'pending' || $sub['status'] === 'reviewed'): ?>
-                                        <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-primary shadow-sm">
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-primary shadow-sm" style="border-radius: 6px;">
                                             <i class="fas fa-edit me-1"></i> Review
                                         </a>
                                     <?php else: ?>
-                                        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=show&id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-outline-secondary shadow-sm">
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=show&id=<?= $sub['submission_id'] ?>" class="btn btn-sm btn-outline-secondary shadow-sm" style="border-radius: 6px;">
                                             <i class="fas fa-eye me-1"></i> Xem chi tiết
                                         </a>
                                     <?php endif; ?>
@@ -111,11 +130,49 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <?php else: ?>
             <div class="text-center py-5 text-muted">
                 <i class="fas fa-check-double fa-3x mb-3 text-success"></i>
-                <p class="mb-0 fs-5">Tất cả bản thảo đã được duyệt!</p>
-                <p class="small">Không có bản thảo nào đang chờ duyệt.</p>
+                <p class="mb-0 fs-5">
+                    <?= $role === 'mangaka' ? 'Tất cả bản vẽ của Trợ lý đã được duyệt!' : 'Tất cả bản thảo đã được duyệt!' ?>
+                </p>
+                <p class="small text-muted mt-1">
+                    <?= $role === 'mangaka' ? 'Hiện tại không có bản vẽ nào từ trợ lý đang chờ bạn đánh giá.' : 'Không có bản thảo nào đang chờ duyệt.' ?>
+                </p>
             </div>
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterStatus = urlParams.get('status');
+    if (filterStatus) {
+        const rows = document.querySelectorAll("tbody tr");
+        let foundCount = 0;
+        rows.forEach(row => {
+            const badge = row.querySelector("td span.badge");
+            if (badge) {
+                const text = badge.textContent.trim().toLowerCase();
+                if (text === filterStatus.toLowerCase()) {
+                    row.style.display = "";
+                    foundCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
+        
+        const heading = document.querySelector("h2.h3");
+        if (heading) {
+            const clearBtn = document.createElement("a");
+            clearBtn.href = window.location.pathname + "?controller=review&action=index";
+            clearBtn.className = "btn btn-sm btn-outline-secondary ms-3 py-1 px-2";
+            clearBtn.style.fontSize = "0.75rem";
+            clearBtn.style.verticalAlign = "middle";
+            clearBtn.innerHTML = "<i class='fas fa-times me-1'></i>Xóa bộ lọc";
+            heading.appendChild(clearBtn);
+        }
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

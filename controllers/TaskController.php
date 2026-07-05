@@ -172,6 +172,18 @@ class TaskController extends BaseController
                 exit;
             }
 
+            // Validation: pageRegionId belongs to pageId
+            if ($pageRegionId) {
+                require_once __DIR__ . '/../models/PageRegion.php';
+                $pageRegionModel = new \PageRegion();
+                $region = $pageRegionModel->findById($pageRegionId);
+                if (!$region || $region['page_id'] != $pageId) {
+                    $_SESSION['error'] = 'Phân vùng của trang truyện không hợp lệ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                    exit;
+                }
+            }
+
             // 3. Validation: assistant_id exists and has role 'assistant' and is active
             if ($assistantId <= 0) {
                 $_SESSION['error'] = 'Vui lòng chọn Assistant hợp lệ.';
@@ -227,6 +239,13 @@ class TaskController extends BaseController
                 'status' => 'pending', // Mặc định khi vừa tạo là pending (Chưa làm)
                 'due_date' => $formattedDueDate
             ]);
+
+            // Đồng thời cập nhật trạng thái của PageRegion liên kết thành 'in_progress'
+            if ($pageRegionId) {
+                require_once __DIR__ . '/../models/PageRegion.php';
+                $pageRegionModel = new \PageRegion();
+                $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
+            }
 
             // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc
             $this->notificationModel->createNotification(
@@ -318,6 +337,18 @@ class TaskController extends BaseController
             // Lấy toàn bộ dữ liệu mangaka có thể đổi
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : intval($task['assistant_id']);
             $pageRegionId = !empty($_POST['page_region_id']) ? intval($_POST['page_region_id']) : null;
+
+            // Validation: pageRegionId belongs to task's pageId
+            if ($pageRegionId) {
+                require_once __DIR__ . '/../models/PageRegion.php';
+                $pageRegionModel = new \PageRegion();
+                $region = $pageRegionModel->findById($pageRegionId);
+                if (!$region || $region['page_id'] != $task['page_id']) {
+                    $_SESSION['error'] = 'Phân vùng của trang truyện không hợp lệ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                    exit;
+                }
+            }
             $title = isset($_POST['title']) ? trim($_POST['title']) : $task['title'];
             $taskType = isset($_POST['task_type']) ? $_POST['task_type'] : $task['task_type'];
             $description = isset($_POST['description']) ? trim($_POST['description']) : $task['description'];
@@ -391,6 +422,13 @@ class TaskController extends BaseController
                 'status' => $status,
                 'due_date' => $formattedDueDate
             ]);
+
+            // Đồng thời cập nhật trạng thái của PageRegion liên kết thành 'in_progress' nếu có đổi vùng
+            if ($pageRegionId && $pageRegionId != $task['page_region_id']) {
+                require_once __DIR__ . '/../models/PageRegion.php';
+                $pageRegionModel = new \PageRegion();
+                $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
+            }
 
             $_SESSION['success'] = 'Cập nhật task thành công.';
             header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $task['page_id']);

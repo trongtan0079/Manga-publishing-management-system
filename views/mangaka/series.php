@@ -104,9 +104,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php endforeach; ?>
             <?php else: ?>
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-5">
-                        <div class="mb-3"><i class="fas fa-folder-open fa-3x text-light"></i></div>
-                        <p class="mb-0">Bạn chưa tạo bộ truyện nào. Nhấn <strong>"Tạo Truyện Mới"</strong> để bắt đầu!</p>
+                    <td colspan="5" class="p-0">
+                        <div class="empty-state-wrapper">
+                            <div class="mb-3" style="color: #cbd5e1;"><i class="fas fa-folder-open fa-3x"></i></div>
+                            <h6 class="fw-bold text-slate-700">Chưa có dự án truyện nào</h6>
+                            <p class="text-muted small mb-0">Bạn chưa tạo bộ truyện nào. Nhấn <strong>"Tạo Truyện Mới"</strong> để bắt đầu!</p>
+                        </div>
                     </td>
                 </tr>
             <?php endif; ?>

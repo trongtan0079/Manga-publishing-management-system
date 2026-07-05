@@ -1,4 +1,11 @@
-<?php 
+<?php
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện bảng điều khiển của Biên tập viên (dashboard.php)
  * Vai trò: Editor (Biên tập viên)
@@ -8,6 +15,9 @@
  * @var int $recentReviews Số lượng bài đánh giá được thực hiện gần đây
  * @var array $pendingList Danh sách các bản thảo đang chờ duyệt
  * @var array $recentReviewList Danh sách các đánh giá đã thực hiện gần đây
+ * @var int $reviewedSubmissions Số lượng bản thảo đang trong quá trình đánh giá
+ * @var int $approvedSubmissions Số lượng bản thảo đã phê duyệt
+ * @var int $rejectedSubmissions Số lượng bản thảo đã bị từ chối
  */
 $pageTitle = 'Góc Biên tập (Editor)';
 $current_page = 'dashboard';
@@ -16,6 +26,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<?php require_once __DIR__ . '/../layouts/welcome_banner.php'; ?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="h3 mb-1">Kiểm duyệt Bản thảo</h2>
@@ -23,62 +35,180 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
+<style>
+    .stat-card-link {
+        text-decoration: none !important;
+        display: block;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .stat-card-link:hover {
+        transform: translateY(-5px);
+    }
+    .stat-card-link .card {
+        border: none !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02), 0 10px 15px rgba(0,0,0,0.03) !important;
+    }
+    .stat-card-link:hover .card {
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+    }
+</style>
+
 <div class="row g-4 mb-4">
     <!-- Cột 1: Thống kê tổng số Submissions chờ review -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card warning h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Chờ review</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($pendingSubmissions) ? $pendingSubmissions : 0 ?></div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=review&action=index&status=pending" class="stat-card-link">
+            <div class="card stat-card warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Chờ review</div>
+                            <div class="h2 mb-0 fw-bold text-white"><?= isset($pendingSubmissions) ? $pendingSubmissions : 0 ?></div>
+                        </div>
+                        <div class="stat-icon warning" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-inbox"></i></div>
                     </div>
-                    <div class="stat-icon warning"><i class="fas fa-inbox"></i></div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Cột 2: Thống kê số Reviews đã thực hiện gần đây -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card primary h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Đã Đánh Giá</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($recentReviews) ? $recentReviews : 0 ?></div>
+        <a href="#recent-reviews-section" class="stat-card-link">
+            <div class="card stat-card primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Đã Đánh Giá</div>
+                            <div class="h2 mb-0 fw-bold text-white"><?= isset($recentReviews) ? $recentReviews : 0 ?></div>
+                        </div>
+                        <div class="stat-icon primary" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-eye"></i></div>
                     </div>
-                    <div class="stat-icon primary"><i class="fas fa-eye"></i></div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Cột 3: Approved -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card success h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Phê Duyệt</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($approvedSubmissions) ? $approvedSubmissions : 0 ?></div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=index&status=approved" class="stat-card-link">
+            <div class="card stat-card success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Phê Duyệt</div>
+                            <div class="h2 mb-0 fw-bold text-white"><?= isset($approvedSubmissions) ? $approvedSubmissions : 0 ?></div>
+                        </div>
+                        <div class="stat-icon success" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-check-circle"></i></div>
                     </div>
-                    <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Cột 4: Rejected -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card danger h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Từ Chối</div>
-                        <div class="h3 mb-0 fw-bold text-dark"><?= isset($rejectedSubmissions) ? $rejectedSubmissions : 0 ?></div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=index&status=rejected" class="stat-card-link">
+            <div class="card stat-card danger h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Từ Chối</div>
+                            <div class="h2 mb-0 fw-bold text-white"><?= isset($rejectedSubmissions) ? $rejectedSubmissions : 0 ?></div>
+                        </div>
+                        <div class="stat-icon danger" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-times-circle"></i></div>
                     </div>
-                    <div class="stat-icon danger"><i class="fas fa-times-circle"></i></div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Cột 1: Cảnh báo Deadline chương truyện gần nhất -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Cảnh báo Deadline Chương truyện gần nhất</h6>
+            </div>
+            <div class="card-body p-0">
+                <?php if (!empty($upcomingChapters)): ?>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Tác phẩm</th>
+                                    <th>Chương truyện</th>
+                                    <th>Tác giả</th>
+                                    <th>Hạn nộp bản thảo</th>
+                                    <th class="text-end pe-4">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($upcomingChapters as $chap): ?>
+                                    <?php 
+                                        $dueDate = strtotime($chap['due_date']);
+                                        $isOverdue = $dueDate < time();
+                                        $timeDiff = abs($dueDate - time());
+                                        $daysLeft = ceil($timeDiff / (60 * 60 * 24));
+                                        
+                                        $badgeClass = 'bg-light text-dark border';
+                                        $labelText = $daysLeft . ' ngày nữa';
+                                        if ($isOverdue) {
+                                            $badgeClass = 'bg-danger text-white';
+                                            $labelText = 'Trễ ' . $daysLeft . ' ngày';
+                                        } elseif ($daysLeft <= 3) {
+                                            $badgeClass = 'bg-warning text-dark';
+                                            $labelText = 'Còn ' . $daysLeft . ' ngày';
+                                        }
+                                    ?>
+                                    <tr>
+                                        <td class="ps-4 font-semibold text-dark"><?= htmlspecialchars($chap['series_title']) ?></td>
+                                        <td>
+                                            <strong>Ch.<?= htmlspecialchars($chap['chapter_number']) ?></strong>
+                                            <span class="text-muted ms-1"><?= htmlspecialchars($chap['chapter_title'] ?? 'Không tên') ?></span>
+                                        </td>
+                                        <td><span class="text-muted"><?= htmlspecialchars($chap['mangaka_name']) ?></span></td>
+                                        <td><?= date('d/m/Y', $dueDate) ?></td>
+                                        <td class="text-end pe-4">
+                                            <span class="badge <?= $badgeClass ?> px-2 py-1"><?= $labelText ?></span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-calendar-check fa-2x mb-2 text-success" style="opacity: 0.5;"></i>
+                        <p class="mb-0 small">Không có chương truyện nào sắp đến hạn.</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cột 2: Biểu đồ tròn Tỷ lệ Duyệt bài -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3">
+                <h6 class="m-0 fw-bold"><i class="fas fa-chart-pie text-primary me-2"></i>Thống kê Tỷ lệ Duyệt bài</h6>
+            </div>
+            <div class="card-body d-flex flex-column align-items-center justify-content-center py-4">
+                <div style="position: relative; height: 180px; width: 100%;">
+                    <canvas id="chartEditorSubmissions" 
+                            data-pending="<?= $pendingSubmissions ?>"
+                            data-reviewed="<?= $reviewedSubmissions ?>"
+                            data-approved="<?= $approvedSubmissions ?>"
+                            data-rejected="<?= $rejectedSubmissions ?>"
+                            style="max-height: 180px;"></canvas>
+                </div>
+                <div class="mt-3 text-center text-xs text-muted w-100 px-3">
+                    <div class="row g-2">
+                        <div class="col-6 text-start"><i class="fas fa-circle me-1" style="color: #ffc107;"></i> Chờ review (<?= $pendingSubmissions ?>)</div>
+                        <div class="col-6 text-start"><i class="fas fa-circle me-1" style="color: #0ea5e9;"></i> Đang đánh giá (<?= $reviewedSubmissions ?>)</div>
+                        <div class="col-6 text-start"><i class="fas fa-circle me-1" style="color: #198754;"></i> Phê duyệt (<?= $approvedSubmissions ?>)</div>
+                        <div class="col-6 text-start"><i class="fas fa-circle me-1" style="color: #dc3545;"></i> Từ chối (<?= $rejectedSubmissions ?>)</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -88,7 +218,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <div class="row mb-4">
     <!-- Bảng danh sách các bản thảo đang chờ phê duyệt -->
     <div class="col-lg-12">
-        <div class="card">
+        <div class="card shadow-sm border-0">
             <div class="card-header">
                 <h6 class="m-0"><i class="fas fa-clipboard-check text-primary me-2"></i>Danh sách Submissions chờ review</h6>
             </div>
@@ -143,9 +273,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
-<div class="row">
+<div class="row" id="recent-reviews-section">
     <div class="col-lg-12">
-        <div class="card mb-4">
+        <div class="card shadow-sm border-0 mb-4">
             <div class="card-header">
                 <h6 class="m-0"><i class="fas fa-history text-primary me-2"></i>Danh sách Reviews gần đây</h6>
             </div>
@@ -200,5 +330,41 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </div>
     </div>
 </div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const canvas = document.getElementById('chartEditorSubmissions');
+        if (canvas) {
+            const pending = parseInt(canvas.getAttribute('data-pending') || '0');
+            const reviewed = parseInt(canvas.getAttribute('data-reviewed') || '0');
+            const approved = parseInt(canvas.getAttribute('data-approved') || '0');
+            const rejected = parseInt(canvas.getAttribute('data-rejected') || '0');
+            
+            new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Chờ review', 'Đang đánh giá', 'Phê duyệt', 'Từ chối'],
+                    datasets: [{
+                        data: [pending, reviewed, approved, rejected],
+                        backgroundColor: ['#ffc107', '#0ea5e9', '#198754', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

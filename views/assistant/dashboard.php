@@ -15,6 +15,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<?php require_once __DIR__ . '/../layouts/welcome_banner.php'; ?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="h3 mb-1">Công việc Trợ lý</h2>
@@ -22,60 +24,84 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
+<style>
+    .stat-card-link {
+        text-decoration: none !important;
+        display: block;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .stat-card-link:hover {
+        transform: translateY(-5px);
+    }
+    .stat-card-link .card {
+        border: none !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02), 0 10px 15px rgba(0,0,0,0.03) !important;
+    }
+    .stat-card-link:hover .card {
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+    }
+</style>
+
 <div class="row g-4 mb-4">
     <div class="col-xl-4 col-md-6">
-        <div class="card stat-card primary h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Task được giao</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($assignedTasks) ? $assignedTasks : 0 ?></div>
-                    </div>
-                    <div class="stat-icon primary">
-                        <i class="fas fa-clipboard-list"></i>
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=index" class="stat-card-link">
+            <div class="card stat-card primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Task được giao</div>
+                            <div class="h3 mb-0 fw-bold text-white"><?= isset($assignedTasks) ? $assignedTasks : 0 ?></div>
+                        </div>
+                        <div class="stat-icon primary" style="background: rgba(255,255,255,0.15); color: #ffffff;">
+                            <i class="fas fa-clipboard-list"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-xl-4 col-md-6">
-        <div class="card stat-card warning h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Task đang xử lý</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($inProgressTasks) ? $inProgressTasks : 0 ?></div>
-                    </div>
-                    <div class="stat-icon warning">
-                        <i class="fas fa-spinner"></i>
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=index&status=in_progress" class="stat-card-link">
+            <div class="card stat-card warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Task đang xử lý</div>
+                            <div class="h3 mb-0 fw-bold text-white"><?= isset($inProgressTasks) ? $inProgressTasks : 0 ?></div>
+                        </div>
+                        <div class="stat-icon warning" style="background: rgba(255,255,255,0.15); color: #ffffff;">
+                            <i class="fas fa-spinner"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <div class="col-xl-4 col-md-6">
-        <div class="card stat-card success h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Task hoàn thành</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($completedTasks) ? $completedTasks : 0 ?></div>
-                    </div>
-                    <div class="stat-icon success">
-                        <i class="fas fa-check-double"></i>
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=index&status=completed" class="stat-card-link">
+            <div class="card stat-card success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Task hoàn thành</div>
+                            <div class="h3 mb-0 fw-bold text-white"><?= isset($completedTasks) ? $completedTasks : 0 ?></div>
+                        </div>
+                        <div class="stat-icon success" style="background: rgba(255,255,255,0.15); color: #ffffff;">
+                            <i class="fas fa-check-double"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
 <div class="row g-4">
     <!-- Cột bên trái: Danh sách Task cần xử lý -->
     <div class="col-lg-8">
-        <div class="card mb-4 h-100">
+        <div class="card shadow-sm border-0 mb-4 h-100">
             <div class="card-header">
                 <h6 class="m-0"><i class="fas fa-tasks text-primary me-2"></i>Nhiệm vụ Cần xử lý</h6>
             </div>
@@ -134,7 +160,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
     <!-- Cột bên phải: Thống kê Thù lao & Trang đã duyệt -->
     <div class="col-lg-4">
-        <div class="card mb-4 h-100">
+        <div class="card shadow-sm border-0 mb-4 h-100">
             <div class="card-header">
                 <h6 class="m-0"><i class="fas fa-hand-holding-usd text-success me-2"></i>Thù lao & Trang đã duyệt</h6>
             </div>
@@ -165,8 +191,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </tbody>
                     </table>
                 </div>
-                <div class="alert alert-light border mt-3 text-xs mb-0">
-                    <i class="fas fa-info-circle me-1 text-primary"></i> Định mức thanh toán: <strong>300.000 đ</strong> / công việc trên mỗi trang vẽ được tác giả duyệt hoàn tất.
+                <div class="alert alert-light border mt-3 text-xs mb-0 d-flex align-items-start gap-2">
+                    <i class="fas fa-info-circle text-primary mt-1"></i>
+                    <span>Định mức thanh toán: <strong>300.000 đ</strong> / công việc trên mỗi trang vẽ được tác giả duyệt hoàn tất.</span>
                 </div>
             </div>
         </div>

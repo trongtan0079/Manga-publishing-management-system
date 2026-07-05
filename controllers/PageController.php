@@ -15,14 +15,14 @@ class PageController extends BaseController
     private $seriesModel;
     private $taskModel;
     
-    // Giới hạn file ảnh 2MB
-    private const MAX_FILE_SIZE = 2 * 1024 * 1024;
+    // Giới hạn file ảnh 10MB
+    private const MAX_FILE_SIZE = 10 * 1024 * 1024;
     
     // Các định dạng ảnh được phép
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp'];
     
     // Trạng thái hợp lệ của page
-    private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published', 'toned'];
+    private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
 
     public function __construct() {
         parent::__construct();
@@ -94,7 +94,7 @@ class PageController extends BaseController
         
         // Kiểm tra kích thước file
         if ($file['size'] > self::MAX_FILE_SIZE) {
-            $_SESSION['error'] = "File ảnh vượt quá dung lượng cho phép (2MB).";
+            $_SESSION['error'] = "File ảnh vượt quá dung lượng cho phép (10MB).";
             return null;
         }
 
@@ -396,35 +396,5 @@ class PageController extends BaseController
         }
     }
 
-    /**
-     * Action: Kích hoạt AI tô màu tự động cho trang truyện
-     */
-    public function runAIColoring() {
-        $pageId = $_GET['page_id'] ?? '';
-        if (empty($pageId)) {
-            $_SESSION['error'] = "Không tìm thấy trang truyện!";
-            header("Location: " . BASE_PATH . "/index.php");
-            exit();
-        }
 
-        $page = $this->pageModel->findById($pageId);
-        if (!$page) {
-            $_SESSION['error'] = "Trang truyện không tồn tại!";
-            header("Location: " . BASE_PATH . "/index.php");
-            exit();
-        }
-
-        // Cập nhật trạng thái trang sang 'toned' (đại diện cho việc tô màu/tông màu hoàn tất)
-        try {
-            $this->pageModel->update($pageId, [
-                'status' => 'toned'
-            ]);
-            $_SESSION['success'] = "AI đã tô màu tự động trang truyện thành công!";
-        } catch (PDOException $e) {
-            $_SESSION['error'] = "Lỗi khi chạy AI tô màu: " . $e->getMessage();
-        }
-
-        header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $pageId);
-        exit();
-    }
 }

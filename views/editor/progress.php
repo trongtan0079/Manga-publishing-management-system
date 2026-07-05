@@ -1,4 +1,11 @@
 <?php
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện theo dõi tiến độ & deadline xuất bản các bộ truyện (progress.php)
  * Vai trò: Editor (Biên tập viên) / Các vai trò khác
@@ -85,9 +92,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <?php endforeach; ?>
     <?php else: ?>
         <div class="col-12">
-            <div class="text-center py-5 text-muted">
-                <i class="fas fa-folder-open fa-3x mb-3 text-secondary"></i>
-                <p class="mb-0 fs-5">Không có dự án truyện nào đang hoạt động.</p>
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body py-5 text-center text-muted">
+                    <i class="fas fa-folder-open fa-3x mb-3 text-secondary" style="opacity: 0.35;"></i>
+                    <h5 class="fw-bold text-dark mb-2">Không có dự án hoạt động</h5>
+                    <p class="text-muted mb-0 small">Hiện không có dự án truyện tranh nào đang trong quá trình sáng tác hoặc hoạt động.</p>
+                </div>
             </div>
         </div>
     <?php endif; ?>

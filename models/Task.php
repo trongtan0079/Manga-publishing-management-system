@@ -48,12 +48,14 @@ class Task extends Model {
      * @return array Danh sách công việc, ưu tiên sắp xếp theo hạn chót (due_date) tăng dần (sắp đến hạn thì hiện trước)
      */
     public function findByAssistantId($assistantId) {
-        $sql = "SELECT t.*, p.page_number, p.image_url, c.chapter_number, s.title as series_title, u.full_name as mangaka_name
+        $sql = "SELECT t.*, p.page_number, p.image_url, c.chapter_number, s.title as series_title, u.full_name as mangaka_name,
+                       r.x as region_x, r.y as region_y, r.width as region_width, r.height as region_height, r.region_type
                 FROM {$this->table} t
                 JOIN pages p ON t.page_id = p.page_id
                 JOIN chapters c ON p.chapter_id = c.chapter_id
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
+                LEFT JOIN page_regions r ON t.page_region_id = r.region_id
                 WHERE t.assistant_id = :assistant_id 
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
@@ -66,16 +68,40 @@ class Task extends Model {
      * Lấy các task chưa hoàn thành của Assistant
      */
     public function findActiveByAssistantId($assistantId) {
-        $sql = "SELECT t.*, p.page_number, p.image_url, c.chapter_number, s.title as series_title, u.full_name as mangaka_name
+        $sql = "SELECT t.*, p.page_number, p.image_url, c.chapter_number, s.title as series_title, u.full_name as mangaka_name,
+                       r.x as region_x, r.y as region_y, r.width as region_width, r.height as region_height, r.region_type
                 FROM {$this->table} t
                 JOIN pages p ON t.page_id = p.page_id
                 JOIN chapters c ON p.chapter_id = c.chapter_id
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
+                LEFT JOIN page_regions r ON t.page_region_id = r.region_id
                 WHERE t.assistant_id = :assistant_id AND t.status != 'completed'
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':assistant_id', $assistantId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy danh sách công việc do Mangaka cụ thể giao cho trợ lý,
+     * bao gồm thông tin chi tiết về trợ lý, trang, chương và bộ truyện.
+     */
+    public function findByMangakaId($mangakaId, $limit = null) {
+        $sql = "SELECT t.*, u.full_name as assistant_name, p.page_number, c.chapter_number, s.title as series_title, s.series_id
+                FROM {$this->table} t
+                LEFT JOIN users u ON t.assistant_id = u.user_id
+                JOIN pages p ON t.page_id = p.page_id
+                JOIN chapters c ON p.chapter_id = c.chapter_id
+                JOIN series s ON c.series_id = s.series_id
+                WHERE t.mangaka_id = :mangaka_id
+                ORDER BY t.created_at DESC";
+        if ($limit) {
+            $sql .= " LIMIT " . intval($limit);
+        }
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':mangaka_id', $mangakaId);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

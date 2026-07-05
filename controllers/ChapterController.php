@@ -139,11 +139,22 @@ class ChapterController extends BaseController
                 exit;
             }
 
+            $formattedDueDate = null;
+            if (!empty($_POST['due_date'])) {
+                $dueTimestamp = strtotime($_POST['due_date']);
+                if ($dueTimestamp === false) {
+                    $_SESSION['error'] = 'Hạn chót (Due Date) không đúng định dạng.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
+                    exit;
+                }
+                $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
+            }
+
             $data = [
                 'series_id' => $seriesId,
                 'chapter_number' => $chapterNumber,
                 'title' => $title,
-                'due_date' => !empty($_POST['due_date']) ? $_POST['due_date'] : null,
+                'due_date' => $formattedDueDate,
                 'status' => $status
             ];
 
@@ -226,10 +237,21 @@ class ChapterController extends BaseController
                 exit;
             }
 
+            $formattedDueDate = null;
+            if (!empty($_POST['due_date'])) {
+                $dueTimestamp = strtotime($_POST['due_date']);
+                if ($dueTimestamp === false) {
+                    $_SESSION['error'] = 'Hạn chót (Due Date) không đúng định dạng.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
+                    exit;
+                }
+                $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
+            }
+
             $data = [
                 'chapter_number' => $chapterNumber,
                 'title' => $title,
-                'due_date' => !empty($_POST['due_date']) ? $_POST['due_date'] : null,
+                'due_date' => $formattedDueDate,
                 'status' => $status
             ];
 

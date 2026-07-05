@@ -63,9 +63,9 @@ class SeriesController extends BaseController
 
         $file = $_FILES['cover_file'];
         
-        // Kiểm tra kích thước file (tối đa 2MB)
-        if ($file['size'] > 2 * 1024 * 1024) {
-            $_SESSION['error'] = "File ảnh bìa vượt quá dung lượng cho phép (2MB).";
+        // Kiểm tra kích thước file (tối đa 10MB)
+        if ($file['size'] > 10 * 1024 * 1024) {
+            $_SESSION['error'] = "File ảnh bìa vượt quá dung lượng cho phép (10MB).";
             return null;
         }
 
@@ -397,7 +397,7 @@ class SeriesController extends BaseController
 
             $status = $_POST['status'] ?? '';
             $publishType = $_POST['publish_type'] ?? 'weekly';
-            if (in_array($status, $this->allowedStatuses)) {
+            if (in_array($status, $this->allowedStatuses) && in_array($publishType, ['weekly', 'monthly'])) {
                 try {
                     $this->seriesModel->update($id, [
                         'status' => $status,
@@ -408,7 +408,7 @@ class SeriesController extends BaseController
                     $_SESSION['error'] = "Lỗi khi cập nhật: " . $e->getMessage();
                 }
             } else {
-                $_SESSION['error'] = "Trạng thái không hợp lệ.";
+                $_SESSION['error'] = "Trạng thái hoặc lịch xuất bản không hợp lệ.";
             }
 
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');

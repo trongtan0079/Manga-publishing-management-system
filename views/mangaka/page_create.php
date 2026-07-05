@@ -39,7 +39,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="mb-3">
                 <label for="image" class="form-label">File ảnh <span class="text-danger">*</span></label>
                 <input class="form-control" type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp" required>
-                <div class="form-text">Chỉ chấp nhận các định dạng ảnh: JPG, JPEG, PNG, WEBP. Dung lượng tối đa 2MB.</div>
+                <div class="form-text">Chỉ chấp nhận các định dạng ảnh: JPG, JPEG, PNG, WEBP. Dung lượng tối đa 10MB.</div>
             </div>
 
             <!-- Trường chọn trạng thái trang -->

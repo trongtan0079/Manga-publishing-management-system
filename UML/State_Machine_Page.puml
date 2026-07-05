@@ -1,0 +1,32 @@
+@startuml
+title State Machine Diagram - Vòng Đời Trạng Thái Của Trang Truyện (Page)
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+
+[*] --> drafting : Mangaka tải lên trang vẽ mới
+
+state drafting {
+    description : Trang vẽ thô đang biên tập
+}
+
+state drawing {
+    description : Đang thực hiện vẽ (đang có Task hoạt động)
+}
+
+state approved {
+    description : Toàn bộ phân vùng (PageRegions) đã hoàn thành và được duyệt
+}
+
+state published {
+    description : Trang truyện đã xuất bản chính thức cùng Chapter
+}
+
+drafting --> drawing : Mangaka tạo và giao Task trên phân vùng
+drawing --> approved : Tất cả phân vùng (PageRegions) chuyển sang 'completed'
+approved --> published : Chapter chứa trang này được duyệt xuất bản
+
+published --> [*]
+
+@enduml

@@ -25,7 +25,7 @@ Thiết kế Database đảm bảo:
 
 ---
 
-## 3. Database Schema (10 Bảng) và Data Dictionary
+## 3. Database Schema (11 Bảng) và Data Dictionary
 
 ### 1. Bảng `roles`
 * **Mô tả**: Lưu trữ thông tin về các vai trò người dùng trong hệ thống.
@@ -144,6 +144,16 @@ Thiết kế Database đảm bảo:
     * `is_read`: BOOLEAN, Default FALSE.
     * `created_at`: TIMESTAMP.
 
+### 11. Bảng `system_logs`
+* **Mô tả**: Nhật ký ghi nhận các hoạt động và tác vụ cấu hình nhạy cảm của người dùng (tập trung vào Admin).
+* **Thuộc tính**:
+    * `log_id`: INT, PK, Auto Increment.
+    * `user_id`: INT, Foreign Key (users.user_id), NULL (Có thể null nếu người dùng bị xóa - ON DELETE SET NULL).
+    * `action`: VARCHAR(255), NOT NULL (Hành động thực hiện, ví dụ: 'Tạo người dùng', 'Sao lưu dữ liệu').
+    * `details`: TEXT, NULL (Mô tả chi tiết nội dung thay đổi).
+    * `ip_address`: VARCHAR(45), NULL (Địa chỉ IP của client thực hiện tác vụ).
+    * `created_at`: TIMESTAMP, Default CURRENT_TIMESTAMP.
+
 ---
 
 ## 4. Phân tích và mô tả toàn bộ mối quan hệ (Relations)
@@ -155,6 +165,7 @@ Thiết kế Database đảm bảo:
   * `users` (1) - (N) `submissions`: Một `User` tạo (`submits`) nhiều `Submission` (thông qua `user_id`).
   * `users` (1) - (N) `reviews`: Một `User` viết (`writes`) nhiều `Review` (thông qua `reviewer_id`).
   * `users` (1) - (N) `notifications`: Một `User` nhận (`receives`) nhiều `Notification` (thông qua `user_id`).
+  * `users` (1) - (N) `system_logs`: Một `User` thực hiện các thao tác sẽ ghi lại (`triggers`) nhiều `SystemLog` (thông qua `user_id`).
   * `users` (1) - (N) `series_rankings`: Một `User` (Board Member) đánh giá (`evaluates`) nhiều `SeriesRanking` (thông qua `board_member_id`).
   * `series` (1) - (N) `chapters`: Một `Series` chứa (`contains`) nhiều `Chapter` (thông qua `series_id`).
   * `series` (1) - (N) `series_rankings`: Một `Series` có thể được xếp hạng (`ranked`) nhiều lần qua các khoảng thời gian (thông qua `series_id`).
@@ -309,6 +320,17 @@ CREATE TABLE notifications (
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+-- 11. system_logs table
+CREATE TABLE system_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(255) NOT NULL,
+    details TEXT,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_logs_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+);
+
 -- Indexes for performance
 CREATE INDEX idx_users_role ON users(role_id);
 CREATE INDEX idx_series_mangaka ON series(mangaka_id);
@@ -317,6 +339,7 @@ CREATE INDEX idx_pages_chapter ON pages(chapter_id);
 CREATE INDEX idx_tasks_users ON tasks(mangaka_id, assistant_id);
 CREATE INDEX idx_submissions_target ON submissions(task_id, chapter_id);
 CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
+CREATE INDEX idx_system_logs_user ON system_logs(user_id);
 ```
 
 ---

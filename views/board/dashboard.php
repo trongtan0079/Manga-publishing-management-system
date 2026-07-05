@@ -18,6 +18,8 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<?php require_once __DIR__ . '/../layouts/welcome_banner.php'; ?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="h3 mb-1">Báo cáo Ban Giám Đốc</h2>
@@ -26,65 +28,91 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <button class="btn btn-secondary shadow-sm" disabled><i class="fas fa-file-invoice-dollar me-2"></i>Tải Báo cáo (Chưa khả dụng)</button>
 </div>
 
+<style>
+    .stat-card-link {
+        text-decoration: none !important;
+        display: block;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .stat-card-link:hover {
+        transform: translateY(-5px);
+    }
+    .stat-card-link .card {
+        border: none !important;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.02), 0 10px 15px rgba(0,0,0,0.03) !important;
+    }
+    .stat-card-link:hover .card {
+        box-shadow: 0 15px 30px rgba(0,0,0,0.08) !important;
+    }
+</style>
+
 <div class="row g-4 mb-4">
     <!-- Card 1: Total Rankings -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card info h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Tổng Xếp Hạng</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($totalRankings) ? (int)$totalRankings : 0 ?></div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
+            <div class="card stat-card info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Tổng Xếp Hạng</div>
+                            <div class="h3 mb-0 fw-bold text-white"><?= isset($totalRankings) ? (int)$totalRankings : 0 ?></div>
+                        </div>
+                        <div class="stat-icon info" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-list-ol"></i></div>
                     </div>
-                    <div class="stat-icon info"><i class="fas fa-list-ol"></i></div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Card 2: Evaluated Series -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card primary h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Manga đã chấm</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($evaluatedSeries) ? (int)$evaluatedSeries : 0 ?></div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
+            <div class="card stat-card primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Manga đã chấm</div>
+                            <div class="h3 mb-0 fw-bold text-white"><?= isset($evaluatedSeries) ? (int)$evaluatedSeries : 0 ?></div>
+                        </div>
+                        <div class="stat-icon primary" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-check-circle"></i></div>
                     </div>
-                    <div class="stat-icon primary"><i class="fas fa-check-circle"></i></div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Card 3: Ungraded Series -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card warning h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Manga chưa chấm</div>
-                        <div class="h3 mb-0 fw-bold"><?= isset($ungradedSeries) ? (int)$ungradedSeries : 0 ?></div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
+            <div class="card stat-card warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Manga chưa chấm</div>
+                            <div class="h3 mb-0 fw-bold text-white"><?= isset($ungradedSeries) ? (int)$ungradedSeries : 0 ?></div>
+                        </div>
+                        <div class="stat-icon warning" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-hourglass-half"></i></div>
                     </div>
-                    <div class="stat-icon warning"><i class="fas fa-hourglass-half"></i></div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 
     <!-- Card 4: Top Ranking Series -->
     <div class="col-xl-3 col-md-6">
-        <div class="card stat-card success h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-xs fw-bold text-muted text-uppercase mb-2">Series Hạng 1</div>
-                        <div class="h5 mb-0 fw-bold text-truncate" style="max-width: 120px;" title="<?= htmlspecialchars($topRankingSeriesName) ?>"><?= htmlspecialchars($topRankingSeriesName) ?></div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
+            <div class="card stat-card success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Series Hạng 1</div>
+                            <div class="h5 mb-0 fw-bold text-white text-truncate" style="max-width: 120px;" title="<?= htmlspecialchars($topRankingSeriesName) ?>"><?= htmlspecialchars($topRankingSeriesName) ?></div>
+                        </div>
+                        <div class="stat-icon success" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-trophy"></i></div>
                     </div>
-                    <div class="stat-icon success"><i class="fas fa-trophy"></i></div>
                 </div>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 

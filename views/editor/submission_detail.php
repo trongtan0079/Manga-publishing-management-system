@@ -1,4 +1,11 @@
 <?php
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện chi tiết thông tin bản thảo đã nộp (submission_detail.php)
  * Vai trò: Các vai trò liên quan (Editor, Mangaka, Assistant)
@@ -17,7 +24,9 @@ $role = $_SESSION['role_name'] ?? '';
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="h3 mb-1">Chi tiết Bản thảo nộp</h2>
+        <h2 class="h3 mb-1">
+            <?= $role === 'assistant' ? 'Chi tiết Sản phẩm đã nộp' : 'Chi tiết Bản thảo nộp' ?>
+        </h2>
         <p class="text-muted text-xs mb-0">Xem thông tin tệp gửi lên, ghi chú, người thực hiện và trạng thái phê duyệt.</p>
     </div>
     <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=index" class="btn btn-outline-secondary btn-sm shadow-sm">
@@ -162,7 +171,7 @@ $role = $_SESSION['role_name'] ?? '';
             </div>
         </div>
 
-        <!-- Khung hành động (Chuyển sang review hoặc Xóa bản thảo) -->
+        <!-- Khung hành động (Chuyển sang review hoặc Xóa bản thảo/sản phẩm) -->
         <div class="card shadow-sm border-0 rounded-3">
             <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-cogs me-2 text-primary"></i>Hành động khả dụng</h5>
@@ -170,23 +179,23 @@ $role = $_SESSION['role_name'] ?? '';
             <div class="card-body p-4 text-center">
                 <?php if ($role === 'editor' && !empty($submission['chapter_id'])): ?>
                     <p class="text-muted text-xs mb-3">Chuyển sang module đánh giá để ghi nhận xét, chấm điểm hoặc phê duyệt chương truyện này.</p>
-                    <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $submission['submission_id'] ?>" class="btn btn-success w-100 py-2.5 shadow-sm fw-bold">
+                    <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $submission['submission_id'] ?>" class="btn btn-success w-100 py-2.5 shadow-sm fw-bold" style="border-radius: 8px;">
                         <i class="fas fa-clipboard-check me-2"></i>Chuyển sang Review (Đánh giá)
                     </a>
                 <?php elseif ($role === 'mangaka' && !empty($submission['task_id']) && $submission['mangaka_id'] == $_SESSION['user_id'] && $submission['status'] === 'pending'): ?>
                     <p class="text-muted text-xs mb-3">Đánh giá bản thảo nộp từ trợ lý (Assistant) của bạn để phê duyệt hoàn thành công việc.</p>
-                    <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $submission['submission_id'] ?>" class="btn btn-success w-100 py-2.5 shadow-sm fw-bold">
+                    <a href="<?= BASE_PATH ?>/index.php?controller=review&action=create&submission_id=<?= $submission['submission_id'] ?>" class="btn btn-success w-100 py-2.5 shadow-sm fw-bold" style="border-radius: 8px;">
                         <i class="fas fa-clipboard-check me-2"></i>Đánh giá & Phê duyệt
                     </a>
                 <?php elseif (($role === 'assistant' || $role === 'mangaka') && $submission['status'] === 'pending' && $submission['user_id'] == $_SESSION['user_id']): ?>
-                    <p class="text-muted text-xs mb-3">Bạn có thể xóa bản thảo đã nộp nếu nó chưa được đánh giá.</p>
-                    <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $submission['submission_id'] ?>" method="POST" class="d-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản thảo này không?');">
-                        <button type="submit" class="btn btn-danger w-100 py-2.5 shadow-sm fw-bold">
-                            <i class="fas fa-trash-alt me-2"></i>Xóa bản thảo nộp này
+                    <p class="text-muted text-xs mb-3">Bạn có thể xóa sản phẩm đã nộp nếu nó chưa được đánh giá.</p>
+                    <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $submission['submission_id'] ?>" method="POST" class="d-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                        <button type="submit" class="btn btn-danger w-100 py-2.5 shadow-sm fw-bold" style="border-radius: 8px;">
+                            <i class="fas fa-trash-alt me-2"></i>Xóa sản phẩm nộp này
                         </button>
                     </form>
                 <?php else: ?>
-                    <p class="text-muted mb-0">Bản thảo này hiện ở trạng thái <strong><?= htmlspecialchars(strtoupper($submission['status'] ?? '')) ?></strong>.</p>
+                    <p class="text-muted mb-0"><?= $role === 'assistant' ? 'Sản phẩm' : 'Bản thảo' ?> này hiện ở trạng thái <strong><?= htmlspecialchars(strtoupper($submission['status'] ?? '')) ?></strong>.</p>
                 <?php endif; ?>
             </div>
         </div>

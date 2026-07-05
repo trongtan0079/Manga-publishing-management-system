@@ -12,6 +12,7 @@ require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/Notification.php';
 require_once __DIR__ . '/../models/SeriesRanking.php';
+require_once __DIR__ . '/../models/SystemLog.php';
 
 
 class DashboardController extends BaseController {
@@ -98,6 +99,7 @@ class DashboardController extends BaseController {
         $pageModel = new Page();
         $taskModel = new Task();
         $rankingModel = new SeriesRanking();
+        $notificationModel = new Notification();
         
         $submissionModel = new Submission();
         
@@ -150,6 +152,26 @@ class DashboardController extends BaseController {
                 $seenSeries[$r['series_id']] = true;
             }
         }
+
+        // Lấy danh sách toàn bộ task để tính tỷ lệ hoàn thành
+        $allTasks = $taskModel->findByMangakaId($userId);
+        $completedTasksCount = 0;
+        foreach ($allTasks as $t) {
+            if ($t['status'] === 'completed') {
+                $completedTasksCount++;
+            }
+        }
+        $totalTasksCount = count($allTasks);
+        $taskCompletionRate = $totalTasksCount > 0 ? round(($completedTasksCount / $totalTasksCount) * 100) : 0;
+
+        // Lấy 5 task gần nhất để hiển thị bảng tiến độ
+        $recentTasksList = $taskModel->findByMangakaId($userId, 5);
+
+        // Lấy danh sách series của họa sĩ này để filter
+        $mySeriesList = $seriesModel->findByMangakaId($userId);
+
+        // Lấy các hoạt động gần đây (thông báo)
+        $recentActivities = $notificationModel->getLatestNotifications($userId, 5);
         
         require_once __DIR__ . '/../views/mangaka/dashboard.php';
     }
@@ -278,6 +300,28 @@ class DashboardController extends BaseController {
         // Lấy 5 recent reviews
         $recentReviewList = array_slice($reviewModel->findByReviewerId($userId), 0, 5);
 
+        // Đếm số lượng Reviewed cho Editor hiện tại
+        $stmtReviewed = $reviewModel->getConnection()->prepare("
+            SELECT COUNT(r.review_id) as total 
+            FROM reviews r
+            JOIN submissions s ON r.submission_id = s.submission_id
+            WHERE r.reviewer_id = :reviewer_id AND s.status = 'reviewed'
+        ");
+        $stmtReviewed->execute(['reviewer_id' => $userId]);
+        $reviewedSubmissions = (int)$stmtReviewed->fetchColumn();
+
+        // Lấy danh sách 5 chapter sắp đến hạn deadline mà chưa được duyệt/xuất bản
+        $stmtDeadlines = $submissionModel->getConnection()->prepare("
+            SELECT c.chapter_number, c.title as chapter_title, c.due_date, s.title as series_title, u.full_name as mangaka_name
+            FROM chapters c
+            JOIN series s ON c.series_id = s.series_id
+            JOIN users u ON s.mangaka_id = u.user_id
+            WHERE c.status NOT IN ('approved', 'published') AND c.due_date IS NOT NULL
+            ORDER BY c.due_date ASC
+            LIMIT 5
+        ");
+        $stmtDeadlines->execute();
+        $upcomingChapters = $stmtDeadlines->fetchAll(\PDO::FETCH_ASSOC);
         
         require_once __DIR__ . '/../views/editor/dashboard.php';
     }
@@ -314,5 +358,98 @@ class DashboardController extends BaseController {
         $ungradedSeries = max(0, $totalSeriesCount - $evaluatedSeries);
         
         require_once __DIR__ . '/../views/board/dashboard.php';
+    }
+
+    /**
+     * Nhật ký hoạt động dành cho Admin
+     */
+    public function logs() {
+        \requireRole('admin');
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $limit = 15; // 15 logs per page
+        $offset = ($page - 1) * $limit;
+        
+        $logModel = new SystemLog();
+        $logs = $logModel->getPaginatedLogs($limit, $offset);
+        $totalLogs = $logModel->countAll();
+        $totalPages = ceil($totalLogs / $limit);
+        
+        $current_page = 'logs';
+        require_once __DIR__ . '/../views/admin/logs.php';
+    }
+
+    /**
+     * Sao lưu cơ sở dữ liệu (tải SQL dump) dành cho Admin
+     */
+    public function backupDb() {
+        \requireRole('admin');
+        
+        $userModel = new User();
+        $conn = $userModel->getConnection();
+        
+        // Ghi nhận nhật ký trước khi sao lưu
+        SystemLog::logAction($_SESSION['user_id'], 'Sao lưu dữ liệu', 'Admin thực hiện sao lưu toàn bộ cơ sở dữ liệu');
+        
+        // 1. Khởi tạo đầu ra file sql
+        $filename = 'manga_backup_' . date('Ymd_His') . '.sql';
+        
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+        
+        // Output SQL header info
+        echo "-- ==============================================================================\n";
+        echo "-- Manga Publishing Management System Database Backup\n";
+        echo "-- Generated on: " . date('Y-m-d H:i:s') . "\n";
+        echo "-- ==============================================================================\n\n";
+        echo "SET FOREIGN_KEY_CHECKS=0;\n\n";
+        
+        // 2. Lấy toàn bộ các bảng trong database
+        $tables = [];
+        $stmt = $conn->query("SHOW TABLES");
+        while ($row = $stmt->fetch(\PDO::FETCH_NUM)) {
+            $tables[] = $row[0];
+        }
+        
+        // 3. Với mỗi bảng, tạo câu lệnh CREATE TABLE và INSERT INTO
+        foreach ($tables as $table) {
+            // Lấy CREATE TABLE
+            $stmtCreate = $conn->query("SHOW CREATE TABLE `{$table}`");
+            $rowCreate = $stmtCreate->fetch(\PDO::FETCH_NUM);
+            
+            echo "-- ------------------------------------------------------------------------------\n";
+            echo "-- Cấu trúc bảng `{$table}`\n";
+            echo "-- ------------------------------------------------------------------------------\n";
+            echo "DROP TABLE IF EXISTS `{$table}`;\n";
+            echo $rowCreate[1] . ";\n\n";
+            
+            // Lấy dữ liệu
+            $stmtData = $conn->query("SELECT * FROM `{$table}`");
+            $rowCount = $stmtData->rowCount();
+            
+            if ($rowCount > 0) {
+                echo "-- ------------------------------------------------------------------------------\n";
+                echo "-- Dữ liệu bảng `{$table}`\n";
+                echo "-- ------------------------------------------------------------------------------\n";
+                
+                while ($row = $stmtData->fetch(\PDO::FETCH_ASSOC)) {
+                    $keys = array_keys($row);
+                    $values = array_values($row);
+                    
+                    $escapedValues = array_map(function($val) use ($conn) {
+                        if ($val === null) return 'NULL';
+                        return $conn->quote($val);
+                    }, $values);
+                    
+                    echo "INSERT INTO `{$table}` (`" . implode("`, `", $keys) . "`) VALUES (" . implode(", ", $escapedValues) . ");\n";
+                }
+                echo "\n";
+            }
+        }
+        
+        echo "SET FOREIGN_KEY_CHECKS=1;\n";
+        exit;
     }
 }

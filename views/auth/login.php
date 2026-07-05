@@ -233,12 +233,7 @@ if (!defined('BASE_PATH')) {
                 </div>
 
                 <div class="mb-4">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <label for="password" class="form-label mb-0">Mật khẩu</label>
-                        <span class="small" style="color: var(--primary-color); font-weight: 600; cursor: help;" 
-                              data-bs-toggle="tooltip" data-bs-placement="top" 
-                              title="Vui lòng liên hệ Quản trị viên (Admin) để được cấp lại mật khẩu.">Quên mật khẩu?</span>
-                    </div>
+                    <label for="password" class="form-label">Mật khẩu</label>
                     <div class="input-group">
                         <span class="input-group-text"><i class="fas fa-lock"></i></span>
                         <input type="password" class="form-control" id="password" name="password" placeholder="••••••••" required>

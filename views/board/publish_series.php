@@ -106,7 +106,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-5">
+                            <td colspan="7" class="text-center text-muted py-5">
                                 <div class="mb-3"><i class="fas fa-folder-open fa-3x text-light"></i></div>
                                 <p class="mb-0">Hiện không có Series nào cần duyệt xuất bản.</p>
                             </td>

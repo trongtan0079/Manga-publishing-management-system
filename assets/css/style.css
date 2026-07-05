@@ -84,6 +84,31 @@ body {
     overflow-x: hidden;
     line-height: 1.6;
     font-size: 0.925rem;
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: -200px;
+    right: -200px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.06) 0%, rgba(236, 72, 153, 0.04) 50%, rgba(255, 255, 255, 0) 70%);
+    z-index: -1;
+    pointer-events: none;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    bottom: -300px;
+    left: -300px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.05) 0%, rgba(14, 165, 233, 0.03) 50%, rgba(255, 255, 255, 0) 70%);
+    z-index: -1;
+    pointer-events: none;
 }
 
 /* ==========================================================================
@@ -177,7 +202,7 @@ h3, .h3 { font-size: 1.25rem; font-weight: 700; }
 
 .sidebar-sticky {
     padding: 1.25rem 0;
-    flex-grow: 1;
+    flex-grow: 1 !important;
     overflow-y: auto;
     min-height: 0;
 }
@@ -291,8 +316,19 @@ main {
     }
 }
 
-.container-fluid {
+main > .container-fluid {
     animation: fadeIn var(--transition-slow) ease-out;
+    min-height: 88vh; /* Đẩy nội dung chính cao hẳn lên để footer hoàn toàn ẩn dưới màn hình */
+}
+
+/* Reusable Elegant Empty State */
+.empty-state-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 5.5rem 2rem !important;
+    color: var(--slate-400);
 }
 
 @keyframes fadeIn {
@@ -309,13 +345,16 @@ main {
     background-color: var(--card-bg);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
-    transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    transition: transform var(--transition-slow), box-shadow var(--transition-slow), border-color var(--transition-slow);
 }
 
 .card:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--slate-300);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(79, 70, 229, 0.15), 0 4px 12px -5px rgba(79, 70, 229, 0.05);
+    border-color: rgba(79, 70, 229, 0.35);
 }
+
+
 
 .card-header {
     background-color: transparent;
@@ -784,3 +823,10 @@ a {
         padding: 0.4rem 0.85rem;
     }
 }
+
+/* Remove underlines from stat card link wraps */
+.stat-card-link,
+.stat-card-link * {
+    text-decoration: none !important;
+}
+

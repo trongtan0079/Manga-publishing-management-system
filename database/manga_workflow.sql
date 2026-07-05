@@ -72,7 +72,7 @@ CREATE TABLE pages (
     chapter_id INT NOT NULL,
     page_number INT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
-    status ENUM('sketch', 'inked', 'toned', 'finished') DEFAULT 'sketch',
+    status ENUM('drafting', 'drawing', 'reviewing', 'approved', 'published') DEFAULT 'drafting',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_pages_chapter FOREIGN KEY (chapter_id) REFERENCES chapters(chapter_id) ON DELETE CASCADE,
@@ -85,7 +85,7 @@ CREATE TABLE pages (
 CREATE TABLE page_regions (
     region_id INT AUTO_INCREMENT PRIMARY KEY,
     page_id INT NOT NULL,
-    region_type ENUM('panel', 'bubble', 'character') NOT NULL,
+    region_type ENUM('panel', 'bubble', 'character', 'background', 'sfx') NOT NULL,
     x INT NOT NULL,
     y INT NOT NULL,
     width INT NOT NULL,
@@ -191,3 +191,19 @@ CREATE INDEX idx_pages_chapter ON pages(chapter_id);
 CREATE INDEX idx_tasks_users ON tasks(mangaka_id, assistant_id);
 CREATE INDEX idx_submissions_target ON submissions(task_id, chapter_id);
 CREATE INDEX idx_notifications_user ON notifications(user_id, is_read);
+
+-- ------------------------------------------------------------------------------
+-- 11. Bảng system_logs: Nhật ký hoạt động hệ thống
+-- ------------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS system_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
+    action VARCHAR(255) NOT NULL,
+    details TEXT,
+    ip_address VARCHAR(45) NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_logs_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
+) COMMENT 'Nhật ký hoạt động nhạy cảm trong hệ thống như đăng nhập, thay đổi thông tin người dùng';
+
+CREATE INDEX idx_system_logs_user ON system_logs(user_id);
+

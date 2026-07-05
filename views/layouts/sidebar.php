@@ -36,6 +36,11 @@ $role = $_SESSION['role_name'] ?? '';
                         <i class="fas fa-user-tag"></i> <span>Quản lý Vai trò</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= (isset($current_page) && $current_page == 'logs') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=logs">
+                        <i class="fas fa-history"></i> <span>Nhật ký hoạt động</span>
+                    </a>
+                </li>
             <?php endif; ?>
 
             <?php if (in_array($role, ['mangaka', 'editor', 'board', 'admin'])): ?>
@@ -58,7 +63,7 @@ $role = $_SESSION['role_name'] ?? '';
             <?php if ($role === 'editor'): ?>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'progress') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=progress">
-                        <i class="fas fa-chart-line"></i> <span>Tiến độ & Deadline</span>
+                        <i class="fas fa-calendar-check"></i> <span>Tiến độ & Deadline</span>
                     </a>
                 </li>
             <?php endif; ?>
@@ -72,9 +77,28 @@ $role = $_SESSION['role_name'] ?? '';
             <?php endif; ?>
 
             <?php if (in_array($role, ['mangaka', 'assistant', 'editor'])): ?>
+                <?php 
+                    $subText = 'Danh sách Bản thảo';
+                    if ($role === 'assistant') {
+                        $subText = 'Sản phẩm đã nộp';
+                    } elseif ($role === 'mangaka') {
+                        $subText = 'Bản thảo của tôi';
+                    }
+                ?>
                 <li class="nav-item">
                     <a class="nav-link <?= (isset($current_page) && $current_page == 'submissions') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=submission&action=index">
-                        <i class="fas fa-cloud-upload-alt"></i> <span>Bản thảo & Phê duyệt</span>
+                        <i class="fas fa-cloud-upload-alt"></i> <span><?= $subText ?></span>
+                    </a>
+                </li>
+            <?php endif; ?>
+
+            <?php if (in_array($role, ['mangaka', 'editor'])): ?>
+                <?php 
+                    $revText = ($role === 'mangaka') ? 'Duyệt bài Trợ lý' : 'Đánh giá & Phê duyệt';
+                ?>
+                <li class="nav-item">
+                    <a class="nav-link <?= (isset($current_page) && $current_page == 'reviews') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=review&action=index">
+                        <i class="fas fa-clipboard-check"></i> <span><?= $revText ?></span>
                     </a>
                 </li>
             <?php endif; ?>
@@ -106,20 +130,20 @@ $role = $_SESSION['role_name'] ?? '';
                 </a>
             </li>
         </ul>
-    </div>
 
-    <!-- Hồ sơ cá nhân - Góc dưới sidebar (Ghim cố định ở đáy) -->
-    <div class="mt-auto px-3 pb-3 pt-2 w-100">
-        <div class="border-top border-light border-opacity-25 pt-3">
-            <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=auth&action=profile" class="d-flex align-items-center text-decoration-none rounded-3 px-2 py-2 sidebar-profile-link <?= (isset($current_page) && $current_page == 'profile') ? 'active' : '' ?>">
-                <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'U') ?>&background=6366f1&color=fff&size=64&font-size=0.45&bold=true" 
-                     alt="Avatar" class="rounded-circle me-2 flex-shrink-0" width="36" height="36">
-                <div style="min-width: 0;" class="flex-grow-1">
-                    <div class="text-white fw-semibold text-truncate" style="font-size: 0.85rem;"><?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User') ?></div>
-                    <div class="text-white-50 text-truncate" style="font-size: 0.7rem;"><?= ucfirst(htmlspecialchars($role)) ?></div>
-                </div>
-                <i class="fas fa-ellipsis-v text-white-50 ms-2 flex-shrink-0" style="font-size: 0.75rem;"></i>
-            </a>
+        <!-- Hồ sơ cá nhân - Nằm trong dòng cuộn để tránh đè chồng chữ ở chiều cao ngắn -->
+        <div class="mt-auto mt-4 px-3 pb-3 pt-2 w-100">
+            <div class="border-top border-light border-opacity-25 pt-3">
+                <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=auth&action=profile" class="d-flex align-items-center text-decoration-none rounded-3 px-2 py-2 sidebar-profile-link <?= (isset($current_page) && $current_page == 'profile') ? 'active' : '' ?>">
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'U') ?>&background=6366f1&color=fff&size=64&font-size=0.45&bold=true" 
+                         alt="Avatar" class="rounded-circle me-2 flex-shrink-0" width="36" height="36">
+                    <div style="min-width: 0;" class="flex-grow-1">
+                        <div class="text-white fw-semibold text-truncate" style="font-size: 0.85rem;"><?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User') ?></div>
+                        <div class="text-white-50 text-truncate" style="font-size: 0.7rem;"><?= ucfirst(htmlspecialchars($role)) ?></div>
+                    </div>
+                    <i class="fas fa-ellipsis-v text-white-50 ms-2 flex-shrink-0" style="font-size: 0.75rem;"></i>
+                </a>
+            </div>
         </div>
     </div>
 </div>

@@ -12,7 +12,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="h3 mb-1">My Tasks Dashboard</h2>
+        <h2 class="h3 mb-1">Công việc của tôi</h2>
         <p class="text-muted text-xs mb-0">Danh sách công việc được giao.</p>
     </div>
 </div>
@@ -27,12 +27,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
                         <tr>
-                            <th class="ps-4">Context (Ngữ cảnh)</th>
+                            <th class="ps-4">Ngữ cảnh truyện</th>
                             <th>Tài nguyên</th>
-                            <th>Task (Công việc)</th>
-                            <th>Priority</th>
-                            <th>Due Date</th>
-                            <th class="text-end pe-4">Status & Update</th>
+                            <th>Nhiệm vụ phân công</th>
+                            <th>Độ ưu tiên</th>
+                            <th>Hạn chót</th>
+                            <th class="text-end pe-4">Trạng thái & Cập nhật</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -85,42 +85,50 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php 
-                                    $pColor = 'secondary';
-                                    if ($task['priority'] == 'high') $pColor = 'danger';
-                                    elseif ($task['priority'] == 'medium') $pColor = 'warning';
-                                    else $pColor = 'info';
-                                    ?>
-                                    <span class="badge bg-<?= $pColor ?>"><?= ucfirst($task['priority']) ?></span>
-                                </td>
-                                <td>
-                                    <?php if ($task['due_date']): ?>
-                                        <?= htmlspecialchars(date('d/m/Y H:i', strtotime($task['due_date']))) ?>
-                                        <?php if (strtotime($task['due_date']) < time() && $task['status'] != 'completed'): ?>
-                                            <br><span class="badge bg-danger">Quá hạn</span>
-                                        <?php endif; ?>
-                                    <?php else: ?>
-                                        <span class="text-muted">None</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-flex align-items-center justify-content-end gap-2">
-                                        <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center gap-2 m-0">
-                                            <select name="status" class="form-select form-select-sm" style="width: 120px;" title="Trạng thái">
-                                                <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-                                                <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>In Progress</option>
-                                                <?php if ($task['status'] == 'completed'): ?>
-                                                    <option value="completed" selected disabled>Completed</option>
-                                                <?php endif; ?>
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                                        </form>
-                                        <?php if ($task['status'] !== 'completed'): ?>
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&task_id=<?= $task['task_id'] ?>" class="btn btn-sm btn-outline-success">
-                                                <i class="fas fa-paper-plane me-1"></i>Nộp bài
-                                            </a>
-                                        <?php endif; ?>
-                                    </div>
+                                     <?php 
+                                     $pColor = 'secondary';
+                                     $pLabel = 'Thường';
+                                     if ($task['priority'] == 'high') {
+                                         $pColor = 'danger';
+                                         $pLabel = 'Cao';
+                                     } elseif ($task['priority'] == 'medium') {
+                                         $pColor = 'warning';
+                                         $pLabel = 'Trung bình';
+                                     } else {
+                                         $pColor = 'info';
+                                         $pLabel = 'Thấp';
+                                     }
+                                     ?>
+                                     <span class="badge bg-<?= $pColor ?>"><?= $pLabel ?></span>
+                                 </td>
+                                 <td>
+                                     <?php if ($task['due_date']): ?>
+                                         <?= htmlspecialchars(date('d/m/Y H:i', strtotime($task['due_date']))) ?>
+                                         <?php if (strtotime($task['due_date']) < time() && $task['status'] != 'completed'): ?>
+                                             <br><span class="badge bg-danger">Quá hạn</span>
+                                         <?php endif; ?>
+                                     <?php else: ?>
+                                         <span class="text-muted">Không có</span>
+                                     <?php endif; ?>
+                                 </td>
+                                 <td class="text-end pe-4">
+                                     <div class="d-flex align-items-center justify-content-end gap-2">
+                                         <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="d-flex align-items-center gap-2 m-0">
+                                             <select name="status" class="form-select form-select-sm" style="width: 130px; border-radius: 6px;" title="Trạng thái">
+                                                 <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Chờ thực hiện</option>
+                                                 <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>Đang làm</option>
+                                                 <?php if ($task['status'] == 'completed'): ?>
+                                                     <option value="completed" selected disabled>Đã hoàn thành</option>
+                                                 <?php endif; ?>
+                                             </select>
+                                             <button type="submit" class="btn btn-sm btn-primary" style="border-radius: 6px;">Lưu</button>
+                                         </form>
+                                         <?php if ($task['status'] !== 'completed'): ?>
+                                             <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&task_id=<?= $task['task_id'] ?>" class="btn btn-sm btn-outline-success" style="border-radius: 6px;">
+                                                 <i class="fas fa-paper-plane me-1"></i>Nộp bài
+                                             </a>
+                                         <?php endif; ?>
+                                     </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -137,5 +145,38 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterStatus = urlParams.get('status');
+    if (filterStatus) {
+        const rows = document.querySelectorAll("tbody tr");
+        let foundCount = 0;
+        rows.forEach(row => {
+            const selectEl = row.querySelector("td select[name='status']");
+            if (selectEl) {
+                const statusVal = selectEl.value;
+                if (statusVal === filterStatus) {
+                    row.style.display = "";
+                    foundCount++;
+                } else {
+                    row.style.display = "none";
+                }
+            }
+        });
+        
+        const cardHeader = document.querySelector(".card-header h5");
+        if (cardHeader) {
+            const clearBtn = document.createElement("a");
+            clearBtn.href = window.location.pathname + "?controller=task&action=index";
+            clearBtn.className = "btn btn-sm btn-outline-secondary ms-3 py-1 px-2";
+            clearBtn.style.fontSize = "0.75rem";
+            clearBtn.innerHTML = "<i class='fas fa-times me-1'></i>Xóa bộ lọc";
+            cardHeader.appendChild(clearBtn);
+        }
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

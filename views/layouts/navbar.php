@@ -3,6 +3,17 @@
  * Layout: Thanh điều hướng phía trên (navbar.php)
  * Chức năng: Hiển thị thương hiệu/logo, nút chuyển đổi menu (sidebar togglers) và thông tin tài khoản người dùng cùng dropdown thông báo.
  */
+$unreadCount = 0;
+$latestNotifications = [];
+
+$vars = get_defined_vars();
+if (array_key_exists('this', $vars) && is_object($vars['this'])) {
+    $unreadCount = $vars['this']->unreadCount ?? 0;
+    $latestNotifications = $vars['this']->latestNotifications ?? [];
+} elseif (isset($GLOBALS['controller']) && is_object($GLOBALS['controller'])) {
+    $unreadCount = $GLOBALS['controller']->unreadCount ?? 0;
+    $latestNotifications = $GLOBALS['controller']->latestNotifications ?? [];
+}
 ?>
 <nav class="navbar navbar-expand-lg bg-white fixed-top">
     <div class="container-fluid px-3 px-lg-0 ps-lg-2 pe-lg-4">
@@ -34,21 +45,21 @@
                 <li class="nav-item dropdown me-3">
                     <a class="nav-link position-relative d-flex align-items-center" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                         <i class="fas fa-bell fs-5"></i>
-                        <?php if (isset($this->unreadCount) && $this->unreadCount > 0): ?>
+                        <?php if ($unreadCount > 0): ?>
                             <span class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
-                                <?= $this->unreadCount > 99 ? '99+' : $this->unreadCount ?>
+                                <?= $unreadCount > 99 ? '99+' : $unreadCount ?>
                             </span>
                         <?php endif; ?>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3 p-0" aria-labelledby="notificationDropdown" style="width: 320px; max-height: 400px; overflow-y: auto;">
                         <li class="p-3 border-bottom d-flex justify-content-between align-items-center bg-light sticky-top rounded-top">
                             <span class="fw-bold text-dark">Thông báo</span>
-                            <?php if (isset($this->unreadCount) && $this->unreadCount > 0): ?>
-                                <span class="badge bg-primary rounded-pill"><?= $this->unreadCount ?> mới</span>
+                            <?php if ($unreadCount > 0): ?>
+                                <span class="badge bg-primary rounded-pill"><?= $unreadCount ?> mới</span>
                             <?php endif; ?>
                         </li>
-                        <?php if (isset($this->latestNotifications) && !empty($this->latestNotifications)): ?>
-                            <?php foreach ($this->latestNotifications as $notif): ?>
+                        <?php if (!empty($latestNotifications)): ?>
+                            <?php foreach ($latestNotifications as $notif): ?>
                                 <li>
                                     <a class="dropdown-item py-3 border-bottom <?= !$notif['is_read'] ? 'bg-light' : '' ?> text-wrap" href="#">
                                         <div class="d-flex justify-content-between align-items-center mb-1">

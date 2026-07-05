@@ -55,11 +55,11 @@ Sub-RQs:
 1.4.1 Admin  
 Admin là người quản trị hệ thống, chịu trách nhiệm quản lý người dùng, phân quyền truy cập và đảm bảo hệ thống hoạt động ổn định. Admin có quyền kiểm soát các chức năng quản trị và theo dõi hoạt động chung của hệ thống.
 
-- Quản lý tài khoản người dùng
+- Quản lý tài khoản người dùng (Tìm kiếm & Phân trang phía Máy chủ - Server-side pagination)
 - Quản lý vai trò và phân quyền
-- Theo dõi hoạt động hệ thống
-- Xem thông báo hệ thống
-- Xem báo cáo và thống kê tổng hợp
+- Theo dõi hoạt động hệ thống (Nhật ký hoạt động Audit Trail lưu vết thao tác, IP, thời gian)
+- Sao lưu dữ liệu dự phòng (Live Database Backup - SQL dump 1-click)
+- Xem thông báo hệ thống và báo cáo thống kê tổng hợp (biểu đồ trực quan)
 
 1.4.2 Mangaka  
 Mangaka là tác giả chính của tác phẩm Manga, chịu trách nhiệm xây dựng nội dung, quản lý quá trình sáng tác và phối hợp với các Assistant để hoàn thiện tác phẩm trước khi gửi kiểm duyệt.

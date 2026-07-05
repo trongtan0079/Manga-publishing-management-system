@@ -13,24 +13,7 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
-<style>
-.ai-colored-page {
-    position: relative;
-    overflow: hidden;
-}
-.ai-colored-page::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.22) 0%, rgba(236, 72, 153, 0.22) 50%, rgba(251, 191, 36, 0.22) 100%);
-    mix-blend-mode: color;
-    pointer-events: none;
-    border-radius: 4px;
-}
-</style>
+
 
 <?php if (isset($_SESSION['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
@@ -84,7 +67,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             case 'reviewing': $pBadge = 'bg-warning text-dark'; $statusLabel = 'Đang chờ duyệt'; break;
             case 'approved': $pBadge = 'bg-info text-dark'; $statusLabel = 'Đã duyệt'; break;
             case 'published': $pBadge = 'bg-success'; $statusLabel = 'Đã xuất bản'; break;
-            case 'toned': $pBadge = 'bg-success'; $statusLabel = 'Tô màu AI'; break;
         }
         ?>
         <div class="row">
@@ -101,21 +83,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <div class="row">
     <!-- Cột trái: Ảnh trang truyện tích hợp vẽ Bounding Box của AI -->
     <div class="col-md-7 mb-4">
-        <div class="card border-info h-100">
+        <div class="card border-info">
             <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-image me-2"></i>Bản vẽ trang truyện</h5>
-                <?php if (!empty($regions)): ?>
-                    <span class="badge bg-dark">Đã nhận dạng <?= count($regions) ?> vùng</span>
-                <?php endif; ?>
             </div>
-            <div class="card-body text-center bg-light d-flex align-items-center justify-content-center p-2" style="min-height: 400px;">
+            <div class="card-body text-center bg-light d-flex flex-column align-items-center justify-content-center p-2" style="min-height: 400px;">
                 <?php if (!empty($page['image_url'])): 
                     $imageUrl = $page['image_url'];
                     $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
                 ?>
-                    <?php if (!empty($regions)): ?>
-                        <div class="position-relative d-inline-block text-start <?= $page['status'] === 'toned' ? 'ai-colored-page' : '' ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
+                    <div id="drawInstruction" class="alert alert-info d-none py-2 mb-3 text-start w-100" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-2"></i><strong>Chế độ vẽ thủ công:</strong> Hãy nhấn giữ chuột trái và kéo trên ảnh truyện để vẽ phân vùng mới.
+                    </div>
+                    
+                    <div id="mangaPageWrapper" class="position-relative d-inline-block text-start" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                        <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
+                        
+                        <?php if (!empty($regions)): ?>
                             <?php foreach ($regions as $region): 
                                 // Tỷ lệ phần trăm dựa trên kích thước giả định 800 x 1000
                                 $l = ($region['x'] / 800) * 100;
@@ -131,6 +115,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 } elseif ($region['region_type'] === 'character') {
                                     $borderColor = '#198754'; // Xanh lá cho nhân vật
                                     $bgColor = 'rgba(25, 135, 84, 0.15)';
+                                } elseif ($region['region_type'] === 'background') {
+                                    $borderColor = '#343a40'; // Đen xám cho background
+                                    $bgColor = 'rgba(52, 58, 64, 0.15)';
+                                } elseif ($region['region_type'] === 'sfx') {
+                                    $borderColor = '#fd7e14'; // Cam cho SFX
+                                    $bgColor = 'rgba(253, 126, 20, 0.15)';
                                 }
                             ?>
                                 <div class="ai-region-overlay" 
@@ -145,12 +135,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                      </span>
                                 </div>
                             <?php endforeach; ?>
-                        </div>
-                    <?php else: ?>
-                        <div class="position-relative d-inline-block text-start <?= $page['status'] === 'toned' ? 'ai-colored-page' : '' ?>" style="max-width: 100%;">
-                            <img src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid border shadow-sm">
-                        </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
                 <?php else: ?>
                     <div class="text-muted my-5">
                         <i class="fas fa-file-image fa-3x mb-3"></i>
@@ -163,14 +149,21 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
     <!-- Cột phải: Thông tin phân đoạn vùng bằng AI & Bảng điều khiển -->
     <div class="col-md-5 mb-4">
-        <div class="card border-secondary h-100">
+        <div class="card border-secondary">
             <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Trình phân đoạn AI</h5>
-                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !empty($regions)): ?>
-                    <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light" onclick="return confirm('Bạn có chắc muốn chạy lại thuật toán quét phân đoạn AI? Dữ liệu cũ sẽ được làm mới.');">
-                        <i class="fas fa-sync-alt me-1"></i>Quét lại
-                    </a>
-                <?php endif; ?>
+                <div class="d-flex gap-2">
+                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                        <button id="btnDrawToggle" class="btn btn-sm btn-info text-white">
+                            <i class="fas fa-edit me-1"></i>Vẽ thủ công
+                        </button>
+                        <?php if (!empty($regions)): ?>
+                            <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light" onclick="return confirm('Bạn có chắc muốn chạy lại thuật toán quét phân đoạn AI? Dữ liệu cũ sẽ được làm mới.');">
+                                <i class="fas fa-sync-alt me-1"></i>Quét lại
+                            </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
             </div>
             <div class="card-body d-flex flex-column justify-content-between">
                 <?php if (empty($regions)): ?>
@@ -179,9 +172,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <h6 class="fw-bold">Hệ thống AI Phân đoạn chưa chạy</h6>
                         <p class="text-muted small px-3">Sử dụng mô hình AI (YOLOv8-Segmentation & SAM) để tự động phát hiện và đánh dấu các vùng Khung truyện (Panel), Bong bóng thoại (Bubble), Nhân vật trên trang.</p>
                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
-                        <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-primary mt-2">
-                            <i class="fas fa-play me-2"></i>Chạy AI phân đoạn vùng
-                        </a>
+                        <div class="d-flex gap-2 justify-content-center mt-2">
+                            <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-primary">
+                                <i class="fas fa-play me-2"></i>Chạy AI phân đoạn vùng
+                            </a>
+                        </div>
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
@@ -200,6 +195,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     $typeLabel = 'Nhân vật';
                                     $typeClass = 'bg-success';
                                     $rowBorder = 'border-start border-success border-4';
+                                } elseif ($region['region_type'] === 'background') {
+                                    $typeLabel = 'Bối cảnh/Nền';
+                                    $typeClass = 'bg-dark';
+                                    $rowBorder = 'border-start border-dark border-4';
+                                } elseif ($region['region_type'] === 'sfx') {
+                                    $typeLabel = 'Hiệu ứng SFX';
+                                    $typeClass = 'bg-warning text-dark';
+                                    $rowBorder = 'border-start border-warning border-4';
                                 }
                             ?>
                                 <div class="list-group-item list-group-item-action mb-2 <?= $rowBorder ?> shadow-sm transition-all" 
@@ -217,11 +220,19 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         Tọa độ: X:<?= $region['x'] ?>, Y:<?= $region['y'] ?> | Kích thước: <?= $region['width'] ?>x<?= $region['height'] ?>
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <span class="badge bg-light text-dark border">AI Generated</span>
+                                        <span class="badge bg-light text-dark border"><?= $region['is_ai_generated'] ? 'AI Generated' : 'Manual' ?></span>
                                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
-                                        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
-                                            <i class="fas fa-plus me-1"></i>Giao việc trên vùng này
-                                        </a>
+                                        <div class="btn-group">
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
+                                                <i class="fas fa-plus me-1"></i>Giao việc
+                                            </a>
+                                            <form action="<?= BASE_PATH ?>/index.php?controller=pageregion&action=delete&id=<?= $region['region_id'] ?>&page_id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa phân vùng này?');">
+                                                <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
+                                                <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2" style="font-size: 11px; margin-left: 2px;">
+                                                    <i class="fas fa-trash-alt me-1"></i>Xóa
+                                                </button>
+                                            </form>
+                                        </div>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -232,35 +243,56 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </div>
 
-        <!-- Trình tô màu AI (Optional) -->
-        <div class="card border-primary mt-4">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-palette me-2"></i>Trình tô màu AI</h5>
-                <?php if ($page['status'] === 'toned'): ?>
-                    <span class="badge bg-light text-primary">Đã tô màu</span>
-                <?php endif; ?>
+
+    </div>
+</div>
+
+<style>
+.drawing-active {
+    cursor: crosshair !important;
+}
+.selection-box {
+    position: absolute;
+    border: 2px dashed #0d6efd;
+    background-color: rgba(13, 110, 253, 0.25);
+    z-index: 1000;
+    pointer-events: none;
+}
+</style>
+
+<!-- Modal chọn loại phân vùng thủ công -->
+<div class="modal fade" id="saveRegionModal" tabindex="-1" aria-labelledby="saveRegionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header py-2 bg-primary text-white">
+                <h6 class="modal-title fw-bold" id="saveRegionModalLabel">Lưu phân vùng mới</h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body text-center py-4">
-                <?php if ($page['status'] !== 'toned'): ?>
-                    <i class="fas fa-magic fa-3x text-muted mb-3"></i>
-                    <h6 class="fw-bold">Tự động tô màu bằng AI</h6>
-                    <p class="text-muted small px-3">Sử dụng mô hình AI Deep Learning (Colorization GANs) để tự động tô màu toàn bộ trang Manga đen trắng gốc của bạn chỉ với một cú click chuột.</p>
-                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
-                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=runAIColoring&page_id=<?= $page['page_id'] ?>" class="btn btn-primary mt-2" onclick="return confirm('Bạn có chắc chắn muốn chạy thuật toán AI tự động tô màu cho trang vẽ này không?');">
-                            <i class="fas fa-paint-brush me-2"></i>Chạy AI tô màu
-                        </a>
-                    <?php endif; ?>
-                <?php else: ?>
-                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                    <h6 class="fw-bold text-success">Trang vẽ đã được tô màu thành công!</h6>
-                    <p class="text-muted small px-3">Bản màu của trang đã được áp dụng. Bạn có thể thay đổi trạng thái trang hoặc tải lên file ảnh khác thủ công nếu muốn sửa đổi bản phối màu này.</p>
-                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
-                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=runAIColoring&page_id=<?= $page['page_id'] ?>" class="btn btn-outline-secondary btn-sm mt-2" onclick="return confirm('Bạn có muốn chạy lại thuật toán AI tô màu?');">
-                            <i class="fas fa-sync-alt me-1"></i>Tô màu lại
-                        </a>
-                    <?php endif; ?>
-                <?php endif; ?>
-            </div>
+            <form action="<?= BASE_PATH ?>/index.php?controller=pageregion&action=store" method="POST">
+                <div class="modal-body py-3">
+                    <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
+                    <!-- Coordinates mapped to 800x1000 standard -->
+                    <input type="hidden" id="reg_x" name="x">
+                    <input type="hidden" id="reg_y" name="y">
+                    <input type="hidden" id="reg_width" name="width">
+                    <input type="hidden" id="reg_height" name="height">
+                    
+                    <div class="mb-3">
+                        <label for="reg_type" class="form-label fw-bold" style="font-size: 0.9rem;">Loại phân vùng <span class="text-danger">*</span></label>
+                        <select class="form-select select-sm" id="reg_type" name="region_type" required>
+                            <option value="panel">Khung truyện (Panel)</option>
+                            <option value="bubble">Bong bóng thoại (Bubble)</option>
+                            <option value="character">Nhân vật (Character)</option>
+                            <option value="background">Bối cảnh/Nền (Background)</option>
+                            <option value="sfx">Hiệu ứng chữ (SFX)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer py-1">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary btn-sm">Lưu vùng</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -307,7 +339,140 @@ function highlightTableRecord(regionId) {
         }, 150);
     }
 }
+
+// Xử lý vẽ phân vùng thủ công bằng cách nhấn giữ và kéo chuột
+let isDrawingMode = false;
+let isDragging = false;
+let startX = 0, startY = 0;
+let selectionBox = null;
+const wrapper = document.getElementById('mangaPageWrapper');
+const img = document.getElementById('mangaPageImage');
+const btnDrawToggle = document.getElementById('btnDrawToggle');
+const drawInstruction = document.getElementById('drawInstruction');
+
+if (btnDrawToggle && wrapper && img) {
+    btnDrawToggle.addEventListener('click', function() {
+        isDrawingMode = !isDrawingMode;
+        if (isDrawingMode) {
+            btnDrawToggle.innerHTML = '<i class="fas fa-times me-1"></i>Hủy vẽ';
+            btnDrawToggle.classList.remove('btn-info');
+            btnDrawToggle.classList.add('btn-danger');
+            wrapper.classList.add('drawing-active');
+            drawInstruction.classList.remove('d-none');
+        } else {
+            resetDrawingMode();
+        }
+    });
+
+    wrapper.addEventListener('mousedown', function(e) {
+        if (!isDrawingMode) return;
+        
+        // Prevent default dragging behavior of the image
+        e.preventDefault();
+        
+        isDragging = true;
+        
+        // Get coordinates relative to the wrapper
+        const rect = wrapper.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+        
+        // Create selection box
+        selectionBox = document.createElement('div');
+        selectionBox.className = 'selection-box';
+        selectionBox.style.left = startX + 'px';
+        selectionBox.style.top = startY + 'px';
+        wrapper.appendChild(selectionBox);
+    });
+
+    wrapper.addEventListener('mousemove', function(e) {
+        if (!isDragging || !selectionBox) return;
+        
+        const rect = wrapper.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+        
+        const x = Math.min(startX, currentX);
+        const y = Math.min(startY, currentY);
+        const width = Math.abs(startX - currentX);
+        const height = Math.abs(startY - currentY);
+        
+        selectionBox.style.left = x + 'px';
+        selectionBox.style.top = y + 'px';
+        selectionBox.style.width = width + 'px';
+        selectionBox.style.height = height + 'px';
+    });
+
+    wrapper.addEventListener('mouseup', function(e) {
+        if (!isDragging) return;
+        isDragging = false;
+        
+        if (!selectionBox) return;
+        
+        const rect = wrapper.getBoundingClientRect();
+        const endX = e.clientX - rect.left;
+        const endY = e.clientY - rect.top;
+        
+        const x = Math.min(startX, endX);
+        const y = Math.min(startY, endY);
+        const width = Math.abs(startX - endX);
+        const height = Math.abs(startY - endY);
+        
+        // Don't save tiny clicks
+        if (width > 10 && height > 10) {
+            // Get visible dimensions of image
+            const clientW = img.clientWidth;
+            const clientH = img.clientHeight;
+            
+            // Map to 800x1000 standard
+            const dbX = Math.round((x / clientW) * 800);
+            const dbY = Math.round((y / clientH) * 1000);
+            const dbW = Math.round((width / clientW) * 800);
+            const dbH = Math.round((height / clientH) * 1000);
+            
+            // Set input values
+            document.getElementById('reg_x').value = dbX;
+            document.getElementById('reg_y').value = dbY;
+            document.getElementById('reg_width').value = dbW;
+            document.getElementById('reg_height').value = dbH;
+            
+            // Show modal
+            const saveModal = new bootstrap.Modal(document.getElementById('saveRegionModal'));
+            saveModal.show();
+            
+            // Listen for modal hide to clean up selection box
+            document.getElementById('saveRegionModal').addEventListener('hidden.bs.modal', function () {
+                if (selectionBox && selectionBox.parentNode) {
+                    selectionBox.parentNode.removeChild(selectionBox);
+                }
+                selectionBox = null;
+                resetDrawingMode();
+            }, { once: true });
+        } else {
+            if (selectionBox && selectionBox.parentNode) {
+                selectionBox.parentNode.removeChild(selectionBox);
+            }
+            selectionBox = null;
+        }
+    });
+}
+
+function resetDrawingMode() {
+    isDrawingMode = false;
+    if (btnDrawToggle) {
+        btnDrawToggle.innerHTML = '<i class="fas fa-edit me-1"></i>Vẽ thủ công';
+        btnDrawToggle.classList.remove('btn-danger');
+        btnDrawToggle.classList.add('btn-info');
+    }
+    if (wrapper) {
+        wrapper.classList.remove('drawing-active');
+    }
+    if (drawInstruction) {
+        drawInstruction.classList.add('d-none');
+    }
+}
 </script>
+
 
 <!-- 
   Khối Quản lý Công việc (Task Management)

@@ -113,6 +113,24 @@ class ReviewController extends BaseController
                 exit;
             }
 
+            if ($decision !== 'approved' && $decision !== 'rejected') {
+                $_SESSION['error'] = 'Quyết định không hợp lệ.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=review&action=create&submission_id=' . $submissionId);
+                exit;
+            }
+
+            if (!empty($rating)) {
+                $ratingVal = intval($rating);
+                if ($ratingVal < 1 || $ratingVal > 10) {
+                    $_SESSION['error'] = 'Điểm số phải nằm trong khoảng từ 1 đến 10.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=review&action=create&submission_id=' . $submissionId);
+                    exit;
+                }
+                $rating = $ratingVal;
+            } else {
+                $rating = null;
+            }
+
             $submission = $this->submissionModel->findById($submissionId);
             if (!$submission || !$this->checkReviewPermission($submission)) {
                 $_SESSION['error'] = 'Bạn không có quyền đánh giá bản thảo này.';
@@ -155,6 +173,36 @@ class ReviewController extends BaseController
                 require_once __DIR__ . '/../models/Task.php';
                 $taskModel = new \Task();
                 $taskModel->update($submission['task_id'], ['status' => 'completed']);
+
+                // Đồng thời cập nhật trạng thái PageRegion liên kết thành 'completed'
+                $taskDetail = $taskModel->findById($submission['task_id']);
+                if ($taskDetail && !empty($taskDetail['page_region_id'])) {
+                    require_once __DIR__ . '/../models/PageRegion.php';
+                    $pageRegionModel = new \PageRegion();
+                    $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'completed']);
+
+                    // Kiểm tra xem tất cả các phân vùng của trang này đã Completed hết chưa
+                    $pageId = $taskDetail['page_id'];
+                    $regions = $pageRegionModel->findByPageId($pageId);
+                    $allCompleted = true;
+                    if (!empty($regions)) {
+                        foreach ($regions as $r) {
+                            if ($r['status'] !== 'completed') {
+                                $allCompleted = false;
+                                break;
+                            }
+                        }
+                    } else {
+                        $allCompleted = false;
+                    }
+
+                    // Nếu tất cả phân vùng đã xong, tự động cập nhật trạng thái trang truyện thành 'approved'
+                    if ($allCompleted) {
+                        require_once __DIR__ . '/../models/Page.php';
+                        $pageModel = new \Page();
+                        $pageModel->update($pageId, ['status' => 'approved']);
+                    }
+                }
             }
 
             // Nếu là bản thảo chương truyện (Chapter) và được duyệt, cập nhật trạng thái Chapter thành 'approved'

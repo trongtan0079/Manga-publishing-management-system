@@ -4,16 +4,27 @@
  * Vai trò: Tất cả người dùng sau khi đăng nhập
  * Chức năng: Hiển thị nhanh các thông báo chưa đọc và danh sách thông báo mới nhất kèm các tác vụ đánh dấu đã đọc.
  */
+$unreadCount = 0;
+$latestNotifications = [];
+
+$vars = get_defined_vars();
+if (array_key_exists('this', $vars) && is_object($vars['this'])) {
+    $unreadCount = $vars['this']->unreadCount ?? 0;
+    $latestNotifications = $vars['this']->latestNotifications ?? [];
+} elseif (isset($GLOBALS['controller']) && is_object($GLOBALS['controller'])) {
+    $unreadCount = $GLOBALS['controller']->unreadCount ?? 0;
+    $latestNotifications = $GLOBALS['controller']->latestNotifications ?? [];
+}
 ?>
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-white border-bottom-0 pt-4 pb-0 d-flex justify-content-between align-items-center">
-        <h6 class="m-0 fw-bold"><i class="fas fa-bell text-primary me-2"></i>Thông báo mới (<?= $this->unreadCount ?>)</h6>
+        <h6 class="m-0 fw-bold"><i class="fas fa-bell text-primary me-2"></i>Thông báo mới (<?= $unreadCount ?>)</h6>
         <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=index" class="text-decoration-none text-sm">Xem tất cả</a>
     </div>
     <div class="card-body">
-        <?php if (!empty($this->latestNotifications)): ?>
+        <?php if (!empty($latestNotifications)): ?>
             <div class="list-group list-group-flush">
-                <?php foreach ($this->latestNotifications as $notif): ?>
+                <?php foreach ($latestNotifications as $notif): ?>
                     <div class="list-group-item list-group-item-action d-flex gap-3 py-3 <?= !$notif['is_read'] ? 'bg-light' : '' ?>" style="border-radius: 8px; margin-bottom: 5px; border: none;">
                         <div class="d-flex align-items-center">
                             <?php if (!$notif['is_read']): ?>
