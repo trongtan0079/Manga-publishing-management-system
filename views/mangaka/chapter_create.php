@@ -37,8 +37,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <select class="form-select" id="status" name="status">
                     <option value="drafting">Bản nháp (Drafting)</option>
                     <option value="drawing">Đang vẽ (Drawing)</option>
-                    <option value="reviewing">Đang chờ duyệt (Reviewing)</option>
                 </select>
+                <div id="status-warning-container"></div>
             </div>
             
             <div class="mb-3">
@@ -50,5 +50,38 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const statusSelect = document.getElementById("status");
+    const warningContainer = document.getElementById("status-warning-container");
+    
+    function updateStatusWarning() {
+        const status = statusSelect.value;
+        let warningHtml = "";
+        
+        if (status === 'drafting') {
+            warningHtml = `
+                <div class="alert alert-warning border-0 py-2 px-3 mt-2 d-flex align-items-start gap-2" style="font-size: 0.8rem; border-radius: 8px; background-color: #fffbeb; color: #b45309;">
+                    <i class="fas fa-exclamation-triangle mt-1 flex-shrink-0"></i>
+                    <div><strong>Lưu ý:</strong> Trợ lý sẽ tạm thời <strong>không nhìn thấy công việc</strong> và <strong>không nhận thông báo</strong> giao việc khi chương ở trạng thái Nháp.</div>
+                </div>
+            `;
+        } else if (status === 'drawing') {
+            warningHtml = `
+                <div class="alert alert-success border-0 py-2 px-3 mt-2 d-flex align-items-start gap-2" style="font-size: 0.8rem; border-radius: 8px; background-color: #f0fdf4; color: #15803d;">
+                    <i class="fas fa-check-circle mt-1 flex-shrink-0"></i>
+                    <div>Các phân công công việc vẽ cho Trợ lý sẽ được <strong>kích hoạt hiển thị</strong> và <strong>gửi thông báo ngay lập tức</strong>.</div>
+                </div>
+            `;
+        }
+        
+        warningContainer.innerHTML = warningHtml;
+    }
+    
+    statusSelect.addEventListener("change", updateStatusWarning);
+    updateStatusWarning();
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

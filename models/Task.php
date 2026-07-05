@@ -56,7 +56,7 @@ class Task extends Model {
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
                 LEFT JOIN page_regions r ON t.page_region_id = r.region_id
-                WHERE t.assistant_id = :assistant_id 
+                WHERE t.assistant_id = :assistant_id AND c.status != 'drafting'
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':assistant_id', $assistantId);
@@ -76,7 +76,7 @@ class Task extends Model {
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
                 LEFT JOIN page_regions r ON t.page_region_id = r.region_id
-                WHERE t.assistant_id = :assistant_id AND t.status != 'completed'
+                WHERE t.assistant_id = :assistant_id AND t.status != 'completed' AND c.status != 'drafting'
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':assistant_id', $assistantId);
@@ -102,6 +102,23 @@ class Task extends Model {
         }
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':mangaka_id', $mangakaId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy toàn bộ danh sách task thuộc về một Chapter cụ thể.
+     * Dùng để gửi thông báo hàng loạt khi chapter chuyển từ drafting sang drawing.
+     */
+    public function findTasksByChapterId($chapterId) {
+        $sql = "SELECT t.*, c.chapter_number, s.title as series_title
+                FROM {$this->table} t
+                JOIN pages p ON t.page_id = p.page_id
+                JOIN chapters c ON p.chapter_id = c.chapter_id
+                JOIN series s ON c.series_id = s.series_id
+                WHERE c.chapter_id = :chapter_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':chapter_id', $chapterId);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

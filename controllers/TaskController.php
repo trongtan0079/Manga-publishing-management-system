@@ -166,11 +166,14 @@ class TaskController extends BaseController
             }
 
             // 2. Validation: page_id ownership
-            if ($pageId <= 0 || !$this->checkPageOwnership($pageId)) {
+            $ownership = $this->checkPageOwnership($pageId);
+            if ($pageId <= 0 || !$ownership) {
                 $_SESSION['error'] = 'Lỗi phân quyền hoặc trang truyện không hợp lệ.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
                 exit;
             }
+            $chapter = $ownership['chapter'];
+            $isDraft = ($chapter['status'] === 'drafting');
 
             // Validation: pageRegionId belongs to pageId
             if ($pageRegionId) {
@@ -247,12 +250,14 @@ class TaskController extends BaseController
                 $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
             }
 
-            // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc
-            $this->notificationModel->createNotification(
-                $assistantId,
-                'task_assigned',
-                'Bạn được giao công việc mới: ' . $title
-            );
+            // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc (chỉ khi không phải Bản nháp)
+            if (!$isDraft) {
+                $this->notificationModel->createNotification(
+                    $assistantId,
+                    'task_assigned',
+                    'Bạn được giao công việc mới: ' . $title
+                );
+            }
 
             // Chuyển hướng quay lại trang chi tiết (page_detail) cùng thông báo thành công
             $_SESSION['success'] = 'Đã giao task thành công.';

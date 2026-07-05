@@ -133,8 +133,8 @@ class ChapterController extends BaseController
                 exit;
             }
 
-            if (!in_array($status, ['drafting', 'drawing', 'reviewing'])) {
-                $_SESSION['error'] = "Trạng thái chapter không hợp lệ!";
+            if (!in_array($status, ['drafting', 'drawing'])) {
+                $_SESSION['error'] = "Trạng thái chapter khởi tạo không hợp lệ! Chỉ cho phép Bản nháp hoặc Đang vẽ.";
                 header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                 exit;
             }
@@ -255,8 +255,32 @@ class ChapterController extends BaseController
                 'status' => $status
             ];
 
+            $oldStatus = $chapter['status'];
+            $newStatus = $status;
+            $shouldNotify = ($oldStatus === 'drafting' && ($newStatus === 'drawing' || $newStatus === 'reviewing'));
+
             try {
                 $this->chapterModel->update($id, $data);
+                
+                // Nếu kích hoạt chương từ Bản nháp sang Đang vẽ/Chờ duyệt, gửi thông báo cho Trợ lý
+                if ($shouldNotify) {
+                    require_once __DIR__ . '/../models/Task.php';
+                    require_once __DIR__ . '/../models/Notification.php';
+                    $taskModel = new \Task();
+                    $notificationModel = new \Notification();
+                    
+                    $tasks = $taskModel->findTasksByChapterId($id);
+                    if (!empty($tasks)) {
+                        foreach ($tasks as $task) {
+                            $notificationModel->createNotification(
+                                $task['assistant_id'],
+                                'task_assigned',
+                                'Bạn được giao công việc mới: ' . $task['title'] . ' (Chương ' . $chapterNumber . ' - ' . $task['series_title'] . ')'
+                            );
+                        }
+                    }
+                }
+                
                 $_SESSION['success'] = "Cập nhật chapter {$chapterNumber} thành công!";
             } catch (PDOException $e) {
                 $_SESSION['error'] = "Lỗi hệ thống khi cập nhật chapter: " . $e->getMessage();
