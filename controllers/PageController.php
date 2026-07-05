@@ -191,8 +191,8 @@ class PageController extends BaseController
                 exit;
             }
 
-            if (!in_array($status, $this->allowedStatuses)) {
-                $_SESSION['error'] = "Trạng thái trang không hợp lệ!";
+            if (!in_array($status, ['drafting', 'drawing'])) {
+                $_SESSION['error'] = "Trạng thái trang khởi tạo không hợp lệ! Chỉ cho phép Bản nháp hoặc Đang vẽ.";
                 header("Location: " . BASE_PATH . "/index.php?controller=page&action=create&chapter_id={$chapterId}");
                 exit;
             }
@@ -304,8 +304,12 @@ class PageController extends BaseController
                 exit;
             }
 
-            if (!in_array($status, $this->allowedStatuses)) {
-                $_SESSION['error'] = "Trạng thái trang không hợp lệ!";
+            $allowedUpdateStatuses = ['drafting', 'drawing', 'reviewing'];
+            if ($page['status'] === 'approved' || $page['status'] === 'published') {
+                $allowedUpdateStatuses[] = $page['status'];
+            }
+            if (!in_array($status, $allowedUpdateStatuses)) {
+                $_SESSION['error'] = "Trạng thái trang cập nhật không hợp lệ!";
                 header("Location: " . BASE_PATH . "/index.php?controller=page&action=edit&id={$id}");
                 exit;
             }

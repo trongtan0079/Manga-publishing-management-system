@@ -48,9 +48,6 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <select class="form-select" id="status" name="status">
                     <option value="drafting" selected>Bản nháp (Drafting)</option>
                     <option value="drawing">Đang vẽ (Drawing)</option>
-                    <option value="reviewing">Đang chờ duyệt (Reviewing)</option>
-                    <option value="approved">Đã duyệt (Approved)</option>
-                    <option value="published">Đã xuất bản (Published)</option>
                 </select>
             </div>
             
