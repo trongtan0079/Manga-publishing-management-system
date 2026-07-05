@@ -134,7 +134,6 @@ switch ($role) {
 <div class="card border-0 mb-4 overflow-hidden position-relative welcome-banner-card">
 
     <!-- Decorative background patterns -->
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; background-image: radial-gradient(#6366f1 1.5px, transparent 1.5px); background-size: 20px 20px; pointer-events: none;"></div>
     <!-- Soft, glowing background color blobs -->
     <div style="position: absolute; width: 350px; height: 350px; background: rgba(99, 102, 241, 0.12); filter: blur(85px); top: -100px; right: -50px; border-radius: 50%; pointer-events: none;"></div>
     <div style="position: absolute; width: 300px; height: 300px; background: rgba(236, 72, 153, 0.1); filter: blur(75px); bottom: -80px; left: -50px; border-radius: 50%; pointer-events: none;"></div>
