@@ -196,8 +196,7 @@ if (!defined('BASE_PATH')) {
 
         .alert-danger {
             border-radius: 12px;
-            border: none;
-            border-left: 4px solid #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.25);
             background-color: #fef2f2;
             color: #991b1b;
             font-weight: 500;
