@@ -64,8 +64,11 @@ class SeriesRankingController extends BaseController
      */
     public function create() {
         \requireRole('board');
-        // Need to get series for dropdown. Should get 'ongoing' or 'completed' maybe, but let's get all except planning/canceled
-        $seriesList = $this->seriesModel->findAll(); 
+        // Chỉ lấy các bộ truyện đang hoạt động để đánh giá xếp hạng, loại bỏ planning và canceled
+        $allSeries = $this->seriesModel->findAll(); 
+        $seriesList = array_filter($allSeries, function($s) {
+            return in_array($s['status'], ['ongoing', 'completed', 'suspended']);
+        });
         require_once __DIR__ . '/../views/board/ranking_create.php';
     }
 
@@ -90,6 +93,11 @@ class SeriesRankingController extends BaseController
             $series = $this->seriesModel->findById($seriesId);
             if (!$series) {
                 $_SESSION['error'] = 'Series không tồn tại.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
+                exit;
+            }
+            if (in_array($series['status'], ['planning', 'canceled'])) {
+                $_SESSION['error'] = 'Không thể xếp hạng cho bộ truyện đang ở trạng thái Kế hoạch hoặc Đã hủy.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
                 exit;
             }
@@ -189,7 +197,10 @@ class SeriesRankingController extends BaseController
             header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=index');
             exit;
         }
-        $seriesList = $this->seriesModel->findAll(); 
+        $allSeries = $this->seriesModel->findAll(); 
+        $seriesList = array_filter($allSeries, function($s) use ($ranking) {
+            return in_array($s['status'], ['ongoing', 'completed', 'suspended']) || $s['series_id'] == $ranking['series_id'];
+        });
         require_once __DIR__ . '/../views/board/ranking_edit.php';
     }
 
@@ -222,6 +233,11 @@ class SeriesRankingController extends BaseController
             $series = $this->seriesModel->findById($seriesId);
             if (!$series) {
                 $_SESSION['error'] = 'Series không tồn tại.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
+                exit;
+            }
+            if (in_array($series['status'], ['planning', 'canceled'])) {
+                $_SESSION['error'] = 'Không thể xếp hạng cho bộ truyện đang ở trạng thái Kế hoạch hoặc Đã hủy.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
             }

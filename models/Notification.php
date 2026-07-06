@@ -19,7 +19,8 @@ class Notification extends Model {
             'review_created',
             'submission_approved',
             'submission_rejected',
-            'ranking_published'
+            'ranking_published',
+            'series_warning'
         ];
 
         if (!in_array($type, $allowedTypes)) {
