@@ -90,12 +90,10 @@ CREATE TABLE page_regions (
     y INT NOT NULL,
     width INT NOT NULL,
     height INT NOT NULL,
-    confidence DECIMAL(5,4) NULL,
-    is_ai_generated BOOLEAN DEFAULT TRUE,
     status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_regions_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE
-) COMMENT 'Lưu trữ thông tin chi tiết về từng vùng trên trang truyện đã phân đoạn qua AI';
+) COMMENT 'Lưu trữ thông tin chi tiết về từng phân vùng vẽ tay thủ công trên trang truyện';
 
 -- ------------------------------------------------------------------------------
 -- 6. Bảng tasks: Quản lý công việc do Mangaka phân công cho Assistant
