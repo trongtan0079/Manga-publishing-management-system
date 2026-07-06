@@ -1,4 +1,6 @@
 -- SQL Migration: Tạo bảng editor_annotations
+USE manga_workflow;
+
 CREATE TABLE IF NOT EXISTS editor_annotations (
     annotation_id INT AUTO_INCREMENT PRIMARY KEY,
     page_id INT NOT NULL,
