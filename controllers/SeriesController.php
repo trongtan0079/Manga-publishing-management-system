@@ -242,6 +242,12 @@ class SeriesController extends BaseController
 
         $this->checkOwnership($series, $id);
 
+        if (empty($series['proposal_file'])) {
+            $_SESSION['error'] = "Vui lòng đính kèm file bản thảo đề xuất trước khi nộp đề xuất bộ truyện.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $id);
+            exit;
+        }
+
         if ($series['status'] !== 'planning' || $series['publish_type'] !== 'draft') {
             $_SESSION['error'] = "Chỉ có thể nộp đề xuất khi bộ truyện ở trạng thái Nháp.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $id);
