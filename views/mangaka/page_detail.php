@@ -511,6 +511,9 @@ function resetDrawingMode() {
                                 <!-- Tiêu đề task -->
                                 <td>
                                     <strong><?= htmlspecialchars($task['title']) ?></strong>
+                                    <?php if (!empty($task['description'])): ?>
+                                        <div class="text-muted small mt-1" style="max-width: 300px;"><?= renderMarkdown($task['description']) ?></div>
+                                    <?php endif; ?>
                                     <?php if (!empty($task['resource_url'])): ?>
                                         <br><small class="text-muted"><i class="fas fa-link me-1"></i>Tài nguyên: <a href="<?= htmlspecialchars($task['resource_url']) ?>" target="_blank">Xem link</a></small>
                                     <?php endif; ?>

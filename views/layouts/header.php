@@ -19,10 +19,25 @@ if (!defined('BASE_PATH')) {
 }
 
 /**
- * Hàm hỗ trợ hiển thị Markdown dạng tối giản (in đậm, in nghiêng, gạch ngang, danh sách bullet) an toàn XSS.
+ * Hàm hỗ trợ hiển thị HTML an toàn (chỉ cho phép các thẻ định dạng văn bản cơ bản).
+ */
+function safeHTML($html) {
+    if (empty($html)) return '';
+    // Cho phép các thẻ: p, strong, em, u, s, ul, ol, li, br
+    return strip_tags($html, '<p><strong><em><u><s><ul><ol><li><br>');
+}
+
+/**
+ * Hàm hỗ trợ hiển thị Markdown dạng tối giản (in đậm, in nghiêng, gạch ngang, danh sách bullet) hoặc HTML an toàn từ Quill.
  */
 function renderMarkdown($text) {
     if (empty($text)) return '';
+    
+    // Nếu dữ liệu đã có định dạng HTML từ Quill (ví dụ có các thẻ p, strong, em...)
+    if (preg_match('/<[a-z][\s\S]*>/i', $text)) {
+        return safeHTML($text);
+    }
+    
     $escaped = htmlspecialchars($text);
     
     // Parse Bold: **text** -> <strong>text</strong>
