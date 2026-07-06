@@ -116,7 +116,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
             <div class="card-body">
                 <?php if (!empty($series['description'])): ?>
-                    <p class="card-text" style="white-space: pre-wrap;"><?= htmlspecialchars($series['description'] ?? '') ?></p>
+                    <div class="card-text" style="white-space: pre-wrap;"><?= renderMarkdown($series['description'] ?? '') ?></div>
                 <?php else: ?>
                     <p class="text-muted fst-italic">Chưa có mô tả.</p>
                 <?php endif; ?>

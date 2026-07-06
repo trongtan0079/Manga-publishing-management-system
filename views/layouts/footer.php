@@ -28,6 +28,50 @@
             });
         }
     });
+
+    // Hàm hỗ trợ chèn cú pháp in đậm, in nghiêng, gạch ngang cho textarea
+    function insertFormatting(id, syntax) {
+        const textarea = document.getElementById(id);
+        if (!textarea) return;
+        
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const selectedText = text.substring(start, end);
+        
+        const replacement = syntax + selectedText + syntax;
+        
+        textarea.value = text.substring(0, start) + replacement + text.substring(end);
+        textarea.focus();
+        textarea.setSelectionRange(start + syntax.length, start + syntax.length + selectedText.length);
+        
+        // Trigger input event
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    // Hàm hỗ trợ chèn danh sách gạch đầu dòng
+    function insertList(id) {
+        const textarea = document.getElementById(id);
+        if (!textarea) return;
+        
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const selectedText = text.substring(start, end);
+        
+        let replacement = '';
+        if (selectedText.length > 0) {
+            replacement = selectedText.split('\n').map(line => line.startsWith('- ') ? line : '- ' + line).join('\n');
+        } else {
+            replacement = '\n- ';
+        }
+        
+        textarea.value = text.substring(0, start) + replacement + text.substring(end);
+        textarea.focus();
+        textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+        
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 </script>
 <?php
 // Chuẩn hóa Flash Message: Đảm bảo thông báo chỉ hiển thị 1 lần

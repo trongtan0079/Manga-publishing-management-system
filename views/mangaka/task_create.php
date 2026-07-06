@@ -45,8 +45,16 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
             <!-- Trường Mô tả chi tiết (Tùy chọn) -->
             <div class="mb-3">
-                <label for="description" class="form-label">Mô tả chi tiết (Tùy chọn)</label>
-                <textarea class="form-control" id="description" name="description" rows="3" placeholder="Mô tả cụ thể yêu cầu của bạn cho assistant..."></textarea>
+                <label for="description" class="form-label fw-bold text-slate-700">Mô tả chi tiết (Tùy chọn)</label>
+                <div class="border rounded-3 overflow-hidden shadow-sm hover-shadow" style="transition: all 0.2s; border-color: #cbd5e1 !important;">
+                    <div class="d-flex gap-2 p-2 border-bottom bg-light align-items-center" style="background-color: #f8fafc !important; border-color: #e2e8f0 !important;">
+                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertFormatting('description', '**')" title="In đậm (Bold)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-bold text-slate-700 small"></i></button>
+                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertFormatting('description', '*')" title="In nghiêng (Italic)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-italic text-slate-700 small"></i></button>
+                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertFormatting('description', '~~')" title="Gạch ngang (Strikethrough)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-strikethrough text-slate-700 small"></i></button>
+                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertList('description')" title="Danh sách (Bullet list)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-list text-slate-700 small"></i></button>
+                    </div>
+                    <textarea class="form-control border-0 rounded-0" id="description" name="description" rows="3" style="box-shadow: none !important; resize: vertical; min-height: 80px;" placeholder="Mô tả cụ thể yêu cầu của bạn cho assistant..."></textarea>
+                </div>
             </div>
 
             <!-- Loại công việc và Phân vùng (New) -->

@@ -17,6 +17,48 @@ if (!defined('BASE_PATH')) {
     if ($basePath === '/' || $basePath === '\\') $basePath = '';
     define('BASE_PATH', str_replace('\\', '/', $basePath));
 }
+
+/**
+ * Hàm hỗ trợ hiển thị Markdown dạng tối giản (in đậm, in nghiêng, gạch ngang, danh sách bullet) an toàn XSS.
+ */
+function renderMarkdown($text) {
+    if (empty($text)) return '';
+    $escaped = htmlspecialchars($text);
+    
+    // Parse Bold: **text** -> <strong>text</strong>
+    $escaped = preg_replace('/\*\*(.*?)\*\*/', '<strong>$1</strong>', $escaped);
+    // Parse Italic: *text* -> <em>text</em>
+    $escaped = preg_replace('/\*(.*?)\*/', '<em>$1</em>', $escaped);
+    // Parse Strikethrough: ~~text~~ -> <del>text</del>
+    $escaped = preg_replace('/~~(.*?)~~/', '<del>$1</del>', $escaped);
+    
+    // Parse Bullet Lists: line starting with "- " or "* " -> <li>
+    $lines = explode("\n", $escaped);
+    $inList = false;
+    $result = [];
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if (strpos($trimmed, '- ') === 0 || strpos($trimmed, '* ') === 0) {
+            if (!$inList) {
+                $result[] = '<ul class="mb-2 ps-3">';
+                $inList = true;
+            }
+            $content = substr($trimmed, 2);
+            $result[] = '<li>' . $content . '</li>';
+        } else {
+            if ($inList) {
+                $result[] = '</ul>';
+                $inList = false;
+            }
+            $result[] = $line;
+        }
+    }
+    if ($inList) {
+        $result[] = '</ul>';
+    }
+    
+    return implode("\n", $result);
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
