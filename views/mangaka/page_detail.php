@@ -127,7 +127,7 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
                                 <div class="ai-region-overlay" 
                                      id="overlay-region-<?= $region['region_id'] ?>"
                                      style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 2px dashed <?= $borderColor ?>; background-color: <?= $bgColor ?>; cursor: pointer; transition: all 0.2s;"
-                                     title="<?= htmlspecialchars(ucfirst($region['region_type'])) ?> (Tin cậy: <?= number_format($region['confidence'] * 100, 2) ?>%)"
+                                     title="<?= htmlspecialchars(ucfirst($region['region_type'])) ?> (Vẽ tay)"
                                      onclick="highlightTableRecord(<?= $region['region_id'] ?>)"
                                      onmouseenter="hoverOverlay(<?= $region['region_id'] ?>, true)"
                                      onmouseleave="hoverOverlay(<?= $region['region_id'] ?>, false)">
@@ -148,41 +148,36 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
         </div>
     </div>
 
-    <!-- Cột phải: Thông tin phân đoạn vùng bằng AI & Bảng điều khiển -->
+    <!-- Cột phải: Thông tin Phân Vùng Bản Vẽ Thủ Công -->
     <div class="col-md-5 mb-4">
         <div class="card border-secondary">
             <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Trình phân đoạn AI</h5>
+                <h5 class="mb-0"><i class="fas fa-crop me-2"></i>Phân vùng bản vẽ</h5>
                 <div class="d-flex gap-2">
                     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
                         <button id="btnDrawToggle" class="btn btn-sm btn-info text-white">
                             <i class="fas fa-edit me-1"></i>Vẽ thủ công
                         </button>
-                        <?php if (!empty($regions)): ?>
-                            <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light" onclick="return confirm('Bạn có chắc muốn chạy lại thuật toán quét phân đoạn AI? Dữ liệu cũ sẽ được làm mới.');">
-                                <i class="fas fa-sync-alt me-1"></i>Quét lại
-                            </a>
-                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
             <div class="card-body d-flex flex-column justify-content-between">
                 <?php if (empty($regions)): ?>
                     <div class="text-center my-auto py-4">
-                        <i class="fas fa-brain fa-3x text-muted mb-3"></i>
-                        <h6 class="fw-bold">Hệ thống AI Phân đoạn chưa chạy</h6>
-                        <p class="text-muted small px-3">Sử dụng mô hình AI (YOLOv8-Segmentation & SAM) để tự động phát hiện và đánh dấu các vùng Khung truyện (Panel), Bong bóng thoại (Bubble), Nhân vật trên trang.</p>
+                        <i class="fas fa-edit fa-3x text-muted mb-3"></i>
+                        <h6 class="fw-bold">Chưa có phân vùng nào</h6>
+                        <p class="text-muted small px-3">Hãy sử dụng bộ công cụ <strong>Vẽ thủ công</strong> chuyên nghiệp để tự vẽ và phân chia khung hình, ô thoại, nhân vật trên trang truyện.</p>
                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
                         <div class="d-flex gap-2 justify-content-center mt-2">
-                            <a href="<?= BASE_PATH ?>/index.php?controller=pageregion&action=runai&page_id=<?= $page['page_id'] ?>" class="btn btn-primary">
-                                <i class="fas fa-play me-2"></i>Chạy AI phân đoạn vùng
-                            </a>
+                            <button onclick="document.getElementById('btnDrawToggle').click();" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit me-2"></i>Bắt đầu vẽ phân vùng
+                            </button>
                         </div>
                         <?php endif; ?>
                     </div>
                 <?php else: ?>
                     <div>
-                        <p class="text-muted small mb-3">Các phân vùng được nhận diện thành công bởi AI. Bạn có thể chọn giao việc (Task) trực tiếp cho Assistant trên từng phân vùng.</p>
+                        <p class="text-muted small mb-3">Các phân vùng bản vẽ hiện có. Bạn có thể chọn giao việc (Task) trực tiếp cho Assistant trên từng phân vùng.</p>
                         <div class="list-group" id="region-list-group">
                             <?php foreach ($regions as $region): 
                                 $typeLabel = 'Khung truyện';
@@ -215,13 +210,13 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
                                             <span class="badge <?= $typeClass ?> me-2"><?= $typeLabel ?></span>
                                             ID #<?= $region['region_id'] ?>
                                         </h6>
-                                        <small class="text-muted">Độ tin cậy: <strong><?= number_format($region['confidence'] * 100, 1) ?>%</strong></small>
+                                        <small class="text-success fw-bold"><i class="fas fa-user-edit me-1"></i>Vẽ thủ công</small>
                                     </div>
                                     <p class="mb-1 text-muted small">
                                         Tọa độ: X:<?= $region['x'] ?>, Y:<?= $region['y'] ?> | Kích thước: <?= $region['width'] ?>x<?= $region['height'] ?>
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <span class="badge bg-light text-dark border"><?= $region['is_ai_generated'] ? 'AI Generated' : 'Manual' ?></span>
+                                        <span class="badge bg-light text-dark border">Vẽ tay</span>
                                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
                                         <div class="btn-group">
                                             <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
