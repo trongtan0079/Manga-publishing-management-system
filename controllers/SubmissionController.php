@@ -6,6 +6,7 @@ require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Task.php';
 require_once __DIR__ . '/../models/Chapter.php';
 require_once __DIR__ . '/../models/Review.php';
+require_once __DIR__ . '/../models/Series.php';
 
 
 class SubmissionController extends BaseController
@@ -13,6 +14,7 @@ class SubmissionController extends BaseController
     private $submissionModel;
     private $taskModel;
     private $chapterModel;
+    private $seriesModel;
 
     public function __construct() {
         parent::__construct();
@@ -22,6 +24,7 @@ class SubmissionController extends BaseController
         $this->submissionModel = new Submission();
         $this->taskModel = new Task();
         $this->chapterModel = new Chapter();
+        $this->seriesModel = new Series();
     }
 
     /**
