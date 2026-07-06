@@ -46,6 +46,7 @@ class ChapterController extends BaseController
      * @return array Trả về thông tin của Series nếu hợp lệ
      */
     private function checkSeriesOwnership($seriesId) {
+        $action = $_GET['action'] ?? '';
         $series = $this->seriesModel->findById($seriesId);
         if (!$series) {
             $_SESSION['error'] = "Không tìm thấy bộ truyện.";
