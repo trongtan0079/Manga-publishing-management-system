@@ -130,16 +130,14 @@ class DashboardController extends BaseController {
         $stmtSub->execute(['mangaka_id1' => $userId, 'mangaka_id2' => $userId]);
         $totalSubmissions = (int)$stmtSub->fetchColumn();
         
-        // Đếm số submissions pending
+        // Đếm số submissions pending của Assistant (Duyệt bài Trợ lý)
         $stmtPending = $submissionModel->getConnection()->prepare("
             SELECT COUNT(s.submission_id) as total 
             FROM submissions s
-            LEFT JOIN tasks t ON s.task_id = t.task_id
-            LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
-            LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
-            WHERE s.status = 'pending' AND (t.mangaka_id = :mangaka_id1 OR ser_chap.mangaka_id = :mangaka_id2)
+            JOIN tasks t ON s.task_id = t.task_id
+            WHERE s.status = 'pending' AND t.mangaka_id = :mangaka_id
         ");
-        $stmtPending->execute(['mangaka_id1' => $userId, 'mangaka_id2' => $userId]);
+        $stmtPending->execute(['mangaka_id' => $userId]);
         $pendingReviews = (int)$stmtPending->fetchColumn();
         
         // Lấy lịch sử xếp hạng để hiển thị biến động
@@ -220,8 +218,11 @@ class DashboardController extends BaseController {
         $taskModel = new Task();
         $chapterModel = new Chapter();
         
-        // Fetch all active series
-        $seriesList = $seriesModel->findAll();
+        // Editor chỉ xem tiến độ các bộ truyện được phân công gán phụ trách và đã phê duyệt (status != 'planning')
+        $sql = "SELECT * FROM series WHERE editor_id = :editor_id AND status != 'planning' ORDER BY series_id DESC";
+        $stmt = $seriesModel->getConnection()->prepare($sql);
+        $stmt->execute([':editor_id' => $userId]);
+        $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         $progressData = [];
         
         foreach ($seriesList as $series) {
@@ -267,9 +268,18 @@ class DashboardController extends BaseController {
         $submissionModel = new Submission();
         $reviewModel = new Review();
         
-        // Lấy số lượng bản thảo chương đang chờ duyệt
-        $stmt = $submissionModel->getConnection()->prepare("SELECT COUNT(*) as total FROM submissions WHERE status = 'pending' AND chapter_id IS NOT NULL");
-        $stmt->execute();
+        // Lấy số lượng bản thảo chương đang chờ duyệt của các bộ truyện được phân công gán phụ trách
+        $stmt = $submissionModel->getConnection()->prepare("
+            SELECT COUNT(sub.submission_id) as total 
+            FROM submissions sub
+            JOIN chapters c ON sub.chapter_id = c.chapter_id
+            JOIN series s ON c.series_id = s.series_id
+            WHERE sub.status = 'pending' 
+              AND sub.chapter_id IS NOT NULL 
+              AND s.editor_id = :editor_id
+              AND s.status != 'planning'
+        ");
+        $stmt->execute(['editor_id' => $userId]);
         $pendingSubmissions = (int)$stmt->fetchColumn();
         
         // Lấy số lượng đánh giá mà Editor này đã làm
@@ -294,8 +304,8 @@ class DashboardController extends BaseController {
         $stmtReject->execute(['reviewer_id' => $userId]);
         $rejectedSubmissions = (int)$stmtReject->fetchColumn();
 
-        // Lấy 5 pending submissions
-        $pendingList = array_slice($submissionModel->findPendingSubmissions(), 0, 5);
+        // Lấy 5 pending submissions của các bộ truyện được phân công gán phụ trách
+        $pendingList = array_slice($submissionModel->findPendingSubmissionsByEditorId($userId), 0, 5);
 
         // Lấy 5 recent reviews
         $recentReviewList = array_slice($reviewModel->findByReviewerId($userId), 0, 5);
@@ -310,17 +320,20 @@ class DashboardController extends BaseController {
         $stmtReviewed->execute(['reviewer_id' => $userId]);
         $reviewedSubmissions = (int)$stmtReviewed->fetchColumn();
 
-        // Lấy danh sách 5 chapter sắp đến hạn deadline mà chưa được duyệt/xuất bản
+        // Lấy danh sách 5 chapter sắp đến hạn deadline của các bộ truyện được phân công gán phụ trách
         $stmtDeadlines = $submissionModel->getConnection()->prepare("
             SELECT c.chapter_number, c.title as chapter_title, c.due_date, s.title as series_title, u.full_name as mangaka_name
             FROM chapters c
             JOIN series s ON c.series_id = s.series_id
             JOIN users u ON s.mangaka_id = u.user_id
-            WHERE c.status NOT IN ('approved', 'published') AND c.due_date IS NOT NULL
+            WHERE c.status NOT IN ('approved', 'published') 
+              AND c.due_date IS NOT NULL 
+              AND s.editor_id = :editor_id
+              AND s.status != 'planning'
             ORDER BY c.due_date ASC
             LIMIT 5
         ");
-        $stmtDeadlines->execute();
+        $stmtDeadlines->execute(['editor_id' => $userId]);
         $upcomingChapters = $stmtDeadlines->fetchAll(\PDO::FETCH_ASSOC);
         
         require_once __DIR__ . '/../views/editor/dashboard.php';

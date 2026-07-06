@@ -41,6 +41,11 @@ class PageRegionController extends BaseController {
         $series = $this->seriesModel->findById($chapter['series_id']);
         if (!$series) return false;
 
+        // Chặn sửa đổi phân vùng nếu bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành
+        if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+            return false;
+        }
+
         return $series['mangaka_id'] == $_SESSION['user_id'];
     }
 

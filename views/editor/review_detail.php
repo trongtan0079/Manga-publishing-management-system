@@ -42,7 +42,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <?php elseif ($submission['status'] === 'rejected'): ?>
                             <div class="fs-5 text-danger fw-bold"><i class="fas fa-times-circle me-2"></i>Từ chối (Rejected)</div>
                         <?php else: ?>
-                            <div class="fs-5 text-secondary fw-bold"><?= ucfirst($submission['status']) ?></div>
+                            <?php 
+                                $statusText = $submission['status'];
+                                if ($submission['status'] === 'pending') $statusText = 'Chờ duyệt';
+                                elseif ($submission['status'] === 'reviewed') $statusText = 'Đang đánh giá';
+                            ?>
+                            <div class="fs-5 text-secondary fw-bold"><?= htmlspecialchars($statusText) ?></div>
                         <?php endif; ?>
                     </div>
                     <div class="col-md-6 ps-4">

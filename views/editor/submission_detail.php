@@ -20,6 +20,14 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 
 $role = $_SESSION['role_name'] ?? '';
+
+// Nếu là Editor đang xem bản thảo Chapter, truy vấn các trang của Chapter đó để ghi chú lỗi
+$pages = [];
+if ($role === 'editor' && !empty($submission['chapter_id'])) {
+    require_once __DIR__ . '/../../models/Page.php';
+    $pageModel = new Page();
+    $pages = $pageModel->findByChapterId($submission['chapter_id']);
+}
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -230,6 +238,330 @@ $role = $_SESSION['role_name'] ?? '';
         <?php endforeach; ?>
     </div>
 </div>
+<?php endif; ?>
+
+<?php if (!empty($pages)): ?>
+<!-- Danh sách các trang để Editor vẽ ghi chú sửa lỗi trực quan -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+        <h5 class="card-title mb-0"><i class="fas fa-images me-2 text-primary"></i>Các trang truyện đã hoàn chỉnh (Đánh dấu lỗi trực quan)</h5>
+    </div>
+    <div class="card-body p-4">
+        <p class="text-muted text-xs mb-3">Nhấp vào nút <strong>"Đánh dấu lỗi"</strong> trên từng trang để mở bản vẽ lỗi trực quan.</p>
+        <div class="row g-3">
+            <?php foreach ($pages as $p): 
+                $pageImg = (strpos($p['image_url'], 'http') === 0) ? $p['image_url'] : BASE_PATH . '/' . ltrim($p['image_url'], '/');
+            ?>
+                <div class="col-md-3 col-sm-6">
+                    <div class="card h-100 border shadow-sm rounded-3 overflow-hidden">
+                        <div class="position-relative text-center bg-light p-2" style="height: 180px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                            <img src="<?= htmlspecialchars($pageImg) ?>" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+                        </div>
+                        <div class="card-body p-3 text-center border-top">
+                            <span class="fw-bold d-block mb-2 text-dark">Trang <?= htmlspecialchars($p['page_number']) ?></span>
+                            <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-annotate fw-bold" 
+                                    data-page-id="<?= $p['page_id'] ?>" 
+                                    data-page-number="<?= $p['page_number'] ?>" 
+                                    data-image-url="<?= htmlspecialchars($pageImg) ?>"
+                                    style="border-radius: 6px;">
+                                <i class="fas fa-edit me-1"></i>Đánh dấu lỗi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Đánh dấu lỗi trực quan -->
+<div class="modal fade" id="annotateModal" tabindex="-1" aria-labelledby="annotateModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: none; box-shadow: var(--shadow-lg);">
+            <div class="modal-header bg-danger text-white py-3">
+                <h5 class="modal-title fw-bold" id="annotateModalLabel"><i class="fas fa-edit me-2"></i>Đánh dấu lỗi trực quan - Trang <span id="modal-page-num"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="row g-0">
+                    <!-- Tranh vẽ bên trái -->
+                    <div class="col-lg-8 bg-light p-4 d-flex align-items-center justify-content-center" style="min-height: 500px; max-height: 70vh; overflow: auto;">
+                        <div id="annoImageWrapper" class="position-relative d-inline-block text-start shadow" style="border: 1px solid #cbd5e1; user-select: none;">
+                            <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 65vh; pointer-events: none;">
+                            <!-- Overlay vẽ -->
+                            <div id="annoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: crosshair;"></div>
+                        </div>
+                    </div>
+                    <!-- Form và danh sách ghi chú bên phải -->
+                    <div class="col-lg-4 border-start d-flex flex-column" style="max-height: 70vh; background-color: #f8fafc;">
+                        <div class="p-4 border-bottom bg-light">
+                            <h6 class="fw-bold text-dark mb-2"><i class="fas fa-plus-circle me-1 text-danger"></i>Thêm ghi chú lỗi mới</h6>
+                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.4;">Nhấn giữ và kéo chuột vẽ khung đỏ trên ảnh bên trái, sau đó nhập nội dung bên dưới.</p>
+                            
+                            <div id="no-selection-warning" class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.8rem; border-radius: 8px;">
+                                <i class="fas fa-info-circle me-1"></i>Vui lòng vẽ một khung lỗi trên ảnh để kích hoạt form nhập.
+                            </div>
+
+                            <form id="annoForm" style="display: none;">
+                                <input type="hidden" id="anno-x">
+                                <input type="hidden" id="anno-y">
+                                <input type="hidden" id="anno-w">
+                                <input type="hidden" id="anno-h">
+                                
+                                <div class="mb-3">
+                                    <label for="anno-comment" class="form-label fw-bold text-slate-700" style="font-size: 0.825rem;">Nội dung ghi chú lỗi <span class="text-danger">*</span></label>
+                                    <textarea class="form-control" id="anno-comment" rows="3" required placeholder="Ví dụ: Sai lời thoại nhân vật, thiếu đổ bóng nền, cần sửa lại nét vẽ..." style="border-radius: 8px; font-size: 0.88rem;"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold py-2" style="border-radius: 8px;"><i class="fas fa-save me-1"></i>Lưu ghi chú lỗi</button>
+                            </form>
+                        </div>
+                        
+                        <div class="flex-grow-1 overflow-y-auto p-4 bg-white" style="min-height: 200px;">
+                            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-list me-1 text-muted"></i>Danh sách lỗi đã đánh dấu</h6>
+                            <div id="anno-list" class="list-group list-group-flush">
+                                <!-- Load bằng JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer py-2 bg-light">
+                <button type="button" class="btn btn-secondary btn-sm px-3" data-bs-dismiss="modal" style="border-radius: 6px;">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let activePageId = 0;
+    let selectedBox = null;
+    let isDrawing = false;
+    let startX = 0, startY = 0;
+    
+    const STD_WIDTH = 800;
+    const STD_HEIGHT = 1000;
+
+    const modal = new bootstrap.Modal(document.getElementById('annotateModal'));
+    const modalPageNum = document.getElementById('modal-page-num');
+    const annoImage = document.getElementById('annoImage');
+    const overlayContainer = document.getElementById('annoOverlayContainer');
+    const annoForm = document.getElementById('annoForm');
+    const noSelectionWarning = document.getElementById('no-selection-warning');
+    const annoList = document.getElementById('anno-list');
+    
+    document.querySelectorAll('.btn-annotate').forEach(button => {
+        button.addEventListener('click', function() {
+            activePageId = this.getAttribute('data-page-id');
+            const pageNum = this.getAttribute('data-page-number');
+            const imgUrl = this.getAttribute('data-image-url');
+            
+            modalPageNum.textContent = pageNum;
+            annoImage.src = imgUrl;
+            
+            resetDrawingState();
+            loadAnnotations();
+            
+            modal.show();
+        });
+    });
+
+    overlayContainer.addEventListener('mousedown', function(e) {
+        isDrawing = true;
+        const rect = overlayContainer.getBoundingClientRect();
+        startX = e.clientX - rect.left;
+        startY = e.clientY - rect.top;
+        
+        if (selectedBox && selectedBox.parentNode) {
+            selectedBox.parentNode.removeChild(selectedBox);
+        }
+        
+        selectedBox = document.createElement('div');
+        selectedBox.style.position = 'absolute';
+        selectedBox.style.border = '2px dashed #dc3545';
+        selectedBox.style.backgroundColor = 'rgba(220, 53, 69, 0.15)';
+        selectedBox.style.pointerEvents = 'none';
+        selectedBox.style.left = startX + 'px';
+        selectedBox.style.top = startY + 'px';
+        
+        overlayContainer.appendChild(selectedBox);
+    });
+
+    overlayContainer.addEventListener('mousemove', function(e) {
+        if (!isDrawing) return;
+        const rect = overlayContainer.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+        
+        const width = currentX - startX;
+        const height = currentY - startY;
+        
+        selectedBox.style.width = Math.abs(width) + 'px';
+        selectedBox.style.height = Math.abs(height) + 'px';
+        selectedBox.style.left = (width < 0 ? currentX : startX) + 'px';
+        selectedBox.style.top = (height < 0 ? currentY : startY) + 'px';
+    });
+
+    overlayContainer.addEventListener('mouseup', function(e) {
+        if (!isDrawing) return;
+        isDrawing = false;
+        
+        const rect = overlayContainer.getBoundingClientRect();
+        const boxWidth = parseFloat(selectedBox.style.width) || 0;
+        const boxHeight = parseFloat(selectedBox.style.height) || 0;
+        const boxLeft = parseFloat(selectedBox.style.left) || 0;
+        const boxTop = parseFloat(selectedBox.style.top) || 0;
+        
+        if (boxWidth < 10 || boxHeight < 10) {
+            if (selectedBox && selectedBox.parentNode) {
+                selectedBox.parentNode.removeChild(selectedBox);
+            }
+            selectedBox = null;
+            resetDrawingState();
+            return;
+        }
+        
+        const scaleX = STD_WIDTH / rect.width;
+        const scaleY = STD_HEIGHT / rect.height;
+        
+        document.getElementById('anno-x').value = Math.round(boxLeft * scaleX);
+        document.getElementById('anno-y').value = Math.round(boxTop * scaleY);
+        document.getElementById('anno-w').value = Math.round(boxWidth * scaleX);
+        document.getElementById('anno-h').value = Math.round(boxHeight * scaleY);
+        
+        noSelectionWarning.style.display = 'none';
+        annoForm.style.display = 'block';
+        document.getElementById('anno-comment').focus();
+    });
+
+    document.getElementById('annoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const commentInput = document.getElementById('anno-comment');
+        
+        const data = {
+            page_id: activePageId,
+            x: document.getElementById('anno-x').value,
+            y: document.getElementById('anno-y').value,
+            width: document.getElementById('anno-w').value,
+            height: document.getElementById('anno-h').value,
+            comments: commentInput.value
+        };
+
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=save_annotation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                commentInput.value = '';
+                resetDrawingState();
+                loadAnnotations();
+            } else {
+                alert('Lỗi: ' + res.error);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Lỗi kết nối máy chủ');
+        });
+    });
+
+    function resetDrawingState() {
+        if (selectedBox && selectedBox.parentNode) {
+            selectedBox.parentNode.removeChild(selectedBox);
+        }
+        selectedBox = null;
+        noSelectionWarning.style.display = 'block';
+        annoForm.style.display = 'none';
+    }
+
+    function loadAnnotations() {
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=get_annotations&page_id=' + activePageId)
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                renderOverlayAnnotations(res.annotations);
+                renderListAnnotations(res.annotations);
+            }
+        });
+    }
+
+    function renderOverlayAnnotations(annotations) {
+        document.querySelectorAll('.editor-annotation-box').forEach(el => el.remove());
+        
+        const rect = overlayContainer.getBoundingClientRect();
+        const scaleX = rect.width / STD_WIDTH;
+        const scaleY = rect.height / STD_HEIGHT;
+        
+        annotations.forEach(ann => {
+            const el = document.createElement('div');
+            el.className = 'editor-annotation-box';
+            el.style.position = 'absolute';
+            el.style.border = '2px dashed #dc3545';
+            el.style.backgroundColor = 'rgba(220, 53, 69, 0.08)';
+            el.style.left = (ann.x * scaleX) + 'px';
+            el.style.top = (ann.y * scaleY) + 'px';
+            el.style.width = (ann.width * scaleX) + 'px';
+            el.style.height = (ann.height * scaleY) + 'px';
+            el.title = ann.comments;
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'help';
+            
+            overlayContainer.appendChild(el);
+        });
+    }
+
+    function renderListAnnotations(annotations) {
+        annoList.innerHTML = '';
+        if (annotations.length === 0) {
+            annoList.innerHTML = '<p class="text-muted text-xs italic text-center py-3">Chưa có ghi chú lỗi nào.</p>';
+            return;
+        }
+
+        annotations.forEach(ann => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item px-0 py-2 border-bottom';
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex-grow:1; min-width:0; padding-right:10px;">
+                        <span class="fw-semibold text-danger text-xs d-block"><i class="fas fa-exclamation-triangle me-1"></i>Lỗi tại (${ann.x}, ${ann.y})</span>
+                        <p class="mb-1 text-dark small" style="white-space: pre-wrap; font-size:0.825rem;">${ann.comments}</p>
+                        <small class="text-muted" style="font-size:0.75rem;"><i class="fas fa-user-edit me-1"></i>Editor: ${ann.editor_name}</small>
+                    </div>
+                    <button class="btn btn-xs btn-link text-danger p-0" onclick="deleteAnnotation(${ann.annotation_id})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            `;
+            annoList.appendChild(item);
+        });
+    }
+
+    window.deleteAnnotation = function(id) {
+        if (!confirm('Bạn có chắc chắn muốn xóa ghi chú lỗi này?')) return;
+        
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=delete_annotation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ annotation_id: id })
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                loadAnnotations();
+            } else {
+                alert('Lỗi: ' + res.error);
+            }
+        });
+    };
+});
+</script>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

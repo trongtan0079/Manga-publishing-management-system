@@ -73,7 +73,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
     <!-- Cột 2: Thống kê số Reviews đã thực hiện gần đây -->
     <div class="col-xl-3 col-md-6">
-        <a href="#recent-reviews-section" class="stat-card-link">
+        <a href="<?= BASE_PATH ?>/index.php?controller=review&action=index&status=reviewed" class="stat-card-link">
             <div class="card stat-card primary h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -178,9 +178,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-5 text-muted">
-                        <i class="fas fa-calendar-check fa-2x mb-2 text-success" style="opacity: 0.5;"></i>
-                        <p class="mb-0 small">Không có chương truyện nào sắp đến hạn.</p>
+                    <div class="text-center py-5 px-3">
+                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle mb-3" style="width: 64px; height: 64px; background-color: #d1e7dd; color: #0f5132;">
+                            <i class="fas fa-calendar-check fa-2x"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Tất cả đều đúng hạn!</h6>
+                        <p class="text-muted small mb-0">Không có chương truyện nào sắp đến hạn cần xử lý gấp.</p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -264,8 +267,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-5">
-                        <p class="text-muted mb-0">Chưa có dữ liệu</p>
+                    <div class="text-center py-5 px-3">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-light text-muted rounded-circle mb-3" style="width: 56px; height: 56px;">
+                            <i class="fas fa-clipboard-check fa-lg"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Không có bản thảo chờ review</h6>
+                        <p class="text-muted small mb-0">Tất cả các chương truyện của dự án bạn phụ trách đều đã được đánh giá.</p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -322,8 +329,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </table>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-5">
-                        <p class="text-muted mb-0">Chưa có dữ liệu</p>
+                    <div class="text-center py-5 px-3">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-light text-muted rounded-circle mb-3" style="width: 56px; height: 56px;">
+                            <i class="fas fa-history fa-lg"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-1">Chưa có đánh giá nào</h6>
+                        <p class="text-muted small mb-0">Bạn chưa thực hiện nhận xét hoặc đánh giá nào gần đây.</p>
                     </div>
                 <?php endif; ?>
             </div>
@@ -342,13 +353,18 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             const approved = parseInt(canvas.getAttribute('data-approved') || '0');
             const rejected = parseInt(canvas.getAttribute('data-rejected') || '0');
             
+            const total = pending + reviewed + approved + rejected;
+            const dataValues = total === 0 ? [1] : [pending, reviewed, approved, rejected];
+            const bgColors = total === 0 ? ['#e2e8f0'] : ['#ffc107', '#0ea5e9', '#198754', '#dc3545'];
+            const labels = total === 0 ? ['Chưa có dữ liệu'] : ['Chờ review', 'Đang đánh giá', 'Phê duyệt', 'Từ chối'];
+            
             new Chart(canvas, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Chờ review', 'Đang đánh giá', 'Phê duyệt', 'Từ chối'],
+                    labels: labels,
                     datasets: [{
-                        data: [pending, reviewed, approved, rejected],
-                        backgroundColor: ['#ffc107', '#0ea5e9', '#198754', '#dc3545'],
+                        data: dataValues,
+                        backgroundColor: bgColors,
                         borderWidth: 0
                     }]
                 },

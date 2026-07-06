@@ -39,11 +39,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             </h5>
                             <?php 
                                 $statusClass = 'secondary';
-                                if ($data['series']['status'] === 'ongoing') $statusClass = 'success';
-                                elseif ($data['series']['status'] === 'planning') $statusClass = 'warning text-dark';
-                                elseif ($data['series']['status'] === 'completed') $statusClass = 'info text-dark';
+                                $statusText = $data['series']['status'];
+                                if ($data['series']['status'] === 'ongoing') { $statusClass = 'success'; $statusText = 'Đang triển khai'; }
+                                elseif ($data['series']['status'] === 'planning') { $statusClass = 'warning text-dark'; $statusText = 'Chờ duyệt'; }
+                                elseif ($data['series']['status'] === 'completed') { $statusClass = 'info text-dark'; $statusText = 'Hoàn thành'; }
+                                elseif ($data['series']['status'] === 'suspended') { $statusClass = 'dark'; $statusText = 'Tạm ngưng'; }
+                                elseif ($data['series']['status'] === 'canceled') { $statusClass = 'danger'; $statusText = 'Đã hủy'; }
                             ?>
-                            <span class="badge bg-<?= $statusClass ?> px-2 py-1"><?= ucfirst(htmlspecialchars($data['series']['status'])) ?></span>
+                            <span class="badge bg-<?= $statusClass ?> px-2 py-1"><?= htmlspecialchars($statusText) ?></span>
                         </div>
                     </div>
                     <div class="card-body p-4">

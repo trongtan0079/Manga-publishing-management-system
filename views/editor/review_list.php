@@ -33,6 +33,11 @@ $role = $_SESSION['role_name'] ?? '';
             <?= $role === 'mangaka' ? 'Xem và đánh giá các sản phẩm hoàn thành từ trợ lý của bạn.' : 'Xem và đánh giá các bản thảo được nộp.' ?>
         </p>
     </div>
+    <div>
+        <a href="<?= BASE_PATH ?>/index.php?controller=dashboard&action=<?= htmlspecialchars($role) ?>" class="btn btn-outline-secondary shadow-sm" style="border-radius: 8px;">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại Bảng điều khiển
+        </a>
+    </div>
 </div>
 
 <?php if (isset($_SESSION['success'])): ?>
@@ -102,14 +107,15 @@ $role = $_SESSION['role_name'] ?? '';
                                 </td>
                                 <td><?= date('d/m/Y H:i', strtotime($sub['submitted_at'])) ?></td>
                                 <td>
-                                    <?php 
-                                        $statusClass = 'secondary';
-                                        $statusText = ucfirst(htmlspecialchars($sub['status'] ?? 'pending'));
-                                        if ($sub['status'] === 'approved') $statusClass = 'success';
-                                        elseif ($sub['status'] === 'rejected') $statusClass = 'danger';
-                                        elseif ($sub['status'] === 'reviewed') $statusClass = 'primary';
-                                    ?>
-                                    <span class="badge bg-<?= $statusClass ?> px-2 py-1"><?= $statusText ?></span>
+                                     <?php 
+                                         $statusClass = 'secondary';
+                                         $statusText = 'Chờ duyệt';
+                                         if ($sub['status'] === 'approved') { $statusClass = 'success'; $statusText = 'Đã duyệt'; }
+                                         elseif ($sub['status'] === 'rejected') { $statusClass = 'danger'; $statusText = 'Từ chối'; }
+                                         elseif ($sub['status'] === 'reviewed') { $statusClass = 'primary'; $statusText = 'Đang đánh giá'; }
+                                         elseif ($sub['status'] === 'pending') { $statusClass = 'warning text-dark'; $statusText = 'Chờ duyệt'; }
+                                     ?>
+                                     <span class="badge bg-<?= $statusClass ?> px-2 py-1 status-badge" data-status="<?= htmlspecialchars($sub['status']) ?>"><?= $statusText ?></span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <?php if ($sub['status'] === 'pending' || $sub['status'] === 'reviewed'): ?>
@@ -149,10 +155,16 @@ document.addEventListener("DOMContentLoaded", function() {
         const rows = document.querySelectorAll("tbody tr");
         let foundCount = 0;
         rows.forEach(row => {
-            const badge = row.querySelector("td span.badge");
+            const badge = row.querySelector("td span.status-badge");
             if (badge) {
-                const text = badge.textContent.trim().toLowerCase();
-                if (text === filterStatus.toLowerCase()) {
+                const statusAttr = badge.getAttribute("data-status");
+                let isMatch = false;
+                if (filterStatus.toLowerCase() === 'reviewed') {
+                    isMatch = (statusAttr && (statusAttr.toLowerCase() === 'approved' || statusAttr.toLowerCase() === 'rejected'));
+                } else {
+                    isMatch = (statusAttr && statusAttr.toLowerCase() === filterStatus.toLowerCase());
+                }
+                if (isMatch) {
                     row.style.display = "";
                     foundCount++;
                 } else {

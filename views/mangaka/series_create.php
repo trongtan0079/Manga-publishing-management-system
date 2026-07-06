@@ -117,6 +117,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <div class="form-text">Hoặc cung cấp đường dẫn trực tiếp đến ảnh bìa từ internet.</div>
             </div>
 
+            <div class="mb-3">
+                <label for="proposal_file" class="form-label fw-bold">Tài liệu đề xuất / Bản thảo sơ bộ (PDF, ZIP, DOCX, RAR)</label>
+                <input class="form-control" type="file" id="proposal_file" name="proposal_file" accept=".pdf,.zip,.docx,.doc,.rar,.pptx">
+                <div class="form-text text-muted">Đính kèm bản thảo nháp sơ bộ, tài liệu đề xuất giới thiệu nội dung (Tối đa 20MB).</div>
+            </div>
+
             <!-- Status and Publish Type will be managed by the Editorial Board -->
             
             <div class="mb-3">

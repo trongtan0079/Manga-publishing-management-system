@@ -128,16 +128,31 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
 
             <div class="mb-3">
+                <label for="proposal_file" class="form-label fw-bold">Tài liệu đề xuất / Bản thảo sơ bộ (PDF, ZIP, DOCX, RAR)</label>
+                <input class="form-control" type="file" id="proposal_file" name="proposal_file" accept=".pdf,.zip,.docx,.doc,.rar,.pptx">
+                <div class="form-text text-muted">Đính kèm bản thảo nháp sơ bộ, tài liệu đề xuất giới thiệu nội dung mới nếu cần thay thế file cũ (Tối đa 20MB).</div>
+                <?php if (!empty($series['proposal_file'])): ?>
+                    <div class="mt-2">
+                        <span class="text-success small fw-bold"><i class="fas fa-file-alt me-1"></i>Đã có file đề xuất:</span>
+                        <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-xs btn-outline-success ms-2 py-0 px-2" target="_blank" style="font-size: 11px;">
+                            <i class="fas fa-download me-1"></i>Tải xuống file hiện tại
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label d-block fw-bold">Trạng thái hiện tại</label>
                 <?php
                 $statusClass = 'bg-secondary';
-                if ($series['status'] === 'ongoing') $statusClass = 'bg-success';
-                elseif ($series['status'] === 'planning') $statusClass = 'bg-warning text-dark';
-                elseif ($series['status'] === 'completed') $statusClass = 'bg-info text-dark';
-                elseif ($series['status'] === 'suspended') $statusClass = 'bg-dark';
-                elseif ($series['status'] === 'canceled') $statusClass = 'bg-danger';
+                $statusLabel = $series['status'];
+                if ($series['status'] === 'ongoing') { $statusClass = 'bg-success'; $statusLabel = 'Đang triển khai'; }
+                elseif ($series['status'] === 'planning') { $statusClass = 'bg-warning text-dark'; $statusLabel = 'Bản nháp / Chờ duyệt'; }
+                elseif ($series['status'] === 'completed') { $statusClass = 'bg-info text-dark'; $statusLabel = 'Hoàn thành'; }
+                elseif ($series['status'] === 'suspended') { $statusClass = 'bg-dark'; $statusLabel = 'Tạm ngưng'; }
+                elseif ($series['status'] === 'canceled') { $statusClass = 'bg-danger'; $statusLabel = 'Đã hủy'; }
                 ?>
-                <span class="badge <?= $statusClass ?> px-3 py-2 fs-6"><?= ucfirst(htmlspecialchars($series['status'])) ?></span>
+                <span class="badge <?= $statusClass ?> px-3 py-2 fs-6"><?= htmlspecialchars($statusLabel) ?></span>
                 <div class="form-text">Trạng thái này được phê duyệt và quản lý bởi Hội đồng Biên tập (Editorial Board).</div>
             </div>
 

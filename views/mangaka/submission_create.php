@@ -61,24 +61,26 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <!-- Upload File -->
                     <div class="mb-4">
                         <label for="file" class="form-label fw-bold text-dark"><i class="fas fa-file-archive me-2 text-muted"></i>Tải lên bản vẽ hoàn chỉnh <span class="text-danger">*</span></label>
-                        <input class="form-control" type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.pdf,.zip" required>
-                        <div class="form-text text-muted mt-2">
-                            <span class="badge bg-light text-dark border me-1">Định dạng hỗ trợ:</span> <code>jpg, jpeg, png, pdf, zip</code>
-                            <br>
-                            <span class="badge bg-light text-dark border me-1">Dung lượng tối đa:</span> <code>20MB</code>
+                        <div class="upload-dropzone position-relative d-flex flex-column align-items-center justify-content-center border border-dashed rounded-3 p-4 bg-light text-center" id="dropzone" style="cursor: pointer; transition: background-color 0.2s, border-color 0.2s; border-width: 2px !important; border-color: #cbd5e1 !important; min-height: 150px;">
+                            <input type="file" id="file" name="file" accept=".jpg,.jpeg,.png,.pdf,.zip" required class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor: pointer; z-index: 2;">
+                            <div class="upload-icon-wrapper mb-3" style="width: 48px; height: 48px; background: rgba(79, 70, 229, 0.08); color: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                                <i class="fas fa-cloud-upload-alt fs-4"></i>
+                            </div>
+                            <h6 class="fw-semibold mb-1" id="upload-status-text" style="font-size: 0.9rem;">Kéo thả file vào đây hoặc click để chọn file</h6>
+                            <p class="text-xs text-muted mb-0" style="font-size: 0.75rem;">Định dạng: .jpg, .jpeg, .png, .pdf, .zip (Tối đa 20MB)</p>
                         </div>
                     </div>
 
                     <!-- Ghi chú (Notes) -->
                     <div class="mb-4">
                         <label for="notes" class="form-label fw-bold text-dark"><i class="fas fa-comment-alt me-2 text-muted"></i>Ghi chú cho Biên tập viên (Editor)</label>
-                        <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Nhập lời nhắn hoặc ghi chú kèm theo bản thảo..."></textarea>
+                        <textarea class="form-control" id="notes" name="notes" rows="4" placeholder="Nhập lời nhắn hoặc ghi chú kèm theo bản thảo..." style="border-radius: 8px; font-size: 0.88rem;"></textarea>
                     </div>
 
                     <!-- Nút bấm -->
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
-                        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=index" class="btn btn-light px-4">Hủy</a>
-                        <button type="submit" class="btn btn-primary px-5 shadow-sm"><i class="fas fa-paper-plane me-2"></i>Nộp Bản Thảo</button>
+                        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=index" class="btn btn-light px-4" style="border-radius: 8px;">Hủy</a>
+                        <button type="submit" class="btn btn-primary px-5 shadow-sm" style="border-radius: 8px;"><i class="fas fa-paper-plane me-2"></i>Nộp Bản Thảo</button>
                     </div>
 
                 </form>
@@ -87,5 +89,53 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('file');
+    const dropzone = document.getElementById('dropzone');
+    const statusText = document.getElementById('upload-status-text');
+    const iconWrapper = dropzone.querySelector('.upload-icon-wrapper');
+
+    if (fileInput && dropzone) {
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                statusText.innerHTML = `<span class="text-success"><i class="fas fa-file-alt me-1"></i><strong>${file.name}</strong></span> <span class="text-muted" style="font-size: 0.8rem;">(${(file.size / (1024 * 1024)).toFixed(2)} MB)</span>`;
+                dropzone.style.borderColor = "#10b981"; // success border
+                dropzone.style.backgroundColor = "rgba(16, 185, 129, 0.02)";
+                iconWrapper.style.backgroundColor = "rgba(16, 185, 129, 0.1)";
+                iconWrapper.style.color = "#10b981";
+                iconWrapper.innerHTML = '<i class="fas fa-check fs-4"></i>';
+            } else {
+                statusText.textContent = "Kéo thả file vào đây hoặc click để chọn file";
+                dropzone.style.borderColor = "#cbd5e1";
+                dropzone.style.backgroundColor = "#f8fafc";
+                iconWrapper.style.backgroundColor = "rgba(79, 70, 229, 0.08)";
+                iconWrapper.style.color = "#4f46e5";
+                iconWrapper.innerHTML = '<i class="fas fa-cloud-upload-alt fs-4"></i>';
+            }
+        });
+
+        // Highlights on drag
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = "#4f46e5";
+                dropzone.style.backgroundColor = "rgba(79, 70, 229, 0.04)";
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropzone.addEventListener(eventName, () => {
+                if (!fileInput.files || !fileInput.files[0]) {
+                    dropzone.style.borderColor = "#cbd5e1";
+                    dropzone.style.backgroundColor = "#f8fafc";
+                }
+            }, false);
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

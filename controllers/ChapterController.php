@@ -55,9 +55,19 @@ class ChapterController extends BaseController
         }
 
         $role = $_SESSION['role_name'] ?? '';
-        // Admin, Editor, Board có quyền xem chi tiết bộ truyện/chapter
-        if ($role === 'admin' || $role === 'editor' || $role === 'board') {
+        // Admin, Board có quyền xem chi tiết bộ truyện/chapter
+        if ($role === 'admin' || $role === 'board') {
             return $series;
+        }
+
+        if ($role === 'editor') {
+            // Editor chỉ được xem nếu được gán phụ trách và bộ truyện đã được duyệt (status !== 'planning')
+            if ($series['editor_id'] == $_SESSION['user_id'] && $series['status'] !== 'planning') {
+                return $series;
+            }
+            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không được phân công quản lý bộ truyện này.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            exit;
         }
 
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
@@ -69,6 +79,13 @@ class ChapterController extends BaseController
         // Chỉ cho phép tạo chapter mới khi bộ truyện đã được duyệt hoạt động (ongoing)
         if (($action === 'create' || $action === 'store') && $series['status'] !== 'ongoing') {
             $_SESSION['error'] = "Bộ truyện chưa được phê duyệt (Đang ở giai đoạn Kế hoạch/Nháp), hoặc đang tạm ngưng, đã hủy. Không thể tạo thêm chapter mới.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
+            exit;
+        }
+
+        // Chặn sửa/xóa/nộp chapter nếu bộ truyện đang tạm ngưng, đã hủy hoặc đã hoàn thành
+        if (in_array($action, ['edit', 'update', 'delete', 'submit']) && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+            $_SESSION['error'] = "Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa hoặc thao tác trên các chương.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
             exit;
         }
@@ -86,6 +103,14 @@ class ChapterController extends BaseController
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
             exit;
         }
+
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role === 'mangaka') {
+            $chapters = $this->chapterModel->findByMangakaId($_SESSION['user_id']);
+            require_once __DIR__ . '/../views/mangaka/chapter_list.php';
+            exit;
+        }
+
         header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
         exit;
     }
@@ -208,6 +233,14 @@ class ChapterController extends BaseController
         }
 
         $series = $this->checkSeriesOwnership($chapter['series_id']);
+
+        // Khóa truy cập trang sửa nếu chương đang chờ duyệt, đã duyệt hoặc đã xuất bản
+        if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+            $_SESSION['error'] = "Chương truyện đang trong quá trình duyệt, đã phê duyệt hoặc đã xuất bản, không thể chỉnh sửa.";
+            header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id=" . $chapter['series_id']);
+            exit;
+        }
+
         require_once __DIR__ . '/../views/mangaka/chapter_edit.php';
     }
 
@@ -342,7 +375,7 @@ class ChapterController extends BaseController
                             $notificationModel->createNotification(
                                 $task['assistant_id'],
                                 'task_assigned',
-                                'Bạn được giao công việc mới: ' . $task['title'] . ' (Chương ' . $chapterNumber . ' - ' . $task['series_title'] . ')'
+                                "Bạn được giao công việc mới: '{$task['title']}' thuộc bộ truyện '{$task['series_title']}' (Chương {$chapterNumber})."
                             );
                         }
                     }

@@ -318,6 +318,43 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Plugin vẽ trạng thái rỗng cho biểu đồ Doughnut
+        const emptyDoughnutPlugin = {
+            id: 'emptyDoughnut',
+            afterDraw(chart) {
+                const { datasets } = chart.data;
+                let hasData = false;
+                for (let i = 0; i < datasets.length; i++) {
+                    hasData = hasData || datasets[i].data.some(val => val > 0);
+                }
+                
+                if (!hasData) {
+                    const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+                    ctx.save();
+                    
+                    const centerX = left + width / 2;
+                    const centerY = top + height / 2;
+                    const outerRadius = Math.min(width, height) / 2 * 0.8;
+                    const innerRadius = outerRadius * 0.6;
+                    
+                    // Vẽ hình vành khuyên màu xám nhạt làm placeholder
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, outerRadius, 0, 2 * Math.PI, false);
+                    ctx.arc(centerX, centerY, innerRadius, 0, 2 * Math.PI, true);
+                    ctx.fillStyle = '#f1f5f9';
+                    ctx.fill();
+                    
+                    // Vẽ chữ "Chưa có dữ liệu" ở giữa
+                    ctx.font = '600 13px sans-serif';
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('Chưa có dữ liệu', centerX, centerY);
+                    ctx.restore();
+                }
+            }
+        };
+
         // Chart 1: User theo Role (Bar Chart)
         const canvas1 = document.getElementById('chartUsersByRole');
         const roleLabels = JSON.parse(canvas1.getAttribute('data-labels') || '[]');
@@ -368,6 +405,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     borderWidth: 0
                 }]
             },
+            plugins: [emptyDoughnutPlugin],
             options: {
                 responsive: true,
                 cutout: '60%',
@@ -397,6 +435,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     borderWidth: 0
                 }]
             },
+            plugins: [emptyDoughnutPlugin],
             options: {
                 responsive: true,
                 cutout: '60%',

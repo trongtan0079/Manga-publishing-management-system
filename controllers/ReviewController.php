@@ -36,15 +36,21 @@ class ReviewController extends BaseController
     public function index() {
         $role = $_SESSION['role_name'] ?? '';
         if ($role === 'editor') {
-            // Editor (Biên tập viên) xem tất cả các bản thảo chương truyện (chờ duyệt + lịch sử)
-            $submissions = $this->submissionModel->findAllChapterSubmissions();
+            // Editor chỉ xem các bản thảo của các bộ truyện được phân công gán phụ trách
+            $submissions = $this->submissionModel->findAllChapterSubmissionsByEditorId($_SESSION['user_id']);
 
-            // Hỗ trợ lọc trạng thái theo query parameter (chỉ hiện bản thảo 'pending' nếu status=pending)
+            // Hỗ trợ lọc trạng thái theo query parameter
             $status = $_GET['status'] ?? null;
-            if ($status && $status === 'pending') {
-                $submissions = array_filter($submissions, function($s) {
-                    return $s['status'] === 'pending';
-                });
+            if ($status) {
+                if ($status === 'pending') {
+                    $submissions = array_filter($submissions, function($s) {
+                        return $s['status'] === 'pending';
+                    });
+                } elseif ($status === 'reviewed') {
+                    $submissions = array_filter($submissions, function($s) {
+                        return in_array($s['status'], ['approved', 'rejected']);
+                    });
+                }
             }
             require_once __DIR__ . '/../views/editor/review_list.php';
         } elseif ($role === 'mangaka') {
@@ -86,19 +92,37 @@ class ReviewController extends BaseController
             }
         }
 
-        // 2. Kiểm tra xem chapter có bị khóa (approved / published) không
+        // 2. Kiểm tra xem chapter và series có bị khóa hoặc bộ truyện bị tạm ngưng/hủy/hoàn thành không
         if ($chapterId) {
             require_once __DIR__ . '/../models/Chapter.php';
             $chapterModel = new \Chapter();
             $chapter = $chapterModel->findById($chapterId);
-            if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
-                return false;
+            if ($chapter) {
+                if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                    return false;
+                }
+                require_once __DIR__ . '/../models/Series.php';
+                $seriesModel = new \Series();
+                $series = $seriesModel->findById($chapter['series_id']);
+                if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                    return false;
+                }
             }
         }
 
-        // Editor có quyền đánh giá bản thảo của Chương truyện (chapter_id không rỗng)
+        // Editor có quyền đánh giá bản thảo của Chương truyện (chapter_id không rỗng) và phải được gán phụ trách
         if ($role === 'editor' && $submission['chapter_id']) {
-            return true;
+            require_once __DIR__ . '/../models/Chapter.php';
+            $chapterModel = new \Chapter();
+            $chapter = $chapterModel->findById($submission['chapter_id']);
+            if ($chapter) {
+                require_once __DIR__ . '/../models/Series.php';
+                $seriesModel = new \Series();
+                $series = $seriesModel->findById($chapter['series_id']);
+                if ($series && $series['editor_id'] == $_SESSION['user_id'] && $series['status'] !== 'planning') {
+                    return true;
+                }
+            }
         }
         // Mangaka có quyền đánh giá bản thảo của Nhiệm vụ (task_id không rỗng)
         if ($role === 'mangaka' && $submission['task_id']) {
@@ -189,20 +213,51 @@ class ReviewController extends BaseController
             $status = ($decision === 'approved') ? 'approved' : 'rejected';
             $this->submissionModel->update($submissionId, ['status' => $status]);
 
+            // Xác định chi tiết bản thảo được review
+            $itemInfo = 'bản thảo';
+            if (!empty($submission['chapter_id'])) {
+                require_once __DIR__ . '/../models/Chapter.php';
+                require_once __DIR__ . '/../models/Series.php';
+                $chapModel = new \Chapter();
+                $serModel = new \Series();
+                $chapter = $chapModel->findById($submission['chapter_id']);
+                $series = $chapter ? $serModel->findById($chapter['series_id']) : null;
+                $seriesTitle = $series ? $series['title'] : 'Không rõ';
+                $chapNum = $chapter ? $chapter['chapter_number'] : 'Không rõ';
+                $itemInfo = "Chapter {$chapNum} của bộ truyện '{$seriesTitle}'";
+            } elseif (!empty($submission['task_id'])) {
+                require_once __DIR__ . '/../models/Task.php';
+                require_once __DIR__ . '/../models/Page.php';
+                require_once __DIR__ . '/../models/Series.php';
+                $tModel = new \Task();
+                $pModel = new \Page();
+                $sModel = new \Series();
+                
+                $task = $tModel->findById($submission['task_id']);
+                $page = $task ? $pModel->findById($task['page_id']) : null;
+                $chapter = $page ? $pModel->getConnection()->query("SELECT * FROM chapters WHERE chapter_id = " . intval($page['chapter_id']))->fetch(PDO::FETCH_ASSOC) : null;
+                $series = $chapter ? $sModel->findById($chapter['series_id']) : null;
+                
+                $seriesTitle = $series ? $series['title'] : 'Không rõ';
+                $chapNum = $chapter ? $chapter['chapter_number'] : 'Không rõ';
+                $pageNum = $page ? $page['page_number'] : 'Không rõ';
+                $itemInfo = "bản vẽ cho công việc '{$task['title']}' thuộc bộ truyện '{$seriesTitle}' (Chương {$chapNum} - Trang {$pageNum})";
+            }
+
             // Gửi thông báo đến người nộp bản thảo
             $this->notificationModel->createNotification(
                 $submission['user_id'],
                 'review_created',
-                "Có một nhận xét mới cho bản thảo của bạn."
+                "Có nhận xét đánh giá mới cho {$itemInfo}."
             );
 
-            $statusText = $status === 'approved' ? 'phê duyệt' : 'từ chối';
+            $statusText = $status === 'approved' ? 'ĐƯỢC PHÊ DUYỆT thành công' : 'BỊ TỪ CHỐI';
             $notifType = $status === 'approved' ? 'submission_approved' : 'submission_rejected';
             
             $this->notificationModel->createNotification(
                 $submission['user_id'],
                 $notifType,
-                "Bản thảo của bạn đã bị {$statusText}. Nhận xét: " . mb_substr($comments, 0, 50) . "..."
+                "Bản thảo của bạn cho {$itemInfo} đã {$statusText}. Nhận xét: " . mb_substr($comments, 0, 80) . "..."
             );
 
             // Nếu là bản thảo nhiệm vụ (Task) và được duyệt, cập nhật trạng thái Task thành 'completed'
@@ -339,5 +394,176 @@ class ReviewController extends BaseController
         }
 
         require_once __DIR__ . '/../views/editor/review_detail.php';
+    }
+
+    /**
+     * AJAX: Lưu ghi chú/đánh dấu lỗi trực quan của Editor trên trang truyện
+     */
+    public function save_annotation() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Phương thức không được hỗ trợ']);
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role !== 'editor') {
+            echo json_encode(['success' => false, 'error' => 'Bạn không có quyền thực hiện chức năng này']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $pageId = isset($input['page_id']) ? intval($input['page_id']) : 0;
+        $x = isset($input['x']) ? intval($input['x']) : 0;
+        $y = isset($input['y']) ? intval($input['y']) : 0;
+        $width = isset($input['width']) ? intval($input['width']) : 0;
+        $height = isset($input['height']) ? intval($input['height']) : 0;
+        $comments = isset($input['comments']) ? trim($input['comments']) : '';
+
+        if ($pageId <= 0 || empty($comments)) {
+            echo json_encode(['success' => false, 'error' => 'Thông tin không hợp lệ hoặc thiếu nội dung']);
+            exit;
+        }
+
+        // Kiểm tra trạng thái khóa của chapter
+        require_once __DIR__ . '/../models/Page.php';
+        $pageModel = new Page();
+        $page = $pageModel->findById($pageId);
+        if (!$page) {
+            echo json_encode(['success' => false, 'error' => 'Trang truyện không tồn tại']);
+            exit;
+        }
+
+        require_once __DIR__ . '/../models/Chapter.php';
+        $chapterModel = new Chapter();
+        $chapter = $chapterModel->findById($page['chapter_id']);
+        if ($chapter) {
+            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                echo json_encode(['success' => false, 'error' => 'Chương truyện đã được phê duyệt hoặc xuất bản, không thể chỉnh sửa ghi chú lỗi']);
+                exit;
+            }
+            require_once __DIR__ . '/../models/Series.php';
+            $seriesModel = new Series();
+            $series = $seriesModel->findById($chapter['series_id']);
+            if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa ghi chú lỗi']);
+                exit;
+            }
+        }
+
+        require_once __DIR__ . '/../models/EditorAnnotation.php';
+        $editorAnnotationModel = new EditorAnnotation();
+        
+        $data = [
+            'page_id' => $pageId,
+            'editor_id' => $_SESSION['user_id'],
+            'x' => $x,
+            'y' => $y,
+            'width' => $width,
+            'height' => $height,
+            'comments' => $comments
+        ];
+
+        $insertedId = $editorAnnotationModel->insert($data);
+        if ($insertedId) {
+            echo json_encode([
+                'success' => true, 
+                'annotation_id' => $insertedId,
+                'editor_name' => $_SESSION['full_name']
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Không thể lưu ghi chú vào CSDL']);
+        }
+        exit;
+    }
+
+    /**
+     * AJAX: Xóa ghi chú lỗi của Editor
+     */
+    public function delete_annotation() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Phương thức không được hỗ trợ']);
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role !== 'editor') {
+            echo json_encode(['success' => false, 'error' => 'Bạn không có quyền thực hiện chức năng này']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $annotationId = isset($input['annotation_id']) ? intval($input['annotation_id']) : 0;
+
+        if ($annotationId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'ID không hợp lệ']);
+            exit;
+        }
+
+        require_once __DIR__ . '/../models/EditorAnnotation.php';
+        $editorAnnotationModel = new EditorAnnotation();
+        
+        $annotation = $editorAnnotationModel->findById($annotationId);
+        if (!$annotation) {
+            echo json_encode(['success' => false, 'error' => 'Không tìm thấy ghi chú']);
+            exit;
+        }
+
+        if ($annotation['editor_id'] != $_SESSION['user_id']) {
+            echo json_encode(['success' => false, 'error' => 'Bạn không thể xóa ghi chú của Editor khác']);
+            exit;
+        }
+
+        // Kiểm tra trạng thái khóa của chapter
+        require_once __DIR__ . '/../models/Page.php';
+        $pageModel = new Page();
+        $page = $pageModel->findById($annotation['page_id']);
+        if ($page) {
+            require_once __DIR__ . '/../models/Chapter.php';
+            $chapterModel = new Chapter();
+            $chapter = $chapterModel->findById($page['chapter_id']);
+            if ($chapter) {
+                if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
+                    echo json_encode(['success' => false, 'error' => 'Chương truyện đã được phê duyệt hoặc xuất bản, không thể xóa ghi chú lỗi']);
+                    exit;
+                }
+                require_once __DIR__ . '/../models/Series.php';
+                $seriesModel = new Series();
+                $series = $seriesModel->findById($chapter['series_id']);
+                if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                    echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể xóa ghi chú lỗi']);
+                    exit;
+                }
+            }
+        }
+
+        $result = $editorAnnotationModel->delete($annotationId);
+        if ($result) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Không thể xóa ghi chú từ CSDL']);
+        }
+        exit;
+    }
+
+    /**
+     * AJAX: Lấy danh sách ghi chú lỗi của Editor trên trang truyện
+     */
+    public function get_annotations() {
+        header('Content-Type: application/json');
+        $pageId = isset($_GET['page_id']) ? intval($_GET['page_id']) : 0;
+        
+        if ($pageId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'ID không hợp lệ']);
+            exit;
+        }
+
+        require_once __DIR__ . '/../models/EditorAnnotation.php';
+        $editorAnnotationModel = new EditorAnnotation();
+        $annotations = $editorAnnotationModel->findByPageId($pageId);
+        
+        echo json_encode(['success' => true, 'annotations' => $annotations]);
+        exit;
     }
 }

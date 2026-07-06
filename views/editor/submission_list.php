@@ -44,11 +44,16 @@ $role = $_SESSION['role_name'] ?? '';
         </p>
     </div>
     
-    <?php if ($role === 'assistant' || $role === 'mangaka'): ?>
-        <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create" class="btn btn-primary shadow-sm" style="border-radius: 8px;">
-            <i class="fas fa-upload me-2"></i><?= $role === 'assistant' ? 'Nộp bản vẽ mới' : 'Nộp Bản Thảo Mới' ?>
+    <div class="d-flex gap-2 flex-wrap">
+        <a href="<?= BASE_PATH ?>/index.php?controller=dashboard&action=<?= htmlspecialchars($role) ?>" class="btn btn-outline-secondary shadow-sm" style="border-radius: 8px;">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại Bảng điều khiển
         </a>
-    <?php endif; ?>
+        <?php if ($role === 'assistant' || $role === 'mangaka'): ?>
+            <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create" class="btn btn-primary shadow-sm" style="border-radius: 8px;">
+                <i class="fas fa-upload me-2"></i><?= $role === 'assistant' ? 'Nộp bản vẽ mới' : 'Nộp Bản Thảo Mới' ?>
+            </a>
+        <?php endif; ?>
+    </div>
 </div>
 
 <!-- Thông báo thành công / lỗi -->
@@ -140,19 +145,22 @@ $role = $_SESSION['role_name'] ?? '';
                                 <td>
                                     <?php 
                                     $statusClass = 'bg-secondary';
-                                    $statusLabel = 'Pending';
+                                    $statusLabel = 'Chờ duyệt';
                                     if ($sub['status'] === 'reviewed') {
                                         $statusClass = 'bg-info';
-                                        $statusLabel = 'Reviewed';
+                                        $statusLabel = 'Đang đánh giá';
                                     } elseif ($sub['status'] === 'approved') {
                                         $statusClass = 'bg-success';
-                                        $statusLabel = 'Approved';
+                                        $statusLabel = 'Đã duyệt';
                                     } elseif ($sub['status'] === 'rejected') {
                                         $statusClass = 'bg-danger';
-                                        $statusLabel = 'Rejected';
+                                        $statusLabel = 'Từ chối';
+                                    } elseif ($sub['status'] === 'pending') {
+                                        $statusClass = 'bg-warning text-dark';
+                                        $statusLabel = 'Chờ duyệt';
                                     }
                                     ?>
-                                    <span class="badge <?= $statusClass ?> px-2 py-1"><?= $statusLabel ?></span>
+                                    <span class="badge <?= $statusClass ?> px-2 py-1 status-badge" data-status="<?= htmlspecialchars($sub['status']) ?>"><?= $statusLabel ?></span>
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="d-inline-flex gap-1">
@@ -196,10 +204,16 @@ document.addEventListener("DOMContentLoaded", function() {
         const rows = document.querySelectorAll("tbody tr");
         let foundCount = 0;
         rows.forEach(row => {
-            const badge = row.querySelector("td span.badge");
+            const badge = row.querySelector("td span.status-badge");
             if (badge) {
-                const text = badge.textContent.trim().toLowerCase();
-                if (text === filterStatus.toLowerCase()) {
+                const statusAttr = badge.getAttribute("data-status");
+                let isMatch = false;
+                if (filterStatus.toLowerCase() === 'reviewed') {
+                    isMatch = (statusAttr && (statusAttr.toLowerCase() === 'approved' || statusAttr.toLowerCase() === 'rejected'));
+                } else {
+                    isMatch = (statusAttr && statusAttr.toLowerCase() === filterStatus.toLowerCase());
+                }
+                if (isMatch) {
                     row.style.display = "";
                     foundCount++;
                 } else {

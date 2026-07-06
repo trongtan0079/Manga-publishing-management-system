@@ -33,13 +33,23 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
     
     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div>
-        <?php if (!$isLocked): ?>
+        <?php if (!$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-warning shadow-sm text-dark"><i class="fas fa-edit me-2"></i>Sửa Chapter</a>
         <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
             <button type="submit" class="btn btn-danger shadow-sm"><i class="fas fa-trash-alt me-2"></i>Xóa</button>
         </form>
         <?php else: ?>
-        <span class="badge bg-warning text-dark p-2 border border-warning"><i class="fas fa-lock me-1"></i>Chương đã được duyệt / phát hành (Khóa)</span>
+            <?php 
+                $lockMsg = 'Chương đã được duyệt / phát hành (Khóa)';
+                if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                    if ($series['status'] === 'suspended') $lockMsg = 'Bộ truyện đang tạm ngưng (Khóa)';
+                    elseif ($series['status'] === 'canceled') $lockMsg = 'Bộ truyện đã hủy (Khóa)';
+                    elseif ($series['status'] === 'completed') $lockMsg = 'Bộ truyện đã hoàn thành (Khóa)';
+                } elseif ($chapter['status'] === 'reviewing') {
+                    $lockMsg = 'Chương đang chờ duyệt (Khóa)';
+                }
+            ?>
+            <span class="badge bg-warning text-dark p-2 border border-warning"><i class="fas fa-lock me-1"></i><?= $lockMsg ?></span>
         <?php endif; ?>
     </div>
     <?php endif; ?>
@@ -57,6 +67,15 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
     <div class="card-body">
         <?php
         $cBadge = 'bg-secondary';
+        $statusLabels = [
+            'drafting' => 'Bản nháp',
+            'drawing' => 'Đang vẽ',
+            'reviewing' => 'Đang chờ duyệt',
+            'approved' => 'Đã duyệt',
+            'published' => 'Đã xuất bản'
+        ];
+        $displayStatus = $statusLabels[$chapter['status']] ?? $chapter['status'];
+
         switch ($chapter['status']) {
             case 'drafting': $cBadge = 'bg-secondary'; break;
             case 'drawing': $cBadge = 'bg-primary'; break;
@@ -65,7 +84,7 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
             case 'published': $cBadge = 'bg-success'; break;
         }
         ?>
-        <p><strong>Trạng thái:</strong> <span class="badge <?= $cBadge ?>"><?= ucfirst(htmlspecialchars($chapter['status'])) ?></span></p>
+        <p><strong>Trạng thái:</strong> <span class="badge <?= $cBadge ?>"><?= htmlspecialchars($displayStatus) ?></span></p>
         <p><strong>Hạn chót (Deadline):</strong> <?= !empty($chapter['due_date']) ? htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['due_date']))) : '<span class="text-muted">Chưa thiết lập</span>' ?></p>
         <p><strong>Ngày tạo:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['created_at']))) ?></p>
         <p><strong>Cập nhật lần cuối:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></p>
@@ -75,7 +94,7 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
 <div class="card border-info">
     <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Trang / Hình ảnh</h5>
-        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
+        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=page&action=create&chapter_id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-light">+ Thêm trang</a>
         <?php endif; ?>
     </div>
@@ -103,6 +122,15 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
                         <?php foreach ($pages as $page): ?>
                             <?php
                             $pBadge = 'bg-secondary';
+                            $pLabels = [
+                                'drafting' => 'Bản nháp',
+                                'drawing' => 'Đang vẽ',
+                                'reviewing' => 'Đang chờ duyệt',
+                                'approved' => 'Đã duyệt',
+                                'published' => 'Đã xuất bản'
+                            ];
+                            $displayPageStatus = $pLabels[$page['status']] ?? $page['status'];
+
                             switch ($page['status']) {
                                 case 'drafting': $pBadge = 'bg-secondary'; break;
                                 case 'drawing': $pBadge = 'bg-primary'; break;
@@ -123,11 +151,11 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
                                         <span class="text-muted">Chưa có ảnh</span>
                                     <?php endif; ?>
                                 </td>
-                                <td><span class="badge <?= $pBadge ?>"><?= ucfirst(htmlspecialchars($page['status'])) ?></span></td>
+                                <td><span class="badge <?= $pBadge ?>"><?= htmlspecialchars($displayPageStatus) ?></span></td>
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></td>
                                 <td>
                                     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-info text-white">Xem</a>
-                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && $page['status'] !== 'approved' && $page['status'] !== 'published'): ?>
+                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && $page['status'] !== 'approved' && $page['status'] !== 'published' && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                                     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                     <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
                                         <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
