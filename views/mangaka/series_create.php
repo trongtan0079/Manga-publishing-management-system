@@ -121,16 +121,42 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             
             <div class="mb-3">
                 <label for="description" class="form-label fw-bold text-slate-700">Mô tả bộ truyện</label>
-                <div class="border rounded-3 overflow-hidden shadow-sm hover-shadow" style="transition: all 0.2s; border-color: #cbd5e1 !important;">
-                    <div class="d-flex gap-2 p-2 border-bottom bg-light align-items-center" style="background-color: #f8fafc !important; border-color: #e2e8f0 !important;">
-                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertFormatting('description', '**')" title="In đậm (Bold)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-bold text-slate-700 small"></i></button>
-                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertFormatting('description', '*')" title="In nghiêng (Italic)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-italic text-slate-700 small"></i></button>
-                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertFormatting('description', '~~')" title="Gạch ngang (Strikethrough)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-strikethrough text-slate-700 small"></i></button>
-                        <button type="button" class="btn btn-sm btn-white border shadow-sm py-1 px-2 d-flex align-items-center justify-content-center" onclick="insertList('description')" title="Danh sách (Bullet list)" style="height: 28px; width: 28px; background-color: #ffffff;"><i class="fas fa-list text-slate-700 small"></i></button>
-                    </div>
-                    <textarea class="form-control border-0 rounded-0" id="description" name="description" rows="5" style="box-shadow: none !important; resize: vertical; min-height: 120px;" placeholder="Nhập tóm tắt hoặc mô tả ngắn cho bộ truyện..."></textarea>
-                </div>
+                <!-- Hidden textarea to store the HTML content for backend submission -->
+                <textarea id="description" name="description" style="display: none;"></textarea>
+                
+                <!-- Quill container -->
+                <div id="quill-editor" style="height: 220px; background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1;"></div>
             </div>
+
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Initialize Quill Editor
+                const quill = new Quill('#quill-editor', {
+                    theme: 'snow',
+                    placeholder: 'Nhập tóm tắt hoặc mô tả ngắn cho bộ truyện...',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],        // text styling
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],     // lists
+                            ['clean']                                         // clear formatting
+                        ]
+                    }
+                });
+
+                // Sync Quill editor HTML with the hidden textarea on submit
+                const form = document.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', function() {
+                        const descriptionTextarea = document.getElementById('description');
+                        if (quill.getText().trim().length > 0) {
+                            descriptionTextarea.value = quill.root.innerHTML;
+                        } else {
+                            descriptionTextarea.value = '';
+                        }
+                    });
+                }
+            });
+            </script>
 
             <button type="submit" class="btn btn-primary">Tạo Series</button>
         </form>

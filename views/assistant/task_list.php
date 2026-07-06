@@ -77,10 +77,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     ?>
                                     <span class="badge <?= $typeBadge ?> mb-1"><?= $typeLabel ?></span><br>
                                     <strong><?= htmlspecialchars($task['title']) ?></strong>
-                                    <?php if (!empty($task['description'])): ?>
+                                    <?php if (!empty($task['description'])): 
+                                        $plainDesc = strip_tags($task['description']);
+                                    ?>
                                         <br>
-                                        <small class="text-muted" title="<?= htmlspecialchars($task['description']) ?>">
-                                            <?= htmlspecialchars(mb_strlen($task['description']) > 50 ? mb_substr($task['description'], 0, 50).'...' : $task['description']) ?>
+                                        <small class="text-muted" title="<?= htmlspecialchars($plainDesc) ?>">
+                                            <?= htmlspecialchars(mb_strlen($plainDesc) > 50 ? mb_substr($plainDesc, 0, 50).'...' : $plainDesc) ?>
                                         </small>
                                     <?php endif; ?>
                                 </td>
