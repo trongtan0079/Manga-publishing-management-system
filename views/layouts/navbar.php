@@ -46,7 +46,8 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                     <a class="nav-link position-relative d-flex align-items-center" href="#" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
                         <i class="fas fa-bell fs-5"></i>
                         <?php if ($unreadCount > 0): ?>
-                            <span class="position-absolute top-25 start-75 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                            <span class="position-absolute badge text-white fw-bold d-inline-flex align-items-center justify-content-center" 
+                                  style="top: 2px; right: -2px; font-size: 0.625rem; background-color: #ef4444 !important; color: #ffffff !important; border: 2px solid #ffffff !important; min-width: 18px; height: 18px; border-radius: 50rem !important; padding: 0 4px; line-height: 1; z-index: 10;">
                                 <?= $unreadCount > 99 ? '99+' : $unreadCount ?>
                             </span>
                         <?php endif; ?>
