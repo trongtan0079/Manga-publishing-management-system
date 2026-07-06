@@ -125,7 +125,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <textarea id="description" name="description" style="display: none;"></textarea>
                 
                 <!-- Quill container -->
-                <div id="quill-editor" style="height: 220px; background-color: #ffffff; border-radius: 8px; border: 1px solid #cbd5e1;"></div>
+                <div id="quill-editor"></div>
             </div>
 
             <script>

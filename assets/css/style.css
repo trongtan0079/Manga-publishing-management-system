@@ -834,3 +834,59 @@ a {
     text-decoration: none !important;
 }
 
+/* ==========================================================================
+   17. QUILL WYSIWYG EDITOR PREMIUM OVERRIDES
+   ========================================================================== */
+.ql-toolbar.ql-snow {
+    border: 1px solid #cbd5e1 !important;
+    border-bottom: none !important;
+    background-color: #f8fafc !important;
+    border-top-left-radius: var(--radius-md) !important;
+    border-top-right-radius: var(--radius-md) !important;
+    padding: 8px 12px !important;
+}
+
+.ql-container.ql-snow {
+    border: 1px solid #cbd5e1 !important;
+    border-bottom-left-radius: var(--radius-md) !important;
+    border-bottom-right-radius: var(--radius-md) !important;
+    background-color: #ffffff !important;
+    font-family: inherit !important;
+    font-size: 0.95rem !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover and focus states to match bootrap focus fields */
+.ql-container.ql-snow:hover,
+.ql-toolbar.ql-snow:hover + .ql-container.ql-snow {
+    border-color: #94a3b8 !important;
+}
+
+.ql-container.ql-snow.ql-focus-editor, 
+.ql-container.ql-snow:focus-within {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 4px var(--primary-soft) !important;
+}
+
+.ql-toolbar.ql-snow:focus-within,
+.ql-toolbar.ql-snow:hover {
+    border-color: var(--primary) !important;
+}
+
+.ql-toolbar.ql-snow:focus-within + .ql-container.ql-snow,
+.ql-container.ql-snow:focus-within {
+    border-color: var(--primary) !important;
+}
+
+.ql-editor {
+    padding: 12px 15px !important;
+    min-height: 120px;
+}
+
+.ql-editor.ql-blank::before {
+    font-style: normal !important;
+    color: #94a3b8 !important;
+    left: 15px !important;
+}
+
