@@ -26,6 +26,7 @@ class Series {
   +status : string
   +publishType : string
   +coverImage : string
+  +editorId : int
 }
 
 class Chapter {
@@ -35,6 +36,7 @@ class Chapter {
   +status : string
   +dueDate : datetime
   +publishedAt : datetime
+  +isFinal : tinyint
 }
 
 class Page {
@@ -104,6 +106,7 @@ class SystemLog {
 Role "1" -- "*" User : assigned
 
 User "1" -- "*" Series : creates
+User "1" -- "*" Series : manages
 
 Series "1" -- "*" Chapter : contains
 

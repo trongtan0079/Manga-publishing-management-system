@@ -13,17 +13,10 @@ participant "Quản Lý Xếp Hạng" as RankingManager
 database "Cơ Sở Dữ Liệu" as DB
 participant "Hệ Thống Thông Báo" as Notification
 
-Board -> PublishManager : Phê duyệt Series
+Board -> PublishManager : Phê duyệt, Thiết lập lịch & Gán Editor
 activate PublishManager
 
-PublishManager -> DB : Cập nhật trạng thái Series (Ongoing)
-activate DB
-DB --> PublishManager : Trạng thái đã cập nhật
-deactivate DB
-
-Board -> PublishManager : Thiết lập lịch phát hành Series
-
-PublishManager -> DB : Lưu lịch phát hành
+PublishManager -> DB : Lưu trạng thái (Ongoing), Lịch & editor_id
 activate DB
 DB --> PublishManager : Lưu thành công
 deactivate DB

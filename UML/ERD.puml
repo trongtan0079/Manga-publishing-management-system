@@ -26,6 +26,7 @@ entity series {
   *series_id : int <<PK>>
   --
   mangaka_id : int <<FK>>
+  editor_id : int <<FK>> <<NULL>>
   title : varchar
   description : text
   status : enum
@@ -44,6 +45,7 @@ entity chapters {
   status : enum
   due_date : datetime
   published_at : datetime
+  is_final : tinyint
   created_at : timestamp
   updated_at : timestamp
 }
@@ -148,6 +150,7 @@ roles ||--o{ users : has
 users ||--o{ system_logs : triggers
 
 users ||--o{ series : creates
+users ||--o{ series : manages
 
 users ||--o{ tasks : assigns
 users ||--o{ tasks : receives
