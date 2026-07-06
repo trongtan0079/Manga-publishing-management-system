@@ -64,6 +64,13 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
                 ?>
                 <input type="datetime-local" class="form-control" id="due_date" name="due_date" value="<?= $dueDateVal ?>" <?= $isLocked ? 'disabled' : '' ?>>
             </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_final" name="is_final" value="1" <?= (!empty($chapter['is_final']) ? 'checked' : '') ?> <?= $isLocked ? 'disabled' : '' ?>>
+                <label class="form-check-label fw-semibold text-danger" for="is_final">
+                    <i class="fas fa-flag"></i> Đây là chương cuối cùng của bộ truyện (End Chapter)
+                </label>
+            </div>
             
             <button type="submit" class="btn btn-warning" <?= $isLocked ? 'disabled' : '' ?>><i class="fas fa-save me-1"></i>Lưu thay đổi</button>
         </form>

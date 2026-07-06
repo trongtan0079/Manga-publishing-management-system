@@ -45,6 +45,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <label for="due_date" class="form-label">Hạn chót (Due Date)</label>
                 <input type="datetime-local" class="form-control" id="due_date" name="due_date">
             </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" id="is_final" name="is_final" value="1">
+                <label class="form-check-label fw-semibold text-danger" for="is_final">
+                    <i class="fas fa-flag"></i> Đây là chương cuối cùng của bộ truyện (End Chapter)
+                </label>
+            </div>
             
             <button type="submit" class="btn btn-primary">Tạo Chapter</button>
         </form>

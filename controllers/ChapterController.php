@@ -159,12 +159,27 @@ class ChapterController extends BaseController
                 $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
             }
 
+            $isFinal = isset($_POST['is_final']) ? 1 : 0;
+            if ($isFinal) {
+                // Kiểm tra xem bộ truyện đã có chapter cuối nào khác chưa
+                $sql = "SELECT COUNT(*) FROM chapters WHERE series_id = :series_id AND is_final = 1";
+                $stmt = $this->chapterModel->getConnection()->prepare($sql);
+                $stmt->bindParam(':series_id', $seriesId);
+                $stmt->execute();
+                if ($stmt->fetchColumn() > 0) {
+                    $_SESSION['error'] = "Bộ truyện này đã có một chapter được đánh dấu là chương cuối rồi!";
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
+                    exit;
+                }
+            }
+
             $data = [
                 'series_id' => $seriesId,
                 'chapter_number' => $chapterNumber,
                 'title' => $title,
                 'due_date' => $formattedDueDate,
-                'status' => $status
+                'status' => $status,
+                'is_final' => $isFinal
             ];
 
             try {
@@ -284,11 +299,27 @@ class ChapterController extends BaseController
                 $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
             }
 
+            $isFinal = isset($_POST['is_final']) ? 1 : 0;
+            if ($isFinal) {
+                // Kiểm tra xem bộ truyện đã có chapter cuối nào khác chưa (ngoại trừ chính chapter này)
+                $sql = "SELECT COUNT(*) FROM chapters WHERE series_id = :series_id AND is_final = 1 AND chapter_id != :chapter_id";
+                $stmt = $this->chapterModel->getConnection()->prepare($sql);
+                $stmt->bindParam(':series_id', $seriesId);
+                $stmt->bindParam(':chapter_id', $id);
+                $stmt->execute();
+                if ($stmt->fetchColumn() > 0) {
+                    $_SESSION['error'] = "Bộ truyện này đã có một chapter khác được đánh dấu là chương cuối rồi!";
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
+                    exit;
+                }
+            }
+
             $data = [
                 'chapter_number' => $chapterNumber,
                 'title' => $title,
                 'due_date' => $formattedDueDate,
-                'status' => $status
+                'status' => $status,
+                'is_final' => $isFinal
             ];
 
             $oldStatus = $chapter['status'];

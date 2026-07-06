@@ -153,7 +153,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <?php foreach ($chapters as $chapter): ?>
                                     <tr>
                                         <td><?= htmlspecialchars($chapter['chapter_number']) ?></td>
-                                        <td><?= htmlspecialchars($chapter['title'] ?? '') ?></td>
+                                        <td>
+                                            <?= htmlspecialchars($chapter['title'] ?? '') ?>
+                                            <?php if (!empty($chapter['is_final'])): ?>
+                                                <span class="badge bg-danger text-white text-xs ms-1"><i class="fas fa-flag me-1"></i>Chương cuối</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <?php
                                             $cBadge = 'bg-secondary';
