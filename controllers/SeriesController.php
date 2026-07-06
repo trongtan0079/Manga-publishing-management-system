@@ -27,10 +27,16 @@ class SeriesController extends BaseController
         $role = $_SESSION['role_name'] ?? '';
         $currentUserId = $_SESSION['user_id'];
         
-        if ($role === 'editor' || $role === 'board' || $role === 'admin') {
+        if ($role === 'board' || $role === 'admin') {
             $sql = "SELECT * FROM series WHERE publish_type != 'draft' ORDER BY series_id DESC";
             $stmt = $this->seriesModel->getConnection()->prepare($sql);
             $stmt->execute();
+            $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } elseif ($role === 'editor') {
+            // Editor chỉ xem các bộ truyện được gán phụ trách và đã được phê duyệt (status !== 'planning')
+            $sql = "SELECT * FROM series WHERE editor_id = :editor_id AND status != 'planning' ORDER BY series_id DESC";
+            $stmt = $this->seriesModel->getConnection()->prepare($sql);
+            $stmt->execute([':editor_id' => $currentUserId]);
             $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($role === 'mangaka') {
             $seriesList = $this->seriesModel->findByMangakaId($currentUserId);
@@ -99,12 +105,58 @@ class SeriesController extends BaseController
 
         $destination = $uploadDir . $newFileName;
         
-        if (move_uploaded_file($file['tmp_name'], $destination)) {
+         if (move_uploaded_file($file['tmp_name'], $destination)) {
             // Trả về đường dẫn tương đối để lưu vào DB
             return '/uploads/covers/' . $newFileName;
         }
 
         $_SESSION['error'] = "Có lỗi xảy ra khi lưu file ảnh bìa.";
+        return null;
+    }
+
+    /**
+     * Xử lý file đề xuất/bản thảo sơ bộ upload (PDF, ZIP, DOCX, DOC, RAR, PPTX)
+     * @return string|null Đường dẫn file nếu thành công, null nếu có lỗi
+     */
+    private function handleProposalUpload() {
+        if (!isset($_FILES['proposal_file']) || $_FILES['proposal_file']['error'] !== UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        $file = $_FILES['proposal_file'];
+        
+        // Kiểm tra kích thước file (tối đa 20MB)
+        if ($file['size'] > 20 * 1024 * 1024) {
+            $_SESSION['error'] = "File đề xuất vượt quá dung lượng cho phép (20MB).";
+            return null;
+        }
+
+        // Kiểm tra định dạng
+        $fileInfo = pathinfo($file['name']);
+        $extension = strtolower($fileInfo['extension'] ?? '');
+        $allowedExtensions = ['pdf', 'zip', 'docx', 'doc', 'rar', 'pptx'];
+        if (!in_array($extension, $allowedExtensions)) {
+            $_SESSION['error'] = "Định dạng file đề xuất không được hỗ trợ. Chỉ cho phép: pdf, zip, docx, doc, rar, pptx";
+            return null;
+        }
+
+        // Tạo tên file ngẫu nhiên để tránh trùng lặp
+        $newFileName = uniqid('proposal_') . '.' . $extension;
+        $uploadDir = __DIR__ . '/../uploads/proposals/';
+        
+        // Tạo thư mục nếu chưa tồn tại
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $destination = $uploadDir . $newFileName;
+        
+        if (move_uploaded_file($file['tmp_name'], $destination)) {
+            // Trả về đường dẫn tương đối để lưu vào DB
+            return '/uploads/proposals/' . $newFileName;
+        }
+
+        $_SESSION['error'] = "Có lỗi xảy ra khi lưu file bản thảo đề xuất.";
         return null;
     }
 
@@ -142,13 +194,25 @@ class SeriesController extends BaseController
                 $coverImage = trim($_POST['cover_image'] ?? '');
             }
 
+            $proposalFile = null;
+            if (isset($_FILES['proposal_file']) && $_FILES['proposal_file']['error'] === UPLOAD_ERR_OK) {
+                $uploadedProposal = $this->handleProposalUpload();
+                if ($uploadedProposal) {
+                    $proposalFile = $uploadedProposal;
+                } else {
+                    header('Location: ' . BASE_PATH . '/index.php?controller=series&action=create');
+                    exit;
+                }
+            }
+
             $data = [
                 'mangaka_id'  => $_SESSION['user_id'],
                 'title'       => $title,
                 'description' => trim($_POST['description'] ?? ''),
                 'status'      => 'planning',
                 'publish_type'=> 'draft', // Mặc định tạo mới ở trạng thái bản nháp
-                'cover_image' => $coverImage
+                'cover_image' => $coverImage,
+                'proposal_file' => $proposalFile
             ];
 
             try {
@@ -233,9 +297,27 @@ class SeriesController extends BaseController
             exit;
         }
 
-        // Admin, Editor, Board có quyền xem thông tin chi tiết các bộ truyện đã nộp hoặc đang hoạt động
-        if ($role === 'admin' || $role === 'editor' || $role === 'board') {
+        // Chặn chỉnh sửa bộ truyện nếu đã tạm ngưng, đã hủy hoặc đã hoàn thành
+        $action = $_GET['action'] ?? '';
+        if (in_array($action, ['edit', 'update']) && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+            $_SESSION['error'] = "Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa thông tin.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $id);
+            exit;
+        }
+
+        // Admin, Board có quyền xem thông tin chi tiết các bộ truyện đã nộp hoặc đang hoạt động
+        if ($role === 'admin' || $role === 'board') {
             return;
+        }
+
+        // Editor chỉ được xem nếu được gán phụ trách và bộ truyện đã được duyệt (status !== 'planning')
+        if ($role === 'editor') {
+            if ($series['editor_id'] == $_SESSION['user_id'] && $series['status'] !== 'planning') {
+                return;
+            }
+            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không được phân công quản lý bộ truyện này.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            exit;
         }
 
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
@@ -301,12 +383,31 @@ class SeriesController extends BaseController
                 $coverImage = trim($_POST['cover_image']);
             }
 
+            $proposalFile = $series['proposal_file'] ?? null;
+            if (isset($_FILES['proposal_file']) && $_FILES['proposal_file']['error'] === UPLOAD_ERR_OK) {
+                $uploadedProposal = $this->handleProposalUpload();
+                if ($uploadedProposal) {
+                    // Xóa file cũ nếu có
+                    if (!empty($series['proposal_file'])) {
+                        $oldPropPath = __DIR__ . '/../' . ltrim($series['proposal_file'], '/');
+                        if (file_exists($oldPropPath)) {
+                            @unlink($oldPropPath);
+                        }
+                    }
+                    $proposalFile = $uploadedProposal;
+                } else {
+                    header('Location: ' . BASE_PATH . '/index.php?controller=series&action=edit&id=' . $id);
+                    exit;
+                }
+            }
+
             $data = [
                 'title'       => $title,
                 'description' => trim($_POST['description'] ?? ''),
                 'status'      => $series['status'], // Trạng thái giữ nguyên, thuộc quyền Board thay đổi
                 'publish_type'=> $series['publish_type'] ?? 'weekly', // Lịch xuất bản giữ nguyên
-                'cover_image' => $coverImage
+                'cover_image' => $coverImage,
+                'proposal_file' => $proposalFile
             ];
 
             try {
@@ -419,6 +520,14 @@ class SeriesController extends BaseController
                     }
                 }
 
+                // Xóa file đề xuất của bộ truyện nếu có
+                if (!empty($series['proposal_file'])) {
+                    $proposalPath = __DIR__ . '/../' . ltrim($series['proposal_file'], '/');
+                    if (file_exists($proposalPath)) {
+                        @unlink($proposalPath);
+                    }
+                }
+
                 $this->seriesModel->delete($id);
                 $_SESSION['success'] = "Đã xóa bộ truyện thành công!";
             } catch (PDOException $e) {
@@ -515,29 +624,46 @@ class SeriesController extends BaseController
                     require_once __DIR__ . '/../models/Notification.php';
                     $notificationModel = new Notification();
                     $mangakaId = $series['mangaka_id'];
-                    $statusViet = 'Kế hoạch';
-                    switch ($status) {
-                        case 'ongoing': $statusViet = 'Đang triển khai'; break;
-                        case 'completed': $statusViet = 'Hoàn thành'; break;
-                        case 'canceled': $statusViet = 'Đã hủy'; break;
-                        case 'suspended': $statusViet = 'Tạm ngưng'; break;
-                    }
                     $publishTypeViet = $publishType === 'weekly' ? 'Hàng tuần' : 'Hàng tháng';
                     
-                    $msg = "Bộ truyện '{$series['title']}' của bạn đã được cập nhật trạng thái thành '{$statusViet}'";
-                    if ($status === 'ongoing') {
-                        $msg .= " với lịch xuất bản: {$publishTypeViet}";
+                    // Kiểm tra xem đây có phải là phê duyệt đề xuất từ nháp/chờ duyệt không
+                    if ($series['status'] === 'planning' && ($series['publish_type'] ?? '') === 'submitted') {
+                        if ($status === 'ongoing') {
+                            $msg = "Đề xuất bộ truyện '{$series['title']}' của bạn đã được Hội đồng Biên tập PHÊ DUYỆT thành công! Truyện chính thức bắt đầu giai đoạn Đang triển khai với lịch xuất bản: {$publishTypeViet}.";
+                        } elseif ($status === 'canceled') {
+                            $msg = "Đề xuất bộ truyện '{$series['title']}' của bạn đã bị Hội đồng Biên tập TỪ CHỐI phê duyệt.";
+                        } else {
+                            $msg = "Đề xuất bộ truyện '{$series['title']}' của bạn đã được cập nhật trạng thái quyết định.";
+                        }
+                    } else {
+                        // Cập nhật trạng thái của một bộ truyện đang chạy
+                        $statusViet = 'Kế hoạch';
+                        switch ($status) {
+                            case 'ongoing': $statusViet = 'Đang triển khai'; break;
+                            case 'completed': $statusViet = 'Hoàn thành'; break;
+                            case 'canceled': $statusViet = 'Đã hủy'; break;
+                            case 'suspended': $statusViet = 'Tạm ngưng'; break;
+                        }
+                        $msg = "Bộ truyện '{$series['title']}' của bạn đã được cập nhật trạng thái thành '{$statusViet}'";
+                        if ($status === 'ongoing') {
+                            $msg .= " với lịch xuất bản: {$publishTypeViet}";
+                        }
+                        $msg .= ".";
                     }
-                    $msg .= ".";
                     
                     $notificationModel->createNotification($mangakaId, 'series_warning', $msg);
 
                     // Gửi thông báo đến editor phụ trách nếu mới gán
                     if ($editorId && $editorId != $series['editor_id']) {
+                        require_once __DIR__ . '/../models/User.php';
+                        $userModel = new \User();
+                        $mangaka = $userModel->findById($series['mangaka_id']);
+                        $mangakaName = $mangaka['full_name'] ?? 'Tác giả';
+                        
                         $notificationModel->createNotification(
                             $editorId,
                             'task_assigned',
-                            "Bạn đã được giao phụ trách kiểm duyệt bộ truyện mới: '{$series['title']}'."
+                            "Bạn đã được phân công phụ trách kiểm duyệt bộ truyện mới: '{$series['title']}' của tác giả {$mangakaName} (Lịch xuất bản: {$publishTypeViet})."
                         );
                     }
 

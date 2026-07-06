@@ -26,6 +26,16 @@ if (!empty($seriesList)) {
 }
 ?>
 
+<style>
+.series-title-link {
+    color: var(--slate-800, #1e293b);
+    transition: color 0.15s ease-in-out;
+}
+.series-title-link:hover {
+    color: var(--primary, #6366f1) !important;
+}
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="h3 mb-1 text-dark fw-bold">Duyệt & Quản lý Series</h2>
@@ -80,7 +90,12 @@ if (!empty($seriesList)) {
                                         ?>
                                             <img src="<?= htmlspecialchars($resolvedCover) ?>" alt="Cover" width="40" height="60" class="me-2 object-fit-cover rounded flex-shrink-0">
                                         <?php endif; ?>
-                                        <span class="fw-bold text-slate-800"><?= htmlspecialchars($series['title']) ?></span>
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="fw-bold text-decoration-none series-title-link" title="Xem chi tiết bộ truyện"><?= htmlspecialchars($series['title']) ?></a>
+                                        <?php if (!empty($series['proposal_file'])): ?>
+                                            <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="badge bg-light text-primary border ms-2 py-1" target="_blank" title="Tải tài liệu đề xuất / bản thảo sơ bộ">
+                                                <i class="fas fa-file-alt me-1"></i>Bản thảo sơ bộ
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                 <td>
@@ -94,10 +109,10 @@ if (!empty($seriesList)) {
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></td>
                                 <td class="text-end pe-4" style="min-width: 340px;">
                                     <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Bạn có chắc chắn muốn phê duyệt quyết định này cho bộ truyện?');">
-                                        <select name="status" class="form-select form-select-sm w-auto" style="max-width: 140px;" title="Trạng thái">
-                                            <option value="planning" selected>Kế hoạch</option>
-                                            <option value="ongoing">Đang triển khai</option>
-                                            <option value="canceled">Đã hủy</option>
+                                        <select name="status" class="form-select form-select-sm w-auto" style="max-width: 140px;" title="Quyết định">
+                                            <option value="planning" selected>Chờ duyệt</option>
+                                            <option value="ongoing">Phê duyệt</option>
+                                            <option value="canceled">Từ chối</option>
                                         </select>
                                         <select name="editor_id" class="form-select form-select-sm w-auto" style="max-width: 150px;" title="Biên tập viên chuyên trách">
                                              <option value="">-- Chọn Editor --</option>
@@ -165,7 +180,12 @@ if (!empty($seriesList)) {
                                         ?>
                                             <img src="<?= htmlspecialchars($resolvedCover) ?>" alt="Cover" width="40" height="60" class="me-2 object-fit-cover rounded flex-shrink-0">
                                         <?php endif; ?>
-                                        <span class="fw-bold text-slate-800"><?= htmlspecialchars($series['title']) ?></span>
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="fw-bold text-decoration-none series-title-link" title="Xem chi tiết bộ truyện"><?= htmlspecialchars($series['title']) ?></a>
+                                        <?php if (!empty($series['proposal_file'])): ?>
+                                            <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="badge bg-light text-primary border ms-2 py-1" target="_blank" title="Tải tài liệu đề xuất / bản thảo sơ bộ">
+                                                <i class="fas fa-file-alt me-1"></i>Bản thảo sơ bộ
+                                            </a>
+                                        <?php endif; ?>
                                     </div>
                                 </td>
                                  <td>
@@ -183,7 +203,10 @@ if (!empty($seriesList)) {
                                      switch ($series['status']) {
                                          case 'ongoing': $badgeClass = 'bg-primary'; $statusLabel = 'Đang triển khai'; break;
                                          case 'completed': $badgeClass = 'bg-success'; $statusLabel = 'Hoàn thành'; break;
-                                         case 'canceled': $badgeClass = 'bg-danger'; $statusLabel = 'Đã hủy'; break;
+                                          case 'canceled': 
+                                              $badgeClass = 'bg-danger'; 
+                                              $statusLabel = empty($series['editor_id']) ? 'Từ chối' : 'Đã hủy'; 
+                                              break;
                                          case 'suspended': $badgeClass = 'bg-warning text-dark'; $statusLabel = 'Tạm ngưng'; break;
                                      }
                                      ?>
@@ -217,7 +240,7 @@ if (!empty($seriesList)) {
                                          <select name="status" class="form-select form-select-sm w-auto" style="max-width: 140px;" title="Trạng thái">
                                              <option value="ongoing" <?= $series['status'] == 'ongoing' ? 'selected' : '' ?>>Đang triển khai</option>
                                              <option value="completed" <?= $series['status'] == 'completed' ? 'selected' : '' ?>>Hoàn thành</option>
-                                             <option value="canceled" <?= $series['status'] == 'canceled' ? 'selected' : '' ?>>Đã hủy</option>
+                                              <option value="canceled" <?= $series['status'] == 'canceled' ? 'selected' : '' ?>><?= empty($series['editor_id']) ? 'Từ chối' : 'Đã hủy' ?></option>
                                              <option value="suspended" <?= $series['status'] == 'suspended' ? 'selected' : '' ?>>Tạm ngưng</option>
                                          </select>
                                          <select name="editor_id" class="form-select form-select-sm w-auto" style="max-width: 150px;" title="Biên tập viên chuyên trách">
