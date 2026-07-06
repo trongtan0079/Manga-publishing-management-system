@@ -162,3 +162,20 @@ Giao diện quản lý của Hội đồng Biên tập được phân tách thà
 - **Tự động gửi thông báo:** Khi Hội đồng Biên tập thay đổi trạng thái hoặc chu kỳ phát hành của bộ truyện, hệ thống tự động gửi thông báo loại `series_warning` cho tác giả tương ứng.
 - **Cảnh báo xếp hạng thấp:** Khi Hội đồng Biên tập nhập dữ liệu bình chọn định kỳ, nếu phát hiện điểm số dưới 50 hoặc thứ hạng rơi xuống từ hạng 5 trở đi, hệ thống sẽ tự động gửi cảnh báo khẩn cấp `series_warning` tới tác giả để họ chủ động điều chỉnh kịch bản.
 - **Khóa bảo vệ chấm điểm (Ranking Safeguards):** Hệ thống cấm hoàn toàn việc tạo mới hoặc chỉnh sửa điểm xếp hạng cho các bộ truyện đang ở trạng thái nháp, chờ duyệt (`planning`) hoặc đã hủy (`canceled`) ở cả tầng giao diện lẫn kiểm tra dữ liệu phía máy chủ (Backend Validation).
+
+---
+
+## 1.7 Công cụ Đánh dấu lỗi Trực quan của Biên tập viên (Tantou Editor Visual Annotations)
+
+Để tối ưu hóa quá trình duyệt bản thảo giữa Biên tập viên chuyên trách (Tantou Editor) và Tác giả (Mangaka):
+- **Cơ chế Vẽ khoanh vùng báo lỗi (Visual Annotation Canvas):**
+  - Tại trang chi tiết bản thảo (`submission_detail`), hệ thống hiển thị danh sách các trang truyện hoàn thiện thuộc chương.
+  - Editor có thể nhấn nút **Đánh dấu lỗi** trên từng trang để mở giao diện Modal Canvas vẽ. Editor nhấp và kéo chuột để vẽ một khung chữ nhật màu đỏ bao quanh vùng bị lỗi trên ảnh, nhập nội dung phản hồi và lưu qua API không cần tải lại trang.
+- **Hệ tọa độ chuẩn hóa tương thích (Responsive Scaling System):**
+  - Để các ô khoanh vùng hiển thị chính xác trên mọi thiết bị và độ phân giải màn hình (Responsive), hệ thống sử dụng cơ chế ánh xạ tọa độ chuẩn hóa về kích thước ảo cố định là **800 x 1000 pixels**.
+  - Khi lưu: Tọa độ thực tế vẽ trên trình duyệt được chia cho kích thước hiển thị hiện tại của ảnh và nhân ngược với 800 (cho chiều ngang) và 1000 (cho chiều dọc).
+  - Khi hiển thị cho Mangaka: Tọa độ lưu trong CSDL được quy đổi thành tỷ lệ phần trăm `%` và vẽ đè (absolute position overlay) trực quan lên ảnh.
+- **Giao diện phản hồi của Tác giả (Mangaka Feedback Screen):**
+  - Tại màn hình chi tiết trang truyện của Mangaka (`page_detail`), các vùng lỗi được viền khung đứt nét màu đỏ nổi bật.
+  - Khi di chuột vào vùng khoanh đỏ, hệ thống kích hoạt Bootstrap Popover hiển thị chi tiết lỗi cần sửa và tên Editor đã đánh dấu. Đồng thời cột bên phải liệt kê danh sách tổng hợp lỗi để tác giả dễ dàng theo dõi sửa chữa.
+- **Ràng buộc Khóa an toàn:** Khi chương truyện đã được phê duyệt (`approved`) hoặc xuất bản (`published`), hệ thống sẽ khóa cứng các API lưu/xóa ghi chú lỗi để tránh làm thay đổi lịch sử duyệt bản thảo.

@@ -1,0 +1,44 @@
+@startuml
+title Sơ đồ Kiến trúc Hệ thống (System Architecture Diagram) - MangaPMS
+
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam linetype ortho
+
+package "Tầng Giao Diện (Client / Frontend)" {
+    [Trình Duyệt Web (Browser)] as Browser
+    note right of Browser
+        - Bootstrap 5 (CSS Grid & UI Elements)
+        - Vanilla JavaScript (Fetch API / AJAX / Canvas drawing)
+        - Chart.js (Biểu đồ xếp hạng & tiến độ)
+        - QuillJS (Trình soạn thảo văn bản nhận xét)
+    end note
+}
+
+package "Tầng Ứng Dụng (Application Server / Backend)" {
+    [Apache Web Server] as Apache
+    
+    package "Mô hình MVC (PHP 8.x)" {
+        [index.php (Front Controller / Router)] as Router
+        [Lớp Điều Khiển (Controllers)] as Ctrl
+        [Lớp Hiển Thị (Views - HTML/PHP)] as View
+        [Lớp Dữ Liệu (Models)] as Model
+        [Thư viện Core (Auth, Model, Database)] as Core
+    }
+}
+
+package "Tầng Lưu Trữ (Database Layer)" {
+    database "MySQL / MariaDB Database" as DB
+}
+
+' Đường truyền kết nối
+Browser <--> Apache : Gửi Request & Nhận Response (HTTP/JSON)
+Apache --> Router : Chuyển tiếp Request
+Router --> Ctrl : Định tuyến & Gọi Action tương ứng
+Ctrl --> Model : Yêu cầu xử lý dữ liệu nghiệp vụ
+Ctrl --> View : Truyền dữ liệu & Nạp Giao diện Render
+View --> Browser : Trả về HTML tĩnh / Dữ liệu JSON cho client
+Model --> Core : Gọi các hàm CRUD/Connect kế thừa
+Core <--> DB : Kết nối qua PDO (PHP Data Objects)
+
+@enduml

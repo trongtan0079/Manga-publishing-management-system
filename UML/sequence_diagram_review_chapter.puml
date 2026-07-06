@@ -31,6 +31,21 @@ deactivate ReviewManager
 Web --> Editor : Hiển thị Chapter
 deactivate Web
 
+opt Đánh dấu lỗi trực quan trên trang truyện
+    Editor -> Web : Vẽ khung đỏ và nhập ghi chú trên canvas
+    activate Web
+    Web -> ReviewManager : save_annotation()
+    activate ReviewManager
+    ReviewManager -> DB : INSERT INTO editor_annotations
+    activate DB
+    DB --> ReviewManager : annotation_id
+    deactivate DB
+    ReviewManager --> Web : JSON Success
+    deactivate ReviewManager
+    Web --> Editor : Hiển thị khung đỏ trên Canvas
+    deactivate Web
+end
+
 alt Chapter đạt yêu cầu
 
     Editor -> Web : Phê duyệt Chapter

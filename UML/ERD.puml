@@ -146,6 +146,19 @@ entity system_logs {
   created_at : timestamp
 }
 
+entity editor_annotations {
+  *annotation_id : int <<PK>>
+  --
+  page_id : int <<FK>>
+  editor_id : int <<FK>>
+  x : int
+  y : int
+  width : int
+  height : int
+  comments : text
+  created_at : timestamp
+}
+
 roles ||--o{ users : has
 users ||--o{ system_logs : triggers
 
@@ -159,6 +172,7 @@ users ||--o{ submissions : submits
 users ||--o{ reviews : writes
 users ||--o{ notifications : receives
 users ||--o{ series_rankings : evaluates
+users ||--o{ editor_annotations : annotates
 
 series ||--o{ chapters : contains
 series ||--o{ series_rankings : ranked
@@ -168,6 +182,7 @@ chapters ||--o{ submissions : submitted
 
 pages ||--o{ page_regions : segment
 pages ||--o{ tasks : requires
+pages ||--o{ editor_annotations : has
 page_regions ||--o{ tasks : targetedAt
 tasks ||--o{ submissions : generates
 

@@ -157,4 +157,57 @@ class Submission extends Model {
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Lấy toàn bộ submissions (cả pending và đã duyệt) của Editor phụ trách
+     */
+    public function findAllChapterSubmissionsByEditorId($editorId) {
+        $sql = "SELECT s.*, 
+                       u.full_name as sender_name,
+                       t.title as task_title,
+                       COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
+                       COALESCE(c.title, c_task.title) as chapter_title,
+                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                FROM {$this->table} s
+                LEFT JOIN users u ON s.user_id = u.user_id
+                LEFT JOIN tasks t ON s.task_id = t.task_id
+                LEFT JOIN pages p_task ON t.page_id = p_task.page_id
+                LEFT JOIN chapters c_task ON p_task.chapter_id = c_task.chapter_id
+                LEFT JOIN series ser_task ON c_task.series_id = ser_task.series_id
+                LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
+                LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
+                WHERE s.chapter_id IS NOT NULL AND ser_chap.editor_id = :editor_id AND ser_chap.status != 'planning'
+                ORDER BY CASE WHEN s.status = 'pending' THEN 0 ELSE 1 END, s.submitted_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':editor_id', $editorId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy danh sách submissions có status = 'pending' cho Editor review, kèm metadata (chỉ các bộ truyện được gán)
+     */
+    public function findPendingSubmissionsByEditorId($editorId) {
+        $sql = "SELECT s.*, 
+                       u.full_name as sender_name,
+                       t.title as task_title,
+                       COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
+                       COALESCE(c.title, c_task.title) as chapter_title,
+                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                FROM {$this->table} s
+                LEFT JOIN users u ON s.user_id = u.user_id
+                LEFT JOIN tasks t ON s.task_id = t.task_id
+                LEFT JOIN pages p_task ON t.page_id = p_task.page_id
+                LEFT JOIN chapters c_task ON p_task.chapter_id = c_task.chapter_id
+                LEFT JOIN series ser_task ON c_task.series_id = ser_task.series_id
+                LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
+                LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
+                WHERE s.status = 'pending' AND s.chapter_id IS NOT NULL AND ser_chap.editor_id = :editor_id AND ser_chap.status != 'planning'
+                ORDER BY s.submitted_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':editor_id', $editorId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
+?>

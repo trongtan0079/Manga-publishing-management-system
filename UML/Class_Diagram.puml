@@ -103,6 +103,18 @@ class SystemLog {
   +ipAddress : string
 }
 
+class EditorAnnotation {
+  +annotationId : int
+  +pageId : int
+  +editorId : int
+  +x : int
+  +y : int
+  +width : int
+  +height : int
+  +comments : string
+  +createdAt : datetime
+}
+
 Role "1" -- "*" User : assigned
 
 User "1" -- "*" Series : creates
@@ -114,6 +126,7 @@ Chapter "1" -- "*" Page : contains
 
 Page "1" -- "*" PageRegion : segment
 Page "1" -- "*" Task : requires
+Page "1" -- "*" EditorAnnotation : has
 PageRegion "1" -- "*" Task : targetedAt
 
 User "1" -- "*" Task : manager_assigns
@@ -128,6 +141,7 @@ User "1" -- "*" Submission : submits
 Submission "1" -- "*" Review : receives
 
 User "1" -- "*" Review : writes
+User "1" -- "*" EditorAnnotation : annotates
 
 Series "1" -- "*" SeriesRanking : ranked
 

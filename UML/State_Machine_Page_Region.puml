@@ -20,6 +20,7 @@ state completed {
 }
 
 pending --> in_progress : Mangaka tạo và giao Task mới gắn với vùng
+in_progress --> pending : Mangaka từ chối bản thảo của Trợ lý (Reject)
 in_progress --> completed : Mangaka phê duyệt bản thảo (Approve Submission) của Trợ lý
 completed --> [*]
 

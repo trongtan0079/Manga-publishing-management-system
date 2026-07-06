@@ -63,9 +63,11 @@ Khi hệ thống có nhiều tác giả (Mangaka), trợ lý (Assistant), biên 
 ### Bước 5: Nộp chương truyện cho Biên tập viên kiểm duyệt
 * Sau khi toàn bộ các trang vẽ trong Chapter 1 được hoàn thiện, **Mangaka A** tiến hành nộp bản thảo nguyên chương (file PDF/ZIP chứa toàn bộ chapter) lên hệ thống. Trạng thái của Chapter 1 chuyển sang `reviewing` (Đang chờ duyệt).
 * **Tantou Editor C** đăng nhập vào Dashboard tiến độ của biên tập viên, thấy Chapter 1 của Mangaka A đang đợi kiểm duyệt.
-* Editor C xem bản thảo chương truyện, viết đánh giá chuyên môn và gửi nhận xét. 
-  * Nếu đạt tiêu chuẩn chất lượng: Editor C bấm **Duyệt (Approve)**. Trạng thái Chapter 1 chuyển sang `approved`.
-  * Khi đến ngày phát hành dự kiến, chương sẽ được chuyển sang trạng thái `published` (Đã xuất bản).
+* Editor C xem bản thảo từng trang, sử dụng công cụ **vẽ khoanh vùng trực quan** để vẽ trực tiếp khung chữ nhật màu đỏ lên vùng bị lỗi trên ảnh trang truyện, viết ghi chú lỗi và lưu lại thông qua AJAX.
+* **Mangaka A** vào xem chi tiết trang truyện của mình sẽ nhìn thấy các khung báo lỗi viền đứt nét màu đỏ bao quanh vị trí lỗi, di chuột qua để xem popover nội dung phản hồi từ Editor và sửa lỗi.
+* Editor C đưa ra quyết định duyệt chuyên môn:
+  * Nếu đạt tiêu chuẩn chất lượng: Editor C bấm **Duyệt (Approve)**. Trạng thái Chapter 1 chuyển sang `approved` (Đồng thời toàn bộ trang vẽ và ghi chú lỗi được khóa cứng, cấm chỉnh sửa).
+  * Nếu chưa đạt: Editor C bấm **Từ chối (Reject)**. Trạng thái Chapter 1 tự động hoàn trả về `drawing` để tác giả và trợ lý tiếp tục vẽ lại.
 
 ### Bước 6: Đánh giá hiệu quả & Thù lao tháng
 * Cuối tháng, **Editorial Board D** nhập dữ liệu bình chọn từ độc giả cho bộ truyện *"Đảo Hải Tặc"*.

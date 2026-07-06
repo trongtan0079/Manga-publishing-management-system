@@ -37,4 +37,21 @@ class Page extends Model {
         $stmt->execute();
         return $stmt->fetchColumn() > 0;
     }
+
+    /**
+     * Lấy danh sách tất cả các trang vẽ thuộc các bộ truyện của Mangaka
+     */
+    public function findByMangakaId($mangakaId) {
+        $sql = "SELECT p.*, c.chapter_number, c.title as chapter_title, s.title as series_title 
+                FROM {$this->table} p 
+                JOIN chapters c ON p.chapter_id = c.chapter_id
+                JOIN series s ON c.series_id = s.series_id 
+                WHERE s.mangaka_id = :mangaka_id 
+                ORDER BY s.title ASC, c.chapter_number ASC, p.page_number ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':mangaka_id', $mangakaId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
+

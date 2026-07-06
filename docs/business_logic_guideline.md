@@ -46,8 +46,10 @@ graph TD
 2. Khi toàn bộ các trang và tất cả các Task nhỏ của trợ lý thuộc Chapter đó đã được Mangaka duyệt hoàn tất, **Mangaka** sẽ lấy các lớp/phần vẽ rời rạc của Assistant để hợp nhất (merge) thành trang vẽ hoàn chỉnh cuối cùng bằng phần mềm đồ họa chuyên dụng, rồi cập nhật lại hình ảnh trang truyện hoàn chỉnh lên hệ thống. Trang vẽ gốc sẽ tự động chuyển sang trạng thái **Đã hoàn thiện (`approved` / `finished`)**.
 3. **Mangaka** đóng gói toàn bộ chương truyện (gồm các trang đã hoàn thiện) dưới dạng tệp tin nén **`.zip`** bản thảo đầy đủ (hoặc file **`.pdf`** tổng hợp) và nhấn **"Nộp Chapter lên Biên tập viên"**. Trạng thái Chapter chuyển sang **Đang chờ duyệt (`reviewing`)**.
 4. Hệ thống tự động gửi thông báo nộp bản thảo tới **Biên tập viên chuyên trách (Tantou Editor)** được gán phụ trách bộ truyện đó để họ vào duyệt. (Nếu bộ truyện chưa được gán Editor cụ thể, thông báo sẽ gửi tới toàn bộ các Editor của tòa soạn làm phương án dự phòng).
-5. **Tantou Editor** được gán đăng nhập, xem trước ảnh bản thảo từng trang hoặc tải file ZIP về kiểm duyệt chất lượng nội dung, kịch bản, lời thoại:
-   * **Từ chối (Reject):** Viết nhận xét chi tiết lỗi kịch bản. Trạng thái Chapter tự động quay lại **Đang vẽ (`drawing`)** để tác giả và trợ lý mở khóa vào sửa chữa.
+5. **Tantou Editor** được gán đăng nhập, xem chi tiết các trang truyện của bản thảo. Tại đây, Editor sử dụng **công cụ vẽ khoanh vùng trực quan** để vẽ trực tiếp khung chữ nhật màu đỏ lên vùng bị lỗi trên ảnh, nhập nội dung phản hồi lỗi (lưu qua AJAX không tải lại trang).
+6. **Mangaka** đăng nhập và xem chi tiết trang truyện của mình sẽ thấy các khung lỗi nét đứt đỏ hiển thị đè lên ảnh. Khi di chuột qua, một popover sẽ hiển thị ghi chú lỗi cụ thể của Editor kèm theo bảng tổng hợp lỗi ở cột bên phải để sửa đổi.
+7. Editor đưa ra quyết định duyệt bản thảo:
+   * **Từ chối (Reject):** Viết nhận xét chi tiết. Trạng thái Chapter tự động quay lại **Đang vẽ (`drawing`)** để tác giả và trợ lý mở khóa vào sửa chữa.
    * **Phê duyệt (Approve):** Chapter đạt chất lượng xuất bản, trạng thái chuyển thành **Đã duyệt (`approved`)** và sẵn sàng chuyển sang nhà in (`published`).
 
 ### 🔹 Giai đoạn 4: Đánh giá xếp hạng & Giám sát (Editorial Board)
@@ -68,7 +70,7 @@ graph TD
 
 ### 🚫 2.2 Khóa chỉnh sửa bản thảo đang duyệt (Manuscript Editing Lock)
 * **Quy tắc:** Khi tác giả đã nộp Chapter lên Biên tập viên và đang ở trạng thái **Đang chờ duyệt (`reviewing`)** hoặc đã được duyệt **Hoàn thành (`approved`/`published`)**, toàn bộ tài liệu thuộc chương này phải được đóng băng để tránh tác giả thay đổi nội dung sau lưng biên tập viên.
-* **Chốt chặn:** Hệ thống khóa cứng tất cả quyền chỉnh sửa ở trạng thái này. Tác giả không thể thêm trang vẽ mới, không thể vẽ thêm phân vùng, không thể giao thêm Task cho trợ lý và trợ lý không thể nộp file đè lên Task cũ.
+* **Chốt chặn:** Hệ thống khóa cứng tất cả quyền chỉnh sửa ở trạng thái này. Tác giả không thể thêm trang vẽ mới, không thể vẽ thêm phân vùng, không thể giao thêm Task cho trợ lý, trợ lý không thể nộp file đè lên Task cũ, và **Biên tập viên cũng không thể lưu mới hoặc xóa các ghi chú lỗi (Editor Annotations)** nhằm bảo vệ tính toàn vẹn và lịch sử của phiên duyệt bản thảo.
 
 ### 🚦 2.3 Kích hoạt hiển thị công việc 2 tầng (Task Gating)
 * **Quy tắc:** Trợ lý không được phép nhìn thấy công việc được giao khi chương truyện đang ở dạng nháp phác thảo kịch bản (`drafting`) để tránh trợ lý vẽ nhầm nội dung thô chưa chốt gây lãng phí chi phí.

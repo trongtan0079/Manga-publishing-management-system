@@ -29,6 +29,7 @@ rectangle "Manga Creation & Publishing System" {
   ' Editor Use Cases
   usecase "Kiểm duyệt Bản thảo Chương" as UC_Editor_Review
   usecase "Đưa ra Nhận xét & Đề xuất sửa đổi" as UC_Editor_Feedback
+  usecase "Đánh dấu lỗi trực quan trên trang" as UC_Editor_Annotate
 
   ' Board Use Cases
   usecase "Duyệt xuất bản Series Manga" as UC_Board_Publish
@@ -50,6 +51,7 @@ Assistant --> UC_Assistant_Submit
 
 Editor --> UC_Editor_Review
 Editor --> UC_Editor_Feedback
+Editor --> UC_Editor_Annotate
 
 Board --> UC_Board_Publish
 Board --> UC_Board_Rank

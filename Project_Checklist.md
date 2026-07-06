@@ -130,6 +130,7 @@
 #### Review Management
 * [x] Approve/Reject Submission
 * [x] Add Review Comments
+* [x] Visual Annotation on Manga Pages (Editor vẽ khoanh vùng báo lỗi trực quan, hiển thị popover cho Mangaka)
 
 #### Ranking Management
 * [x] Evaluate Series
@@ -148,10 +149,10 @@
 * [x] ERD
 * [x] Class Diagram
 * [x] Use Case Diagram
-* [ ] Use Case Description
+* [x] Use Case Description (Đặc tả chi tiết 3 ca sử dụng cốt lõi)
 * [x] Activity Diagram
 * [x] Sequence Diagram
-* [ ] System Architecture Diagram
+* [x] System Architecture Diagram (Sơ đồ kiến trúc tầng MVC & Database)
 * [x] Database Documentation
 * [ ] User Manual (Tài liệu hướng dẫn)
 
