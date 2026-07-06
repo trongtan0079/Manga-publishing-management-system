@@ -34,6 +34,14 @@ class SubmissionController extends BaseController
         if ($role === 'editor') {
             // Editor xem toàn bộ chapter submission (kể cả pending và history)
             $submissions = $this->submissionModel->findAllChapterSubmissions();
+
+            // Hỗ trợ lọc trạng thái theo query parameter
+            $status = $_GET['status'] ?? null;
+            if ($status && in_array($status, ['pending', 'approved', 'rejected'])) {
+                $submissions = array_filter($submissions, function($s) use ($status) {
+                    return $s['status'] === $status;
+                });
+            }
         } elseif ($role === 'mangaka' || $role === 'assistant') {
             // Assistant và Mangaka xem lịch sử nộp bài của chính mình
             $submissions = $this->submissionModel->findByUserId($userId);
@@ -333,23 +341,43 @@ class SubmissionController extends BaseController
             require_once __DIR__ . '/../models/Notification.php';
             $notificationModel = new \Notification();
 
-            // Nếu là Mangaka nộp Chapter, tự động chuyển trạng thái Chapter sang 'reviewing'
             if ($role === 'mangaka' && $chapterId > 0) {
                 $this->chapterModel->update($chapterId, ['status' => 'reviewing']);
                 
                 require_once __DIR__ . '/../models/User.php';
                 $userModel = new \User();
-                $editors = $userModel->findByRoleName('editor');
-                foreach ($editors as $editor) {
+                
+                $chapter = $this->chapterModel->findById($chapterId);
+                $series = null;
+                if ($chapter) {
+                    $series = $this->seriesModel->findById($chapter['series_id']);
+                }
+                $seriesTitle = $series ? $series['title'] : 'bộ truyện';
+                
+                if ($series && !empty($series['editor_id'])) {
+                    // Gửi DUY NHẤT cho Editor chuyên trách
                     $notificationModel->createNotification(
-                        $editor['user_id'],
+                        $series['editor_id'],
                         'chapter_submitted',
-                        'Mangaka ' . $_SESSION['username'] . ' vừa nộp một Chapter mới chờ duyệt.'
+                        'Mangaka ' . $_SESSION['full_name'] . " vừa nộp một Chapter mới cho bộ truyện: '{$seriesTitle}'."
                     );
+                } else {
+                    // Bể duyệt chung fallback
+                    $editors = $userModel->findByRoleName('editor');
+                    foreach ($editors as $editor) {
+                        $notificationModel->createNotification(
+                            $editor['user_id'],
+                            'chapter_submitted',
+                            'Mangaka ' . $_SESSION['full_name'] . " vừa nộp một Chapter mới chờ duyệt."
+                        );
+                    }
                 }
             } elseif ($role === 'assistant' && $taskId > 0) {
                 $task = $this->taskModel->findById($taskId);
                 if ($task) {
+                    // Cập nhật trạng thái Task thành 'in_progress' khi Assistant nộp bài
+                    $this->taskModel->update($taskId, ['status' => 'in_progress']);
+
                     $notificationModel->createNotification(
                         $task['mangaka_id'],
                         'submission_submitted',

@@ -38,6 +38,14 @@ class ReviewController extends BaseController
         if ($role === 'editor') {
             // Editor (Biên tập viên) xem tất cả các bản thảo chương truyện (chờ duyệt + lịch sử)
             $submissions = $this->submissionModel->findAllChapterSubmissions();
+
+            // Hỗ trợ lọc trạng thái theo query parameter (chỉ hiện bản thảo 'pending' nếu status=pending)
+            $status = $_GET['status'] ?? null;
+            if ($status && $status === 'pending') {
+                $submissions = array_filter($submissions, function($s) {
+                    return $s['status'] === 'pending';
+                });
+            }
             require_once __DIR__ . '/../views/editor/review_list.php';
         } elseif ($role === 'mangaka') {
             // Mangaka xem các bản thảo của Task đang chờ duyệt thuộc về các Task do họ giao
@@ -240,6 +248,17 @@ class ReviewController extends BaseController
                         $pageModel->update($pageId, ['status' => 'approved']);
                     }
                 }
+            } elseif ($submission['task_id'] && $status === 'rejected') {
+                require_once __DIR__ . '/../models/Task.php';
+                $taskModel = new \Task();
+                $taskModel->update($submission['task_id'], ['status' => 'pending']);
+
+                $taskDetail = $taskModel->findById($submission['task_id']);
+                if ($taskDetail && !empty($taskDetail['page_region_id'])) {
+                    require_once __DIR__ . '/../models/PageRegion.php';
+                    $pageRegionModel = new \PageRegion();
+                    $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'pending']);
+                }
             }
 
             // Nếu là bản thảo chương truyện (Chapter)
@@ -248,6 +267,31 @@ class ReviewController extends BaseController
                 $chapterModel = new \Chapter();
                 if ($status === 'approved') {
                     $chapterModel->update($submission['chapter_id'], ['status' => 'approved']);
+
+                    // Kiểm tra xem chapter có phải là chương cuối không để thông báo cho Board
+                    $chapDetail = $chapterModel->findById($submission['chapter_id']);
+                    if ($chapDetail && !empty($chapDetail['is_final'])) {
+                        // Lấy thông tin bộ truyện
+                        require_once __DIR__ . '/../models/Series.php';
+                        $seriesModel = new \Series();
+                        $seriesDetail = $seriesModel->findById($chapDetail['series_id']);
+                        $seriesTitle = $seriesDetail ? $seriesDetail['title'] : 'bộ truyện';
+                        
+                        // Tìm toàn bộ tài khoản có role là 'board' đang hoạt động để gửi thông báo
+                        require_once __DIR__ . '/../models/User.php';
+                        $userModel = new \User();
+                        $boardMembers = $userModel->findByRoleName('board');
+                        
+                        if (!empty($boardMembers)) {
+                            foreach ($boardMembers as $member) {
+                                $this->notificationModel->createNotification(
+                                    $member['user_id'],
+                                    'series_completed',
+                                    "Chương cuối của bộ truyện '{$seriesTitle}' đã được duyệt. Vui lòng xác nhận hoàn thành."
+                                );
+                            }
+                        }
+                    }
                 } else {
                     // Nếu bị từ chối (rejected), tự động chuyển trạng thái Chapter về 'drawing' để Mangaka chỉnh sửa
                     $chapterModel->update($submission['chapter_id'], ['status' => 'drawing']);
