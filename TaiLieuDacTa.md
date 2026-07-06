@@ -85,7 +85,7 @@ Tantou Editor là biên tập viên trực tiếp theo dõi quá trình phát tr
 Editorial Board là hội đồng biên tập chịu trách nhiệm đánh giá hiệu quả hoạt động của các Series Manga dựa trên dữ liệu bình chọn và kết quả phát hành. Hội đồng đưa ra các quyết định liên quan đến việc tiếp tục xuất bản, thay đổi lịch phát hành hoặc ngừng phát hành Series.
 
 - Đánh giá hồ sơ giới thiệu Series mới
-- Bỏ phiếu xét duyệt các Series trước khi phát hành
+- Bỏ phiếu xét duyệt các Series trước khi phát hành và gán Biên tập viên chuyên trách (Tantou Editor) cho bộ truyện
 - Nhập dữ liệu bình chọn của độc giả
 - Theo dõi bảng xếp hạng các Series
 - Xem báo cáo thống kê kết quả phát hành
@@ -143,16 +143,20 @@ Giao diện quản lý của Hội đồng Biên tập được phân tách thà
 - **Bảng 1: Đề xuất bộ truyện mới (Chờ phê duyệt):**
   - Chỉ hiển thị các bộ truyện đã nộp ở trạng thái `planning`.
   - Hội đồng Biên tập có quyền đưa ra 2 quyết định:
-    - **Đồng ý phê duyệt:** Đổi trạng thái sang **Đang triển khai (Ongoing)** và bắt buộc thiết lập Lịch phát hành (Hàng tuần/Hàng tháng).
+    - **Đồng ý phê duyệt:** Đổi trạng thái sang **Đang triển khai (Ongoing)**, thiết lập Lịch phát hành (Hàng tuần/Hàng tháng) và gán Biên tập viên chuyên trách (Tantou Editor) phụ trách bộ truyện.
     - **Từ chối đề xuất:** Chuyển trạng thái sang **Đã hủy (Canceled)** để khép lại dự án.
 - **Bảng 2: Bộ truyện đang hoạt động (Giám sát & Quản lý):**
   - Hiển thị các bộ truyện đang trong vòng đời sản xuất gồm **Đang triển khai (Ongoing)** và **Tạm ngưng (Suspended)**.
-  - Hội đồng Biên tập có quyền cập nhật linh hoạt các trạng thái:
+  - Hội đồng Biên tập có quyền cập nhật linh hoạt các trạng thái và thay đổi/gán lại Biên tập viên phụ trách bộ truyện (Tantou Editor).
+  - Các quyền cập nhật trạng thái gồm:
     - **Tạm ngưng (Suspended):** Khi bộ truyện cần tạm dừng phát hành (treo bút). Lúc này, nút tạo chapter mới của tác giả sẽ tự động ẩn đi, các task của trợ lý cũng bị ẩn tạm thời. Hội đồng có thể khôi phục lại trạng thái `ongoing` bất kỳ lúc nào để tác giả tiếp tục vẽ.
     - **Hoàn thành (Completed):** Đóng dự án khi tác phẩm kết thúc tốt đẹp.
     - **Đã hủy (Canceled):** Đình bản hoặc khai tử vĩnh viễn bộ truyện. Khi chuyển sang trạng thái này, bộ truyện sẽ biến mất khỏi hàng đợi giám sát của Hội đồng.
-  - **Khóa an toàn khi Hoàn thành (Completed Lock):** Hệ thống chặn đứng hành vi chuyển trạng thái bộ truyện sang *Hoàn thành (Completed)* nếu phát hiện còn bất kỳ chương truyện (Chapter) nào chưa được Biên tập viên duyệt xong (đang ở trạng thái nháp, đang vẽ hoặc đang chờ duyệt).
-  - **Giám sát Tiến độ Chapter:** Bảng 2 hiển thị rõ ràng tỉ lệ `Chương đã duyệt hoàn tất / Tổng số chương hiện có` giúp Hội đồng dễ dàng đánh giá tiến độ thực tế trước khi đưa ra quyết định đóng truyện.
+  - **Khóa an toàn khi Hoàn thành (Completed Lock):** Hệ thống chặn đứng hành vi chuyển trạng thái bộ truyện sang *Hoàn thành (Completed)* nếu phát hiện còn bất kỳ chương truyện (Chapter) nào chưa được Biên tập viên duyệt xong (đang ở trạng thái nháp, đang vẽ hoặc đang chờ duyệt) VÀ bắt buộc phải có ít nhất một chương được phê duyệt là **Chương cuối (End Chapter)**.
+  - **Giám sát Tiến độ Chapter và Đóng truyện:** 
+    - Bảng 2 hiển thị tỉ lệ `Chương đã duyệt hoàn tất / Tổng số chương hiện có` giúp Hội đồng giám sát tiến độ thực tế.
+    - Hệ thống áp dụng cơ chế **Chương cuối (End Chapter)**: Tác giả có thể đánh dấu một chapter là chương cuối (tối đa 1 chương cuối mỗi bộ truyện). Cột tiến độ sẽ chỉ hiển thị nhãn xanh **Hoàn tất** khi chương cuối này đã được Editor duyệt thành công. Nếu không, nhãn hiển thị sẽ luôn giữ ở dạng **Đang làm** để tránh Hội đồng kết thúc nhầm bộ truyện khi tác giả vẫn đang sáng tác.
+    - Khi chương cuối được duyệt, hệ thống tự động gửi thông báo đến toàn bộ các thành viên Hội đồng Biên tập để họ kịp thời kiểm tra và chuyển trạng thái Series sang **Hoàn thành**.
 
 ### 1.6.4 Hệ thống Cảnh báo tự động và Ràng buộc Xếp hạng (Rankings)
 - **Tự động gửi thông báo:** Khi Hội đồng Biên tập thay đổi trạng thái hoặc chu kỳ phát hành của bộ truyện, hệ thống tự động gửi thông báo loại `series_warning` cho tác giả tương ứng.

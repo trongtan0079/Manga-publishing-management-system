@@ -10,11 +10,11 @@ Hệ thống vận hành xoay quanh vòng đời khép kín của một tác ph�
 
 ```mermaid
 graph TD
-    A[Mangaka: Tạo Series Nháp] -->|Gửi Đề Xuất| B[Editorial Board: Duyệt & Chọn Lịch]
+    A[Mangaka: Tạo Series Nháp] -->|Gửi Đề Xuất| B[Editorial Board: Duyệt, Chọn Lịch & Gán Editor]
     B -->|Ongoing| C[Mangaka: Tạo Chapter & Vẽ Phân Vùng]
     C -->|Giao Task| D[Assistant: Vẽ Nền/Tô Bóng/Hiệu Ứng]
     D -->|Nộp Bài| E[Mangaka: Đánh Giá & Phê Duyệt Task]
-    E -->|Hoàn Thành Chapter| F[Mangaka: Nộp Chapter Cho Editor]
+    E -->|Hoàn Thành Chapter| F[Mangaka: Nộp Chapter Cho Editor phụ trách]
     F -->|Đang Chờ Duyệt| G[Tantou Editor: Đánh Giá & Duyệt Chapter]
     G -->|Approved| H[Chương Sẵn Sàng Xuất Bản]
     G -->|Rejected| C
@@ -28,7 +28,7 @@ graph TD
 2. **Mangaka** kiểm tra lại hồ sơ và nhấn **"Gửi đề xuất lên Hội đồng"**. Trạng thái bộ truyện chuyển sang **Đang chờ duyệt (`proposed`)**.
 3. Thành viên **Editorial Board** đăng nhập, xem danh sách đề xuất. Board thực hiện đánh giá hồ sơ và chọn hành động:
    * **Từ chối (Reject):** Trạng thái quay về `planning` để tác giả chỉnh sửa lại.
-   * **Phê duyệt (Approve):** Board bắt buộc phải chọn Lịch xuất bản là **Hàng tuần (`weekly`)** hoặc **Hàng tháng (`monthly`)**. Trạng thái bộ truyện chính thức chuyển sang **Đang xuất bản (`ongoing`)**.
+   * **Phê duyệt (Approve):** Board bắt buộc phải chọn Lịch xuất bản là **Hàng tuần (`weekly`)** hoặc **Hàng tháng (`monthly`)**, đồng thời gán một **Biên tập viên chuyên trách (Tantou Editor)** từ danh sách để trực tiếp quản lý và duyệt các chương truyện sau này. Trạng thái bộ truyện chính thức chuyển sang **Đang xuất bản (`ongoing`)**.
 
 ### 🔹 Giai đoạn 2: Sáng tác & Phối hợp Studio (Mangaka ↔ Assistant)
 1. Khi bộ truyện đã hoạt động (`ongoing`), **Mangaka** có quyền tạo mới các chương truyện (Chapter). Trạng thái khởi tạo ban đầu của Chapter là **Bản nháp (`drafting`)**.
@@ -45,7 +45,8 @@ graph TD
    * **Yêu cầu chỉnh sửa (Reject):** Viết ghi chú những chỗ vẽ lỗi. Task tự động trả về `pending`, phân vùng trang truyện cũng chuyển về chờ vẽ để Assistant làm lại.
 2. Khi toàn bộ các trang và tất cả các Task nhỏ của trợ lý thuộc Chapter đó đã được Mangaka duyệt hoàn tất, trang vẽ gốc sẽ tự động chuyển sang trạng thái **Đã hoàn thiện (`finished`)**.
 3. **Mangaka** đóng gói toàn bộ chương truyện (tải lên file ZIP bản thảo đầy đủ) và nhấn **"Nộp Chapter lên Biên tập viên"**. Trạng thái Chapter chuyển sang **Đang chờ duyệt (`reviewing`)**.
-4. **Tantou Editor** đăng nhập, xem trước ảnh bản thảo từng trang hoặc tải file ZIP về kiểm duyệt chất lượng nội dung, kịch bản, lời thoại:
+4. Hệ thống tự động gửi thông báo nộp bản thảo tới **Biên tập viên chuyên trách (Tantou Editor)** được gán phụ trách bộ truyện đó để họ vào duyệt. (Nếu bộ truyện chưa được gán Editor cụ thể, thông báo sẽ gửi tới toàn bộ các Editor của tòa soạn làm phương án dự phòng).
+5. **Tantou Editor** được gán đăng nhập, xem trước ảnh bản thảo từng trang hoặc tải file ZIP về kiểm duyệt chất lượng nội dung, kịch bản, lời thoại:
    * **Từ chối (Reject):** Viết nhận xét chi tiết lỗi kịch bản. Trạng thái Chapter tự động quay lại **Đang vẽ (`drawing`)** để tác giả và trợ lý mở khóa vào sửa chữa.
    * **Phê duyệt (Approve):** Chapter đạt chất lượng xuất bản, trạng thái chuyển thành **Đã duyệt (`approved`)** và sẵn sàng chuyển sang nhà in (`published`).
 
@@ -76,6 +77,14 @@ graph TD
 ### 📊 2.4 Giới hạn đánh giá & Phân hạng (Ranking Restriction)
 * **Quy tắc:** Chỉ được phép nhập điểm đánh giá xếp hạng đối với các bộ truyện đang thực sự phát hành (`ongoing`).
 * **Chốt chặn:** Hệ thống chặn hoàn toàn hành vi cố tình nhập dữ liệu xếp hạng cho các bộ truyện đang ở dạng đề xuất nháp (`planning`, `proposed`) hoặc đã bị khai tử (`canceled`, `suspended`).
+
+### 🏁 2.5 Xác thực Hoàn thành Bộ truyện (Series Completion Validation)
+* **Quy tắc:** Để tránh việc Hội đồng Biên tập kết thúc nhầm bộ truyện khi tác phẩm vẫn đang trong quá trình ra chương mới, hệ thống áp dụng cơ chế xác thực dựa trên "Chương cuối" (End Chapter). 
+* **Chốt chặn:**
+  - Hệ thống kiểm soát tính duy nhất: Mỗi bộ truyện (Series) chỉ được phép có tối đa một chương truyện được đánh dấu là Chương cuối (`is_final = 1`).
+  - Giao diện của Hội đồng Biên tập sử dụng thuộc tính `has_final_approved` để chuyển nhãn Tiến độ Chapter sang **Hoàn tất** (màu xanh lá). Nếu truyện chưa có chương cuối được phê duyệt, cột tiến độ sẽ hiển thị **Đang làm** (màu vàng) kể cả khi toàn bộ chương hiện có đã được duyệt xong.
+  - Khi chương cuối được phê duyệt, hệ thống tự động bắn thông báo loại `series_completed` (biểu tượng cờ caro xanh) gửi đến toàn bộ các thành viên Hội đồng Biên tập để họ kiểm tra và đổi trạng thái Series sang **Hoàn thành (Completed)**.
+  - **Chốt chặn Backend:** Ở tầng kiểm soát cập nhật trạng thái bộ truyện (`SeriesController::updateStatus`), hệ thống từ chối cho phép đổi trạng thái sang **Hoàn thành (Completed)** nếu phát hiện bộ truyện chưa có bất kỳ chương cuối (`is_final = 1`) nào được phê duyệt thành công.
 
 ---
 

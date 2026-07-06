@@ -42,9 +42,11 @@ CREATE TABLE series (
     status ENUM('planning', 'ongoing', 'completed', 'canceled', 'suspended') DEFAULT 'planning',
     publish_type VARCHAR(50) DEFAULT 'weekly',
     cover_image VARCHAR(255),
+    editor_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_series_mangaka FOREIGN KEY (mangaka_id) REFERENCES users(user_id) ON DELETE RESTRICT
+    CONSTRAINT fk_series_mangaka FOREIGN KEY (mangaka_id) REFERENCES users(user_id) ON DELETE RESTRICT,
+    CONSTRAINT fk_series_editor FOREIGN KEY (editor_id) REFERENCES users(user_id) ON DELETE SET NULL
 ) COMMENT 'Lưu trữ thông tin dự án/bộ truyện Manga của Tác giả (Mangaka)';
 
 -- ------------------------------------------------------------------------------
@@ -58,6 +60,7 @@ CREATE TABLE chapters (
     status ENUM('drafting', 'drawing', 'reviewing', 'approved', 'published') DEFAULT 'drafting',
     due_date DATETIME,
     published_at DATETIME,
+    is_final TINYINT(1) DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_chapters_series FOREIGN KEY (series_id) REFERENCES series(series_id) ON DELETE CASCADE,
