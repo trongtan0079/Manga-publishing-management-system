@@ -37,13 +37,29 @@
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const text = textarea.value;
-        const selectedText = text.substring(start, end);
+        let selectedText = text.substring(start, end);
+        
+        let placeholderUsed = false;
+        if (selectedText.length === 0) {
+            placeholderUsed = true;
+            if (syntax === '**') selectedText = 'chữ in đậm';
+            else if (syntax === '*') selectedText = 'chữ in nghiêng';
+            else if (syntax === '~~') selectedText = 'chữ gạch ngang';
+            else selectedText = 'văn bản';
+        }
         
         const replacement = syntax + selectedText + syntax;
         
         textarea.value = text.substring(0, start) + replacement + text.substring(end);
         textarea.focus();
-        textarea.setSelectionRange(start + syntax.length, start + syntax.length + selectedText.length);
+        
+        if (placeholderUsed) {
+            // Bôi đen chữ placeholder để người dùng gõ đè lên được ngay
+            textarea.setSelectionRange(start + syntax.length, start + syntax.length + selectedText.length);
+        } else {
+            // Đưa con trỏ chuột về sau cụm từ định dạng
+            textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+        }
         
         // Trigger input event
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
@@ -57,18 +73,24 @@
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
         const text = textarea.value;
-        const selectedText = text.substring(start, end);
+        let selectedText = text.substring(start, end);
         
         let replacement = '';
         if (selectedText.length > 0) {
             replacement = selectedText.split('\n').map(line => line.startsWith('- ') ? line : '- ' + line).join('\n');
         } else {
-            replacement = '\n- ';
+            selectedText = 'dòng danh sách';
+            replacement = '\n- ' + selectedText;
         }
         
         textarea.value = text.substring(0, start) + replacement + text.substring(end);
         textarea.focus();
-        textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+        
+        if (selectedText === 'dòng danh sách') {
+            textarea.setSelectionRange(start + 3, start + 3 + selectedText.length);
+        } else {
+            textarea.setSelectionRange(start + replacement.length, start + replacement.length);
+        }
         
         textarea.dispatchEvent(new Event('input', { bubbles: true }));
     }
