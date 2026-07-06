@@ -1,4 +1,6 @@
 -- database/seed_users.sql
+USE manga_workflow;
+
 -- Thêm dữ liệu roles (Sử dụng IGNORE để tránh lỗi khi chạy lại file nhiều lần)
 INSERT IGNORE INTO roles (role_name, description) VALUES 
 ('admin', 'Quản trị viên hệ thống'),
