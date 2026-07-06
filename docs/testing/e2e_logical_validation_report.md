@@ -22,8 +22,8 @@ Báo cáo này ghi nhận kết quả kiểm thử chuỗi nghiệp vụ khép k
 - **Hành động**: 
   - Mangaka đăng nhập, tạo bộ truyện mới **"Test Series"**.
   - Tạo chương truyện mới **"Ch. 1 - Test Chapter"**.
-  - Tải lên trang truyện mới (Page 1) và thực thi **"Quét AI phân đoạn vùng"**.
-  - Nhận diện thành công các phân vùng nhân vật, khung thoại.
+  - Tải lên trang truyện mới (Page 1) và sử dụng bộ công cụ vẽ kéo-thả thủ công để phân vùng tranh vẽ.
+  - Lưu thành công tọa độ các phân vùng vẽ tay thủ công.
   - Tạo một Task **"Background inking"** tại phân vùng số 4, giao cho **Assistant One**.
 - **Kết quả**: Thành công 100%. Lịch sử thông báo gửi đến Assistant được ghi nhận thành công trong DB.
 

@@ -103,15 +103,15 @@ Xác nhận không thể tạo/sửa/xóa task khi chương truyện chứa nó 
 ## 6. Test Case 6: Khóa thao tác Phân vùng (Page Regions) trên Chapter đã khóa
 
 ### Mục đích:
-Đảm bảo không thể quét AI lại phân vùng, tạo phân vùng thủ công hoặc xóa phân vùng trên trang truyện đã khóa.
+Đảm bảo không thể tạo phân vùng thủ công hoặc xóa phân vùng trên trang truyện đã khóa.
 
 ### Các bước thực hiện:
 1. Đăng nhập bằng tài khoản **Mangaka**.
 2. Truy cập trang chi tiết một trang truyện thuộc chapter đã khóa.
 
 ### Kết quả mong đợi (Pass Criteria):
-- Nút **"Vẽ thủ công"** và nút **"Quét lại"** (hoặc **"Chạy AI phân đoạn vùng"**) đều biến mất khỏi giao diện Trình phân đoạn AI.
-- Thử gửi POST request tạo phân vùng thủ công hoặc request quét AI trực tiếp đến backend. Xác nhận backend chặn và báo lỗi phân quyền hoặc trang truyện không hợp lệ.
+- Nút **"Bắt đầu vẽ phân vùng"** và nút xóa phân vùng biến mất hoặc bị vô hiệu hóa khỏi giao diện.
+- Thử gửi POST request tạo phân vùng thủ công trực tiếp đến backend. Xác nhận backend chặn và báo lỗi phân quyền hoặc trang truyện không hợp lệ.
 
 ---
 

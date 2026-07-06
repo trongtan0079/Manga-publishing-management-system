@@ -89,9 +89,9 @@
 
 ### 🖼️ 2.5. State Machine Diagram cho Page Region (Biểu đồ trạng thái Phân vùng)
 * **Tệp thiết kế:** [UML/State_Machine_Page_Region.puml](file:///d:/XAMPP/htdocs/Manga-publishing-management-system/UML/State_Machine_Page_Region.puml)
-* **Mục đích:** Mô tả chi tiết vòng đời và sự đồng bộ trạng thái của một Phân vùng tranh (`PageRegion`) vẽ thủ công hoặc AI quét.
+* **Mục đích:** Mô tả chi tiết vòng đời và sự đồng bộ trạng thái của một Phân vùng tranh (`PageRegion`) vẽ thủ công.
 * **Liên hệ với Code và DB:**
-  * Khởi tạo ở trạng thái `pending`: `PageRegionController::runAI()` (AI) hoặc `PageRegionController::store()` (Vẽ tay).
+  * Khởi tạo ở trạng thái `pending`: `PageRegionController::store()` (Vẽ tay thủ công).
   * Chuyển sang `in_progress` khi Mangaka giao Task tương ứng: `TaskController::store()`.
   * Hoàn thành (`completed`) khi Mangaka phê duyệt bản thảo của trợ lý: `ReviewController::store()`.
   * Ánh xạ 1-1 với cột `page_regions.status` kiểu dữ liệu `ENUM('pending', 'in_progress', 'completed')`.

@@ -43,8 +43,8 @@ Khi hệ thống có nhiều tác giả (Mangaka), trợ lý (Assistant), biên 
 
 ### Bước 2: Sáng tác & Phân chia công việc cho Trợ lý
 * **Mangaka A** tạo tiếp **Chapter 1** và upload **Trang vẽ số 1** (Page 1) lên hệ thống.
-* Mangaka A nhấn nút **"Chạy AI phân đoạn vùng"**. Hệ thống AI tự động phát hiện và đánh dấu 3 vùng trên Page 1 (ví dụ: Vùng #1 là bong bóng thoại, Vùng #2 là khung nền nhân vật).
-* Mangaka A chọn Vùng #2 (Khung nền), nhấn nút **"Giao việc trên vùng này"** để tạo một Task vẽ nền hậu cảnh. 
+* Mangaka A sử dụng chuột để vẽ khoanh các phân vùng trực tiếp trên Trang vẽ số 1 (ví dụ: Vùng #1 là bong bóng thoại vẽ tay, Vùng #2 là khung nền nhân vật cần vẽ). Hệ thống lưu tọa độ các phân vùng thủ công này vào CSDL.
+* Mangaka A chọn Vùng #2 (Khung nền), nhấn nút **"Giao việc"** để tạo một Task vẽ nền hậu cảnh. 
 * Trong form tạo Task, Mangaka A chọn giao cho **Assistant B** và đặt hạn chót (Deadline).
 
 ### Bước 3: Trợ lý làm việc & Nộp bài
