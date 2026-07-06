@@ -54,9 +54,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <h5 class="fw-bold mb-3 text-slate-700"><i class="fas fa-layer-group text-primary me-2"></i>Thống kê Tổng quan</h5>
-<!-- Row 1: Thống kê chính (4 cards) -->
 <div class="row g-4 mb-4">
-    <div class="col-xl-3 col-md-6">
+    <!-- Card 1: Tổng User -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=user&action=index" class="stat-card-link">
             <div class="card stat-card primary h-100">
                 <div class="card-body">
@@ -71,7 +71,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <!-- Card 2: Tổng Series -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
             <div class="card stat-card success h-100">
                 <div class="card-body">
@@ -86,7 +87,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <!-- Card 3: Tổng Chapter -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
             <div class="card stat-card warning h-100">
                 <div class="card-body">
@@ -101,7 +103,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-    <div class="col-xl-3 col-md-6">
+    <!-- Card 4: Tổng Page -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
             <div class="card stat-card danger h-100">
                 <div class="card-body">
@@ -116,11 +119,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-</div>
-
-<!-- Row 2: Thống kê phụ (5 cards) -->
-<div class="row g-4 mb-4">
-    <div class="col-xl col-lg-4 col-md-6">
+    <!-- Card 5: Tổng Task -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
             <div class="card stat-card info h-100">
                 <div class="card-body">
@@ -135,7 +135,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-    <div class="col-xl col-lg-4 col-md-6">
+    <!-- Card 6: Tổng Bản thảo -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
             <div class="card stat-card primary h-100">
                 <div class="card-body">
@@ -150,7 +151,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-    <div class="col-xl col-lg-4 col-md-6">
+    <!-- Card 7: Tổng Đánh giá -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
             <div class="card stat-card success h-100">
                 <div class="card-body">
@@ -165,22 +167,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-    <div class="col-xl col-lg-4 col-md-6">
-        <a href="<?= BASE_PATH ?>/index.php?controller=notification&action=index" class="stat-card-link">
-            <div class="card stat-card warning h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Tổng Thông báo</div>
-                            <div class="h3 mb-0 fw-bold text-white"><?= $totalNotifications ?></div>
-                        </div>
-                        <div class="stat-icon warning" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-bell"></i></div>
-                    </div>
-                </div>
-            </div>
-        </a>
-    </div>
-    <div class="col-xl col-lg-4 col-md-6">
+    <!-- Card 8: Tổng Xếp hạng -->
+    <div class="col-xl-4 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
             <div class="card stat-card danger h-100">
                 <div class="card-body">
@@ -190,6 +178,22 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <div class="h3 mb-0 fw-bold text-white"><?= $totalRankings ?></div>
                         </div>
                         <div class="stat-icon danger" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-trophy"></i></div>
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <!-- Card 9: Tổng Thông báo -->
+    <div class="col-xl-4 col-md-6">
+        <a href="<?= BASE_PATH ?>/index.php?controller=notification&action=index" class="stat-card-link">
+            <div class="card stat-card warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Tổng Thông báo</div>
+                            <div class="h3 mb-0 fw-bold text-white"><?= $totalNotifications ?></div>
+                        </div>
+                        <div class="stat-icon warning" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-bell"></i></div>
                     </div>
                 </div>
             </div>
