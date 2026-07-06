@@ -42,6 +42,7 @@ CREATE TABLE series (
     status ENUM('planning', 'ongoing', 'completed', 'canceled', 'suspended') DEFAULT 'planning',
     publish_type VARCHAR(50) DEFAULT 'weekly',
     cover_image VARCHAR(255),
+    proposal_file VARCHAR(255),
     editor_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
