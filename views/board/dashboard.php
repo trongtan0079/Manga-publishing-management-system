@@ -25,7 +25,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <h2 class="h3 mb-1">Báo cáo Ban Giám Đốc</h2>
         <p class="text-muted text-xs mb-0">Theo dõi doanh thu, bảng xếp hạng và toàn cảnh hoạt động xuất bản.</p>
     </div>
-    <button class="btn btn-secondary shadow-sm" disabled><i class="fas fa-file-invoice-dollar me-2"></i>Tải Báo cáo (Chưa khả dụng)</button>
+    <a href="<?= BASE_PATH ?>/index.php?controller=dashboard&action=exportRanking" class="btn btn-success shadow-sm"><i class="fas fa-file-excel me-2"></i>Tải Báo cáo Xếp Hạng (CSV)</a>
 </div>
 
 <style>
@@ -83,7 +83,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
     <!-- Card 3: Ungraded Series -->
     <div class="col-xl-3 col-md-6">
-        <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
+        <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=create" class="stat-card-link">
             <div class="card stat-card warning h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -100,19 +100,47 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
     <!-- Card 4: Top Ranking Series -->
     <div class="col-xl-3 col-md-6">
-        <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=index" class="stat-card-link">
+        <?php 
+        $topSeriesUrl = BASE_PATH . '/index.php?controller=seriesRanking&action=index';
+        if (!empty($top5Series)) {
+            $topSeriesUrl = BASE_PATH . '/index.php?controller=series&action=show&id=' . $top5Series[0]['series_id'];
+        }
+        ?>
+        <a href="<?= $topSeriesUrl ?>" class="stat-card-link">
             <div class="card stat-card success h-100">
                 <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <div class="overflow-hidden flex-grow-1 me-2">
                             <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Series Hạng 1</div>
-                            <div class="h5 mb-0 fw-bold text-white text-truncate" style="max-width: 120px;" title="<?= htmlspecialchars($topRankingSeriesName) ?>"><?= htmlspecialchars($topRankingSeriesName) ?></div>
+                            <div class="h5 mb-0 fw-bold text-white text-truncate" title="<?= htmlspecialchars($topRankingSeriesName) ?>"><?= htmlspecialchars($topRankingSeriesName) ?></div>
                         </div>
-                        <div class="stat-icon success" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-trophy"></i></div>
+                        <div class="stat-icon success flex-shrink-0" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-trophy"></i></div>
                     </div>
                 </div>
             </div>
         </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white border-bottom py-3">
+                <h6 class="m-0 fw-bold"><i class="fas fa-chart-bar text-primary me-2"></i>Biểu đồ Điểm số Xếp hạng (Kỳ: <?= htmlspecialchars($latestPeriod ?? 'Chưa có') ?>)</h6>
+            </div>
+            <div class="card-body">
+                <?php if (!empty($chartSeriesData)): ?>
+                    <div style="height: 280px; position: relative;">
+                        <canvas id="chartSeriesRankings"></canvas>
+                    </div>
+                <?php else: ?>
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-chart-bar fa-3x mb-3 text-secondary" style="opacity: 0.3;"></i>
+                        <p class="mb-0 small">Chưa có dữ liệu xếp hạng kỳ này để hiển thị biểu đồ</p>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -168,5 +196,70 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 </div>
 
+<?php if (!empty($chartSeriesData)): ?>
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const canvas = document.getElementById('chartSeriesRankings');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            
+            const labels = <?= json_encode(array_column($chartSeriesData, 'series_title')) ?>;
+            const data = <?= json_encode(array_map(function($item) { return (float)$item['score']; }, $chartSeriesData)) ?>;
+            
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Điểm số xếp hạng',
+                        data: data,
+                        backgroundColor: 'rgba(99, 102, 241, 0.75)', // Indigo style color
+                        borderColor: 'rgb(99, 102, 241)',
+                        borderWidth: 1,
+                        borderRadius: 6,
+                        barPercentage: 0.5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return ' ' + context.raw + ' điểm';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return value + ' đ';
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

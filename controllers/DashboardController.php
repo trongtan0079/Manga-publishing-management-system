@@ -342,11 +342,15 @@ class DashboardController extends BaseController {
         $topRankingSeriesName = "Chưa có dữ liệu";
         $top5Series = [];
         $bottom5Series = [];
+        $chartSeriesData = [];
         
         if ($latestPeriod) {
             $evaluatedSeries = $rankingModel->getSeriesCountByPeriod($latestPeriod);
             $top5Series = $rankingModel->getTopSeriesByPeriod($latestPeriod, 5);
             $bottom5Series = $rankingModel->getBottomSeriesByPeriod($latestPeriod, 5);
+            // Lấy tối đa 10 truyện để vẽ biểu đồ
+            $chartSeriesData = $rankingModel->getTopSeriesByPeriod($latestPeriod, 10);
+            
             // Lấy tên truyện đứng hạng 1
             if (!empty($top5Series)) {
                 $topRankingSeriesName = $top5Series[0]['series_title'];
@@ -354,10 +358,54 @@ class DashboardController extends BaseController {
         }
         
         $seriesModel = new Series();
-        $totalSeriesCount = $seriesModel->countAll();
-        $ungradedSeries = max(0, $totalSeriesCount - $evaluatedSeries);
+        $conn = $seriesModel->getConnection();
+        $stmtActive = $conn->prepare("SELECT COUNT(*) FROM series WHERE status IN ('ongoing', 'completed', 'suspended')");
+        $stmtActive->execute();
+        $totalActiveSeriesCount = (int)$stmtActive->fetchColumn();
+        $ungradedSeries = max(0, $totalActiveSeriesCount - $evaluatedSeries);
         
         require_once __DIR__ . '/../views/board/dashboard.php';
+    }
+
+    /**
+     * Xuất báo cáo xếp hạng dưới dạng file CSV (Dành cho Board)
+     */
+    public function exportRanking() {
+        \requireRole('board');
+        
+        $rankingModel = new SeriesRanking();
+        $latestPeriod = $rankingModel->getLatestPeriod();
+        
+        if (!$latestPeriod) {
+            $_SESSION['error'] = 'Chưa có dữ liệu xếp hạng nào để xuất báo cáo.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=board');
+            exit;
+        }
+        
+        $rankings = $rankingModel->getTopSeriesByPeriod($latestPeriod, 100);
+        
+        $filename = 'bao_cao_xep_hang_' . $latestPeriod . '_' . date('Ymd_His') . '.csv';
+        header('Content-Type: text/csv; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $filename . '"');
+        
+        $output = fopen('php://output', 'w');
+        
+        // Thêm UTF-8 BOM
+        fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+        
+        fputcsv($output, ['Thứ hạng', 'Tên truyện', 'Điểm số', 'Kỳ đánh giá (Ngày bắt đầu)']);
+        
+        foreach ($rankings as $row) {
+            fputcsv($output, [
+                $row['rank_position'],
+                $row['series_title'],
+                $row['score'],
+                $row['period_start_date']
+            ]);
+        }
+        
+        fclose($output);
+        exit;
     }
 
     /**
