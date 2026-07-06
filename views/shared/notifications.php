@@ -63,10 +63,16 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                         </div>
                         <div class="d-flex flex-column justify-content-center w-100 ms-2">
                             <div class="d-flex w-100 justify-content-between align-items-center mb-1">
-                                <strong class="mb-1 text-dark"><?= $typeLabel ?></strong>
+                                <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>" class="text-decoration-none text-dark hover-primary-text">
+                                    <strong class="mb-1"><?= $typeLabel ?></strong>
+                                </a>
                                 <small class="text-muted" style="font-size: 0.8rem;"><?= date('d/m/Y H:i', strtotime($notif['created_at'])) ?></small>
                             </div>
-                            <p class="mb-1 text-dark fw-normal"><?= htmlspecialchars($notif['message']) ?></p>
+                            <p class="mb-1 fw-normal">
+                                <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>" class="text-decoration-none text-secondary hover-primary-text" style="font-size: 0.9rem;">
+                                    <?= htmlspecialchars($notif['message']) ?>
+                                </a>
+                            </p>
                         </div>
                         <div class="d-flex align-items-center ms-3">
                             <?php if (!$notif['is_read']): ?>
@@ -92,4 +98,14 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
     </div>
 </div>
 
+<style>
+.hover-primary-text {
+    transition: color 0.15s ease-in-out;
+}
+.hover-primary-text:hover {
+    color: var(--primary, #6366f1) !important;
+}
+</style>
+
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
+

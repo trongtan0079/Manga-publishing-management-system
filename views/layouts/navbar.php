@@ -62,7 +62,7 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                         <?php if (!empty($latestNotifications)): ?>
                             <?php foreach ($latestNotifications as $notif): ?>
                                 <li>
-                                    <a class="dropdown-item py-3 border-bottom <?= !$notif['is_read'] ? 'bg-light' : '' ?> text-wrap" href="#">
+                                    <a class="dropdown-item py-3 border-bottom <?= !$notif['is_read'] ? 'bg-light' : '' ?> text-wrap" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="fw-bold text-dark" style="font-size: 0.85rem;">
                                                 <?php if (!$notif['is_read']): ?>
