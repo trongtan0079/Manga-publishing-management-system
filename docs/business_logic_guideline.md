@@ -43,8 +43,8 @@ graph TD
 1. **Mangaka** kiểm tra bài nộp của Assistant trực tiếp trên giao diện chi tiết trang truyện:
    * **Đồng ý phê duyệt (Approve):** Đánh giá điểm chuyên môn (thang điểm 10) và viết bình luận. Task chuyển sang **Hoàn thành (`completed`)**.
    * **Yêu cầu chỉnh sửa (Reject):** Viết ghi chú những chỗ vẽ lỗi. Task tự động trả về `pending`, phân vùng trang truyện cũng chuyển về chờ vẽ để Assistant làm lại.
-2. Khi toàn bộ các trang và tất cả các Task nhỏ của trợ lý thuộc Chapter đó đã được Mangaka duyệt hoàn tất, trang vẽ gốc sẽ tự động chuyển sang trạng thái **Đã hoàn thiện (`finished`)**.
-3. **Mangaka** đóng gói toàn bộ chương truyện (tải lên file ZIP bản thảo đầy đủ) và nhấn **"Nộp Chapter lên Biên tập viên"**. Trạng thái Chapter chuyển sang **Đang chờ duyệt (`reviewing`)**.
+2. Khi toàn bộ các trang và tất cả các Task nhỏ của trợ lý thuộc Chapter đó đã được Mangaka duyệt hoàn tất, **Mangaka** sẽ lấy các lớp/phần vẽ rời rạc của Assistant để hợp nhất (merge) thành trang vẽ hoàn chỉnh cuối cùng bằng phần mềm đồ họa chuyên dụng, rồi cập nhật lại hình ảnh trang truyện hoàn chỉnh lên hệ thống. Trang vẽ gốc sẽ tự động chuyển sang trạng thái **Đã hoàn thiện (`approved` / `finished`)**.
+3. **Mangaka** đóng gói toàn bộ chương truyện (gồm các trang đã hoàn thiện) dưới dạng tệp tin nén **`.zip`** bản thảo đầy đủ (hoặc file **`.pdf`** tổng hợp) và nhấn **"Nộp Chapter lên Biên tập viên"**. Trạng thái Chapter chuyển sang **Đang chờ duyệt (`reviewing`)**.
 4. Hệ thống tự động gửi thông báo nộp bản thảo tới **Biên tập viên chuyên trách (Tantou Editor)** được gán phụ trách bộ truyện đó để họ vào duyệt. (Nếu bộ truyện chưa được gán Editor cụ thể, thông báo sẽ gửi tới toàn bộ các Editor của tòa soạn làm phương án dự phòng).
 5. **Tantou Editor** được gán đăng nhập, xem trước ảnh bản thảo từng trang hoặc tải file ZIP về kiểm duyệt chất lượng nội dung, kịch bản, lời thoại:
    * **Từ chối (Reject):** Viết nhận xét chi tiết lỗi kịch bản. Trạng thái Chapter tự động quay lại **Đang vẽ (`drawing`)** để tác giả và trợ lý mở khóa vào sửa chữa.
