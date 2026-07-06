@@ -90,6 +90,14 @@ class TaskController extends BaseController
         // Lấy toàn bộ task của người dùng này qua hàm findByAssistantId
         $tasks = $this->taskModel->findByAssistantId($_SESSION['user_id']);
         
+        // Hỗ trợ lọc trạng thái theo query parameter
+        $status = $_GET['status'] ?? null;
+        if ($status && in_array($status, ['pending', 'in_progress', 'completed'])) {
+            $tasks = array_filter($tasks, function($t) use ($status) {
+                return $t['status'] === $status;
+            });
+        }
+        
         // Nạp view để hiển thị giao diện danh sách task
         require __DIR__ . '/../views/assistant/task_list.php';
     }
@@ -476,6 +484,30 @@ class TaskController extends BaseController
                 // 2. Cập nhật trạng thái phân vùng mới (nếu có) thành 'in_progress'
                 if ($pageRegionId) {
                     $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
+                }
+            }
+
+            // Gửi thông báo đến assistant nếu không phải bản nháp
+            $page = $this->pageModel->findById($task['page_id']);
+            $isDraft = false;
+            if ($page) {
+                $chapter = $this->chapterModel->findById($page['chapter_id']);
+                if ($chapter && $chapter['status'] === 'drafting') {
+                    $isDraft = true;
+                }
+            }
+            if (!$isDraft) {
+                $this->notificationModel->createNotification(
+                    $assistantId,
+                    'task_assigned',
+                    "Mangaka " . $_SESSION['full_name'] . " đã cập nhật thông tin công việc: " . $title
+                );
+                if ($assistantId != $task['assistant_id'] && !empty($task['assistant_id'])) {
+                    $this->notificationModel->createNotification(
+                        $task['assistant_id'],
+                        'task_assigned',
+                        "Công việc '" . $task['title'] . "' trước đó của bạn đã được chuyển giao cho người khác."
+                    );
                 }
             }
 

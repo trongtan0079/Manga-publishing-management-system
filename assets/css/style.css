@@ -573,6 +573,10 @@ main > .container-fluid {
     transition: all var(--transition);
 }
 
+.form-select {
+    padding-right: 2.25rem;
+}
+
 .form-control:focus,
 .form-select:focus {
     background-color: #ffffff;
