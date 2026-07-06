@@ -56,7 +56,7 @@ class Task extends Model {
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
                 LEFT JOIN page_regions r ON t.page_region_id = r.region_id
-                WHERE t.assistant_id = :assistant_id AND c.status != 'drafting'
+                WHERE t.assistant_id = :assistant_id AND c.status != 'drafting' AND s.status != 'planning'
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':assistant_id', $assistantId);
@@ -76,7 +76,7 @@ class Task extends Model {
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
                 LEFT JOIN page_regions r ON t.page_region_id = r.region_id
-                WHERE t.assistant_id = :assistant_id AND t.status != 'completed' AND c.status != 'drafting'
+                WHERE t.assistant_id = :assistant_id AND t.status != 'completed' AND c.status != 'drafting' AND s.status != 'planning'
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':assistant_id', $assistantId);

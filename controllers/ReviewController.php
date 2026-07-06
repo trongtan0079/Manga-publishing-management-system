@@ -205,28 +205,36 @@ class ReviewController extends BaseController
 
                 // Đồng thời cập nhật trạng thái PageRegion liên kết thành 'completed'
                 $taskDetail = $taskModel->findById($submission['task_id']);
-                if ($taskDetail && !empty($taskDetail['page_region_id'])) {
+                if ($taskDetail) {
+                    $pageId = $taskDetail['page_id'];
                     require_once __DIR__ . '/../models/PageRegion.php';
                     $pageRegionModel = new \PageRegion();
-                    $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'completed']);
 
-                    // Kiểm tra xem tất cả các phân vùng của trang này đã Completed hết chưa
-                    $pageId = $taskDetail['page_id'];
-                    $regions = $pageRegionModel->findByPageId($pageId);
-                    $allCompleted = true;
-                    if (!empty($regions)) {
-                        foreach ($regions as $r) {
-                            if ($r['status'] !== 'completed') {
-                                $allCompleted = false;
-                                break;
-                            }
-                        }
-                    } else {
-                        $allCompleted = false;
+                    if (!empty($taskDetail['page_region_id'])) {
+                        $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'completed']);
                     }
 
-                    // Nếu tất cả phân vùng đã xong, tự động cập nhật trạng thái trang truyện thành 'approved'
-                    if ($allCompleted) {
+                    // Tự động duyệt trang vẽ (Page status = 'approved') nếu tất cả các Task của trang này đã hoàn thành
+                    $tasksOnPage = $taskModel->findByPageId($pageId);
+                    $allTasksCompleted = true;
+                    foreach ($tasksOnPage as $t) {
+                        if ($t['status'] !== 'completed') {
+                            $allTasksCompleted = false;
+                            break;
+                        }
+                    }
+
+                    // Đồng thời kiểm tra xem tất cả các phân vùng của trang này đã hoàn thành chưa (để đồng bộ)
+                    $regions = $pageRegionModel->findByPageId($pageId);
+                    $allRegionsCompleted = true;
+                    foreach ($regions as $r) {
+                        if ($r['status'] !== 'completed') {
+                            $allRegionsCompleted = false;
+                            break;
+                        }
+                    }
+
+                    if ($allTasksCompleted && $allRegionsCompleted) {
                         require_once __DIR__ . '/../models/Page.php';
                         $pageModel = new \Page();
                         $pageModel->update($pageId, ['status' => 'approved']);
@@ -234,11 +242,16 @@ class ReviewController extends BaseController
                 }
             }
 
-            // Nếu là bản thảo chương truyện (Chapter) và được duyệt, cập nhật trạng thái Chapter thành 'approved'
-            if ($submission['chapter_id'] && $status === 'approved') {
+            // Nếu là bản thảo chương truyện (Chapter)
+            if ($submission['chapter_id']) {
                 require_once __DIR__ . '/../models/Chapter.php';
                 $chapterModel = new \Chapter();
-                $chapterModel->update($submission['chapter_id'], ['status' => 'approved']);
+                if ($status === 'approved') {
+                    $chapterModel->update($submission['chapter_id'], ['status' => 'approved']);
+                } else {
+                    // Nếu bị từ chối (rejected), tự động chuyển trạng thái Chapter về 'drawing' để Mangaka chỉnh sửa
+                    $chapterModel->update($submission['chapter_id'], ['status' => 'drawing']);
+                }
             }
 
             $_SESSION['success'] = 'Đã đánh giá bản thảo thành công.';

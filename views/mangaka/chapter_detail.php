@@ -9,7 +9,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
-$isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published');
+$isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'approved' || $chapter['status'] === 'published');
 ?>
 
 <?php if (isset($_SESSION['success'])): ?>

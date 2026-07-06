@@ -63,10 +63,10 @@ class SubmissionController extends BaseController
             $tasks = $this->taskModel->findActiveByAssistantId($userId);
             require_once __DIR__ . '/../views/assistant/upload_submission.php';
         } elseif ($role === 'mangaka') {
-            // Chỉ hiển thị chapter thuộc series của mangaka và chưa được duyệt/xuất bản
+            // Chỉ hiển thị chapter thuộc series của mangaka và chưa được duyệt/xuất bản, và chưa ở trạng thái reviewing
             $allChapters = $this->chapterModel->findByMangakaId($userId);
             $chapters = array_filter($allChapters, function($c) {
-                return $c['status'] !== 'approved' && $c['status'] !== 'published';
+                return !in_array($c['status'], ['reviewing', 'approved', 'published']);
             });
             require_once __DIR__ . '/../views/mangaka/submission_create.php';
         } else {
@@ -122,8 +122,8 @@ class SubmissionController extends BaseController
                 require_once __DIR__ . '/../models/Chapter.php';
                 $chapterModel = new \Chapter();
                 $chapter = $chapterModel->findById($page['chapter_id']);
-                if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
-                    $_SESSION['error'] = 'Chương truyện chứa công việc này đã được phê duyệt hoặc xuất bản, không thể nộp bản thảo.';
+                if ($chapter && in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                    $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã được phê duyệt hoặc xuất bản, không thể nộp bản thảo.';
                     header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                     exit;
                 }
@@ -153,8 +153,25 @@ class SubmissionController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }
-            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
-                $_SESSION['error'] = 'Chương truyện này đã được phê duyệt hoặc xuất bản, không thể nộp thêm bản thảo.';
+            if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                $_SESSION['error'] = 'Chương truyện này đang chờ duyệt, đã được phê duyệt hoặc xuất bản, không thể nộp thêm bản thảo.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+
+            // Kiểm tra xem có task nào chưa hoàn thành thuộc chapter này không
+            require_once __DIR__ . '/../models/Task.php';
+            $taskModel = new \Task();
+            $tasks = $taskModel->findTasksByChapterId($chapterId);
+            $hasUncompleted = false;
+            foreach ($tasks as $t) {
+                if ($t['status'] !== 'completed') {
+                    $hasUncompleted = true;
+                    break;
+                }
+            }
+            if ($hasUncompleted) {
+                $_SESSION['error'] = 'Không thể nộp bản thảo chương truyện khi vẫn còn công việc (Task) chưa hoàn thành của các Trợ lý.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }

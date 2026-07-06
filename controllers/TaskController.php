@@ -118,8 +118,8 @@ class TaskController extends BaseController
         }
 
         $chapter = $ownership['chapter'];
-        if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
-            $_SESSION['error'] = 'Chương truyện chứa trang này đã được duyệt hoặc xuất bản, không thể giao thêm việc.';
+        if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+            $_SESSION['error'] = 'Chương truyện chứa trang này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể giao thêm việc.';
             header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapter['chapter_id']);
             exit;
         }
@@ -180,8 +180,8 @@ class TaskController extends BaseController
                 exit;
             }
             $chapter = $ownership['chapter'];
-            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
-                $_SESSION['error'] = 'Chương truyện chứa trang này đã được duyệt hoặc xuất bản, không thể giao thêm việc.';
+            if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                $_SESSION['error'] = 'Chương truyện chứa trang này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể giao thêm việc.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapter['chapter_id']);
                 exit;
             }
@@ -307,8 +307,8 @@ class TaskController extends BaseController
         $page = $this->pageModel->findById($task['page_id']);
         if ($page) {
             $chapter = $this->chapterModel->findById($page['chapter_id']);
-            if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
-                $_SESSION['error'] = 'Chương truyện chứa công việc này đã được duyệt hoặc xuất bản, không thể sửa công việc.';
+            if ($chapter && in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể sửa công việc.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                 exit;
             }
@@ -354,8 +354,8 @@ class TaskController extends BaseController
         $page = $this->pageModel->findById($task['page_id']);
         if ($page) {
             $chapter = $this->chapterModel->findById($page['chapter_id']);
-            if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
-                $_SESSION['error'] = 'Chương truyện chứa công việc này đã được duyệt hoặc xuất bản, không thể cập nhật.';
+            if ($chapter && in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể cập nhật.';
                 if ($_SESSION['role_name'] === 'assistant') {
                     header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
                 } else {
@@ -465,11 +465,18 @@ class TaskController extends BaseController
                 'due_date' => $formattedDueDate
             ]);
 
-            // Đồng thời cập nhật trạng thái của PageRegion liên kết thành 'in_progress' nếu có đổi vùng
-            if ($pageRegionId && $pageRegionId != $task['page_region_id']) {
+            // Đồng thời cập nhật trạng thái của PageRegion nếu có đổi vùng
+            if ($pageRegionId != $task['page_region_id']) {
                 require_once __DIR__ . '/../models/PageRegion.php';
                 $pageRegionModel = new \PageRegion();
-                $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
+                // 1. Trả trạng thái phân vùng cũ (nếu có) về 'pending'
+                if ($task['page_region_id']) {
+                    $pageRegionModel->update($task['page_region_id'], ['status' => 'pending']);
+                }
+                // 2. Cập nhật trạng thái phân vùng mới (nếu có) thành 'in_progress'
+                if ($pageRegionId) {
+                    $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
+                }
             }
 
             $_SESSION['success'] = 'Cập nhật task thành công.';
@@ -532,8 +539,8 @@ class TaskController extends BaseController
             $page = $this->pageModel->findById($task['page_id']);
             if ($page) {
                 $chapter = $this->chapterModel->findById($page['chapter_id']);
-                if ($chapter && ($chapter['status'] === 'approved' || $chapter['status'] === 'published')) {
-                    $_SESSION['error'] = 'Chương truyện chứa công việc này đã được duyệt hoặc xuất bản, không thể xóa.';
+                if ($chapter && in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                    $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể xóa.';
                     header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                     exit;
                 }
