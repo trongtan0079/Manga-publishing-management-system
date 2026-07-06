@@ -290,6 +290,7 @@ body.sidebar-collapsed .sidebar-custom .nav-link i {
 }
 
 body.sidebar-collapsed .sidebar-custom .nav-link span,
+body.sidebar-collapsed .sidebar-custom .nav-link div,
 body.sidebar-collapsed .sidebar-custom .nav-category,
 body.sidebar-collapsed .sidebar-custom .mt-auto {
     display: none !important;
