@@ -30,11 +30,18 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <?php endif; ?>
 
 <!-- Tiêu đề trang và Nút thêm mới -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="h3 mb-0 text-dark fw-bold">Dự án Truyện</h2>
-    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
-    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Tạo Truyện Mới</a>
-    <?php endif; ?>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="h3 mb-0 text-dark fw-bold">Dự án Truyện</h2>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="<?= BASE_PATH ?>/index.php?controller=dashboard&action=<?= htmlspecialchars($_SESSION['role_name'] ?? 'mangaka') ?>" class="btn btn-outline-secondary shadow-sm">
+            <i class="fas fa-arrow-left me-2"></i>Quay lại Bảng điều khiển
+        </a>
+        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=create" class="btn btn-primary shadow-sm"><i class="fas fa-plus me-2"></i>Tạo Truyện Mới</a>
+        <?php endif; ?>
+    </div>
 </div>
 
 <!-- Bảng hiển thị danh sách bộ truyện -->
@@ -79,7 +86,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     break;
                                 case 'ongoing': $badgeClass = 'bg-primary'; $statusLabel = 'Đang triển khai'; break;
                                 case 'completed': $badgeClass = 'bg-success'; $statusLabel = 'Hoàn thành'; break;
-                                case 'canceled': $badgeClass = 'bg-danger'; $statusLabel = 'Đã hủy'; break;
+                                case 'canceled': 
+                                    $badgeClass = 'bg-danger'; 
+                                    $statusLabel = empty($series['editor_id']) ? 'Từ chối' : 'Đã hủy'; 
+                                    break;
                                 case 'suspended': $badgeClass = 'bg-warning text-dark'; $statusLabel = 'Tạm ngưng'; break;
                             }
                             ?>

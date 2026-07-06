@@ -66,7 +66,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <!-- Chapter đang thực hiện -->
     <div class="col-xl-3 col-md-6">
-        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
+        <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=index" class="stat-card-link">
             <div class="card stat-card primary h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -96,14 +96,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </a>
     </div>
-    <!-- Bản thảo chờ duyệt -->
+    <!-- Duyệt bài Trợ lý -->
     <div class="col-xl-3 col-md-6">
         <a href="<?= BASE_PATH ?>/index.php?controller=review&action=index" class="stat-card-link">
             <div class="card stat-card warning h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Bản thảo chờ duyệt</div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Duyệt bài Trợ lý</div>
                             <div class="h2 mb-0 fw-bold text-white"><?= isset($pendingReviews) ? $pendingReviews : 0 ?></div>
                         </div>
                         <div class="stat-icon warning" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-clock"></i></div>
@@ -114,7 +114,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <!-- Tổng Pages -->
     <div class="col-xl-3 col-md-6">
-        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
+        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=index" class="stat-card-link">
             <div class="card stat-card primary h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -130,7 +130,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <!-- Tổng Tasks -->
     <div class="col-xl-3 col-md-6">
-        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="stat-card-link">
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=index" class="stat-card-link">
             <div class="card stat-card info h-100">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
@@ -205,7 +205,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 </div>
 
 <!-- Hàng 2: Tiến độ Công việc Trợ lý -->
-<div class="row mb-4">
+<div class="row mb-4" id="tasks-progress-section">
     <div class="col-lg-12">
         <div class="card shadow-sm border-0">
             <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">

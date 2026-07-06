@@ -31,7 +31,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <!-- Thanh điều hướng cơ bản -->
 <div class="mb-4 d-flex justify-content-between align-items-center">
-    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="btn btn-outline-secondary shadow-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
+    <?php
+    $backUrl = BASE_PATH . '/index.php?controller=series&action=index';
+    if (isset($_SESSION['role_name'])) {
+        if ($_SESSION['role_name'] === 'board') {
+            $backUrl = BASE_PATH . '/index.php?controller=series&action=publish';
+        } elseif ($_SESSION['role_name'] === 'editor') {
+            $backUrl = BASE_PATH . '/index.php?controller=dashboard&action=editor';
+        }
+    }
+    ?>
+    <a href="<?= $backUrl ?>" class="btn btn-outline-secondary shadow-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
     
     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div class="d-flex gap-2">
@@ -42,9 +52,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </button>
         </form>
         <?php endif; ?>
+        <?php if (!in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning shadow-sm text-dark">
             <i class="fas fa-edit me-2"></i>Sửa Truyện
         </a>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 </div>
@@ -80,7 +92,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         break;
                     case 'ongoing': $badgeClass = 'bg-primary'; $sLabel = 'Đang triển khai'; break;
                     case 'completed': $badgeClass = 'bg-success'; $sLabel = 'Hoàn thành'; break;
-                    case 'canceled': $badgeClass = 'bg-danger'; $sLabel = 'Đã hủy'; break;
+                    case 'canceled': 
+                        $badgeClass = 'bg-danger'; 
+                        $sLabel = empty($series['editor_id']) ? 'Từ chối' : 'Đã hủy'; 
+                        break;
                     case 'suspended': $badgeClass = 'bg-warning text-dark'; $sLabel = 'Tạm ngưng'; break;
                 }
                 ?>
@@ -104,6 +119,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <strong>Cập nhật lần cuối:</strong> <br>
                     <?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?>
                 </p>
+                
+                <?php if (!empty($series['proposal_file'])): ?>
+                <div class="mt-3 border-top pt-3">
+                    <p class="card-text mb-1"><strong>Tài liệu đề xuất:</strong></p>
+                    <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-sm btn-outline-primary w-100" target="_blank">
+                        <i class="fas fa-file-download me-2"></i>Tải bản thảo sơ bộ
+                    </a>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -176,7 +200,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></td>
                                         <td class="text-end">
                                             <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">Xem</a>
-                                            <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                                            <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                                             <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                             <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
                                                 <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
