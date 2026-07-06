@@ -105,3 +105,46 @@ Khi Tantou Editor từ chối phê duyệt chapter vì lý do chất lượng:
 * **Biên tập viên (Tantou Editor):** Xem tiến độ thời gian thực của studio, duyệt/từ chối chương truyện kèm viết nhận xét lỗi kịch bản.
 * **Hội đồng Biên tập (Editorial Board):** Phê duyệt đề xuất phát hành series mới, nhập số liệu bình chọn độc giả và theo dõi bảng xếp hạng.
 * **Quản trị viên (Admin):** Cấp quyền người dùng và giám sát nhật ký audit log của toàn hệ thống.
+
+---
+
+## 💡 4. CHÚ GIẢI THUẬT NGỮ & LƯU Ý HỆ THỐNG QUAN TRỌNG (Glossary & Notes)
+
+Để bảo vệ và thuyết trình xuất sắc trước Hội đồng phản biện, cần ghi nhớ các chú giải và cơ chế vận hành đặc thù dưới đây:
+
+### 🏷️ 4.1 Chú giải các Trạng thái Vòng đời (State Definitions)
+
+#### 1. Bộ truyện (Series):
+*   **Bản thảo nháp (`planning`):** Ý tưởng phác thảo ban đầu của Tác giả. Ẩn hoàn toàn khỏi Dashboard của Editor và Board. Chặn truy cập URL bypass.
+*   **Chờ duyệt (`proposed`):** Đang nộp lên Hội đồng chờ xét duyệt phát hành. Tác giả bị khóa chỉnh sửa hồ sơ tạm thời khi đang chờ duyệt.
+*   **Đang xuất bản (`ongoing`):** Đã duyệt phát hành. Bắt buộc phải cấu hình lịch xuất bản (Hàng tuần `weekly` hoặc Hàng tháng `monthly`).
+*   **Tạm ngưng (`suspended`):** Tạm thời dừng phát hành (vì lý do sức khỏe...). Chặn tạo Chapter mới trong kỳ tạm ngưng này.
+*   **Đã hủy (`canceled`):** Đình bản vĩnh viễn bộ truyện (do điểm thấp). Ẩn khỏi màn hình giám sát và ngừng xếp hạng.
+
+#### 2. Chương truyện (Chapter):
+*   **Bản nháp (`drafting`):** Mangaka vẽ kịch bản phân cảnh thô. Ẩn toàn bộ Task khỏi màn hình của Trợ lý để tránh vẽ trước khi chốt kịch bản.
+*   **Đang vẽ (`drawing`):** Triển khai vẽ chi tiết. Trợ lý bắt đầu nhìn thấy công việc được giao, tiến hành nhận việc và nộp sản phẩm vẽ.
+*   **Chờ duyệt (`reviewing`):** Mangaka nộp bản thảo đầy đủ cho Biên tập viên. **Khóa chỉnh sửa toàn bộ dữ liệu** thuộc chapter (cấm tác giả và trợ lý sửa chữa).
+*   **Đã duyệt (`approved`):** Biên tập viên phê duyệt đạt chuẩn. Khóa chỉnh sửa vĩnh viễn. Chỉ có Editor mới có quyền mở khóa trả về `drawing`.
+*   **Đã xuất bản (`published`):** Chương truyện phát hành ra công chúng, bắt đầu thu thập số liệu bình chọn của độc giả.
+
+#### 3. Công việc của Trợ lý (Task):
+*   **Chờ xử lý (`pending`):** Trợ lý chưa bắt đầu vẽ. Mangaka có thể đổi trợ lý phụ trách hoặc thay đổi phân vùng vẽ.
+*   **Đang làm (`in_progress`):** Trợ lý đang thực hiện hoặc đã nộp sản phẩm vẽ chờ Mangaka duyệt. Khóa không cho phép gán lại trợ lý khác.
+*   **Hoàn thành (`completed`):** Tác giả phê duyệt bài vẽ đạt yêu cầu. Ghi nhận tính thù lao tháng cho Trợ lý (300.000đ/task).
+
+### ⚠️ 4.2 Cơ chế Cảnh báo Đình bản tự động (`series_warning`)
+* **Thời điểm kích hoạt:** Xảy ra ngay khi thành viên `Editorial Board` nhập dữ liệu đánh giá xếp hạng mới cho một Series.
+* **Logic xử lý:** Hệ thống tự động tính điểm trung bình tích lũy của Series đó qua tất cả các kỳ xếp hạng. Nếu điểm trung bình **< 5.0 (thang điểm 10)** hoặc **< 50.0 (thang điểm 100)**:
+  * Hệ thống tự động chèn một bản ghi thông báo mới vào bảng `notifications` với loại `type = 'series_warning'`.
+  * Khi Mangaka đăng nhập, một banner cảnh báo đỏ nổi bật sẽ hiển thị trên Header: *"Bộ truyện của bạn có nguy cơ bị hủy do thứ hạng thấp"*.
+
+### 💰 4.3 Công thức tính thù lao Trợ lý (Assistant Payment Formula)
+* **Định mức:** Mỗi công việc phân vùng hoàn thành được tính thù lao cố định là **300.000 VNĐ** (ví dụ vẽ nền 300k, đổ bóng 300k, sfx 300k).
+* **Công thức tổng hợp tháng:**
+  $$\text{Tổng thù lao tháng} = (\text{Số lượng Task đạt trạng thái 'completed' trong tháng}) \times 300.000\text{ VNĐ}$$
+* **Sự minh bạch:** Số trang vẽ độc nhất đã được duyệt (`COUNT(DISTINCT page_id)`) được hiển thị song song giúp trợ lý đối chiếu xem tác giả có duyệt thiếu trang nào hay không.
+
+### 📐 4.4 Quy tắc liên kết Task trên Toàn trang vs Phân vùng cụ thể
+* **Toàn trang (Page-level Task):** Cột `page_region_id` mang giá trị `NULL`. Nhiệm vụ này áp dụng cho toàn bộ trang vẽ (ví dụ: "Tô mực toàn bộ trang 1").
+* **Phân vùng (Region-level Task):** Cột `page_region_id` chứa khóa ngoại trỏ đến một phân vùng trong bảng `page_regions`. Nhiệm vụ này chỉ áp dụng cho khung hình cụ thể đã vẽ khoanh vùng (ví dụ: "Vẽ nền cảnh tòa nhà ở Khung số 2"). Trợ lý sẽ có tệp ảnh cắt riêng phân vùng đó để dễ tập trung xử lý vẽ.
