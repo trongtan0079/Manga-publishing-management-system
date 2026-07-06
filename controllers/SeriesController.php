@@ -28,7 +28,7 @@ class SeriesController extends BaseController
         $currentUserId = $_SESSION['user_id'];
         
         if ($role === 'editor' || $role === 'board' || $role === 'admin') {
-            $sql = "SELECT * FROM series ORDER BY series_id DESC";
+            $sql = "SELECT * FROM series WHERE publish_type != 'draft' ORDER BY series_id DESC";
             $stmt = $this->seriesModel->getConnection()->prepare($sql);
             $stmt->execute();
             $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -188,6 +188,23 @@ class SeriesController extends BaseController
             $this->seriesModel->update($id, [
                 'publish_type' => 'submitted'
             ]);
+            
+            // Tìm toàn bộ tài khoản có role là 'board' đang hoạt động để gửi thông báo
+            require_once __DIR__ . '/../models/Notification.php';
+            $notificationModel = new \Notification();
+            require_once __DIR__ . '/../models/User.php';
+            $userModel = new \User();
+            $boardMembers = $userModel->findByRoleName('board');
+            if (!empty($boardMembers)) {
+                foreach ($boardMembers as $member) {
+                    $notificationModel->createNotification(
+                        $member['user_id'],
+                        'series_submitted',
+                        "Mangaka " . $_SESSION['full_name'] . " vừa nộp đề xuất bộ truyện mới: '" . $series['title'] . "'."
+                    );
+                }
+            }
+
             $_SESSION['success'] = "Đề xuất bộ truyện '{$series['title']}' đã được gửi đến Ban Biên tập thành công!";
         } catch (PDOException $e) {
             $_SESSION['error'] = "Lỗi khi gửi đề xuất: " . $e->getMessage();
@@ -418,12 +435,19 @@ class SeriesController extends BaseController
     public function publish() {
         requireRole('board');
         
+        // Lấy danh sách các editor đang active để gán chuyên trách
+        require_once __DIR__ . '/../models/User.php';
+        $userModel = new \User();
+        $editors = $userModel->findByRoleName('editor');
+        
         // Lấy danh sách truyện đang chờ duyệt (planning) và đang xuất bản (ongoing)
-        $sql = "SELECT s.*, u.full_name as mangaka_name,
+        $sql = "SELECT s.*, u.full_name as mangaka_name, ed.full_name as editor_name,
                 (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id) as total_chapters,
-                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id AND status IN ('approved', 'published')) as finished_chapters
+                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id AND status IN ('approved', 'published')) as finished_chapters,
+                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id AND is_final = 1 AND status IN ('approved', 'published')) as has_final_approved
                 FROM series s 
                 JOIN users u ON s.mangaka_id = u.user_id 
+                LEFT JOIN users ed ON s.editor_id = ed.user_id
                 WHERE s.status IN ('planning', 'ongoing', 'suspended') AND s.publish_type != 'draft'
                 ORDER BY s.created_at DESC";
         $stmt = $this->seriesModel->getConnection()->prepare($sql);
@@ -450,7 +474,7 @@ class SeriesController extends BaseController
             $publishType = $_POST['publish_type'] ?? 'weekly';
             if (in_array($status, $this->allowedStatuses) && in_array($publishType, ['weekly', 'monthly'])) {
                 
-                // Ràng buộc: Không cho phép hoàn thành series nếu vẫn còn các chapter chưa hoàn thành
+                // Ràng buộc: Không cho phép hoàn thành series nếu vẫn còn các chapter chưa hoàn thành hoặc chưa có chương cuối được duyệt
                 if ($status === 'completed') {
                     $sql = "SELECT COUNT(*) as unfinished_chapters 
                             FROM chapters 
@@ -463,12 +487,28 @@ class SeriesController extends BaseController
                         header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
                         exit;
                     }
+
+                    // Kiểm tra xem đã có chương cuối nào được duyệt/xuất bản chưa
+                    $sqlFinal = "SELECT COUNT(*) as has_final 
+                                 FROM chapters 
+                                 WHERE series_id = :series_id AND is_final = 1 AND status IN ('approved', 'published')";
+                    $stmtFinal = $this->seriesModel->getConnection()->prepare($sqlFinal);
+                    $stmtFinal->execute(['series_id' => $id]);
+                    $resFinal = $stmtFinal->fetch(PDO::FETCH_ASSOC);
+                    if (!$resFinal || $resFinal['has_final'] == 0) {
+                        $_SESSION['error'] = "Không thể hoàn thành bộ truyện khi chưa có chương cuối (End Chapter) nào được phê duyệt.";
+                        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                        exit;
+                    }
                 }
+
+                $editorId = isset($_POST['editor_id']) && $_POST['editor_id'] !== '' ? intval($_POST['editor_id']) : null;
 
                 try {
                     $this->seriesModel->update($id, [
                         'status' => $status,
-                        'publish_type' => $publishType
+                        'publish_type' => $publishType,
+                        'editor_id' => $editorId
                     ]);
                     
                     // Gửi thông báo đến mangaka
@@ -491,6 +531,15 @@ class SeriesController extends BaseController
                     $msg .= ".";
                     
                     $notificationModel->createNotification($mangakaId, 'series_warning', $msg);
+
+                    // Gửi thông báo đến editor phụ trách nếu mới gán
+                    if ($editorId && $editorId != $series['editor_id']) {
+                        $notificationModel->createNotification(
+                            $editorId,
+                            'task_assigned',
+                            "Bạn đã được giao phụ trách kiểm duyệt bộ truyện mới: '{$series['title']}'."
+                        );
+                    }
 
                     $_SESSION['success'] = "Cập nhật trạng thái và lịch xuất bản bộ truyện thành công.";
                 } catch (PDOException $e) {
