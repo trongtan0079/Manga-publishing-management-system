@@ -25,7 +25,7 @@ Thiết kế Database đảm bảo:
 
 ---
 
-## 3. Database Schema (11 Bảng) và Data Dictionary
+## 3. Database Schema (12 Bảng) và Data Dictionary
 
 ### 1. Bảng `roles`
 * **Mô tả**: Lưu trữ thông tin về các vai trò người dùng trong hệ thống.
@@ -85,22 +85,38 @@ Thiết kế Database đảm bảo:
     * `updated_at`: TIMESTAMP.
     * **UNIQUE Constraint**: (`chapter_id`, `page_number`).
 
-### 6. Bảng `tasks`
-* **Mô tả**: Quản lý công việc do Mangaka phân công cho Assistant (ví dụ đi nét, đổ tone trang cụ thể).
+### 6. Bảng `page_regions`
+* **Mô tả**: Lưu trữ thông tin chi tiết về từng phân vùng vẽ tay thủ công trên trang truyện để phân công công việc cụ thể.
+* **Thuộc tính**:
+    * `region_id`: INT, PK, Auto Increment.
+    * `page_id`: INT, Foreign Key (pages.page_id), NOT NULL.
+    * `region_type`: ENUM('panel', 'bubble', 'character', 'background', 'sfx'), NOT NULL.
+    * `x`: INT, NOT NULL.
+    * `y`: INT, NOT NULL.
+    * `width`: INT, NOT NULL.
+    * `height`: INT, NOT NULL.
+    * `status`: ENUM('pending', 'in_progress', 'completed'), Default 'pending'.
+    * `created_at`: TIMESTAMP.
+
+### 7. Bảng `tasks`
+* **Mô tả**: Quản lý công việc do Mangaka phân công cho Assistant (ví dụ đi nét, đổ tone trang cụ thể hoặc trên một phân vùng cụ thể).
 * **Thuộc tính**:
     * `task_id`: INT, PK, Auto Increment.
     * `page_id`: INT, Foreign Key (pages.page_id), NOT NULL.
+    * `page_region_id`: INT, Foreign Key (page_regions.region_id), NULL (Nếu giao việc trên một phân vùng cụ thể).
     * `mangaka_id`: INT, Foreign Key (users.user_id), NOT NULL (Người giao việc).
     * `assistant_id`: INT, Foreign Key (users.user_id), NOT NULL (Người nhận việc).
     * `title`: VARCHAR(255), NOT NULL.
+    * `task_type`: ENUM('background', 'inking', 'coloring', 'effects', 'other'), Default 'other'.
     * `description`: TEXT, NULL.
+    * `resource_url`: VARCHAR(255), NULL.
     * `priority`: ENUM('low', 'medium', 'high'), Default 'medium'.
     * `status`: ENUM('pending', 'in_progress', 'completed'), Default 'pending'.
     * `due_date`: DATETIME, NULL.
     * `created_at`: TIMESTAMP.
     * `updated_at`: TIMESTAMP.
 
-### 7. Bảng `submissions`
+### 8. Bảng `submissions`
 * **Mô tả**: Quản lý việc nộp sản phẩm (Assistant nộp Task cho Mangaka, hoặc Mangaka nộp Chapter cho Editor).
 * **Thuộc tính**:
     * `submission_id`: INT, PK, Auto Increment.
@@ -113,7 +129,7 @@ Thiết kế Database đảm bảo:
     * `submitted_at`: TIMESTAMP.
     * `updated_at`: TIMESTAMP.
 
-### 8. Bảng `reviews`
+### 9. Bảng `reviews`
 * **Mô tả**: Quản lý phản hồi và đánh giá về Submission (Editor duyệt Chapter, Mangaka duyệt Task).
 * **Thuộc tính**:
     * `review_id`: INT, PK, Auto Increment.
@@ -123,7 +139,7 @@ Thiết kế Database đảm bảo:
     * `rating`: INT, NULL (Thang điểm).
     * `created_at`: TIMESTAMP.
 
-### 9. Bảng `series_rankings`
+### 10. Bảng `series_rankings`
 * **Mô tả**: Xếp hạng Series theo chu kỳ (tuần/tháng) do Hội đồng Editorial Board đánh giá.
 * **Thuộc tính**:
     * `ranking_id`: INT, PK, Auto Increment.
@@ -134,7 +150,7 @@ Thiết kế Database đảm bảo:
     * `period_start_date`: DATE, NOT NULL.
     * `created_at`: TIMESTAMP.
 
-### 10. Bảng `notifications`
+### 11. Bảng `notifications`
 * **Mô tả**: Quản lý thông báo hệ thống gửi đến người dùng.
 * **Thuộc tính**:
     * `notification_id`: INT, PK, Auto Increment.
@@ -144,7 +160,7 @@ Thiết kế Database đảm bảo:
     * `is_read`: BOOLEAN, Default FALSE.
     * `created_at`: TIMESTAMP.
 
-### 11. Bảng `system_logs`
+### 12. Bảng `system_logs`
 * **Mô tả**: Nhật ký ghi nhận các hoạt động và tác vụ cấu hình nhạy cảm của người dùng (tập trung vào Admin).
 * **Thuộc tính**:
     * `log_id`: INT, PK, Auto Increment.
@@ -170,7 +186,9 @@ Thiết kế Database đảm bảo:
   * `series` (1) - (N) `chapters`: Một `Series` chứa (`contains`) nhiều `Chapter` (thông qua `series_id`).
   * `series` (1) - (N) `series_rankings`: Một `Series` có thể được xếp hạng (`ranked`) nhiều lần qua các khoảng thời gian (thông qua `series_id`).
   * `chapters` (1) - (N) `pages`: Một `Chapter` chứa (`contains`) nhiều `Page` (thông qua `chapter_id`).
+  * `pages` (1) - (N) `page_regions`: Một `Page` được phân chia thành (`segment`) nhiều `PageRegion` (thông qua `page_id`).
   * `pages` (1) - (N) `tasks`: Một `Page` yêu cầu (`requires`) nhiều `Task` (thông qua `page_id`).
+  * `page_regions` (1) - (N) `tasks`: Một `PageRegion` có thể được giao (`targetedAt`) nhiều `Task` (thông qua `page_region_id`).
   * `tasks` (1) - (N) `submissions`: Một `Task` sinh ra (`generates`) nhiều `Submission` (nếu bị reject và nộp lại nhiều lần, thông qua `task_id`).
   * `chapters` (1) - (N) `submissions`: Một `Chapter` được submit (`submitted`) qua nhiều lần (thông qua `chapter_id`).
   * `submissions` (1) - (N) `reviews`: Một `Submission` có thể nhận (`receives`) nhiều `Review` (thông qua `submission_id`).
@@ -250,25 +268,43 @@ CREATE TABLE pages (
     UNIQUE KEY unique_page (chapter_id, page_number)
 );
 
--- 6. tasks table
+-- 6. page_regions table
+CREATE TABLE page_regions (
+    region_id INT AUTO_INCREMENT PRIMARY KEY,
+    page_id INT NOT NULL,
+    region_type ENUM('panel', 'bubble', 'character', 'background', 'sfx') NOT NULL,
+    x INT NOT NULL,
+    y INT NOT NULL,
+    width INT NOT NULL,
+    height INT NOT NULL,
+    status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_regions_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE
+);
+
+-- 7. tasks table
 CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     page_id INT NOT NULL,
+    page_region_id INT NULL,
     mangaka_id INT NOT NULL,
     assistant_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
+    task_type ENUM('background', 'inking', 'coloring', 'effects', 'other') DEFAULT 'other',
     description TEXT,
+    resource_url VARCHAR(255) NULL,
     priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
     status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
     due_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_tasks_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE,
+    CONSTRAINT fk_tasks_region FOREIGN KEY (page_region_id) REFERENCES page_regions(region_id) ON DELETE SET NULL,
     CONSTRAINT fk_tasks_mangaka FOREIGN KEY (mangaka_id) REFERENCES users(user_id) ON DELETE RESTRICT,
     CONSTRAINT fk_tasks_assistant FOREIGN KEY (assistant_id) REFERENCES users(user_id) ON DELETE RESTRICT
 );
 
--- 7. submissions table
+-- 8. submissions table
 CREATE TABLE submissions (
     submission_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -284,7 +320,7 @@ CREATE TABLE submissions (
     CONSTRAINT fk_submissions_chapter FOREIGN KEY (chapter_id) REFERENCES chapters(chapter_id) ON DELETE CASCADE
 );
 
--- 8. reviews table
+-- 9. reviews table
 CREATE TABLE reviews (
     review_id INT AUTO_INCREMENT PRIMARY KEY,
     submission_id INT NOT NULL,
@@ -296,7 +332,7 @@ CREATE TABLE reviews (
     CONSTRAINT fk_reviews_reviewer FOREIGN KEY (reviewer_id) REFERENCES users(user_id) ON DELETE RESTRICT
 );
 
--- 9. series_rankings table
+-- 10. series_rankings table
 CREATE TABLE series_rankings (
     ranking_id INT AUTO_INCREMENT PRIMARY KEY,
     series_id INT NOT NULL,
@@ -309,7 +345,7 @@ CREATE TABLE series_rankings (
     CONSTRAINT fk_rankings_board FOREIGN KEY (board_member_id) REFERENCES users(user_id) ON DELETE RESTRICT
 );
 
--- 10. notifications table
+-- 11. notifications table
 CREATE TABLE notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
@@ -320,7 +356,7 @@ CREATE TABLE notifications (
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- 11. system_logs table
+-- 12. system_logs table
 CREATE TABLE system_logs (
     log_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,

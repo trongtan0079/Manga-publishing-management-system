@@ -11,7 +11,7 @@ start
 
 |Editorial Board|
 :Xem thông tin Series;
-:Đánh giá Series;
+:Đánh giá ý tưởng Series;
 :Bỏ phiếu xét duyệt Series;
 
 if (Series được phê duyệt?) then (Có)
@@ -26,10 +26,10 @@ if (Series được phê duyệt?) then (Có)
 :Xem danh sách Task;
 :Tải tài nguyên làm việc;
 :Thực hiện công việc được giao;
-:Nộp Submission;
+:Nộp Submission cho Task;
 
 |Mangaka|
-:Kiểm duyệt Submission;
+:Kiểm duyệt Submission của Assistant;
 
 while (Submission đạt yêu cầu?) is (Không)
 
@@ -37,60 +37,59 @@ while (Submission đạt yêu cầu?) is (Không)
 
 |Assistant|
 :Chỉnh sửa công việc;
-:Nộp lại Submission;
+:Nộp lại Submission cho Task;
 
 |Mangaka|
 :Kiểm duyệt lại Submission;
 
 endwhile (Có)
 
-:Chấp nhận kết quả;
-:Cập nhật tiến độ Chapter;
+:Chấp nhận kết quả vẽ;
+:Hoàn tất các Task của Chapter;
+:Nộp bản thảo Chapter hoàn chỉnh (Trạng thái: Reviewing);
 
 |Tantou Editor|
-:Xem Chapter hoàn chỉnh;
+:Nhận bản thảo Chapter;
 :Review nội dung và hình ảnh;
 
-while (Có yêu cầu chỉnh sửa?) is (Có)
+if (Bản thảo đạt yêu cầu?) then (Không)
 
-:Ghi chú chỉnh sửa;
+:Từ chối bản thảo (Rejected);
 
 |Mangaka|
-:Cập nhật nội dung Chapter;
-:Upload lại Chapter;
+:Nhận phản hồi từ Editor;
+:Chương tự động quay về trạng thái Drawing;
+:Chỉnh sửa nội dung / phân công lại trợ lý;
+:Nộp lại bản thảo Chapter (Trạng thái: Reviewing);
+
+else (Có)
 
 |Tantou Editor|
-:Review lại Chapter;
+:Phê duyệt bản thảo Chapter (Approved);
+:Phát hành Manga ra công chúng (Published);
 
-endwhile (Không)
-
-|Editorial Board|
-:Xem báo cáo từ Tantou Editor;
-:Đánh giá chất lượng Chapter;
-
-if (Chapter được phê duyệt?) then (Có)
-
-:Thiết lập lịch phát hành;
-:Phát hành Manga;
-:Nhập dữ liệu bình chọn;
-:Cập nhật bảng xếp hạng;
-:Đánh giá hiệu quả Series;
-
-if (Tiếp tục xuất bản?) then (Có)
-:Tiếp tục phát hành Series;
-else (Không)
-:Ngừng phát hành Series;
 endif
 
+|Editorial Board|
+:Nhập dữ liệu bình chọn từ độc giả sau mỗi kỳ phát hành;
+:Cập nhật bảng xếp hạng các Series;
+:Đánh giá hiệu quả hoạt động của Series;
+
+if (Series xếp hạng kém / Có nguy cơ bị hủy?) then (Có)
+  if (Quyết định dừng hẳn dự án?) then (Có)
+    :Ngừng phát hành Series (Canceled);
+  else (Không)
+    :Tạm ngưng phát hành Series (Suspended);
+  endif
 else (Không)
-:Từ chối xuất bản;
+  :Tiếp tục phát hành Series (Ongoing);
 endif
 
 stop
 
 else (Không)
 
-:Từ chối Series;
+:Từ chối đề xuất Series;
 stop
 
 endif

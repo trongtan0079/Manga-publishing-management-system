@@ -24,6 +24,7 @@ class Series {
   +title : string
   +description : string
   +status : string
+  +publishType : string
   +coverImage : string
 }
 
@@ -32,6 +33,7 @@ class Chapter {
   +chapterNumber : int
   +title : string
   +status : string
+  +dueDate : datetime
   +publishedAt : datetime
 }
 
@@ -42,10 +44,22 @@ class Page {
   +status : string
 }
 
+class PageRegion {
+  +regionId : int
+  +regionType : string
+  +x : int
+  +y : int
+  +width : int
+  +height : int
+  +status : string
+}
+
 class Task {
   +taskId : int
   +title : string
+  +taskType : string
   +description : string
+  +resourceUrl : string
   +priority : string
   +status : string
   +dueDate : datetime
@@ -80,6 +94,13 @@ class Notification {
   +isRead : boolean
 }
 
+class SystemLog {
+  +logId : int
+  +action : string
+  +details : string
+  +ipAddress : string
+}
+
 Role "1" -- "*" User : assigned
 
 User "1" -- "*" Series : creates
@@ -88,7 +109,9 @@ Series "1" -- "*" Chapter : contains
 
 Chapter "1" -- "*" Page : contains
 
+Page "1" -- "*" PageRegion : segment
 Page "1" -- "*" Task : requires
+PageRegion "1" -- "*" Task : targetedAt
 
 User "1" -- "*" Task : manager_assigns
 User "1" -- "*" Task : assistant_receives
@@ -108,5 +131,6 @@ Series "1" -- "*" SeriesRanking : ranked
 User "1" -- "*" SeriesRanking : evaluates
 
 User "1" -- "*" Notification : receives
+User "1" -- "*" SystemLog : triggers
 
 @enduml

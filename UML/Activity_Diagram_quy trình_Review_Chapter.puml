@@ -10,23 +10,25 @@ start
 
 partition Mangaka {
   :Hoàn thành Chapter;
-  :Upload Chapter hoàn chỉnh;
+  :Nộp bản thảo Chapter (Reviewing);
 }
 
 partition TantouEditor {
-  :Tiếp nhận Chapter;
+  :Tiếp nhận bản thảo Chapter;
   :Kiểm tra nội dung Chapter;
-  :Kiểm tra chất lượng Artwork;
+  :Kiểm tra chất lượng vẽ (Artwork);
 }
 
 if (Phát hiện lỗi?) then (Có)
   partition TantouEditor {
-    :Ghi chú trên Manga Page;
-    :Gửi yêu cầu chỉnh sửa;
+    :Ghi chú trực tiếp trên trang vẽ;
+    :Từ chối bản thảo (Rejected);
+    :Chương tự động chuyển về trạng thái Drawing;
   }
   partition Mangaka {
-    :Chỉnh sửa Chapter;
-    :Upload lại Chapter;
+    :Nhận phản hồi yêu cầu sửa lỗi;
+    :Chỉnh sửa nội dung / phân công trợ lý;
+    :Nộp lại bản thảo Chapter (Reviewing);
   }
   partition TantouEditor {
     :Review lại Chapter;
@@ -34,23 +36,19 @@ if (Phát hiện lỗi?) then (Có)
 endif
 
 partition TantouEditor {
-  :Chuyển Chapter đến Editorial Board;
+  :Đánh giá tổng thể bản thảo;
 }
 
-partition EditorialBoard {
-  :Đánh giá chất lượng Chapter;
-}
-
-if (Chapter được phê duyệt?) then (Có)
-  partition EditorialBoard {
+if (Chương được phê duyệt?) then (Có)
+  partition TantouEditor {
+    :Phê duyệt bản thảo Chapter (Approved);
     :Cập nhật trạng thái Chapter;
-    :Cập nhật lịch phát hành;
-    :Chuyển sang quy trình xuất bản;
+    :Phát hành chương truyện ra công chúng (Published);
   }
   stop
 else (Không)
-  partition EditorialBoard {
-    :Từ chối hoặc yêu cầu chỉnh sửa bổ sung;
+  partition TantouEditor {
+    :Từ chối hẳn hoặc gửi phản hồi chỉnh sửa bổ sung;
   }
   stop
 endif

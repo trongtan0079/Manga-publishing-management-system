@@ -32,22 +32,9 @@ Editorial Board
 - Nhập dữ liệu bình chọn từ độc giả vào hệ thống sau mỗi kỳ phát hành
 - Xem bảng xếp hạng các series được tổng hợp sau mỗi lần nhập dữ liệu
 
-*Tùy chọn: Tích hợp AI
-- AI tự động tô màu trang truyện
-- AI hỗ trợ phân đoạn vùng trên trang truyện"	
-
-"Series
-Chapter
-Page
-Manuscript
-Task
-Submission
-..."	
-Yes	"RQ: Which deep learning architecture achieves the highest accuracy in detecting and segmenting panels, speech bubbles, and character regions in manga pages?
-
-Sub-RQs:
-- RQ1: How do U-Net, YOLOv8, SAM, etc. differ in segmentation accuracy (IoU, F1-score) across manga region types (panels, speech bubbles, characters)?
-- RQ2: How does variation in manga art styles affect the segmentation performance of each architecture?"
+*Công cụ phân vùng bản vẽ:*
+- Hỗ trợ bộ công cụ vẽ tay thủ công chuyên nghiệp để tự tay phân chia khung hình, ô thoại, nhân vật, bối cảnh trên trang truyện một cách trực quan và chính xác tuyệt đối.
+- Giúp Mangaka dễ dàng chỉ định vùng làm việc cụ thể khi giao Task cho các trợ lý (Assistant).
 
 
 
@@ -126,3 +113,48 @@ Hệ thống áp dụng cơ chế quản lý vòng đời chặt chẽ đối v�
   - Khi toàn bộ trang vẽ hoàn thành, Mangaka nộp bản thảo và chuyển trạng thái chương sang *Đang chờ duyệt (Reviewing)* để gửi tới Biên tập viên (Tantou Editor) đánh giá chất lượng.
 - **Giai đoạn Đã duyệt (Approved) & Đã xuất bản (Published)**:
   - Biên tập viên phê duyệt đưa chương truyện vào trạng thái sẵn sàng phát hành hoặc xuất bản thương mại. Các trạng thái này là cuối cùng và bị khóa chỉnh sửa.
+
+---
+
+## 1.6 Quy trình Kiểm duyệt và Giám sát vòng đời Đề án bộ truyện (Series Lifecycles & Operations)
+
+Hệ thống áp dụng cơ chế quản lý và kiểm duyệt vòng đời vĩ mô chặt chẽ đối với các Bộ truyện (Series), phân định rõ ràng quyền hạn giữa Tác giả (Mangaka), Trợ lý (Assistant) và Hội đồng Biên tập (Editorial Board):
+
+### 1.6.1 Giai đoạn Đề xuất Bộ truyện mới (Series Proposal & Draft)
+- **Khởi tạo Bản nháp riêng tư (Draft Stage):**
+  - Khi Mangaka tạo mới một bộ truyện (Series), hệ thống sẽ mặc định gán thuộc tính `publish_type = 'draft'` và đặt trạng thái là **Nháp (Chưa nộp)**.
+  - Bộ truyện ở trạng thái này là không gian riêng tư của tác giả để phác thảo ý tưởng, viết tóm tắt cốt truyện và tải lên ảnh bìa. 
+  - Hội đồng Biên tập (Editorial Board) và Biên tập viên (Tantou Editor) **không thể nhìn thấy** bản nháp này trên Dashboard của họ. Đồng thời, hệ thống chặn quyền xem chi tiết trực tiếp bằng đường dẫn (URL Bypass) của các vai trò này để bảo mật tuyệt đối cho tác giả.
+- **Nộp Đề xuất (Submit Proposal):**
+  - Khi tác giả đã hoàn thiện thông tin, tác giả bấm nút **Nộp Đề Xuất** (Submit Proposal). Trạng thái bộ truyện sẽ được chuyển sang dạng chờ duyệt (`publish_type = 'submitted'`).
+  - Lúc này, bộ truyện mới chính thức hiển thị trên bảng chờ phê duyệt của Hội đồng Biên tập.
+
+### 1.6.2 Phân quyền Tạo Chapter & Phân công trong giai đoạn Chờ duyệt
+Để tạo điều kiện cho tác giả chuẩn bị trước bản thảo mẫu (Buffer Chapters) nhưng vẫn bảo mật quy trình sáng tác:
+- **Tác giả chủ động chuẩn bị trước:** Trong khi bộ truyện đang chờ duyệt (trạng thái `planning`), tác giả Mangaka vẫn có quyền tạo trước các chapter nháp, tải lên các trang vẽ và phân công task vẽ cho các trợ lý.
+- **Tầng bảo mật đối với Trợ lý (Assistant):** 
+  - Trợ lý sẽ **không thể nhìn thấy** bất kỳ chapter hay task nào của bộ truyện khi bộ truyện chưa được Hội đồng Biên tập phê duyệt (ở trạng thái `planning`).
+  - Hệ thống lọc bỏ hoàn toàn các task này khỏi bảng điều khiển của Trợ lý, đảm bảo họ không bắt tay vào làm việc trước khi dự án được cấp phép chính thức.
+- **Tầng bảo mật đối với Hội đồng (Board) và Biên tập viên (Editor):**
+  - Khi xem chi tiết bộ truyện đang chờ duyệt, mục **Danh sách Chapter** sẽ bị ẩn hoàn toàn đối với Hội đồng và BTV để họ tập trung đánh giá hồ sơ ý tưởng gốc thay vì bản thảo dang dở.
+
+### 1.6.3 Phê duyệt và Giám sát hoạt động của Hội đồng Biên tập
+Giao diện quản lý của Hội đồng Biên tập được phân tách thành 2 bảng giám sát độc lập để tối ưu hóa vận hành:
+- **Bảng 1: Đề xuất bộ truyện mới (Chờ phê duyệt):**
+  - Chỉ hiển thị các bộ truyện đã nộp ở trạng thái `planning`.
+  - Hội đồng Biên tập có quyền đưa ra 2 quyết định:
+    - **Đồng ý phê duyệt:** Đổi trạng thái sang **Đang triển khai (Ongoing)** và bắt buộc thiết lập Lịch phát hành (Hàng tuần/Hàng tháng).
+    - **Từ chối đề xuất:** Chuyển trạng thái sang **Đã hủy (Canceled)** để khép lại dự án.
+- **Bảng 2: Bộ truyện đang hoạt động (Giám sát & Quản lý):**
+  - Hiển thị các bộ truyện đang trong vòng đời sản xuất gồm **Đang triển khai (Ongoing)** và **Tạm ngưng (Suspended)**.
+  - Hội đồng Biên tập có quyền cập nhật linh hoạt các trạng thái:
+    - **Tạm ngưng (Suspended):** Khi bộ truyện cần tạm dừng phát hành (treo bút). Lúc này, nút tạo chapter mới của tác giả sẽ tự động ẩn đi, các task của trợ lý cũng bị ẩn tạm thời. Hội đồng có thể khôi phục lại trạng thái `ongoing` bất kỳ lúc nào để tác giả tiếp tục vẽ.
+    - **Hoàn thành (Completed):** Đóng dự án khi tác phẩm kết thúc tốt đẹp.
+    - **Đã hủy (Canceled):** Đình bản hoặc khai tử vĩnh viễn bộ truyện. Khi chuyển sang trạng thái này, bộ truyện sẽ biến mất khỏi hàng đợi giám sát của Hội đồng.
+  - **Khóa an toàn khi Hoàn thành (Completed Lock):** Hệ thống chặn đứng hành vi chuyển trạng thái bộ truyện sang *Hoàn thành (Completed)* nếu phát hiện còn bất kỳ chương truyện (Chapter) nào chưa được Biên tập viên duyệt xong (đang ở trạng thái nháp, đang vẽ hoặc đang chờ duyệt).
+  - **Giám sát Tiến độ Chapter:** Bảng 2 hiển thị rõ ràng tỉ lệ `Chương đã duyệt hoàn tất / Tổng số chương hiện có` giúp Hội đồng dễ dàng đánh giá tiến độ thực tế trước khi đưa ra quyết định đóng truyện.
+
+### 1.6.4 Hệ thống Cảnh báo tự động và Ràng buộc Xếp hạng (Rankings)
+- **Tự động gửi thông báo:** Khi Hội đồng Biên tập thay đổi trạng thái hoặc chu kỳ phát hành của bộ truyện, hệ thống tự động gửi thông báo loại `series_warning` cho tác giả tương ứng.
+- **Cảnh báo xếp hạng thấp:** Khi Hội đồng Biên tập nhập dữ liệu bình chọn định kỳ, nếu phát hiện điểm số dưới 50 hoặc thứ hạng rơi xuống từ hạng 5 trở đi, hệ thống sẽ tự động gửi cảnh báo khẩn cấp `series_warning` tới tác giả để họ chủ động điều chỉnh kịch bản.
+- **Khóa bảo vệ chấm điểm (Ranking Safeguards):** Hệ thống cấm hoàn toàn việc tạo mới hoặc chỉnh sửa điểm xếp hạng cho các bộ truyện đang ở trạng thái nháp, chờ duyệt (`planning`) hoặc đã hủy (`canceled`) ở cả tầng giao diện lẫn kiểm tra dữ liệu phía máy chủ (Backend Validation).

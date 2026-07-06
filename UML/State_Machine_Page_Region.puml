@@ -5,7 +5,7 @@ skinparam backgroundColor white
 skinparam shadowing false
 skinparam linetype ortho
 
-[*] --> pending : Mangaka chạy AI quét / Vẽ thủ công vùng mới
+[*] --> pending : Mangaka vẽ thủ công phân vùng mới
 
 state pending {
     description : Vùng vừa được tạo, chưa giao việc
