@@ -154,15 +154,26 @@ switch ($role) {
             <!-- Center Side: Slideshow (Stacked Drawing Papers Effect) -->
             <div class="col-lg-4 text-center py-3 py-lg-0 d-flex justify-content-center align-items-center">
                 <div style="position: relative; width: 380px; height: 215px; margin: 15px 0;">
-                    <!-- Bottom sketch paper sheet (light grey-blue paper) -->
-                    <div class="sheet-bottom" style="position: absolute; top: 8px; left: 10px; width: 100%; height: 100%; background-color: #cbd5e1; border: 1px solid #94a3b8; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-radius: 12px; transform: rotate(5deg); z-index: 1; pointer-events: none;"></div>
+                    <!-- Bottom sketch paper sheet (light warm white paper) -->
+                    <div class="sheet-bottom" style="position: absolute; top: 8px; left: 10px; width: 100%; height: 100%; background-color: #f3f4f6; border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 12px; transform: rotate(5deg); z-index: 1; pointer-events: none;">
+                        <!-- Crop marks style for authenticity -->
+                        <div style="position: absolute; top: 8px; bottom: 8px; left: 8px; right: 8px; border: 1px solid rgba(0, 180, 216, 0.06); border-radius: 8px;"></div>
+                    </div>
 
-                    <!-- Middle sketch paper sheet (off-white paper) -->
-                    <div class="sheet-middle" style="position: absolute; top: -6px; left: -8px; width: 100%; height: 100%; background-color: #f1f5f9; border: 1px solid #cbd5e1; box-shadow: 0 6px 18px rgba(0,0,0,0.35); border-radius: 12px; transform: rotate(-4deg); z-index: 2; pointer-events: none;"></div>
+                    <!-- Middle sketch paper sheet (clean off-white paper) -->
+                    <div class="sheet-middle" style="position: absolute; top: -6px; left: -8px; width: 100%; height: 100%; background-color: #fafafa; border: 1px solid rgba(0, 0, 0, 0.07); box-shadow: 0 6px 16px rgba(0,0,0,0.2); border-radius: 12px; transform: rotate(-4deg); z-index: 2; pointer-events: none;">
+                        <!-- Crop marks style for authenticity -->
+                        <div style="position: absolute; top: 8px; bottom: 8px; left: 8px; right: 8px; border: 1px dashed rgba(0, 180, 216, 0.08); border-radius: 8px;"></div>
+                    </div>
 
                     <!-- Top main sketch paper sheet containing slideshow -->
                     <div class="dashboard-slideshow-container sheet-top"
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; background-color: #ffffff; border: 1px solid #cbd5e1; box-shadow: 0 10px 30px rgba(0,0,0,0.45); border-radius: 12px; transform: rotate(-0.5deg); z-index: 3;">
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; background-color: #ffffff; border: 1px solid rgba(0, 0, 0, 0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-radius: 12px; transform: rotate(-0.5deg); z-index: 3;">
+                        
+                        <!-- Real Manga Manuscript Non-Photo Blue crop mark frame guidelines -->
+                        <div style="position: absolute; top: 12px; bottom: 12px; left: 12px; right: 12px; border: 1px solid rgba(0, 180, 216, 0.15); border-radius: 6px; pointer-events: none; z-index: 4;"></div>
+                        <div style="position: absolute; top: 16px; bottom: 16px; left: 16px; right: 16px; border: 1px dashed rgba(0, 180, 216, 0.08); pointer-events: none; z-index: 4;"></div>
+                        
                         <?php
                         $imageFiles = glob(__DIR__ . '/../../assets/images/Manga_dashboard_*.{png,jpg,jpeg,webp,PNG,JPG,JPEG,WEBP}', GLOB_BRACE);
                         if ($imageFiles) {
@@ -179,7 +190,7 @@ switch ($role) {
                             $opacity = ($index === 0) ? '1' : '0';
                         ?>
                             <div class="dashboard-slide <?= $isActive ?>"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('<?= BASE_PATH ?>/assets/images/<?= $fileName ?>?v=<?= $version ?>'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: <?= $opacity ?>; transition: opacity 0.8s ease-in-out;">
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('<?= BASE_PATH ?>/assets/images/<?= $fileName ?>?v=<?= $version ?>'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: <?= $opacity ?>; transition: opacity 0.8s ease-in-out; z-index: 3;">
                             </div>
                         <?php endforeach; ?>
                     </div>
