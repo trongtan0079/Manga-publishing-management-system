@@ -70,8 +70,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             $badgeClass = 'bg-secondary';
                             $statusLabel = $series['status'];
                             switch ($series['status']) {
-                                case 'planning': $badgeClass = 'bg-info text-dark'; $statusLabel = 'Kế hoạch'; break;
-                                case 'ongoing': $badgeClass = 'bg-primary'; $statusLabel = 'Đang xuất bản'; break;
+                                case 'planning': 
+                                    if (($series['publish_type'] ?? '') === 'draft') {
+                                        $badgeClass = 'bg-secondary'; $statusLabel = 'Nháp (Chưa nộp)';
+                                    } else {
+                                        $badgeClass = 'bg-info text-dark'; $statusLabel = 'Chờ phê duyệt';
+                                    }
+                                    break;
+                                case 'ongoing': $badgeClass = 'bg-primary'; $statusLabel = 'Đang triển khai'; break;
                                 case 'completed': $badgeClass = 'bg-success'; $statusLabel = 'Hoàn thành'; break;
                                 case 'canceled': $badgeClass = 'bg-danger'; $statusLabel = 'Đã hủy'; break;
                                 case 'suspended': $badgeClass = 'bg-warning text-dark'; $statusLabel = 'Tạm ngưng'; break;

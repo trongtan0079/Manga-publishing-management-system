@@ -147,13 +147,13 @@ class SeriesController extends BaseController
                 'title'       => $title,
                 'description' => trim($_POST['description'] ?? ''),
                 'status'      => 'planning',
-                'publish_type'=> 'weekly', // Quy định bởi Editorial Board khi duyệt
+                'publish_type'=> 'draft', // Mặc định tạo mới ở trạng thái bản nháp
                 'cover_image' => $coverImage
             ];
 
             try {
                 $this->seriesModel->insert($data);
-                $_SESSION['success'] = "Tạo bộ truyện '{$title}' thành công!";
+                $_SESSION['success'] = "Tạo bộ truyện '{$title}' thành công! Trạng thái hiện tại là Bản nháp.";
             } catch (PDOException $e) {
                 $_SESSION['error'] = "Lỗi hệ thống khi tạo bộ truyện: " . $e->getMessage();
             }
@@ -161,6 +161,40 @@ class SeriesController extends BaseController
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
             exit;
         }
+    }
+
+    /**
+     * Nộp đề xuất bộ truyện lên Ban Biên Tập (Từ Nháp sang Chờ duyệt)
+     */
+    public function submit($id) {
+        requireRole('mangaka');
+        $id = (int)$id;
+        $series = $this->seriesModel->findById($id);
+        if (!$series) {
+            $_SESSION['error'] = "Không tìm thấy bộ truyện.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            exit;
+        }
+
+        $this->checkOwnership($series, $id);
+
+        if ($series['status'] !== 'planning' || $series['publish_type'] !== 'draft') {
+            $_SESSION['error'] = "Chỉ có thể nộp đề xuất khi bộ truyện ở trạng thái Nháp.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $id);
+            exit;
+        }
+
+        try {
+            $this->seriesModel->update($id, [
+                'publish_type' => 'submitted'
+            ]);
+            $_SESSION['success'] = "Đề xuất bộ truyện '{$series['title']}' đã được gửi đến Ban Biên tập thành công!";
+        } catch (PDOException $e) {
+            $_SESSION['error'] = "Lỗi khi gửi đề xuất: " . $e->getMessage();
+        }
+
+        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $id);
+        exit;
     }
 
     /**
@@ -174,7 +208,15 @@ class SeriesController extends BaseController
         }
 
         $role = $_SESSION['role_name'] ?? '';
-        // Admin, Editor, Board có quyền xem thông tin chi tiết bộ truyện
+        
+        // Nếu là bản nháp (draft), chỉ tác giả (Mangaka) sở hữu mới có quyền truy cập
+        if (($series['publish_type'] ?? '') === 'draft' && $_SESSION['user_id'] != $series['mangaka_id']) {
+            $_SESSION['error'] = "Bộ truyện này hiện đang là Bản nháp và chưa được nộp.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
+            exit;
+        }
+
+        // Admin, Editor, Board có quyền xem thông tin chi tiết các bộ truyện đã nộp hoặc đang hoạt động
         if ($role === 'admin' || $role === 'editor' || $role === 'board') {
             return;
         }
@@ -377,10 +419,12 @@ class SeriesController extends BaseController
         requireRole('board');
         
         // Lấy danh sách truyện đang chờ duyệt (planning) và đang xuất bản (ongoing)
-        $sql = "SELECT s.*, u.full_name as mangaka_name 
+        $sql = "SELECT s.*, u.full_name as mangaka_name,
+                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id) as total_chapters,
+                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id AND status IN ('approved', 'published')) as finished_chapters
                 FROM series s 
                 JOIN users u ON s.mangaka_id = u.user_id 
-                WHERE s.status IN ('planning', 'ongoing') 
+                WHERE s.status IN ('planning', 'ongoing', 'suspended') AND s.publish_type != 'draft'
                 ORDER BY s.created_at DESC";
         $stmt = $this->seriesModel->getConnection()->prepare($sql);
         $stmt->execute();
@@ -405,11 +449,49 @@ class SeriesController extends BaseController
             $status = $_POST['status'] ?? '';
             $publishType = $_POST['publish_type'] ?? 'weekly';
             if (in_array($status, $this->allowedStatuses) && in_array($publishType, ['weekly', 'monthly'])) {
+                
+                // Ràng buộc: Không cho phép hoàn thành series nếu vẫn còn các chapter chưa hoàn thành
+                if ($status === 'completed') {
+                    $sql = "SELECT COUNT(*) as unfinished_chapters 
+                            FROM chapters 
+                            WHERE series_id = :series_id AND status IN ('drafting', 'drawing', 'reviewing')";
+                    $stmt = $this->seriesModel->getConnection()->prepare($sql);
+                    $stmt->execute(['series_id' => $id]);
+                    $res = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($res && $res['unfinished_chapters'] > 0) {
+                        $_SESSION['error'] = "Không thể hoàn thành bộ truyện khi vẫn còn các chương truyện đang vẽ hoặc chờ duyệt.";
+                        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                        exit;
+                    }
+                }
+
                 try {
                     $this->seriesModel->update($id, [
                         'status' => $status,
                         'publish_type' => $publishType
                     ]);
+                    
+                    // Gửi thông báo đến mangaka
+                    require_once __DIR__ . '/../models/Notification.php';
+                    $notificationModel = new Notification();
+                    $mangakaId = $series['mangaka_id'];
+                    $statusViet = 'Kế hoạch';
+                    switch ($status) {
+                        case 'ongoing': $statusViet = 'Đang triển khai'; break;
+                        case 'completed': $statusViet = 'Hoàn thành'; break;
+                        case 'canceled': $statusViet = 'Đã hủy'; break;
+                        case 'suspended': $statusViet = 'Tạm ngưng'; break;
+                    }
+                    $publishTypeViet = $publishType === 'weekly' ? 'Hàng tuần' : 'Hàng tháng';
+                    
+                    $msg = "Bộ truyện '{$series['title']}' của bạn đã được cập nhật trạng thái thành '{$statusViet}'";
+                    if ($status === 'ongoing') {
+                        $msg .= " với lịch xuất bản: {$publishTypeViet}";
+                    }
+                    $msg .= ".";
+                    
+                    $notificationModel->createNotification($mangakaId, 'series_warning', $msg);
+
                     $_SESSION['success'] = "Cập nhật trạng thái và lịch xuất bản bộ truyện thành công.";
                 } catch (PDOException $e) {
                     $_SESSION['error'] = "Lỗi khi cập nhật: " . $e->getMessage();

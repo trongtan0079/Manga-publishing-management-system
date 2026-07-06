@@ -34,7 +34,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <a href="<?= BASE_PATH ?>/index.php?controller=series&action=index" class="btn btn-outline-secondary shadow-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
     
     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
-    <div>
+    <div class="d-flex gap-2">
+        <?php if ($series['status'] === 'planning' && ($series['publish_type'] ?? '') === 'draft'): ?>
+        <form action="<?= BASE_PATH ?>/index.php?controller=series&action=submit&id=<?= $series['series_id'] ?>" method="POST" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn nộp đề xuất bộ truyện này đến Ban Biên tập?');">
+            <button type="submit" class="btn btn-success shadow-sm">
+                <i class="fas fa-paper-plane me-2"></i>Nộp Đề Xuất
+            </button>
+        </form>
+        <?php endif; ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning shadow-sm text-dark">
             <i class="fas fa-edit me-2"></i>Sửa Truyện
         </a>
@@ -64,8 +71,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 $badgeClass = 'bg-secondary';
                 $sLabel = $series['status'];
                 switch ($series['status']) {
-                    case 'planning': $badgeClass = 'bg-info text-dark'; $sLabel = 'Kế hoạch'; break;
-                    case 'ongoing': $badgeClass = 'bg-primary'; $sLabel = 'Đang xuất bản'; break;
+                    case 'planning': 
+                        if (($series['publish_type'] ?? '') === 'draft') {
+                            $badgeClass = 'bg-secondary'; $sLabel = 'Nháp (Chưa nộp)';
+                        } else {
+                            $badgeClass = 'bg-info text-dark'; $sLabel = 'Chờ phê duyệt';
+                        }
+                        break;
+                    case 'ongoing': $badgeClass = 'bg-primary'; $sLabel = 'Đang triển khai'; break;
                     case 'completed': $badgeClass = 'bg-success'; $sLabel = 'Hoàn thành'; break;
                     case 'canceled': $badgeClass = 'bg-danger'; $sLabel = 'Đã hủy'; break;
                     case 'suspended': $badgeClass = 'bg-warning text-dark'; $sLabel = 'Tạm ngưng'; break;
@@ -77,7 +90,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 </p>
                 <p class="card-text">
                     <strong>Lịch xuất bản:</strong> 
-                    <span class="badge bg-secondary"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                    <?php if ($series['status'] === 'planning'): ?>
+                        <span class="badge bg-light text-dark border">Chưa quyết định (Chờ duyệt)</span>
+                    <?php else: ?>
+                        <span class="badge bg-secondary"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                    <?php endif; ?>
                 </p>
                 <p class="card-text">
                     <strong>Ngày tạo:</strong> <br>
@@ -106,6 +123,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </div>
 
+        <?php 
+        // Chỉ hiển thị danh sách chapter cho tác giả/trợ lý khi truyện đang chờ duyệt. Hội đồng/BTV chỉ thấy khi truyện đã duyệt sang ongoing
+        $showChapters = ($series['status'] !== 'planning' || $_SESSION['role_name'] === 'mangaka' || $_SESSION['role_name'] === 'assistant');
+        if ($showChapters): 
+        ?>
         <!-- Chapter Management -->
         <div class="card border-primary">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
@@ -168,6 +190,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php endif; ?>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
 

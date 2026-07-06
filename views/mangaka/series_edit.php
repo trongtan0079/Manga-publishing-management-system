@@ -83,7 +83,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
             <div class="mb-3">
                 <label class="form-label d-block fw-bold">Lịch xuất bản</label>
-                <span class="badge bg-secondary px-3 py-2 fs-6"><?= ucfirst(htmlspecialchars($series['publish_type'] ?? 'Chưa quyết định')) ?></span>
+                <?php if ($series['status'] === 'planning'): ?>
+                    <span class="badge bg-light text-dark border px-3 py-2 fs-6">Chưa quyết định (Chờ duyệt)</span>
+                <?php else: ?>
+                    <span class="badge bg-secondary px-3 py-2 fs-6"><?= (($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                <?php endif; ?>
                 <div class="form-text">Lịch xuất bản do Hội đồng Biên tập quyết định khi phê duyệt tác phẩm.</div>
             </div>
             
