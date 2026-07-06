@@ -140,7 +140,7 @@ class SeriesRankingController extends BaseController
                 $series = $this->seriesModel->findById($seriesId);
                 if ($series) {
                     $mangakaId = $series['mangaka_id'];
-                    $message = "Bộ truyện {$series['title']} của bạn đã được xếp hạng {$rankPosition} với điểm số {$score}.";
+                    $message = "Thông báo xếp hạng kỳ mới: Bộ truyện '{$series['title']}' của bạn đạt thứ hạng #{$rankPosition} với điểm số bình chọn là {$score}.";
                     $this->notificationModel->createNotification($mangakaId, 'ranking_published', $message);
 
                     // Nhận thông báo khi series có nguy cơ bị huỷ (Nếu điểm số < 50 hoặc thứ hạng >= 5)
