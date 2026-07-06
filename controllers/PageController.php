@@ -29,7 +29,7 @@ class PageController extends BaseController
         \requireLogin();
         
         $action = $_GET['action'] ?? 'index';
-        $allowedViewRoles = ['mangaka', 'editor', 'board', 'admin'];
+        $allowedViewRoles = ['mangaka', 'editor', 'board', 'admin', 'assistant'];
         
         if (in_array($action, ['show', 'index'])) {
             if (!in_array($_SESSION['role_name'], $allowedViewRoles)) {
@@ -67,14 +67,49 @@ class PageController extends BaseController
         }
 
         $role = $_SESSION['role_name'] ?? '';
-        // Admin, Editor, Board có quyền xem chi tiết chapter/page
-        if ($role === 'admin' || $role === 'editor' || $role === 'board') {
+        // Admin, Board có quyền xem chi tiết chapter/page
+        if ($role === 'admin' || $role === 'board') {
             return ['chapter' => $chapter, 'series' => $series];
+        }
+
+        if ($role === 'editor') {
+            // Editor chỉ được xem nếu được gán phụ trách và bộ truyện đã được duyệt (status !== 'planning')
+            if ($series['editor_id'] == $_SESSION['user_id'] && $series['status'] !== 'planning') {
+                return ['chapter' => $chapter, 'series' => $series];
+            }
+            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không được phân công quản lý bộ truyện này.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            exit;
+        }
+
+        if ($role === 'assistant') {
+            // Kiểm tra xem assistant có được giao task nào thuộc page này không
+            $pageId = $_GET['id'] ?? null;
+            if ($pageId) {
+                $sql = "SELECT COUNT(*) as task_count FROM tasks WHERE page_id = :page_id AND assistant_id = :assistant_id";
+                $stmt = $this->pageModel->getConnection()->prepare($sql);
+                $stmt->execute(['page_id' => $pageId, 'assistant_id' => $_SESSION['user_id']]);
+                $res = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($res && $res['task_count'] > 0) {
+                    return ['chapter' => $chapter, 'series' => $series];
+                }
+            }
+            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có công việc được giao trên trang truyện này.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=assistant');
+            exit;
         }
 
         if ($series['mangaka_id'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên chapter này.";
             header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
+            exit;
+        }
+
+        // Chặn sửa/xóa/nộp trang nếu bộ truyện đang tạm ngưng, đã hủy hoặc đã hoàn thành
+        $action = $_GET['action'] ?? '';
+        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete']) && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+            $_SESSION['error'] = "Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa trang truyện.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapterId);
             exit;
         }
 
@@ -137,6 +172,13 @@ class PageController extends BaseController
     }
 
     public function index() {
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role === 'mangaka') {
+            $pages = $this->pageModel->findByMangakaId($_SESSION['user_id']);
+            require_once __DIR__ . '/../views/mangaka/page_list.php';
+            exit;
+        }
+
         // Chuyển hướng về trang chi tiết series
         header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
         exit;
@@ -262,6 +304,10 @@ class PageController extends BaseController
         require_once __DIR__ . '/../models/PageRegion.php';
         $pageRegionModel = new PageRegion();
         $regions = $pageRegionModel->findByPageId($id);
+
+        require_once __DIR__ . '/../models/EditorAnnotation.php';
+        $editorAnnotationModel = new EditorAnnotation();
+        $editorAnnotations = $editorAnnotationModel->findByPageId($id);
 
         require_once __DIR__ . '/../views/mangaka/page_detail.php';
     }

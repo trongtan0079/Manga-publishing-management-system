@@ -12,6 +12,45 @@ require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published');
+
+// Spotlight logic for Assistant tasks
+$highlightRegionId = $_GET['highlight_region'] ?? null;
+if (!$highlightRegionId && isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
+    if (!empty($tasks)) {
+        foreach ($tasks as $t) {
+            if ($t['assistant_id'] == $_SESSION['user_id'] && !empty($t['page_region_id'])) {
+                $highlightRegionId = $t['page_region_id'];
+                break;
+            }
+        }
+    }
+}
+$hasSpotlight = !empty($highlightRegionId);
+
+// Filter regions and tasks for Assistant to only show their assigned items
+if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
+    $assignedRegionIds = [];
+    if (!empty($tasks)) {
+        // Filter tasks first to only keep the assistant's own tasks
+        $tasks = array_filter($tasks, function($t) {
+            return $t['assistant_id'] == $_SESSION['user_id'];
+        });
+        
+        // Collect assigned region IDs from those tasks
+        foreach ($tasks as $t) {
+            if (!empty($t['page_region_id'])) {
+                $assignedRegionIds[] = $t['page_region_id'];
+            }
+        }
+    }
+    
+    // Filter regions list to only include those assigned
+    if (!empty($regions)) {
+        $regions = array_filter($regions, function($r) use ($assignedRegionIds) {
+            return in_array($r['region_id'], $assignedRegionIds);
+        });
+    }
+}
 ?>
 
 
@@ -37,14 +76,28 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
     <!-- Nút quay lại danh sách trang của chapter -->
     <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
     
-    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
+    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div>
-        <!-- Nút sửa trang hiện tại -->
-        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
-        <!-- Form xóa trang, dùng onsubmit để hỏi lại trước khi xóa -->
-        <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
-            <button type="submit" class="btn btn-danger">Xóa</button>
-        </form>
+        <?php if (!$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+            <!-- Nút sửa trang hiện tại -->
+            <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
+            <!-- Form xóa trang, dùng onsubmit để hỏi lại trước khi xóa -->
+            <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
+                <button type="submit" class="btn btn-danger">Xóa</button>
+            </form>
+        <?php else: ?>
+            <?php 
+                $lockMsg = 'Trang đã được duyệt / phát hành (Khóa)';
+                if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                    if ($series['status'] === 'suspended') $lockMsg = 'Bộ truyện đang tạm ngưng (Khóa)';
+                    elseif ($series['status'] === 'canceled') $lockMsg = 'Bộ truyện đã hủy (Khóa)';
+                    elseif ($series['status'] === 'completed') $lockMsg = 'Bộ truyện đã hoàn thành (Khóa)';
+                } elseif ($chapter['status'] === 'reviewing') {
+                    $lockMsg = 'Chương chứa trang đang chờ duyệt (Khóa)';
+                }
+            ?>
+            <span class="badge bg-warning text-dark p-2 border border-warning"><i class="fas fa-lock me-1"></i><?= $lockMsg ?></span>
+        <?php endif; ?>
     </div>
     <?php endif; ?>
 </div>
@@ -97,7 +150,7 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
                         <i class="fas fa-info-circle me-2"></i><strong>Chế độ vẽ thủ công:</strong> Hãy nhấn giữ chuột trái và kéo trên ảnh truyện để vẽ phân vùng mới.
                     </div>
                     
-                    <div id="mangaPageWrapper" class="position-relative d-inline-block text-start" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
+                    <div id="mangaPageWrapper" class="position-relative d-inline-block text-start <?= $hasSpotlight ? 'has-spotlight' : '' ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden;">
                         <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
                         
                         <?php if (!empty($regions)): ?>
@@ -123,8 +176,10 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
                                     $borderColor = '#fd7e14'; // Cam cho SFX
                                     $bgColor = 'rgba(253, 126, 20, 0.15)';
                                 }
-                            ?>
-                                <div class="ai-region-overlay" 
+                                $isSpotlight = ($highlightRegionId && $region['region_id'] == $highlightRegionId);
+                                $spotlightClass = $isSpotlight ? ' assistant-spotlight' : '';
+                                ?>
+                                <div class="ai-region-overlay<?= $spotlightClass ?>" 
                                      id="overlay-region-<?= $region['region_id'] ?>"
                                      style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 2px dashed <?= $borderColor ?>; background-color: <?= $bgColor ?>; cursor: pointer; transition: all 0.2s;"
                                      title="<?= htmlspecialchars(ucfirst($region['region_type'])) ?> (Vẽ tay)"
@@ -133,6 +188,27 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
                                      onmouseleave="hoverOverlay(<?= $region['region_id'] ?>, false)">
                                      <span class="badge bg-dark text-white position-absolute p-1" style="font-size: 8px; top: 2px; left: 2px; opacity: 0.85;">
                                          <?= ucfirst($region['region_type']) ?>
+                                     </span>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+
+                        <?php if (!empty($editorAnnotations)): ?>
+                            <?php foreach ($editorAnnotations as $ann): 
+                                $l = ($ann['x'] / 800) * 100;
+                                $t = ($ann['y'] / 1000) * 100;
+                                $w = ($ann['width'] / 800) * 100;
+                                $h = ($ann['height'] / 1000) * 100;
+                            ?>
+                                <div class="editor-annotation-overlay" 
+                                     style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 2px dashed #dc3545; background-color: rgba(220, 53, 69, 0.07); cursor: help; z-index: 10;"
+                                     data-bs-toggle="popover"
+                                     data-bs-trigger="hover focus"
+                                     data-bs-placement="top"
+                                     data-bs-content="<?= htmlspecialchars($ann['comments']) ?>"
+                                     title="Ghi chú lỗi của Editor: <?= htmlspecialchars($ann['editor_name']) ?>">
+                                     <span class="badge bg-danger text-white position-absolute p-1" style="font-size: 8px; bottom: 2px; right: 2px; opacity: 0.85;">
+                                         <i class="fas fa-exclamation-circle me-1"></i>Editor Note
                                      </span>
                                 </div>
                             <?php endforeach; ?>
@@ -154,7 +230,7 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
             <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-crop me-2"></i>Phân vùng bản vẽ</h5>
                 <div class="d-flex gap-2">
-                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
+                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                         <button id="btnDrawToggle" class="btn btn-sm btn-info text-white">
                             <i class="fas fa-edit me-1"></i>Vẽ thủ công
                         </button>
@@ -167,7 +243,7 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
                         <i class="fas fa-edit fa-3x text-muted mb-3"></i>
                         <h6 class="fw-bold">Chưa có phân vùng nào</h6>
                         <p class="text-muted small px-3">Hãy sử dụng bộ công cụ <strong>Vẽ thủ công</strong> chuyên nghiệp để tự vẽ và phân chia khung hình, ô thoại, nhân vật trên trang truyện.</p>
-                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
+                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                         <div class="d-flex gap-2 justify-content-center mt-2">
                             <button onclick="document.getElementById('btnDrawToggle').click();" class="btn btn-primary btn-sm">
                                 <i class="fas fa-edit me-2"></i>Bắt đầu vẽ phân vùng
@@ -217,7 +293,7 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
                                     </p>
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <span class="badge bg-light text-dark border">Vẽ tay</span>
-                                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
+                                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                                         <div class="btn-group">
                                             <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
                                                 <i class="fas fa-plus me-1"></i>Giao việc
@@ -239,6 +315,25 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
             </div>
         </div>
 
+        <!-- Khối Ghi chú lỗi của Editor (nếu có) -->
+        <?php if (!empty($editorAnnotations)): ?>
+        <div class="card border-danger mt-3">
+            <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Ý kiến sửa đổi từ Editor</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">Biên tập viên yêu cầu chỉnh sửa các vị trí được khoanh đỏ nét đứt trên trang truyện:</p>
+                <div class="list-group">
+                    <?php foreach ($editorAnnotations as $ann): ?>
+                        <div class="list-group-item list-group-item-danger px-3 py-2 border-start border-danger border-4 mb-2 rounded shadow-sm">
+                            <span class="fw-bold text-danger text-xs d-block"><i class="fas fa-user-edit me-1"></i>Editor: <?= htmlspecialchars($ann['editor_name']) ?></span>
+                            <p class="mb-0 text-dark small" style="white-space: pre-wrap; font-size: 0.85rem;"><?= htmlspecialchars($ann['comments']) ?></p>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
     </div>
 </div>
@@ -253,6 +348,32 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
     background-color: rgba(13, 110, 253, 0.25);
     z-index: 1000;
     pointer-events: none;
+}
+
+/* Spotlight mode for Assistant */
+.has-spotlight .ai-region-overlay:not(.assistant-spotlight) {
+    opacity: 0.15;
+    border-style: dotted !important;
+    background-color: rgba(0, 0, 0, 0.05) !important;
+    pointer-events: none;
+}
+.has-spotlight .editor-annotation-overlay {
+    opacity: 0.25;
+}
+.has-spotlight .editor-annotation-overlay:hover {
+    opacity: 1.0;
+}
+.assistant-spotlight {
+    outline: 9999px solid rgba(0, 0, 0, 0.65) !important;
+    border: 3px solid #ffc107 !important; /* Gold border */
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.9) !important;
+    z-index: 1050 !important;
+    animation: pulse-spotlight 2s infinite ease-in-out;
+}
+@keyframes pulse-spotlight {
+    0% { box-shadow: 0 0 15px rgba(255, 193, 7, 0.7); }
+    50% { box-shadow: 0 0 25px rgba(255, 193, 7, 1.0); }
+    100% { box-shadow: 0 0 15px rgba(255, 193, 7, 0.7); }
 }
 </style>
 
@@ -467,6 +588,14 @@ function resetDrawingMode() {
         drawInstruction.classList.add('d-none');
     }
 }
+
+// Kích hoạt bootstrap popovers để xem ghi chú Editor khi rê chuột
+document.addEventListener("DOMContentLoaded", function() {
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+        return new bootstrap.Popover(popoverTriggerEl)
+    });
+});
 </script>
 
 
@@ -479,7 +608,7 @@ function resetDrawingMode() {
     <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
         <h5 class="mb-0">Quản lý công việc</h5>
         <!-- Nút tạo công việc mới, truyền sẵn page_id qua URL GET parameter -->
-        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
+        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>" class="btn btn-sm btn-light">+ Tạo công việc</a>
         <?php endif; ?>
     </div>
@@ -570,18 +699,18 @@ function resetDrawingMode() {
                                 <!-- Hạn chót, định dạng d/m/Y -->
                                 <td><?= $task['due_date'] ? htmlspecialchars(date('d/m/Y', strtotime($task['due_date']))) : '<span class="text-muted">Không có</span>' ?></td>
                                 <!-- Các nút thao tác Sửa và Xóa dành cho Mangaka -->
-                                <td>
-                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked): ?>
-                                    <!-- Nút Sửa chuyển hướng sang TaskController@edit -->
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
-                                    <!-- Nút Xóa thực hiện qua form POST để bảo mật -->
-                                    <form action="<?= BASE_PATH ?>/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                                    </form>
-                                    <?php else: ?>
-                                        <span class="text-muted small"><?= $isLocked ? 'Khóa' : '-' ?></span>
-                                    <?php endif; ?>
-                                </td>
+                                 <td>
+                                     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+                                     <!-- Nút Sửa chuyển hướng sang TaskController@edit -->
+                                     <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
+                                     <!-- Nút Xóa thực hiện qua form POST để bảo mật -->
+                                     <form action="<?= BASE_PATH ?>/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
+                                         <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                     </form>
+                                     <?php else: ?>
+                                         <span class="text-muted small"><?= ($isLocked || in_array($series['status'], ['suspended', 'canceled', 'completed'])) ? 'Khóa' : '-' ?></span>
+                                     <?php endif; ?>
+                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
