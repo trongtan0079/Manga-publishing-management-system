@@ -1,0 +1,107 @@
+# TÀI LIỆU KỊCH BẢN LOGIC NGHIỆP VỤ & QUY TRÌNH VẬN HÀNH HỆ THỐNG MANGA PMS
+
+Tài liệu này đặc tả chi tiết toàn bộ kịch bản nghiệp vụ, luồng hoạt động liên vai trò (End-to-End Workflow), các ràng buộc kỹ thuật nghiêm ngặt (Business Constraints) và hướng dẫn xử lý các tình huống nghiệp vụ thực tế trong hệ thống Quản lý Sáng tác và Xuất bản Manga (Manga PMS).
+
+---
+
+## 🧭 1. LUỒNG HOẠT ĐỘNG TOÀN CẢNH (End-to-End Workflow)
+
+Hệ thống vận hành xoay quanh vòng đời khép kín của một tác phẩm Manga từ khi còn là ý tưởng cho đến khi phát hành và xếp hạng định kỳ. Quy trình gồm 4 giai đoạn chính:
+
+```mermaid
+graph TD
+    A[Mangaka: Tạo Series Nháp] -->|Gửi Đề Xuất| B[Editorial Board: Duyệt & Chọn Lịch]
+    B -->|Ongoing| C[Mangaka: Tạo Chapter & Vẽ Phân Vùng]
+    C -->|Giao Task| D[Assistant: Vẽ Nền/Tô Bóng/Hiệu Ứng]
+    D -->|Nộp Bài| E[Mangaka: Đánh Giá & Phê Duyệt Task]
+    E -->|Hoàn Thành Chapter| F[Mangaka: Nộp Chapter Cho Editor]
+    F -->|Đang Chờ Duyệt| G[Tantou Editor: Đánh Giá & Duyệt Chapter]
+    G -->|Approved| H[Chương Sẵn Sàng Xuất Bản]
+    G -->|Rejected| C
+    H -->|Đọc Giả Bình Chọn| I[Editorial Board: Nhập Điểm Xếp Hạng]
+    I -->|Điểm < 5.0| J[Hệ Thống: Gửi Cảnh Báo Nguy Cơ Đình Bản]
+    I -->|Thống Kê| K[Bảng Xếp Hạng - Leaderboard]
+```
+
+### 🔹 Giai đoạn 1: Đăng ký & Phê duyệt Series mới
+1. **Mangaka** đăng nhập hệ thống, tạo hồ sơ giới thiệu bộ truyện mới (nhập Tên truyện, Mô tả, tải lên Ảnh bìa). Lúc này bộ truyện ở trạng thái **Bản thảo nháp (`planning`)**.
+2. **Mangaka** kiểm tra lại hồ sơ và nhấn **"Gửi đề xuất lên Hội đồng"**. Trạng thái bộ truyện chuyển sang **Đang chờ duyệt (`proposed`)**.
+3. Thành viên **Editorial Board** đăng nhập, xem danh sách đề xuất. Board thực hiện đánh giá hồ sơ và chọn hành động:
+   * **Từ chối (Reject):** Trạng thái quay về `planning` để tác giả chỉnh sửa lại.
+   * **Phê duyệt (Approve):** Board bắt buộc phải chọn Lịch xuất bản là **Hàng tuần (`weekly`)** hoặc **Hàng tháng (`monthly`)**. Trạng thái bộ truyện chính thức chuyển sang **Đang xuất bản (`ongoing`)**.
+
+### 🔹 Giai đoạn 2: Sáng tác & Phối hợp Studio (Mangaka ↔ Assistant)
+1. Khi bộ truyện đã hoạt động (`ongoing`), **Mangaka** có quyền tạo mới các chương truyện (Chapter). Trạng thái khởi tạo ban đầu của Chapter là **Bản nháp (`drafting`)**.
+2. **Mangaka** tải lên các trang truyện vẽ thô (Pages). Trạng thái mặc định của các trang là `sketch`.
+3. Tại trang chi tiết của từng trang vẽ, **Mangaka** sử dụng chuột kéo thả trực tiếp lên tranh vẽ để tạo ra các **Phân vùng (`PageRegions`)** (Khung thoại, Nền cảnh, Nhân vật, Hiệu ứng).
+4. **Mangaka** bấm nút **"Giao việc"** tại phân vùng vừa tạo, điền thông tin mô tả công việc (Task), đính kèm tệp tài nguyên vẽ hỗ trợ, chọn **Assistant** phụ trách vẽ và đặt Hạn chót (Deadline). Lúc này Task ở trạng thái **Chờ xử lý (`pending`)**.
+5. Khi Mangaka đổi trạng thái Chapter từ **Bản nháp (`drafting`)** sang **Đang vẽ (`drawing`)**, **Assistant** mới bắt đầu nhận được thông báo và nhìn thấy Task trên Dashboard của mình.
+6. **Assistant** tải ảnh trang vẽ và tài liệu hỗ trợ về máy, hoàn thành phần việc (ví dụ: vẽ nền cảnh) và đóng gói kết quả thành file nộp bài (ảnh hoặc file nén ZIP).
+7. **Assistant** nhấn **"Nộp bài"**, tải file lên. Hệ thống tự động chuyển trạng thái Task sang **Đang xử lý/Kiểm tra (`in_progress`)** và gửi thông báo cho tác giả.
+
+### 🔹 Giai đoạn 3: Phê duyệt bản thảo & Duyệt phát hành (Mangaka ↔ Editor)
+1. **Mangaka** kiểm tra bài nộp của Assistant trực tiếp trên giao diện chi tiết trang truyện:
+   * **Đồng ý phê duyệt (Approve):** Đánh giá điểm chuyên môn (thang điểm 10) và viết bình luận. Task chuyển sang **Hoàn thành (`completed`)**.
+   * **Yêu cầu chỉnh sửa (Reject):** Viết ghi chú những chỗ vẽ lỗi. Task tự động trả về `pending`, phân vùng trang truyện cũng chuyển về chờ vẽ để Assistant làm lại.
+2. Khi toàn bộ các trang và tất cả các Task nhỏ của trợ lý thuộc Chapter đó đã được Mangaka duyệt hoàn tất, trang vẽ gốc sẽ tự động chuyển sang trạng thái **Đã hoàn thiện (`finished`)**.
+3. **Mangaka** đóng gói toàn bộ chương truyện (tải lên file ZIP bản thảo đầy đủ) và nhấn **"Nộp Chapter lên Biên tập viên"**. Trạng thái Chapter chuyển sang **Đang chờ duyệt (`reviewing`)**.
+4. **Tantou Editor** đăng nhập, xem trước ảnh bản thảo từng trang hoặc tải file ZIP về kiểm duyệt chất lượng nội dung, kịch bản, lời thoại:
+   * **Từ chối (Reject):** Viết nhận xét chi tiết lỗi kịch bản. Trạng thái Chapter tự động quay lại **Đang vẽ (`drawing`)** để tác giả và trợ lý mở khóa vào sửa chữa.
+   * **Phê duyệt (Approve):** Chapter đạt chất lượng xuất bản, trạng thái chuyển thành **Đã duyệt (`approved`)** và sẵn sàng chuyển sang nhà in (`published`).
+
+### 🔹 Giai đoạn 4: Đánh giá xếp hạng & Giám sát (Editorial Board)
+1. Sau mỗi kỳ phát hành truyện ra thị trường, các thành viên **Editorial Board** thu thập kết quả bình chọn từ độc giả và tiến hành nhập điểm đánh giá chuyên môn vào hệ thống cho từng bộ truyện.
+2. Bản ghi xếp hạng (`series_rankings`) ghi lại điểm số và vị trí xếp hạng của bộ truyện trong kỳ.
+3. Hệ thống tổng hợp toàn bộ điểm số để kết xuất ra **Bảng xếp hạng (Leaderboard)** công khai cho toàn studio theo dõi.
+4. **Cảnh báo đình bản tự động:** Nếu điểm trung bình đánh giá của một bộ truyện bị giảm xuống dưới **5.0**, hệ thống sẽ tự động gửi một thông báo khẩn cấp dạng cảnh báo màu đỏ (`series_warning`) tới tác giả để nhắc nhở cải thiện chất lượng ở các chương sau, tránh nguy cơ bị hủy bộ truyện vĩnh viễn (`canceled`).
+
+---
+
+## 🔒 2. CÁC RÀNG BUỘC NGHIỆP VỤ & AN TOÀN HỆ THỐNG (Business Constraints)
+
+Để đảm bảo hệ thống vận hành đúng quy chuẩn học thuật và tránh các lỗi logic, các chốt chặn sau đã được cài đặt cứng ở tầng Backend:
+
+### 🛡️ 2.1 Bảo mật hồ sơ dự thảo (Draft Security)
+* **Quy tắc:** Khi một bộ truyện (Series) ở trạng thái **Bản thảo nháp (`planning`)**, tuyệt đối không một ai (kể cả Biên tập viên hay Hội đồng quản lý) được quyền nhìn thấy sự tồn tại của bộ truyện này trên màn hình làm việc của họ.
+* **Chốt chặn:** Hệ thống chặn hoàn toàn việc truy cập trực tiếp bằng đường dẫn (URL Bypass) bằng cách kiểm tra quyền sở hữu ở mức Controller. Nếu người dùng không phải là tác giả của bộ truyện nháp đó, hệ thống sẽ trả về lỗi `Access Denied` hoặc đá về trang chủ.
+
+### 🚫 2.2 Khóa chỉnh sửa bản thảo đang duyệt (Manuscript Editing Lock)
+* **Quy tắc:** Khi tác giả đã nộp Chapter lên Biên tập viên và đang ở trạng thái **Đang chờ duyệt (`reviewing`)** hoặc đã được duyệt **Hoàn thành (`approved`/`published`)**, toàn bộ tài liệu thuộc chương này phải được đóng băng để tránh tác giả thay đổi nội dung sau lưng biên tập viên.
+* **Chốt chặn:** Hệ thống khóa cứng tất cả quyền chỉnh sửa ở trạng thái này. Tác giả không thể thêm trang vẽ mới, không thể vẽ thêm phân vùng, không thể giao thêm Task cho trợ lý và trợ lý không thể nộp file đè lên Task cũ.
+
+### 🚦 2.3 Kích hoạt hiển thị công việc 2 tầng (Task Gating)
+* **Quy tắc:** Trợ lý không được phép nhìn thấy công việc được giao khi chương truyện đang ở dạng nháp phác thảo kịch bản (`drafting`) để tránh trợ lý vẽ nhầm nội dung thô chưa chốt gây lãng phí chi phí.
+* **Chốt chặn:** Công việc chỉ xuất hiện trên bảng điều khiển của Trợ lý khi chương truyện được tác giả chuyển sang trạng thái **Đang vẽ (`drawing`)** VÀ bộ truyện đã được duyệt hoạt động chính thức (`ongoing`).
+
+### 📊 2.4 Giới hạn đánh giá & Phân hạng (Ranking Restriction)
+* **Quy tắc:** Chỉ được phép nhập điểm đánh giá xếp hạng đối với các bộ truyện đang thực sự phát hành (`ongoing`).
+* **Chốt chặn:** Hệ thống chặn hoàn toàn hành vi cố tình nhập dữ liệu xếp hạng cho các bộ truyện đang ở dạng đề xuất nháp (`planning`, `proposed`) hoặc đã bị khai tử (`canceled`, `suspended`).
+
+---
+
+## 📝 3. HƯỚNG DẪN VẬN HÀNH & XỬ LÝ TÌNH HUỐNG (Operations Guide)
+
+### 📌 3.1 Hướng dẫn vẽ phân vùng thủ công kéo thả trực quan
+1. Đăng nhập tài khoản **Mangaka**, truy cập một bộ truyện đang phát hành, chọn một chapter đang ở trạng thái **Đang vẽ (`drawing`)**.
+2. Bấm vào chi tiết một Trang truyện (Page).
+3. Tại khung tranh vẽ lớn ở giữa màn hình:
+   * Giữ chuột trái tại điểm bắt đầu và **kéo kéo chuột vẽ** một hình chữ nhật bao quanh phân vùng bạn muốn giao việc (ví dụ khung hình nền).
+   * Khi thả chuột, một bảng pop-up nhỏ sẽ hiện lên yêu cầu chọn loại phân vùng (`panel`, `bubble`, `character`, `background`, `sfx`).
+   * Chọn loại vùng và bấm **Lưu phân vùng**. Tọa độ thực tế `x, y, width, height` sẽ được gửi về máy chủ để lưu lại.
+4. Tại bảng danh sách phân vùng bên phải, chọn phân vùng vừa vẽ và bấm **Giao việc** để liên kết sang trang tạo Task cho Assistant.
+
+### 📌 3.2 Quy trình xử lý khi Chapter bị Biên tập viên từ chối (Rejected Chapter Rescue)
+Khi Tantou Editor từ chối phê duyệt chapter vì lý do chất lượng:
+1. Trạng thái Chapter tự động chuyển từ `reviewing` về **Đang vẽ (`drawing`)**.
+2. Hệ thống tự động mở khóa toàn bộ các trang truyện và phân vùng thuộc chapter này.
+3. Mangaka đăng nhập, đọc ghi chú từ chối của Editor trong phần phản hồi (Reviews).
+4. Mangaka tiến hành chỉnh sửa các trang vẽ bị lỗi hoặc tạo các phân vùng vẽ tay thủ công mới và giao tiếp Task chỉnh sửa cho Assistant hoàn thiện lại.
+5. Sau khi sửa xong, Mangaka tiến hành nộp duyệt lại chapter như bình thường.
+
+### 📌 3.3 Hướng dẫn cấu hình người dùng thử nghiệm nhanh (Demo Setup)
+Để kiểm thử trọn vẹn luồng cộng tác đa vai trò, bạn có thể tạo 5 tài khoản mẫu trong CSDL tương ứng với các vai trò:
+* **Tác giả (Mangaka):** Có quyền tạo truyện, vẽ phân vùng, giao việc, duyệt bài nộp của trợ lý.
+* **Trợ lý (Assistant):** Chỉ có quyền xem Task được giao của mình, tải ảnh gốc, nộp tệp vẽ xong và xem bảng thù lao tháng.
+* **Biên tập viên (Tantou Editor):** Xem tiến độ thời gian thực của studio, duyệt/từ chối chương truyện kèm viết nhận xét lỗi kịch bản.
+* **Hội đồng Biên tập (Editorial Board):** Phê duyệt đề xuất phát hành series mới, nhập số liệu bình chọn độc giả và theo dõi bảng xếp hạng.
+* **Quản trị viên (Admin):** Cấp quyền người dùng và giám sát nhật ký audit log của toàn hệ thống.
