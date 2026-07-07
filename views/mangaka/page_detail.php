@@ -12,6 +12,42 @@ require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published');
+?>
+<style>
+.selected-card {
+    background-color: #f8fafc !important; /* Tông xám pastel nhạt sạch sẽ */
+    border-color: #4f46e5 !important;    /* Viền màu tím thương hiệu */
+    border-width: 2px !important;
+    box-shadow: 0 0 20px rgba(79, 70, 229, 0.25) !important; /* Đổ bóng phát sáng (Glowing shadow) */
+    transform: translateY(-2px);
+    transition: all 0.25s ease;
+}
+
+/* Tối/mờ đi các card phân vùng không được chọn ở danh sách bên phải */
+#region-list-group.has-selected .list-group-item-action:not(.selected-card) {
+    opacity: 0.45;
+    filter: grayscale(15%);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* Tối/mờ đi các phân vùng vẽ khác trên canvas khi có một phân vùng được chọn */
+#mangaPageWrapper.has-selected-overlay .page-region-overlay:not(.selected-overlay) {
+    opacity: 0.12 !important;
+    border-style: dotted !important;
+    box-shadow: none !important;
+    transition: opacity 0.3s ease;
+}
+
+/* Tăng cường hiển thị phân vùng được chọn trên canvas */
+.selected-overlay {
+    opacity: 0.95 !important;
+    border-style: solid !important;
+    border-width: 4px !important;
+    z-index: 100 !important;
+    box-shadow: 0 0 25px currentColor !important;
+}
+</style>
+<?php
 
 // Spotlight logic for Assistant tasks
 $highlightRegionId = $_GET['highlight_region'] ?? null;
@@ -74,7 +110,11 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
 <!-- Khối thanh điều hướng và nút hành động -->
 <div class="mb-3 d-flex justify-content-between align-items-center">
     <!-- Nút quay lại danh sách trang của chapter -->
-    <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
+    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant'): ?>
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=index" class="btn btn-secondary">&larr; Quay lại Danh sách Công việc</a>
+    <?php else: ?>
+        <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($chapter['chapter_id']) ?>" class="btn btn-secondary">&larr; Quay lại Chapter</a>
+    <?php endif; ?>
     
     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div>
@@ -137,6 +177,41 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
 <div class="row">
     <!-- Cột trái: Ảnh trang truyện tích hợp vẽ Bounding Box của AI -->
     <div class="col-md-7 mb-4">
+        <!-- Hộp hiển thị mô tả công việc của phân vùng đang được chọn (nằm riêng bên ngoài) -->
+        <div id="selectedTaskDetailsBox" class="card border-0 shadow-sm mb-3 text-start d-none" style="background-color: #ffffff; border-radius: 12px; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03) !important;">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-primary fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
+                        YÊU CẦU CÔNG VIỆC CỦA PHÂN VÙNG
+                    </span>
+                    <button type="button" class="btn-close text-slate-400" style="font-size: 0.72rem; box-shadow: none;" onclick="closeSelectedTaskBox()"></button>
+                </div>
+                <h4 id="selectedTaskTitle" class="fw-bold text-slate-900 mb-3" style="font-size: 1.15rem; line-height: 1.35; letter-spacing: -0.01em;">Tiêu đề công việc</h4>
+                <hr class="my-2 border-slate-200" style="opacity: 0.08;">
+                
+                <div class="d-flex flex-wrap gap-3 mb-2 text-xs" style="font-size: 0.72rem;">
+                    <div><i class="fas fa-tag text-slate-400 me-1"></i>Loại: <span id="selectedTaskType" class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 font-semibold">Vẽ nền</span></div>
+                    <div><i class="fas fa-user-circle text-slate-400 me-1"></i>Trợ lý: <strong id="selectedTaskAssistant" class="text-slate-700">Assistant One</strong></div>
+                    <div><i class="fas fa-exclamation-triangle text-slate-400 me-1"></i>Độ ưu tiên: <span id="selectedTaskPriority" class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-0.5">Trung bình</span></div>
+                    <div><i class="far fa-calendar-alt text-slate-400 me-1"></i>Hạn chót: <strong id="selectedTaskDueDate" class="text-slate-700">09/07/2026</strong></div>
+                </div>
+                
+                <hr class="my-2 border-slate-200" style="opacity: 0.08;">
+                
+                <div class="text-xs text-slate-500 font-semibold mb-1" style="font-size: 0.72rem;"><i class="fas fa-file-alt me-1 text-slate-400"></i>Mục tiêu & Yêu cầu chi tiết:</div>
+                <div id="selectedTaskDescription" class="bg-slate-50 p-2.5 rounded border border-slate-100 text-slate-700 text-start overflow-y-auto mb-2" style="max-height: 180px; line-height: 1.5; font-size: 0.8rem; border-color: #e2e8f0 !important;">
+                    Mô tả chi tiết...
+                </div>
+
+                <!-- Nút nộp bài dành cho Trợ lý -->
+                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant'): ?>
+                    <div class="mt-3 pt-2 text-end border-top" id="submissionButtonContainer" style="border-top-color: #f1f5f9 !important;">
+                        <!-- Sẽ được fill bằng JavaScript -->
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <div class="card border-info">
             <div class="card-header bg-info text-dark d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-image me-2"></i>Bản vẽ trang truyện</h5>
@@ -161,9 +236,12 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                 $w = ($region['width'] / 800) * 100;
                                 $h = ($region['height'] / 1000) * 100;
                                 
-                                $borderColor = '#dc3545'; // Đỏ cho panel
-                                $bgColor = 'rgba(220, 53, 69, 0.15)';
-                                if ($region['region_type'] === 'bubble') {
+                                $borderColor = '#6c757d'; // Mặc định là xám cho custom type
+                                $bgColor = 'rgba(108, 117, 125, 0.12)';
+                                if ($region['region_type'] === 'panel') {
+                                    $borderColor = '#dc3545'; // Đỏ cho panel
+                                    $bgColor = 'rgba(220, 53, 69, 0.15)';
+                                } elseif ($region['region_type'] === 'bubble') {
                                     $borderColor = '#0d6efd'; // Xanh dương cho bubble
                                     $bgColor = 'rgba(13, 110, 253, 0.15)';
                                 } elseif ($region['region_type'] === 'character') {
@@ -194,30 +272,69 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         <?php endif; ?>
 
                         <?php if (!empty($editorAnnotations)): ?>
-                            <?php foreach ($editorAnnotations as $ann): 
+                            <?php foreach ($editorAnnotations as $index => $ann): 
                                 $l = ($ann['x'] / 800) * 100;
                                 $t = ($ann['y'] / 1000) * 100;
                                 $w = ($ann['width'] / 800) * 100;
                                 $h = ($ann['height'] / 1000) * 100;
                             ?>
                                 <div class="editor-annotation-overlay" 
-                                     style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 2px dashed #dc3545; background-color: rgba(220, 53, 69, 0.07); cursor: help; z-index: 10;"
+                                     style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #dc3545; background-color: rgba(220, 53, 69, 0.15); cursor: help; z-index: 10;"
                                      data-bs-toggle="popover"
                                      data-bs-trigger="hover focus"
                                      data-bs-placement="top"
                                      data-bs-content="<?= htmlspecialchars($ann['comments']) ?>"
-                                     title="Ghi chú lỗi của Editor: <?= htmlspecialchars($ann['editor_name']) ?>">
-                                     <span class="badge bg-danger text-white position-absolute p-1" style="font-size: 8px; bottom: 2px; right: 2px; opacity: 0.85;">
-                                         <i class="fas fa-exclamation-circle me-1"></i>Editor Note
+                                     title="Lỗi <?= $index + 1 ?> (<?= htmlspecialchars($ann['editor_name']) ?>)">
+                                     <span class="badge bg-danger position-absolute top-0 start-0 translate-middle" style="font-size: 0.75rem; pointer-events: auto; z-index: 11;">
+                                         <?= $index + 1 ?>
                                      </span>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
+                    
+                    <?php if (!empty($editorAnnotations)): ?>
+                        <div class="mt-4 w-100 text-start bg-white p-3 rounded shadow-sm border border-danger-subtle">
+                            <h6 class="fw-bold text-danger mb-3 border-bottom border-danger-subtle pb-2"><i class="fas fa-exclamation-triangle me-2"></i>Lỗi Editor yêu cầu sửa đổi:</h6>
+                            <ul class="list-unstyled mb-0 text-sm">
+                                <?php foreach ($editorAnnotations as $index => $ann): ?>
+                                    <li class="mb-3 pb-2 <?= $index < count($editorAnnotations) - 1 ? 'border-bottom border-slate-100' : '' ?>">
+                                        <div class="d-flex align-items-start">
+                                            <span class="badge bg-danger mt-1 me-2 shadow-sm">Lỗi <?= $index + 1 ?></span>
+                                            <div>
+                                                <div class="fw-bold text-dark"><?= htmlspecialchars($ann['editor_name']) ?> <span class="text-muted fw-normal fs-xs ms-1">đã ghi chú:</span></div>
+                                                <div class="text-slate-700 mt-1" style="font-size: 0.85rem; line-height: 1.5;"><?= nl2br(htmlspecialchars($ann['comments'])) ?></div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                    
                 <?php else: ?>
                     <div class="text-muted my-5">
                         <i class="fas fa-file-image fa-3x mb-3"></i>
                         <p>Trang này chưa có hình ảnh.</p>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+                    <hr class="my-4 text-slate-200">
+                    <div class="w-100 text-start mt-2">
+                        <h6 class="fw-bold text-primary mb-3"><i class="fas fa-upload me-2"></i>Cập nhật Bản vẽ Hoàn chỉnh (Genko)</h6>
+                        <form action="<?= BASE_PATH ?>/index.php?controller=page&action=update&id=<?= $page['page_id'] ?>" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="page_number" value="<?= htmlspecialchars($page['page_number']) ?>">
+                            <input type="hidden" name="status" value="<?= htmlspecialchars($page['status']) ?>">
+                            <div class="upload-dropzone position-relative d-flex flex-column align-items-center justify-content-center border border-primary border-dashed rounded-3 p-4 bg-light text-center shadow-sm" style="cursor: pointer; min-height: 120px; transition: all 0.2s;">
+                                <input type="file" id="image" name="image" accept=".jpg,.jpeg,.png,.webp" class="position-absolute top-0 start-0 w-100 h-100 opacity-0" style="cursor: pointer; z-index: 2;" onchange="this.form.submit()">
+                                <div class="upload-icon-wrapper mb-2" style="width: 40px; height: 40px; background: rgba(79, 70, 229, 0.1); color: #4f46e5; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-cloud-upload-alt fs-5"></i>
+                                </div>
+                                <h6 class="fw-semibold mb-1" style="font-size: 0.9rem;">Kéo thả ảnh đã ghép vào đây để tải lên</h6>
+                                <p class="text-muted mb-0" style="font-size: 0.75rem;">File ảnh sẽ được tự động lưu thay thế cho ảnh hiện tại.</p>
+                            </div>
+                        </form>
                     </div>
                 <?php endif; ?>
             </div>
@@ -226,27 +343,29 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
 
     <!-- Cột phải: Thông tin Phân Vùng Bản Vẽ Thủ Công -->
     <div class="col-md-5 mb-4">
-        <div class="card border-secondary">
-            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0"><i class="fas fa-crop me-2"></i>Phân vùng bản vẽ</h5>
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="card-header bg-white py-3 border-bottom border-slate-100 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 text-slate-800 fw-bold" style="font-size: 1.05rem;"><i class="fas fa-crop me-2 text-primary"></i>Phân vùng bản vẽ</h5>
                 <div class="d-flex gap-2">
                     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
-                        <button id="btnDrawToggle" class="btn btn-sm btn-info text-white">
+                        <button id="btnDrawToggle" class="btn btn-sm px-3 rounded-pill fw-bold text-white shadow-sm border-0" style="background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%); font-size: 0.78rem; transition: all 0.2s;">
                             <i class="fas fa-edit me-1"></i>Vẽ thủ công
                         </button>
                     <?php endif; ?>
                 </div>
             </div>
-            <div class="card-body d-flex flex-column justify-content-between">
+            <div class="card-body d-flex flex-column justify-content-between" style="min-height: 320px;">
                 <?php if (empty($regions)): ?>
-                    <div class="text-center my-auto py-4">
-                        <i class="fas fa-edit fa-3x text-muted mb-3"></i>
-                        <h6 class="fw-bold">Chưa có phân vùng nào</h6>
-                        <p class="text-muted small px-3">Hãy sử dụng bộ công cụ <strong>Vẽ thủ công</strong> chuyên nghiệp để tự vẽ và phân chia khung hình, ô thoại, nhân vật trên trang truyện.</p>
+                    <div class="text-center my-auto py-5 d-flex flex-column align-items-center justify-content-center">
+                        <div class="mb-3 d-flex align-items-center justify-content-center rounded-circle shadow-sm" style="width: 72px; height: 72px; background: rgba(79, 70, 229, 0.06); color: #4f46e5;">
+                            <i class="fas fa-vector-square fa-2x"></i>
+                        </div>
+                        <h6 class="fw-bold text-slate-800 mb-2" style="font-size: 1.05rem;">Chưa có phân vùng nào</h6>
+                        <p class="text-slate-500 px-4 mb-4 text-xs" style="max-width: 320px; line-height: 1.6; font-size: 0.8rem;">Hãy sử dụng bộ công cụ <strong>Vẽ thủ công</strong> chuyên nghiệp để tự vẽ và phân chia khung hình, ô thoại, nhân vật trên trang truyện.</p>
                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                         <div class="d-flex gap-2 justify-content-center mt-2">
-                            <button onclick="document.getElementById('btnDrawToggle').click();" class="btn btn-primary btn-sm">
-                                <i class="fas fa-edit me-2"></i>Bắt đầu vẽ phân vùng
+                            <button onclick="document.getElementById('btnDrawToggle').click();" class="btn btn-sm px-4 py-2 rounded-pill fw-bold text-white shadow" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); border: none; font-size: 0.8rem; transition: all 0.2s;">
+                                <i class="fas fa-plus-circle me-1.5"></i>Bắt đầu vẽ phân vùng
                             </button>
                         </div>
                         <?php endif; ?>
@@ -256,10 +375,15 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         <p class="text-muted small mb-3">Các phân vùng bản vẽ hiện có. Bạn có thể chọn giao việc (Task) trực tiếp cho Assistant trên từng phân vùng.</p>
                         <div class="list-group" id="region-list-group">
                             <?php foreach ($regions as $region): 
-                                $typeLabel = 'Khung truyện';
-                                $typeClass = 'bg-danger';
-                                $rowBorder = 'border-start border-danger border-4';
-                                if ($region['region_type'] === 'bubble') {
+                                $typeLabel = htmlspecialchars($region['region_type']);
+                                $typeClass = 'bg-secondary';
+                                $rowBorder = 'border-start border-secondary border-4';
+                                
+                                if ($region['region_type'] === 'panel') {
+                                    $typeLabel = 'Khung truyện';
+                                    $typeClass = 'bg-danger';
+                                    $rowBorder = 'border-start border-danger border-4';
+                                } elseif ($region['region_type'] === 'bubble') {
                                     $typeLabel = 'Bong bóng thoại';
                                     $typeClass = 'bg-primary';
                                     $rowBorder = 'border-start border-primary border-4';
@@ -279,8 +403,10 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                             ?>
                                 <div class="list-group-item list-group-item-action mb-2 <?= $rowBorder ?> shadow-sm transition-all" 
                                      id="list-region-<?= $region['region_id'] ?>"
+                                     onclick="highlightCanvasOverlay(<?= $region['region_id'] ?>)"
                                      onmouseenter="hoverOverlay(<?= $region['region_id'] ?>, true)"
-                                     onmouseleave="hoverOverlay(<?= $region['region_id'] ?>, false)">
+                                     onmouseleave="hoverOverlay(<?= $region['region_id'] ?>, false)"
+                                     style="cursor: pointer;">
                                     <div class="d-flex w-100 justify-content-between align-items-center">
                                         <h6 class="mb-1 fw-bold text-dark">
                                             <span class="badge <?= $typeClass ?> me-2"><?= $typeLabel ?></span>
@@ -291,10 +417,61 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                     <p class="mb-1 text-muted small">
                                         Tọa độ: X:<?= $region['x'] ?>, Y:<?= $region['y'] ?> | Kích thước: <?= $region['width'] ?>x<?= $region['height'] ?>
                                     </p>
+                                    
+                                    <!-- Hiển thị công việc đã giao cho phân vùng này -->
+                                    <?php 
+                                    $regionTasks = array_filter($tasks, function($t) use ($region) {
+                                        return !empty($t['page_region_id']) && $t['page_region_id'] == $region['region_id'];
+                                    });
+                                    if (!empty($regionTasks)): 
+                                    ?>
+                                        <div class="mt-2 mb-2 p-2 rounded border" style="font-size: 0.78rem; background-color: #f8fafc; border-color: #e2e8f0 !important;">
+                                            <?php foreach ($regionTasks as $rt): 
+                                                $rtColor = 'secondary';
+                                                $rtLabel = $rt['status'];
+                                                if ($rt['status'] == 'completed') { $rtColor = 'success'; $rtLabel = 'Hoàn thành'; }
+                                                elseif ($rt['status'] == 'submitted') { $rtColor = 'info'; $rtLabel = 'Chờ duyệt'; }
+                                                elseif ($rt['status'] == 'rejected') { $rtColor = 'danger'; $rtLabel = 'Yêu cầu sửa'; }
+                                                elseif ($rt['status'] == 'in_progress') { $rtColor = 'primary'; $rtLabel = 'Đang làm'; }
+                                                else { $rtColor = 'warning text-dark'; $rtLabel = 'Chờ xử lý'; }
+                                            ?>
+                                                 <div class="d-flex align-items-center justify-content-between mb-1">
+                                                     <span class="fw-semibold text-slate-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;" title="<?= htmlspecialchars($rt['title']) ?>">
+                                                         <i class="fas fa-tasks me-1 text-indigo-500"></i><?= htmlspecialchars($rt['title']) ?>
+                                                     </span>
+                                                     <div>
+                                                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant' && $rt['status'] !== 'completed'): ?>
+                                                             <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&task_id=<?= $rt['task_id'] ?>" class="text-success text-decoration-none me-2 fw-bold" onclick="event.stopPropagation();" style="font-size: 10px;">
+                                                                 Nộp bài
+                                                             </a>
+                                                         <?php endif; ?>
+                                                         <?php if (!empty($rt['description'])): ?>
+                                                             <button class="btn btn-link btn-xs p-0 text-decoration-none text-primary me-2" type="button" data-bs-toggle="collapse" data-bs-target="#region-task-desc-<?= $rt['task_id'] ?>" onclick="event.stopPropagation();" aria-expanded="false" aria-controls="region-task-desc-<?= $rt['task_id'] ?>" title="Xem yêu cầu" style="font-size: 10px; font-weight: 500; box-shadow: none;">
+                                                                 Chi tiết
+                                                             </button>
+                                                         <?php endif; ?>
+                                                         <span class="badge bg-<?= $rtColor ?> rounded-pill py-0.5 px-1.5" style="font-size: 8px;"><?= $rtLabel ?></span>
+                                                     </div>
+                                                 </div>
+                                                 <?php if (!empty($rt['description'])): ?>
+                                                     <div class="collapse mt-1 mb-2" id="region-task-desc-<?= $rt['task_id'] ?>" onclick="event.stopPropagation();">
+                                                         <div class="card card-body bg-light p-2 border-light text-slate-600 text-start" style="font-size: 0.72rem; line-height: 1.4; border-radius: 6px; max-height: 120px; overflow-y: auto;">
+                                                             <strong>Yêu cầu:</strong><br>
+                                                             <?= renderMarkdown($rt['description']) ?>
+                                                         </div>
+                                                     </div>
+                                                 <?php endif; ?>
+                                                 <div class="text-slate-500 d-flex justify-content-between align-items-center mb-2" style="font-size: 0.7rem; padding-left: 14px;">
+                                                     <span><i class="fas fa-user-circle me-1 text-slate-400"></i>Trợ lý: <strong><?= htmlspecialchars($rt['assistant_name'] ?? 'Chưa rõ') ?></strong></span>
+                                                 </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    
                                     <div class="d-flex justify-content-between align-items-center mt-2">
                                         <span class="badge bg-light text-dark border">Vẽ tay</span>
                                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
-                                        <div class="btn-group">
+                                        <div class="btn-group" onclick="event.stopPropagation();">
                                             <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
                                                 <i class="fas fa-plus me-1"></i>Giao việc
                                             </a>
@@ -402,7 +579,13 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                             <option value="character">Nhân vật (Character)</option>
                             <option value="background">Bối cảnh/Nền (Background)</option>
                             <option value="sfx">Hiệu ứng chữ (SFX)</option>
+                            <option value="other">Khác (Tự nhập)...</option>
                         </select>
+                    </div>
+
+                    <div class="mb-3 d-none" id="custom_type_container">
+                        <label for="custom_reg_type" class="form-label fw-bold" style="font-size: 0.9rem;">Nhập loại phân vùng tự chọn <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="custom_reg_type" name="custom_region_type" placeholder="Ví dụ: Đạo cụ, Vũ khí, v.v.">
                     </div>
                 </div>
                 <div class="modal-footer py-1">
@@ -415,16 +598,155 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
 </div>
 
 <script>
+<?php
+// Chuẩn bị dữ liệu JSON của các task để đẩy vào JS
+$jsTasks = [];
+if (!empty($tasks)) {
+    foreach ($tasks as $t) {
+        $jsTasks[] = [
+            'task_id' => $t['task_id'],
+            'page_region_id' => $t['page_region_id'],
+            'title' => $t['title'],
+            'description' => renderMarkdown($t['description']),
+            'task_type' => $t['task_type'],
+            'priority' => $t['priority'],
+            'status' => $t['status'],
+            'due_date' => $t['due_date'] ? date('d/m/Y H:i', strtotime($t['due_date'])) : 'Không có',
+            'assistant_name' => $t['assistant_name'] ?? 'Chưa rõ'
+        ];
+    }
+}
+?>
+const BASE_PATH = '<?= BASE_PATH ?>';
+const pageTasksData = <?= json_encode($jsTasks) ?>;
+
+function closeSelectedTaskBox() {
+    document.getElementById('selectedTaskDetailsBox').classList.add('d-none');
+    
+    // Khôi phục độ mờ của danh sách card bên phải
+    const listGroup = document.getElementById('region-list-group');
+    if (listGroup) {
+        listGroup.classList.remove('has-selected');
+    }
+    document.querySelectorAll('.list-group-item-action').forEach(el => {
+        el.classList.remove('selected-card');
+    });
+
+    // Khôi phục độ mờ của các phân vùng vẽ bên trái
+    const wrapper = document.getElementById('mangaPageWrapper');
+    if (wrapper) {
+        wrapper.classList.remove('has-selected-overlay');
+    }
+    document.querySelectorAll('.page-region-overlay').forEach(el => {
+        el.classList.remove('selected-overlay');
+    });
+}
+
+function updateSelectedTaskBox(regionId) {
+    // 1. Quản lý các card bên phải (Spotlight Focus)
+    const listGroup = document.getElementById('region-list-group');
+    if (listGroup) {
+        listGroup.classList.add('has-selected');
+    }
+    document.querySelectorAll('.list-group-item-action').forEach(el => {
+        el.classList.remove('selected-card');
+    });
+    const activeCard = document.getElementById('list-region-' + regionId);
+    if (activeCard) {
+        activeCard.classList.add('selected-card');
+    }
+
+    // 2. Quản lý các phân vùng vẽ trên canvas bên trái (Spotlight Focus)
+    const wrapper = document.getElementById('mangaPageWrapper');
+    if (wrapper) {
+        wrapper.classList.add('has-selected-overlay');
+    }
+    document.querySelectorAll('.page-region-overlay').forEach(el => {
+        el.classList.remove('selected-overlay');
+    });
+    const activeOverlay = document.getElementById('overlay-region-' + regionId);
+    if (activeOverlay) {
+        activeOverlay.classList.add('selected-overlay');
+    }
+
+    const matchedTasks = pageTasksData.filter(t => t.page_region_id == regionId);
+    const infoBox = document.getElementById('selectedTaskDetailsBox');
+    if (matchedTasks.length > 0) {
+        const task = matchedTasks[0];
+        
+        document.getElementById('selectedTaskTitle').innerText = task.title;
+        
+        let typeLabel = task.task_type;
+        if (task.task_type === 'background') typeLabel = 'Vẽ nền (Background)';
+        else if (task.task_type === 'inking') typeLabel = 'Đi nét (Inking)';
+        else if (task.task_type === 'coloring') typeLabel = 'Lên màu (Coloring)';
+        else if (task.task_type === 'effects') typeLabel = 'Hiệu ứng (Effects)';
+        else typeLabel = task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1);
+        
+        document.getElementById('selectedTaskType').innerText = typeLabel;
+        document.getElementById('selectedTaskAssistant').innerText = task.assistant_name;
+        
+        const priorityEl = document.getElementById('selectedTaskPriority');
+        priorityEl.innerText = task.priority === 'high' ? 'Cao' : (task.priority === 'medium' ? 'Trung bình' : (task.priority === 'low' ? 'Thấp' : 'Thường'));
+        priorityEl.className = 'badge px-2 py-0.5 border ' + 
+            (task.priority === 'high' ? 'bg-danger-subtle text-danger border-danger-subtle' : 
+            (task.priority === 'medium' ? 'bg-warning-subtle text-warning border-warning-subtle' : 'bg-info-subtle text-info border-info-subtle'));
+            
+        document.getElementById('selectedTaskDueDate').innerText = task.due_date;
+        document.getElementById('selectedTaskDescription').innerHTML = task.description || '<em class="text-muted">Không có mô tả chi tiết.</em>';
+        
+        // Cập nhật nút nộp bài cho trợ lý
+        const submissionContainer = document.getElementById('submissionButtonContainer');
+        if (submissionContainer) {
+            if (task.status === 'completed') {
+                submissionContainer.innerHTML = `
+                    <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
+                        <i class="fas fa-check-circle me-1.5 text-success"></i>Công việc đã hoàn thành
+                    </span>`;
+            } else if (task.status === 'submitted') {
+                submissionContainer.innerHTML = `
+                    <span class="badge bg-info-subtle text-info border border-info-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
+                        <i class="fas fa-spinner fa-spin me-1.5 text-info"></i>Đang chờ duyệt bài
+                    </span>
+                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-outline-success py-1.5 px-3" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
+                        Nộp lại bản thảo mới
+                    </a>`;
+            } else if (task.status === 'rejected') {
+                submissionContainer.innerHTML = `
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
+                        <i class="fas fa-exclamation-triangle me-1.5 text-danger"></i>Mangaka yêu cầu sửa lại (Bị từ chối)
+                    </span>
+                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-success py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500; background-color: #10b981; border-color: #10b981; transition: all 0.2s;">
+                        <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
+                    </a>`;
+            } else {
+                submissionContainer.innerHTML = `
+                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-success py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500; background-color: #10b981; border-color: #10b981; transition: all 0.2s;">
+                        <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
+                    </a>`;
+            }
+        }
+
+        infoBox.classList.remove('d-none');
+    } else {
+        infoBox.classList.add('d-none');
+    }
+}
+
 function hoverOverlay(regionId, isHover) {
     const overlay = document.getElementById('overlay-region-' + regionId);
     const listItem = document.getElementById('list-region-' + regionId);
     if (overlay) {
         if (isHover) {
-            overlay.style.transform = 'scale(1.02)';
-            overlay.style.boxShadow = '0 0 12px rgba(0,0,0,0.5)';
+            overlay.style.borderStyle = 'solid';
+            overlay.style.borderWidth = '3px';
+            overlay.style.backgroundColor = overlay.style.backgroundColor.replace('0.12', '0.35').replace('0.15', '0.35');
+            overlay.style.boxShadow = '0 0 15px ' + overlay.style.borderColor;
             overlay.style.zIndex = '10';
         } else {
-            overlay.style.transform = 'scale(1)';
+            overlay.style.borderStyle = 'dashed';
+            overlay.style.borderWidth = '2px';
+            overlay.style.backgroundColor = overlay.style.backgroundColor.replace('0.35', '0.15').replace('0.35', '0.12');
             overlay.style.boxShadow = 'none';
             overlay.style.zIndex = '1';
         }
@@ -433,17 +755,76 @@ function hoverOverlay(regionId, isHover) {
         if (isHover) {
             listItem.classList.add('active-region');
             listItem.style.backgroundColor = '#f0f4f8';
+            listItem.style.borderColor = '#4f46e5';
+            listItem.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
         } else {
             listItem.classList.remove('active-region');
             listItem.style.backgroundColor = '';
+            listItem.style.borderColor = '';
+            listItem.style.boxShadow = '';
         }
     }
 }
 
+function highlightCanvasOverlay(regionId) {
+    updateSelectedTaskBox(regionId);
+
+    const card = document.getElementById('list-region-' + regionId);
+    if (card) {
+        const collapses = card.querySelectorAll('.collapse');
+        collapses.forEach(c => {
+            const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c);
+            bsCollapse.toggle();
+        });
+    }
+
+    const overlay = document.getElementById('overlay-region-' + regionId);
+    if (overlay) {
+        overlay.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        let count = 0;
+        const oldBorder = overlay.style.borderStyle;
+        const oldWidth = overlay.style.borderWidth;
+        const oldBg = overlay.style.backgroundColor;
+        
+        const interval = setInterval(() => {
+            if (count % 2 === 0) {
+                overlay.style.borderStyle = 'solid';
+                overlay.style.borderWidth = '4px';
+                overlay.style.backgroundColor = oldBg.replace('0.12', '0.5').replace('0.15', '0.5');
+                overlay.style.boxShadow = '0 0 25px ' + overlay.style.borderColor;
+            } else {
+                overlay.style.borderStyle = 'dashed';
+                overlay.style.borderWidth = '2px';
+                overlay.style.backgroundColor = oldBg;
+                overlay.style.boxShadow = 'none';
+            }
+            count++;
+            if (count > 6) {
+                clearInterval(interval);
+                overlay.style.borderStyle = oldBorder;
+                overlay.style.borderWidth = oldWidth;
+                overlay.style.backgroundColor = oldBg;
+                overlay.style.boxShadow = 'none';
+            }
+        }, 200);
+    }
+}
+
 function highlightTableRecord(regionId) {
+    updateSelectedTaskBox(regionId);
+
     const listItem = document.getElementById('list-region-' + regionId);
     if (listItem) {
         listItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        
+        // Tự động mở rộng các collapse mô tả bên trong
+        const collapses = listItem.querySelectorAll('.collapse');
+        collapses.forEach(c => {
+            const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
+            bsCollapse.show();
+        });
+        
         // Tạo hiệu ứng nhấp nháy
         let count = 0;
         const interval = setInterval(() => {
@@ -595,6 +976,42 @@ document.addEventListener("DOMContentLoaded", function() {
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl)
     });
+
+    // Xử lý loại phân vùng tự chọn
+    const regTypeSelect = document.getElementById('reg_type');
+    const customTypeContainer = document.getElementById('custom_type_container');
+    const customTypeInput = document.getElementById('custom_reg_type');
+
+    if (regTypeSelect && customTypeContainer && customTypeInput) {
+        regTypeSelect.addEventListener('change', function() {
+            if (regTypeSelect.value === 'other') {
+                customTypeContainer.classList.remove('d-none');
+                customTypeInput.required = true;
+            } else {
+                customTypeContainer.classList.add('d-none');
+                customTypeInput.required = false;
+            }
+        });
+    }
+
+    <?php if ($highlightRegionId): ?>
+        // Tự động cuộn đến, tô màu viền/bóng và mở rộng chi tiết công việc của phân vùng được highlight
+        const targetRegionId = <?= intval($highlightRegionId) ?>;
+        setTimeout(() => {
+            const card = document.getElementById('list-region-' + targetRegionId);
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Mở rộng tất cả collapse mô tả bên trong
+                const collapses = card.querySelectorAll('.collapse');
+                collapses.forEach(c => {
+                    const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
+                    bsCollapse.show();
+                });
+            }
+            // Kích hoạt hiệu ứng nhấp nháy trên canvas
+            highlightCanvasOverlay(targetRegionId);
+        }, 500);
+    <?php endif; ?>
 });
 </script>
 
@@ -639,18 +1056,31 @@ document.addEventListener("DOMContentLoaded", function() {
                             <tr<?= $hoverAttr ?>>
                                 <!-- Tiêu đề task -->
                                 <td>
-                                    <strong><?= htmlspecialchars($task['title']) ?></strong>
-                                    <?php if (!empty($task['description'])): ?>
-                                        <div class="text-muted small mt-1" style="max-width: 300px;"><?= renderMarkdown($task['description']) ?></div>
-                                    <?php endif; ?>
-                                    <?php if (!empty($task['resource_url'])): ?>
-                                        <br><small class="text-muted"><i class="fas fa-link me-1"></i>Tài nguyên: <a href="<?= htmlspecialchars($task['resource_url']) ?>" target="_blank">Xem link</a></small>
-                                    <?php endif; ?>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex align-items-center gap-1 flex-wrap">
+                                            <strong><?= htmlspecialchars($task['title']) ?></strong>
+                                            <?php if (!empty($task['description'])): ?>
+                                                <button class="btn btn-link btn-xs p-0 text-decoration-none text-primary ms-1" type="button" data-bs-toggle="collapse" data-bs-target="#task-desc-<?= $task['task_id'] ?>" aria-expanded="false" aria-controls="task-desc-<?= $task['task_id'] ?>" title="Xem chi tiết mô tả" style="font-size: 0.75rem;">
+                                                    <i class="fas fa-info-circle me-1"></i>Chi tiết
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
+                                        <?php if (!empty($task['description'])): ?>
+                                            <div class="collapse mt-2" id="task-desc-<?= $task['task_id'] ?>">
+                                                <div class="card card-body bg-light p-2.5 border-slate-100 text-muted" style="font-size: 0.8rem; max-width: 400px; max-height: 250px; overflow-y: auto; line-height: 1.5; border-radius: 8px;">
+                                                    <?= renderMarkdown($task['description']) ?>
+                                                </div>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($task['resource_url'])): ?>
+                                            <small class="text-muted mt-1"><i class="fas fa-link me-1"></i>Tài nguyên: <a href="<?= htmlspecialchars($task['resource_url']) ?>" target="_blank">Xem link</a></small>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <!-- Loại công việc -->
                                 <td>
                                     <?php
-                                    $typeLabel = 'Khác';
+                                    $typeLabel = htmlspecialchars($task['task_type'] ?? 'Khác');
                                     $typeBadge = 'bg-secondary';
                                     switch ($task['task_type']) {
                                         case 'background': $typeLabel = 'Vẽ nền'; $typeBadge = 'bg-dark'; break;
@@ -691,6 +1121,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     $sColor = 'secondary';
                                     $sLabel = $task['status'];
                                     if ($task['status'] == 'completed') { $sColor = 'success'; $sLabel = 'Hoàn thành'; }
+                                    elseif ($task['status'] == 'submitted') { $sColor = 'info'; $sLabel = 'Chờ duyệt'; }
                                     elseif ($task['status'] == 'in_progress') { $sColor = 'primary'; $sLabel = 'Đang làm'; }
                                     else { $sColor = 'warning text-dark'; $sLabel = 'Chờ xử lý'; }
                                     ?>

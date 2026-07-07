@@ -9,7 +9,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
-$isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'approved' || $chapter['status'] === 'published');
+$isLocked = ($chapter['status'] === 'reviewing_draft' || $chapter['status'] === 'reviewing_final' || $chapter['status'] === 'approved' || $chapter['status'] === 'published');
 ?>
 
 <?php if (isset($_SESSION['success'])): ?>
@@ -34,6 +34,11 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div>
         <?php if (!$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+            <?php if ($chapter['status'] === 'drafting'): ?>
+                <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&chapter_id=<?= $chapter['chapter_id'] ?>" class="btn btn-success shadow-sm me-1"><i class="fas fa-paper-plane me-1"></i>Nộp duyệt Bản nháp</a>
+            <?php elseif ($chapter['status'] === 'drawing'): ?>
+                <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&chapter_id=<?= $chapter['chapter_id'] ?>" class="btn btn-primary shadow-sm me-1"><i class="fas fa-check-double me-1"></i>Nộp duyệt Bản hoàn chỉnh</a>
+            <?php endif; ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-warning shadow-sm text-dark"><i class="fas fa-edit me-2"></i>Sửa Chapter</a>
         <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
             <button type="submit" class="btn btn-danger shadow-sm"><i class="fas fa-trash-alt me-2"></i>Xóa</button>
@@ -45,8 +50,10 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
                     if ($series['status'] === 'suspended') $lockMsg = 'Bộ truyện đang tạm ngưng (Khóa)';
                     elseif ($series['status'] === 'canceled') $lockMsg = 'Bộ truyện đã hủy (Khóa)';
                     elseif ($series['status'] === 'completed') $lockMsg = 'Bộ truyện đã hoàn thành (Khóa)';
-                } elseif ($chapter['status'] === 'reviewing') {
-                    $lockMsg = 'Chương đang chờ duyệt (Khóa)';
+                } elseif ($chapter['status'] === 'reviewing_draft') {
+                    $lockMsg = 'Đang chờ duyệt Nháp (Khóa)';
+                } elseif ($chapter['status'] === 'reviewing_final') {
+                    $lockMsg = 'Đang chờ duyệt Hoàn chỉnh (Khóa)';
                 }
             ?>
             <span class="badge bg-warning text-dark p-2 border border-warning"><i class="fas fa-lock me-1"></i><?= $lockMsg ?></span>
@@ -70,7 +77,8 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
         $statusLabels = [
             'drafting' => 'Bản nháp',
             'drawing' => 'Đang vẽ',
-            'reviewing' => 'Đang chờ duyệt',
+            'reviewing_draft' => 'Đang chờ duyệt Nháp',
+            'reviewing_final' => 'Đang chờ duyệt Hoàn chỉnh',
             'approved' => 'Đã duyệt',
             'published' => 'Đã xuất bản'
         ];
@@ -79,7 +87,8 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
         switch ($chapter['status']) {
             case 'drafting': $cBadge = 'bg-secondary'; break;
             case 'drawing': $cBadge = 'bg-primary'; break;
-            case 'reviewing': $cBadge = 'bg-warning text-dark'; break;
+            case 'reviewing_draft': 
+            case 'reviewing_final': $cBadge = 'bg-warning text-dark'; break;
             case 'approved': $cBadge = 'bg-info text-dark'; break;
             case 'published': $cBadge = 'bg-success'; break;
         }
@@ -125,7 +134,8 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
                             $pLabels = [
                                 'drafting' => 'Bản nháp',
                                 'drawing' => 'Đang vẽ',
-                                'reviewing' => 'Đang chờ duyệt',
+                                'reviewing_draft' => 'Đang chờ duyệt Nháp',
+                                'reviewing_final' => 'Đang chờ duyệt Hoàn chỉnh',
                                 'approved' => 'Đã duyệt',
                                 'published' => 'Đã xuất bản'
                             ];
@@ -134,7 +144,8 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
                             switch ($page['status']) {
                                 case 'drafting': $pBadge = 'bg-secondary'; break;
                                 case 'drawing': $pBadge = 'bg-primary'; break;
-                                case 'reviewing': $pBadge = 'bg-warning text-dark'; break;
+                                case 'reviewing_draft': 
+                                case 'reviewing_final': $pBadge = 'bg-warning text-dark'; break;
                                 case 'approved': $pBadge = 'bg-info text-dark'; break;
                                 case 'published': $pBadge = 'bg-success'; break;
                             }
@@ -142,14 +153,22 @@ $isLocked = ($chapter['status'] === 'reviewing' || $chapter['status'] === 'appro
                             <tr>
                                 <td class="text-center fs-5 fw-bold"><?= htmlspecialchars($page['page_number']) ?></td>
                                 <td>
-                                    <?php if (!empty($page['image_url'])): 
-                                        $imageUrl = $page['image_url'];
-                                        $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
-                                    ?>
-                                        <img src="<?= htmlspecialchars($resolvedImage) ?>" alt="Trang <?= htmlspecialchars($page['page_number']) ?>" class="img-thumbnail" style="max-height: 100px;">
-                                    <?php else: ?>
-                                        <span class="text-muted">Chưa có ảnh</span>
-                                    <?php endif; ?>
+                                    <div class="position-relative d-inline-block">
+                                        <?php if (!empty($page['image_url'])): 
+                                            $imageUrl = $page['image_url'];
+                                            $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                                        ?>
+                                            <img src="<?= htmlspecialchars($resolvedImage) ?>" alt="Trang <?= htmlspecialchars($page['page_number']) ?>" class="img-thumbnail <?= !empty($page['annotation_count']) ? 'border-danger border-2' : '' ?>" style="max-height: 100px;">
+                                        <?php else: ?>
+                                            <div class="bg-light border text-muted d-flex align-items-center justify-content-center <?= !empty($page['annotation_count']) ? 'border-danger border-2' : '' ?>" style="height: 100px; width: 70px; font-size: 0.8rem;">Trống</div>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (!empty($page['annotation_count'])): ?>
+                                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger shadow-sm border border-white" title="Có <?= $page['annotation_count'] ?> lỗi cần sửa do Editor đánh dấu">
+                                                <i class="fas fa-exclamation"></i> <?= $page['annotation_count'] ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                                 <td><span class="badge <?= $pBadge ?>"><?= htmlspecialchars($displayPageStatus) ?></span></td>
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></td>

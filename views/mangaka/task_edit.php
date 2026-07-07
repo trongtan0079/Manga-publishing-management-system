@@ -68,6 +68,27 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     quill.root.innerHTML = oldContent;
                 }
 
+                // Xử lý loại công việc tự chọn
+                const taskTypeSelect = document.getElementById('task_type');
+                const customTaskTypeContainer = document.getElementById('custom_task_type_container');
+                const customTaskTypeInput = document.getElementById('custom_task_type');
+
+                function toggleCustomTaskType() {
+                    if (taskTypeSelect.value === 'other') {
+                        customTaskTypeContainer.classList.remove('d-none');
+                        customTaskTypeInput.required = true;
+                    } else {
+                        customTaskTypeContainer.classList.add('d-none');
+                        customTaskTypeInput.required = false;
+                    }
+                }
+
+                if (taskTypeSelect && customTaskTypeContainer && customTaskTypeInput) {
+                    taskTypeSelect.addEventListener('change', toggleCustomTaskType);
+                    // Chạy ngay lần đầu để đồng bộ trạng thái mặc định
+                    toggleCustomTaskType();
+                }
+
                 // Sync Quill editor HTML with the hidden textarea on submit
                 const form = document.querySelector('form');
                 if (form) {
@@ -84,16 +105,24 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </script>
 
             <!-- Loại công việc và Phân vùng (New) -->
+            <?php 
+            $isCustomTaskType = !in_array($task['task_type'] ?? 'other', ['background', 'inking', 'coloring', 'effects']);
+            ?>
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="task_type" class="form-label">Loại công việc <span class="text-danger">*</span></label>
+                    <label for="task_type" class="form-label fw-bold">Loại công việc <span class="text-danger">*</span></label>
                     <select class="form-select" id="task_type" name="task_type" required>
                         <option value="background" <?= ($task['task_type'] ?? 'other') === 'background' ? 'selected' : '' ?>>Vẽ nền (Background)</option>
                         <option value="inking" <?= ($task['task_type'] ?? 'other') === 'inking' ? 'selected' : '' ?>>Đi nét (Inking)</option>
                         <option value="coloring" <?= ($task['task_type'] ?? 'other') === 'coloring' ? 'selected' : '' ?>>Lên màu (Coloring)</option>
                         <option value="effects" <?= ($task['task_type'] ?? 'other') === 'effects' ? 'selected' : '' ?>>Hiệu ứng (Effects)</option>
-                        <option value="other" <?= ($task['task_type'] ?? 'other') === 'other' ? 'selected' : '' ?>>Khác (Other)</option>
+                        <option value="other" <?= (($task['task_type'] ?? 'other') === 'other' || $isCustomTaskType) ? 'selected' : '' ?>>Khác (Other)</option>
                     </select>
+                    
+                    <div class="mt-2 d-none" id="custom_task_type_container">
+                        <label for="custom_task_type" class="form-label fw-semibold text-slate-700" style="font-size: 0.85rem;">Nhập loại công việc tự chọn <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="custom_task_type" name="custom_task_type" placeholder="Ví dụ: Đổ tone, Dán decal, v.v." value="<?= $isCustomTaskType ? htmlspecialchars($task['task_type']) : '' ?>">
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="page_region_id" class="form-label">Phân vùng ảnh</label>

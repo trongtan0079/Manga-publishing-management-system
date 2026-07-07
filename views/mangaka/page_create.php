@@ -30,9 +30,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             
             <!-- Trường nhập số thứ tự trang -->
             <div class="mb-3">
-                <label for="page_number" class="form-label">Số trang <span class="text-danger">*</span></label>
+                <label for="page_number" class="form-label fw-bold">Số trang <span class="text-danger">*</span></label>
                 <input type="number" class="form-control" id="page_number" name="page_number" min="1" required>
-                <div class="form-text">Số trang phải lớn hơn 0 và không được trùng với các trang đã có trong chapter.</div>
+                <div class="form-text text-muted" id="page-help-text">Số trang phải lớn hơn 0 và không được trùng với các trang đã có trong chapter.</div>
+                <div class="text-danger mt-1 d-none" id="page-number-warning" style="font-size: 0.8rem; font-weight: 500;">
+                    <i class="fas fa-exclamation-circle me-1"></i>Số trang này đã tồn tại trong chapter này. Vui lòng chọn số khác!
+                </div>
             </div>
             
             <!-- Trường chọn file ảnh -->
@@ -68,6 +71,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const dropzone = document.getElementById('dropzone');
     const statusText = document.getElementById('upload-status-text');
     const iconWrapper = dropzone.querySelector('.upload-icon-wrapper');
+    
+    // Validate số trang trùng lặp thời gian thực
+    const pageInput = document.getElementById('page_number');
+    const pageWarning = document.getElementById('page-number-warning');
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const existingPages = <?= json_encode(array_map('intval', $existingPageNumbers ?? [])) ?>;
+
+    if (pageInput && pageWarning) {
+        pageInput.addEventListener('input', function() {
+            const val = parseInt(pageInput.value, 10);
+            if (existingPages.includes(val)) {
+                pageInput.classList.add('is-invalid');
+                pageWarning.classList.remove('d-none');
+                if (submitBtn) submitBtn.disabled = true;
+            } else {
+                pageInput.classList.remove('is-invalid');
+                pageWarning.classList.add('d-none');
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+    }
 
     if (fileInput && dropzone) {
         fileInput.addEventListener('change', function() {

@@ -67,6 +67,61 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     </div>
                 </div>
 
+                <!-- Yêu cầu công việc ban đầu -->
+                <?php if (!empty($submission['task_id'])): ?>
+                <div class="mb-4 bg-slate-50 p-3 rounded border border-slate-200">
+                    <p class="fw-bold text-primary mb-2"><i class="fas fa-clipboard-list me-2"></i>Yêu cầu công việc ban đầu</p>
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <span class="text-muted small">Loại việc:</span>
+                            <span class="badge bg-secondary-subtle text-secondary ms-1"><?= htmlspecialchars((string)($submission['task_type'] ?? 'Không rõ')) ?></span>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <span class="text-muted small">Độ ưu tiên:</span>
+                            <?php 
+                            $priClass = 'secondary';
+                            $priLabel = 'Bình thường';
+                            if ($submission['task_priority'] == 'high') { $priClass = 'danger'; $priLabel = 'Cao'; }
+                            elseif ($submission['task_priority'] == 'low') { $priClass = 'info'; $priLabel = 'Thấp'; }
+                            ?>
+                            <span class="badge bg-<?= $priClass ?>-subtle text-<?= $priClass ?> ms-1"><?= $priLabel ?></span>
+                        </div>
+                        <?php if (!empty($submission['task_due_date'])): ?>
+                        <div class="col-12 mb-2">
+                            <span class="text-muted small">Hạn chót:</span>
+                            <span class="text-dark small ms-1"><?= date('d/m/Y H:i', strtotime($submission['task_due_date'])) ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <div class="col-12 mt-2 pt-2 border-top border-slate-200">
+                            <span class="text-muted small d-block mb-1">Mô tả / Yêu cầu chi tiết:</span>
+                            <div class="text-dark bg-white p-3 rounded border border-slate-100 quill-content-render" style="font-size: 0.85rem; max-height: 250px; overflow-y: auto;">
+                                <?= !empty($submission['task_description']) ? $submission['task_description'] : '<em>Không có mô tả chi tiết.</em>' ?>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($submission['page_image_url']) && isset($submission['region_x'])): ?>
+                        <div class="col-12 mt-3 pt-3 border-top border-slate-200">
+                            <span class="text-muted small d-block mb-2">Vị trí phân vùng trên bản nháp gốc:</span>
+                            <?php 
+                                $imageUrl = $submission['page_image_url'];
+                                $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                                $l = ($submission['region_x'] / 800) * 100;
+                                $t = ($submission['region_y'] / 1000) * 100;
+                                $w = ($submission['region_width'] / 800) * 100;
+                                $h = ($submission['region_height'] / 1000) * 100;
+                            ?>
+                            <div class="text-center bg-white p-2 rounded border border-slate-100 overflow-hidden">
+                                <div class="position-relative d-inline-block shadow-sm" style="max-width: 100%; border: 1px solid #ddd;">
+                                    <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 350px; display: block;" alt="Page Reference">
+                                    <div style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #0d6efd; background-color: rgba(13, 110, 253, 0.2); pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <!-- Khu vực hiển thị tệp tin/hình ảnh đính kèm -->
                 <?php if ($submission['file_url']): ?>
                     <div class="mb-4">

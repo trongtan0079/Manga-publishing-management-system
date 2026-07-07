@@ -90,7 +90,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                                 <td>
                                     <?php
-                                    $typeLabel = 'Khác';
+                                    $typeLabel = htmlspecialchars($task['task_type'] ?? 'Khác');
                                     $typeBadge = 'bg-secondary';
                                     switch ($task['task_type'] ?? 'other') {
                                         case 'background': $typeLabel = 'Vẽ nền'; $typeBadge = 'bg-dark'; break;
@@ -138,6 +138,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             break;
                                         case 'submitted':
                                             $statusBadge = '<span class="badge bg-warning text-dark">Đã nộp</span>';
+                                            break;
+                                        case 'rejected':
+                                            $statusBadge = '<span class="badge bg-danger">Cần sửa</span>';
                                             break;
                                         case 'completed':
                                             $statusBadge = '<span class="badge bg-success">Hoàn thành</span>';

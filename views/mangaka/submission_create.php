@@ -46,8 +46,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <select class="form-select" id="chapter_id" name="chapter_id" required>
                             <option value="" disabled selected>-- Chọn chương cần nộp --</option>
                             <?php if (!empty($chapters)): ?>
+                                <?php $selectedChapterId = isset($_GET['chapter_id']) ? intval($_GET['chapter_id']) : 0; ?>
                                 <?php foreach ($chapters as $c): ?>
-                                    <option value="<?= $c['chapter_id'] ?>">
+                                    <option value="<?= $c['chapter_id'] ?>" <?= ($c['chapter_id'] == $selectedChapterId) ? 'selected' : '' ?>>
                                         <?= htmlspecialchars($c['series_title']) ?> - Ch.<?= htmlspecialchars($c['chapter_number']) ?>: <?= htmlspecialchars($c['title'] ?? 'Chưa đặt tên') ?>
                                     </option>
                                 <?php endforeach; ?>

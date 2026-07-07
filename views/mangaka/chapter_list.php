@@ -48,6 +48,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <th class="ps-4">Chương số</th>
                         <th>Tên Chapter</th>
                         <th>Thuộc bộ truyện</th>
+                        <th>Tiến độ</th>
                         <th>Trạng thái</th>
                         <th>Cập nhật lần cuối</th>
                         <th class="text-end pe-4">Hành động</th>
@@ -66,6 +67,21 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                                 <td>
                                     <span class="badge bg-light text-dark border"><i class="fas fa-book me-1 text-muted"></i><?= htmlspecialchars($chapter['series_title'] ?? '') ?></span>
+                                </td>
+                                <td>
+                                    <?php if ($chapter['total_tasks'] > 0): 
+                                        $percent = round(($chapter['completed_tasks'] / $chapter['total_tasks']) * 100);
+                                        $barClass = $percent === 100 ? 'bg-success' : 'bg-primary';
+                                    ?>
+                                        <div style="min-width: 120px; max-width: 160px;">
+                                            <div class="progress" style="height: 6px; background-color: #e9ecef; border-radius: 3px; margin-bottom: 2px;">
+                                                <div class="progress-bar <?= $barClass ?>" role="progressbar" style="width: <?= $percent ?>%; border-radius: 3px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="text-muted" style="font-size: 0.72rem; font-weight: 500;"><?= $chapter['completed_tasks'] ?>/<?= $chapter['total_tasks'] ?> việc (<?= $percent ?>%)</small>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-secondary border text-xs" style="font-weight: 500;">Tác giả tự vẽ</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php

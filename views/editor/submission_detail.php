@@ -162,6 +162,60 @@ if ($role === 'editor' && !empty($submission['chapter_id'])) {
                     </span>
                 </div>
 
+                <?php if (!empty($submission['task_id'])): ?>
+                <div class="mb-3 bg-slate-50 p-3 rounded border border-slate-200">
+                    <small class="text-muted d-block text-uppercase text-xs fw-bold mb-2 text-primary"><i class="fas fa-clipboard-list me-1"></i>Yêu cầu công việc ban đầu</small>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted d-inline-block" style="width: 80px;">Loại việc:</small>
+                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1"><?= htmlspecialchars((string)($submission['task_type'] ?? 'Không rõ')) ?></span>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted d-inline-block" style="width: 80px;">Độ ưu tiên:</small>
+                        <?php 
+                        $priClass = 'secondary';
+                        $priLabel = 'Bình thường';
+                        if ($submission['task_priority'] == 'high') { $priClass = 'danger'; $priLabel = 'Cao'; }
+                        elseif ($submission['task_priority'] == 'low') { $priClass = 'info'; $priLabel = 'Thấp'; }
+                        ?>
+                        <span class="badge bg-<?= $priClass ?>-subtle text-<?= $priClass ?> px-2 py-1"><?= $priLabel ?></span>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <small class="text-muted d-inline-block" style="width: 80px;">Hạn chót:</small>
+                        <span class="text-dark text-sm"><?= !empty($submission['task_due_date']) ? date('d/m/Y H:i', strtotime($submission['task_due_date'])) : 'Không có' ?></span>
+                    </div>
+                    
+                    <div class="mt-3 pt-2 border-top border-slate-200">
+                        <small class="text-muted d-block text-xs fw-bold mb-1">Mô tả / Yêu cầu chi tiết:</small>
+                        <div class="text-dark text-sm bg-white p-3 rounded border border-slate-100 quill-content-render" style="max-height: 250px; overflow-y: auto;">
+                            <?= !empty($submission['task_description']) ? $submission['task_description'] : '<em>Không có mô tả chi tiết.</em>' ?>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($submission['page_image_url']) && isset($submission['region_x'])): ?>
+                    <div class="mt-3 pt-3 border-top border-slate-200">
+                        <small class="text-muted d-block text-xs fw-bold mb-2">Vị trí phân vùng trên bản nháp gốc:</small>
+                        <?php 
+                            $imageUrl = $submission['page_image_url'];
+                            $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                            $l = ($submission['region_x'] / 800) * 100;
+                            $t = ($submission['region_y'] / 1000) * 100;
+                            $w = ($submission['region_width'] / 800) * 100;
+                            $h = ($submission['region_height'] / 1000) * 100;
+                        ?>
+                        <div class="text-center bg-white p-2 rounded border border-slate-100 overflow-hidden">
+                            <div class="position-relative d-inline-block shadow-sm" style="max-width: 100%; border: 1px solid #ddd;">
+                                <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 350px; display: block;" alt="Page Reference">
+                                <div style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #0d6efd; background-color: rgba(13, 110, 253, 0.2); pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Ngày nộp</small>
                     <span class="text-dark"><i class="far fa-calendar-alt text-muted me-1"></i><?= htmlspecialchars(date('d/m/Y H:i:s', strtotime($submission['submitted_at'] ?? 'now'))) ?></span>
@@ -171,7 +225,7 @@ if ($role === 'editor' && !empty($submission['chapter_id'])) {
 
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Ghi chú kèm theo</small>
-                    <div class="bg-light p-3 rounded text-dark text-sm border-start border-primary border-3" style="white-space: pre-line;">
+                    <div class="bg-light p-3 rounded text-dark text-sm border border-slate-200" style="white-space: pre-line;">
                         <?= !empty($submission['notes']) ? htmlspecialchars((string)($submission['notes'] ?? '')) : '<em>Không có ghi chú nào đi kèm.</em>' ?>
                     </div>
                 </div>

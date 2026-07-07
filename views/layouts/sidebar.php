@@ -66,6 +66,11 @@ $role = $_SESSION['role_name'] ?? '';
                         <i class="fas fa-calendar-check"></i> <span>Tiến độ & Deadline</span>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= (isset($current_page) && $current_page == 'dossiers') ? 'active' : '' ?>" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=dossiers">
+                        <i class="fas fa-folder-open"></i> <span>Hồ sơ & Bảo vệ Series</span>
+                    </a>
+                </li>
             <?php endif; ?>
 
             <?php if ($role === 'assistant'): ?>

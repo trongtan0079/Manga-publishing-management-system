@@ -147,6 +147,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
         </div>
 
+        <?php if (!empty($series['dossier_notes'])): ?>
+        <div class="card border-danger mb-4 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Biện hộ & Hồ sơ bảo vệ tác phẩm (Từ Editor phụ trách)</h5>
+            </div>
+            <div class="card-body">
+                <div class="card-text text-dark" style="white-space: pre-wrap; font-size: 0.95rem;"><?= htmlspecialchars($series['dossier_notes']) ?></div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <?php 
         // Chỉ hiển thị danh sách chapter cho tác giả/trợ lý khi truyện đang chờ duyệt. Hội đồng/BTV chỉ thấy khi truyện đã duyệt sang ongoing
         $showChapters = ($series['status'] !== 'planning' || $_SESSION['role_name'] === 'mangaka' || $_SESSION['role_name'] === 'assistant');
@@ -168,6 +179,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <tr>
                                     <th>#</th>
                                     <th>Tên Chapter</th>
+                                    <th>Tiến độ Studio</th>
                                     <th>Trạng thái</th>
                                     <th>Cập nhật lần cuối</th>
                                     <th class="text-end">Thao tác</th>
@@ -181,6 +193,21 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             <?= htmlspecialchars($chapter['title'] ?? '') ?>
                                             <?php if (!empty($chapter['is_final'])): ?>
                                                 <span class="badge bg-danger text-white text-xs ms-1"><i class="fas fa-flag me-1"></i>Chương cuối</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($chapter['total_tasks'] > 0): 
+                                                $percent = round(($chapter['completed_tasks'] / $chapter['total_tasks']) * 100);
+                                                $barClass = $percent === 100 ? 'bg-success' : 'bg-primary';
+                                            ?>
+                                                <div style="min-width: 120px; max-width: 160px;">
+                                                    <div class="progress" style="height: 6px; background-color: #e9ecef; border-radius: 3px; margin-bottom: 2px;">
+                                                        <div class="progress-bar <?= $barClass ?>" role="progressbar" style="width: <?= $percent ?>%; border-radius: 3px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    </div>
+                                                    <small class="text-muted" style="font-size: 0.72rem; font-weight: 500;"><?= $chapter['completed_tasks'] ?>/<?= $chapter['total_tasks'] ?> việc (<?= $percent ?>%)</small>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="badge bg-light text-secondary border text-xs" style="font-weight: 500;">Tác giả tự vẽ</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>

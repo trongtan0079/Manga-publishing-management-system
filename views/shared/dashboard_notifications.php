@@ -49,7 +49,9 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                             <i class="fas <?= $icon ?> <?= $color ?> fs-5"></i>
                         </div>
                         <div class="d-flex flex-column justify-content-center w-100">
-                            <h6 class="mb-1 text-dark text-sm fw-normal"><?= htmlspecialchars($notif['message']) ?></h6>
+                            <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>" class="text-decoration-none text-dark hover-primary-text">
+                                <h6 class="mb-1 text-sm fw-normal"><?= htmlspecialchars($notif['message']) ?></h6>
+                            </a>
                             <small class="text-muted" style="font-size: 0.75rem;"><?= date('d/m/Y H:i', strtotime($notif['created_at'])) ?></small>
                         </div>
                         <?php if (!$notif['is_read']): ?>
@@ -64,6 +66,15 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                     </div>
                 <?php endforeach; ?>
             </div>
+            
+            <style>
+            .hover-primary-text {
+                transition: color 0.15s ease-in-out;
+            }
+            .hover-primary-text:hover {
+                color: var(--primary, #6366f1) !important;
+            }
+            </style>
         <?php else: ?>
             <div class="text-center py-4">
                 <div class="text-muted mb-2"><i class="fas fa-bell-slash fs-1 text-light"></i></div>

@@ -117,7 +117,13 @@ $role = $_SESSION['role_name'] ?? '';
                                         <?php if (!empty($sub['task_id'])): ?>
                                             <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
+                                            <?php if (isset($sub['chapter_status']) && $sub['chapter_status'] === 'reviewing_final'): ?>
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Bản Hoàn Chỉnh</span>
+                                            <?php elseif (isset($sub['chapter_status']) && $sub['chapter_status'] === 'reviewing_draft'): ?>
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Bản Nháp</span>
+                                            <?php else: ?>
+                                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Chapter Submission</span>
+                                            <?php endif; ?>
                                         <?php endif; ?>
                                     </td>
                                 <?php endif; ?>

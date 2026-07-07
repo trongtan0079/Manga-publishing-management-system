@@ -68,6 +68,26 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     }
                 });
 
+                // Xử lý loại công việc tự chọn
+                const taskTypeSelect = document.getElementById('task_type');
+                const customTaskTypeContainer = document.getElementById('custom_task_type_container');
+                const customTaskTypeInput = document.getElementById('custom_task_type');
+
+                function toggleCustomTaskType() {
+                    if (taskTypeSelect.value === 'other') {
+                        customTaskTypeContainer.classList.remove('d-none');
+                        customTaskTypeInput.required = true;
+                    } else {
+                        customTaskTypeContainer.classList.add('d-none');
+                        customTaskTypeInput.required = false;
+                    }
+                }
+                
+                if (taskTypeSelect && customTaskTypeContainer && customTaskTypeInput) {
+                    taskTypeSelect.addEventListener('change', toggleCustomTaskType);
+                    toggleCustomTaskType();
+                }
+                
                 // Sync Quill editor HTML with the hidden textarea on submit
                 const form = document.querySelector('form');
                 if (form) {
@@ -86,7 +106,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <!-- Loại công việc và Phân vùng (New) -->
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="task_type" class="form-label">Loại công việc <span class="text-danger">*</span></label>
+                    <label for="task_type" class="form-label fw-bold">Loại công việc <span class="text-danger">*</span></label>
                     <select class="form-select" id="task_type" name="task_type" required>
                         <option value="background">Vẽ nền (Background)</option>
                         <option value="inking">Đi nét (Inking)</option>
@@ -94,6 +114,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <option value="effects">Hiệu ứng (Effects)</option>
                         <option value="other" selected>Khác (Other)</option>
                     </select>
+                    
+                    <div class="mt-2 d-none" id="custom_task_type_container">
+                        <label for="custom_task_type" class="form-label fw-semibold text-slate-700" style="font-size: 0.85rem;">Nhập loại công việc tự chọn <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-sm" id="custom_task_type" name="custom_task_type" placeholder="Ví dụ: Đổ tone, Dán decal, v.v.">
+                    </div>
                 </div>
                 <div class="col-md-6">
                     <label for="page_region_id" class="form-label">Phân vùng ảnh</label>
