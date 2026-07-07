@@ -7,6 +7,7 @@ require_once __DIR__ . '/../models/Task.php';
 require_once __DIR__ . '/../models/Chapter.php';
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/Series.php';
+require_once __DIR__ . '/../models/Page.php';
 
 
 class SubmissionController extends BaseController
@@ -83,7 +84,7 @@ class SubmissionController extends BaseController
             // Chỉ hiển thị chapter thuộc series của mangaka và chưa được duyệt/xuất bản, và chưa ở trạng thái reviewing
             $allChapters = $this->chapterModel->findByMangakaId($userId);
             $chapters = array_filter($allChapters, function($c) {
-                return !in_array($c['status'], ['reviewing', 'approved', 'published']);
+                return !in_array($c['status'], ['reviewing_draft', 'reviewing_final', 'approved', 'published']);
             });
             require_once __DIR__ . '/../views/mangaka/submission_create.php';
         } else {
@@ -148,6 +149,16 @@ class SubmissionController extends BaseController
                         header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                         exit;
                     }
+                    if ($series && $series['status'] === 'planning') {
+                        $_SESSION['error'] = 'Không thể nộp bản vẽ cho bộ truyện đang ở trạng thái Kế hoạch hoặc chưa được phê duyệt phát hành.';
+                        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                        exit;
+                    }
+                    if ($chapter && $chapter['status'] === 'drafting') {
+                        $_SESSION['error'] = 'Không thể nộp bản vẽ cho chương truyện đang ở trạng thái Bản nháp.';
+                        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                        exit;
+                    }
                     if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
                         $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã được phê duyệt hoặc xuất bản, không thể nộp bản thảo.';
                         header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
@@ -185,25 +196,41 @@ class SubmissionController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }
-            if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+            if ($series['status'] === 'planning') {
+                $_SESSION['error'] = 'Không thể nộp bản thảo khi bộ truyện đang ở trạng thái Kế hoạch hoặc chưa được phê duyệt phát hành.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+            if (in_array($chapter['status'], ['reviewing_draft', 'reviewing_final', 'approved', 'published'])) {
                 $_SESSION['error'] = 'Chương truyện này đang chờ duyệt, đã được phê duyệt hoặc xuất bản, không thể nộp thêm bản thảo.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }
 
-            // Kiểm tra xem có task nào chưa hoàn thành thuộc chapter này không
-            require_once __DIR__ . '/../models/Task.php';
-            $taskModel = new \Task();
-            $tasks = $taskModel->findTasksByChapterId($chapterId);
-            $hasUncompleted = false;
-            foreach ($tasks as $t) {
-                if ($t['status'] !== 'completed') {
-                    $hasUncompleted = true;
-                    break;
+            // Nếu nộp Bản Hoàn Chỉnh (đang ở trạng thái drawing), kiểm tra xem có task nào chưa hoàn thành không
+            if ($chapter['status'] === 'drawing') {
+                require_once __DIR__ . '/../models/Task.php';
+                $taskModel = new \Task();
+                $tasks = $taskModel->findTasksByChapterId($chapterId);
+                $hasUncompleted = false;
+                foreach ($tasks as $t) {
+                    if ($t['status'] !== 'completed') {
+                        $hasUncompleted = true;
+                        break;
+                    }
+                }
+                if ($hasUncompleted) {
+                    $_SESSION['error'] = 'Không thể nộp Bản Hoàn Chỉnh khi vẫn còn công việc (Task) chưa hoàn thành của các Trợ lý.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                    exit;
                 }
             }
-            if ($hasUncompleted) {
-                $_SESSION['error'] = 'Không thể nộp bản thảo chương truyện khi vẫn còn công việc (Task) chưa hoàn thành của các Trợ lý.';
+
+            // Chặn nộp chương rỗng chưa có bất kỳ trang nào
+            $pageModel = new \Page();
+            $pages = $pageModel->findByChapterId($chapterId);
+            if (empty($pages)) {
+                $_SESSION['error'] = 'Chương truyện phải có ít nhất 1 trang vẽ được tải lên hệ thống mới có thể nộp duyệt.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                 exit;
             }
@@ -366,7 +393,8 @@ class SubmissionController extends BaseController
             $notificationModel = new \Notification();
 
             if ($role === 'mangaka' && $chapterId > 0) {
-                $this->chapterModel->update($chapterId, ['status' => 'reviewing']);
+                $newStatus = ($chapter['status'] === 'drafting') ? 'reviewing_draft' : 'reviewing_final';
+                $this->chapterModel->update($chapterId, ['status' => $newStatus]);
                 
                 require_once __DIR__ . '/../models/User.php';
                 $userModel = new \User();
@@ -383,7 +411,8 @@ class SubmissionController extends BaseController
                     $notificationModel->createNotification(
                         $series['editor_id'],
                         'chapter_submitted',
-                        "Mangaka " . $_SESSION['full_name'] . " vừa nộp Chapter " . ($chapter['chapter_number'] ?? '') . " cho bộ truyện: '{$seriesTitle}'."
+                        "Mangaka " . $_SESSION['full_name'] . " vừa nộp Chapter " . ($chapter['chapter_number'] ?? '') . " cho bộ truyện: '{$seriesTitle}'.",
+                        $submissionId
                     );
                 } else {
                     // Bể duyệt chung fallback
@@ -392,15 +421,22 @@ class SubmissionController extends BaseController
                         $notificationModel->createNotification(
                             $editor['user_id'],
                             'chapter_submitted',
-                            "Mangaka " . $_SESSION['full_name'] . " vừa nộp Chapter " . ($chapter['chapter_number'] ?? '') . " cho bộ truyện: '{$seriesTitle}' (Chưa gán Editor chuyên trách)."
+                            "Mangaka " . $_SESSION['full_name'] . " vừa nộp Chapter " . ($chapter['chapter_number'] ?? '') . " cho bộ truyện: '{$seriesTitle}' (Chưa gán Editor chuyên trách).",
+                            $submissionId
                         );
                     }
                 }
             } elseif ($role === 'assistant' && $taskId > 0) {
                 $task = $this->taskModel->findById($taskId);
                 if ($task) {
-                    // Cập nhật trạng thái Task thành 'in_progress' khi Assistant nộp bài
-                    $this->taskModel->update($taskId, ['status' => 'in_progress']);
+                    // Cập nhật trạng thái Task thành 'submitted' khi Assistant nộp bài
+                    $this->taskModel->update($taskId, ['status' => 'submitted']);
+
+                    if (!empty($task['page_region_id'])) {
+                        require_once __DIR__ . '/../models/PageRegion.php';
+                        $pageRegionModel = new \PageRegion();
+                        $pageRegionModel->update($task['page_region_id'], ['status' => 'submitted']);
+                    }
 
                     require_once __DIR__ . '/../models/Page.php';
                     require_once __DIR__ . '/../models/Chapter.php';
@@ -421,7 +457,8 @@ class SubmissionController extends BaseController
                     $notificationModel->createNotification(
                         $task['mangaka_id'],
                         'submission_submitted',
-                        "Trợ lý {$assistantName} vừa nộp bản vẽ cho công việc: '{$task['title']}' thuộc bộ truyện '{$seriesTitle}' (Chương {$chapNum} - Trang {$pageNum})."
+                        "Trợ lý {$assistantName} vừa nộp bản vẽ cho công việc: '{$task['title']}' thuộc bộ truyện '{$seriesTitle}' (Chương {$chapNum} - Trang {$pageNum}).",
+                        $submissionId
                     );
                 }
             }
@@ -467,7 +504,20 @@ class SubmissionController extends BaseController
         // - Mangaka được xem của chính mình hoặc các bản thảo thuộc series/task thuộc quyền của mình
         $hasAccess = false;
         if ($role === 'editor') {
-            $hasAccess = true;
+            // Chỉ Editor được gán chuyên trách cho bộ truyện mới được xem bản thảo
+            if ($submission['chapter_id']) {
+                require_once __DIR__ . '/../models/Chapter.php';
+                require_once __DIR__ . '/../models/Series.php';
+                $chapModel = new \Chapter();
+                $seriesModel = new \Series();
+                $ch = $chapModel->findById($submission['chapter_id']);
+                if ($ch) {
+                    $se = $seriesModel->findById($ch['series_id']);
+                    if ($se && $se['editor_id'] == $userId) {
+                        $hasAccess = true;
+                    }
+                }
+            }
         } elseif ($role === 'assistant') {
             if ($submission['user_id'] == $userId) {
                 $hasAccess = true;

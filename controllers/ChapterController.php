@@ -106,7 +106,7 @@ class ChapterController extends BaseController
 
         $role = $_SESSION['role_name'] ?? '';
         if ($role === 'mangaka') {
-            $chapters = $this->chapterModel->findByMangakaId($_SESSION['user_id']);
+            $chapters = $this->chapterModel->findByMangakaIdWithStats($_SESSION['user_id']);
             require_once __DIR__ . '/../views/mangaka/chapter_list.php';
             exit;
         }
@@ -181,17 +181,18 @@ class ChapterController extends BaseController
                     header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                     exit;
                 }
+                if ($dueTimestamp < time()) {
+                    $_SESSION['error'] = 'Hạn chót của chương truyện không thể ở quá khứ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
+                    exit;
+                }
                 $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
             }
 
             $isFinal = isset($_POST['is_final']) ? 1 : 0;
             if ($isFinal) {
                 // Kiểm tra xem bộ truyện đã có chapter cuối nào khác chưa
-                $sql = "SELECT COUNT(*) FROM chapters WHERE series_id = :series_id AND is_final = 1";
-                $stmt = $this->chapterModel->getConnection()->prepare($sql);
-                $stmt->bindParam(':series_id', $seriesId);
-                $stmt->execute();
-                if ($stmt->fetchColumn() > 0) {
+                if ($this->chapterModel->hasFinalChapter($seriesId)) {
                     $_SESSION['error'] = "Bộ truyện này đã có một chapter được đánh dấu là chương cuối rồi!";
                     header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                     exit;
@@ -300,6 +301,11 @@ class ChapterController extends BaseController
 
             // Ngăn nộp chương rỗng chưa có bất kỳ trang nào hoặc vẫn còn task chưa xong
             if ($status === 'reviewing') {
+                if ($series['status'] === 'planning') {
+                    $_SESSION['error'] = "Không thể nộp duyệt chương truyện khi bộ truyện đang ở trạng thái Kế hoạch hoặc chưa được phê duyệt phát hành.";
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
+                    exit;
+                }
                 $pages = $this->pageModel->findByChapterId($id);
                 if (empty($pages)) {
                     $_SESSION['error'] = "Chương truyện phải có ít nhất 1 trang vẽ mới có thể nộp duyệt.";
@@ -330,17 +336,19 @@ class ChapterController extends BaseController
                     exit;
                 }
                 $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
+                
+                // Chặn hạn chót ở quá khứ nếu Mangaka thực sự thay đổi giá trị của nó
+                if ($dueTimestamp < time() && $formattedDueDate !== $chapter['due_date']) {
+                    $_SESSION['error'] = 'Hạn chót của chương truyện không thể ở quá khứ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
+                    exit;
+                }
             }
 
             $isFinal = isset($_POST['is_final']) ? 1 : 0;
             if ($isFinal) {
                 // Kiểm tra xem bộ truyện đã có chapter cuối nào khác chưa (ngoại trừ chính chapter này)
-                $sql = "SELECT COUNT(*) FROM chapters WHERE series_id = :series_id AND is_final = 1 AND chapter_id != :chapter_id";
-                $stmt = $this->chapterModel->getConnection()->prepare($sql);
-                $stmt->bindParam(':series_id', $seriesId);
-                $stmt->bindParam(':chapter_id', $id);
-                $stmt->execute();
-                if ($stmt->fetchColumn() > 0) {
+                if ($this->chapterModel->hasFinalChapter($seriesId, $id)) {
                     $_SESSION['error'] = "Bộ truyện này đã có một chapter khác được đánh dấu là chương cuối rồi!";
                     header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
                     exit;
@@ -372,10 +380,14 @@ class ChapterController extends BaseController
                     $tasks = $taskModel->findTasksByChapterId($id);
                     if (!empty($tasks)) {
                         foreach ($tasks as $task) {
+                            if (($task['page_status'] ?? '') === 'drafting') {
+                                continue; // Bỏ qua không gửi thông báo nếu trang liên kết vẫn là nháp
+                            }
                             $notificationModel->createNotification(
                                 $task['assistant_id'],
                                 'task_assigned',
-                                "Bạn được giao công việc mới: '{$task['title']}' thuộc bộ truyện '{$task['series_title']}' (Chương {$chapterNumber})."
+                                "Bạn được giao công việc mới: '{$task['title']}' thuộc bộ truyện '{$task['series_title']}' (Chương {$chapterNumber}).",
+                                $task['task_id']
                             );
                         }
                     }
@@ -406,8 +418,16 @@ class ChapterController extends BaseController
 
         $series = $this->checkSeriesOwnership($chapter['series_id']);
         
-        // Lấy danh sách các trang của chapter này
-        $pages = $this->pageModel->findByChapterId($id);
+        // Lấy danh sách các trang của chapter này, kèm theo số lượng ghi chú (annotations) của Editor
+        $pages = $this->pageModel->findByChapterIdWithAnnotationCount($id);
+
+        // Lọc bỏ các trang bản nháp (drafting) nếu người xem là editor hoặc board
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role === 'editor' || $role === 'board') {
+            $pages = array_filter($pages, function($p) {
+                return $p['status'] !== 'drafting';
+            });
+        }
 
         require_once __DIR__ . '/../views/mangaka/chapter_detail.php';
     }

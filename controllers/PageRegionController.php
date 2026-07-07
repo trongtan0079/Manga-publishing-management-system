@@ -62,13 +62,16 @@ class PageRegionController extends BaseController {
                 exit();
             }
 
-            $regionType = $_POST['region_type'] ?? '';
+            $regionType = trim($_POST['region_type'] ?? '');
+            if ($regionType === 'other' && !empty($_POST['custom_region_type'])) {
+                $regionType = trim($_POST['custom_region_type']);
+            }
             $x = intval($_POST['x'] ?? 0);
             $y = intval($_POST['y'] ?? 0);
             $width = intval($_POST['width'] ?? 0);
             $height = intval($_POST['height'] ?? 0);
 
-            if (!in_array($regionType, ['panel', 'bubble', 'character', 'background', 'sfx']) || $width <= 0 || $height <= 0) {
+            if (empty($regionType) || strlen($regionType) > 50 || $width <= 0 || $height <= 0) {
                 $_SESSION['error'] = "Dữ liệu phân vùng không hợp lệ!";
                 header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $pageId);
                 exit();

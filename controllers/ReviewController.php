@@ -35,34 +35,31 @@ class ReviewController extends BaseController
      */
     public function index() {
         $role = $_SESSION['role_name'] ?? '';
+        
+        $submissions = [];
         if ($role === 'editor') {
             // Editor chỉ xem các bản thảo của các bộ truyện được phân công gán phụ trách
             $submissions = $this->submissionModel->findAllChapterSubmissionsByEditorId($_SESSION['user_id']);
-
-            // Hỗ trợ lọc trạng thái theo query parameter
-            $status = $_GET['status'] ?? null;
-            if ($status) {
-                if ($status === 'pending') {
-                    $submissions = array_filter($submissions, function($s) {
-                        return $s['status'] === 'pending';
-                    });
-                } elseif ($status === 'reviewed') {
-                    $submissions = array_filter($submissions, function($s) {
-                        return in_array($s['status'], ['approved', 'rejected']);
-                    });
-                }
-            }
-            require_once __DIR__ . '/../views/editor/review_list.php';
         } elseif ($role === 'mangaka') {
-            // Mangaka xem các bản thảo của Task đang chờ duyệt thuộc về các Task do họ giao
+            // Mangaka xem các bản thảo của Task thuộc về các Task do họ giao (cả pending và đã duyệt)
             $userId = $_SESSION['user_id'];
-            $submissions = $this->submissionModel->findPendingSubmissionsByMangakaId($userId);
-            require_once __DIR__ . '/../views/editor/review_list.php';
+            $submissions = $this->submissionModel->findAllTaskSubmissionsByMangakaId($userId);
         } else {
             $_SESSION['error'] = 'Bạn không có quyền truy cập trang này.';
             header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             exit;
         }
+
+        // Tách thành 2 mảng riêng biệt: Đang chờ duyệt và Đã duyệt
+        $pendingSubmissions = array_filter($submissions, function($s) {
+            return $s['status'] === 'pending';
+        });
+        
+        $reviewedSubmissions = array_filter($submissions, function($s) {
+            return in_array($s['status'], ['approved', 'rejected']);
+        });
+
+        require_once __DIR__ . '/../views/editor/review_list.php';
     }
 
     /**
@@ -73,6 +70,11 @@ class ReviewController extends BaseController
      */
     private function checkReviewPermission($submission) {
         $role = $_SESSION['role_name'] ?? '';
+
+        // 0. Chỉ cho phép đánh giá khi bản thảo đang ở trạng thái pending
+        if (($submission['status'] ?? '') !== 'pending') {
+            return false;
+        }
 
         // 1. Xác định chapter_id tương ứng
         $chapterId = null;
@@ -229,13 +231,15 @@ class ReviewController extends BaseController
                 require_once __DIR__ . '/../models/Task.php';
                 require_once __DIR__ . '/../models/Page.php';
                 require_once __DIR__ . '/../models/Series.php';
+                require_once __DIR__ . '/../models/Chapter.php';
                 $tModel = new \Task();
                 $pModel = new \Page();
+                $cModel = new \Chapter();
                 $sModel = new \Series();
                 
                 $task = $tModel->findById($submission['task_id']);
                 $page = $task ? $pModel->findById($task['page_id']) : null;
-                $chapter = $page ? $pModel->getConnection()->query("SELECT * FROM chapters WHERE chapter_id = " . intval($page['chapter_id']))->fetch(PDO::FETCH_ASSOC) : null;
+                $chapter = $page ? $cModel->findById($page['chapter_id']) : null;
                 $series = $chapter ? $sModel->findById($chapter['series_id']) : null;
                 
                 $seriesTitle = $series ? $series['title'] : 'Không rõ';
@@ -248,7 +252,8 @@ class ReviewController extends BaseController
             $this->notificationModel->createNotification(
                 $submission['user_id'],
                 'review_created',
-                "Có nhận xét đánh giá mới cho {$itemInfo}."
+                "Có nhận xét đánh giá mới cho {$itemInfo}.",
+                $submissionId
             );
 
             $statusText = $status === 'approved' ? 'ĐƯỢC PHÊ DUYỆT thành công' : 'BỊ TỪ CHỐI';
@@ -257,7 +262,8 @@ class ReviewController extends BaseController
             $this->notificationModel->createNotification(
                 $submission['user_id'],
                 $notifType,
-                "Bản thảo của bạn cho {$itemInfo} đã {$statusText}. Nhận xét: " . mb_substr($comments, 0, 80) . "..."
+                "Bản thảo của bạn cho {$itemInfo} đã {$statusText}. Nhận xét: " . mb_substr($comments, 0, 80) . "...",
+                $submissionId
             );
 
             // Nếu là bản thảo nhiệm vụ (Task) và được duyệt, cập nhật trạng thái Task thành 'completed'
@@ -306,13 +312,13 @@ class ReviewController extends BaseController
             } elseif ($submission['task_id'] && $status === 'rejected') {
                 require_once __DIR__ . '/../models/Task.php';
                 $taskModel = new \Task();
-                $taskModel->update($submission['task_id'], ['status' => 'pending']);
+                $taskModel->update($submission['task_id'], ['status' => 'rejected']);
 
                 $taskDetail = $taskModel->findById($submission['task_id']);
                 if ($taskDetail && !empty($taskDetail['page_region_id'])) {
                     require_once __DIR__ . '/../models/PageRegion.php';
                     $pageRegionModel = new \PageRegion();
-                    $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'pending']);
+                    $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'rejected']);
                 }
             }
 
@@ -320,36 +326,46 @@ class ReviewController extends BaseController
             if ($submission['chapter_id']) {
                 require_once __DIR__ . '/../models/Chapter.php';
                 $chapterModel = new \Chapter();
+                $chapDetail = $chapterModel->findById($submission['chapter_id']);
+                
                 if ($status === 'approved') {
-                    $chapterModel->update($submission['chapter_id'], ['status' => 'approved']);
+                    if ($chapDetail && $chapDetail['status'] === 'reviewing_draft') {
+                        $chapterModel->update($submission['chapter_id'], ['status' => 'drawing']);
+                    } else {
+                        $chapterModel->update($submission['chapter_id'], ['status' => 'approved']);
 
-                    // Kiểm tra xem chapter có phải là chương cuối không để thông báo cho Board
-                    $chapDetail = $chapterModel->findById($submission['chapter_id']);
-                    if ($chapDetail && !empty($chapDetail['is_final'])) {
-                        // Lấy thông tin bộ truyện
-                        require_once __DIR__ . '/../models/Series.php';
-                        $seriesModel = new \Series();
-                        $seriesDetail = $seriesModel->findById($chapDetail['series_id']);
-                        $seriesTitle = $seriesDetail ? $seriesDetail['title'] : 'bộ truyện';
-                        
-                        // Tìm toàn bộ tài khoản có role là 'board' đang hoạt động để gửi thông báo
-                        require_once __DIR__ . '/../models/User.php';
-                        $userModel = new \User();
-                        $boardMembers = $userModel->findByRoleName('board');
-                        
-                        if (!empty($boardMembers)) {
-                            foreach ($boardMembers as $member) {
-                                $this->notificationModel->createNotification(
-                                    $member['user_id'],
-                                    'series_completed',
-                                    "Chương cuối của bộ truyện '{$seriesTitle}' đã được duyệt. Vui lòng xác nhận hoàn thành."
-                                );
+                        // Kiểm tra xem chapter có phải là chương cuối không để thông báo cho Board
+                        if ($chapDetail && !empty($chapDetail['is_final'])) {
+                            // Lấy thông tin bộ truyện
+                            require_once __DIR__ . '/../models/Series.php';
+                            $seriesModel = new \Series();
+                            $seriesDetail = $seriesModel->findById($chapDetail['series_id']);
+                            $seriesTitle = $seriesDetail ? $seriesDetail['title'] : 'bộ truyện';
+                            
+                            // Tìm toàn bộ tài khoản có role là 'board' đang hoạt động để gửi thông báo
+                            require_once __DIR__ . '/../models/User.php';
+                            $userModel = new \User();
+                            $boardMembers = $userModel->findByRoleName('board');
+                            
+                            if (!empty($boardMembers)) {
+                                foreach ($boardMembers as $member) {
+                                    $this->notificationModel->createNotification(
+                                        $member['user_id'],
+                                        'series_completed',
+                                        "Chương cuối của bộ truyện '{$seriesTitle}' đã được duyệt. Vui lòng xác nhận hoàn thành.",
+                                        $chapDetail['series_id']
+                                    );
+                                }
                             }
                         }
                     }
                 } else {
-                    // Nếu bị từ chối (rejected), tự động chuyển trạng thái Chapter về 'drawing' để Mangaka chỉnh sửa
-                    $chapterModel->update($submission['chapter_id'], ['status' => 'drawing']);
+                    // Nếu bị từ chối (rejected), tự động chuyển trạng thái Chapter
+                    if ($chapDetail && $chapDetail['status'] === 'reviewing_draft') {
+                        $chapterModel->update($submission['chapter_id'], ['status' => 'drafting']);
+                    } else {
+                        $chapterModel->update($submission['chapter_id'], ['status' => 'drawing']);
+                    }
                 }
             }
 
@@ -383,7 +399,25 @@ class ReviewController extends BaseController
         $role = $_SESSION['role_name'] ?? '';
         $userId = $_SESSION['user_id'];
         $hasAccess = false;
-        if ($role === 'editor') $hasAccess = true;
+        
+        if ($role === 'admin' || $role === 'board') {
+            $hasAccess = true;
+        } elseif ($role === 'editor') {
+            // Chỉ Editor được gán chuyên trách cho bộ truyện mới được xem đánh giá
+            if (!empty($submission['chapter_id'])) {
+                require_once __DIR__ . '/../models/Chapter.php';
+                require_once __DIR__ . '/../models/Series.php';
+                $chapM = new \Chapter();
+                $serM = new \Series();
+                $ch = $chapM->findById($submission['chapter_id']);
+                if ($ch) {
+                    $se = $serM->findById($ch['series_id']);
+                    if ($se && $se['editor_id'] == $userId) {
+                        $hasAccess = true;
+                    }
+                }
+            }
+        }
         if ($submission['user_id'] == $userId) $hasAccess = true;
         if ($review['reviewer_id'] == $userId) $hasAccess = true;
         
@@ -391,6 +425,31 @@ class ReviewController extends BaseController
             $_SESSION['error'] = 'Bạn không có quyền xem đánh giá này.';
             header('Location: ' . BASE_PATH . '/index.php?controller=review&action=index');
             exit;
+        }
+
+        // Fetch annotated pages if this is a chapter submission
+        $annotatedPages = [];
+        if (!empty($submission['chapter_id'])) {
+            require_once __DIR__ . '/../models/Page.php';
+            require_once __DIR__ . '/../models/EditorAnnotation.php';
+            $pageModel = new \Page();
+            $eaModel = new \EditorAnnotation();
+            
+            $pages = $pageModel->findByChapterId($submission['chapter_id']);
+            foreach ($pages as $p) {
+                $annotations = $eaModel->findByPageId($p['page_id']);
+                // Chỉ lấy các annotations của chính người đánh giá này
+                $relevantAnnotations = array_filter($annotations, function($a) use ($review) {
+                    return $a['editor_id'] == $review['reviewer_id'];
+                });
+                
+                if (!empty($relevantAnnotations)) {
+                    $annotatedPages[] = [
+                        'page' => $p,
+                        'annotations' => array_values($relevantAnnotations)
+                    ];
+                }
+            }
         }
 
         require_once __DIR__ . '/../views/editor/review_detail.php';
@@ -420,6 +479,11 @@ class ReviewController extends BaseController
         $height = isset($input['height']) ? intval($input['height']) : 0;
         $comments = isset($input['comments']) ? trim($input['comments']) : '';
 
+        if ($x < 0 || $y < 0 || $width <= 0 || $height <= 0 || ($x + $width) > 800 || ($y + $height) > 1000) {
+            echo json_encode(['success' => false, 'error' => 'Tọa độ vùng đánh dấu không hợp lệ']);
+            exit;
+        }
+
         if ($pageId <= 0 || empty($comments)) {
             echo json_encode(['success' => false, 'error' => 'Thông tin không hợp lệ hoặc thiếu nội dung']);
             exit;
@@ -438,16 +502,22 @@ class ReviewController extends BaseController
         $chapterModel = new Chapter();
         $chapter = $chapterModel->findById($page['chapter_id']);
         if ($chapter) {
-            if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
-                echo json_encode(['success' => false, 'error' => 'Chương truyện đã được phê duyệt hoặc xuất bản, không thể chỉnh sửa ghi chú lỗi']);
+            if ($chapter['status'] !== 'reviewing') {
+                echo json_encode(['success' => false, 'error' => 'Chỉ có thể tạo ghi chú lỗi khi chương truyện đang ở trạng thái Chờ duyệt (reviewing)']);
                 exit;
             }
             require_once __DIR__ . '/../models/Series.php';
             $seriesModel = new Series();
             $series = $seriesModel->findById($chapter['series_id']);
-            if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
-                echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa ghi chú lỗi']);
-                exit;
+            if ($series) {
+                if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                    echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa ghi chú lỗi']);
+                    exit;
+                }
+                if ($series['editor_id'] != $_SESSION['user_id']) {
+                    echo json_encode(['success' => false, 'error' => 'Bạn không phải Biên tập viên chuyên trách (Tantou Editor) của bộ truyện này. Không thể tạo ghi chú lỗi']);
+                    exit;
+                }
             }
         }
 
@@ -524,16 +594,22 @@ class ReviewController extends BaseController
             $chapterModel = new Chapter();
             $chapter = $chapterModel->findById($page['chapter_id']);
             if ($chapter) {
-                if ($chapter['status'] === 'approved' || $chapter['status'] === 'published') {
-                    echo json_encode(['success' => false, 'error' => 'Chương truyện đã được phê duyệt hoặc xuất bản, không thể xóa ghi chú lỗi']);
+                if ($chapter['status'] !== 'reviewing') {
+                    echo json_encode(['success' => false, 'error' => 'Chỉ có thể xóa ghi chú lỗi khi chương truyện đang ở trạng thái Chờ duyệt (reviewing)']);
                     exit;
                 }
                 require_once __DIR__ . '/../models/Series.php';
                 $seriesModel = new Series();
                 $series = $seriesModel->findById($chapter['series_id']);
-                if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
-                    echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể xóa ghi chú lỗi']);
-                    exit;
+                if ($series) {
+                    if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                        echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể xóa ghi chú lỗi']);
+                        exit;
+                    }
+                    if ($series['editor_id'] != $_SESSION['user_id']) {
+                        echo json_encode(['success' => false, 'error' => 'Bạn không phải Biên tập viên chuyên trách (Tantou Editor) của bộ truyện này. Không thể xóa ghi chú lỗi']);
+                        exit;
+                    }
                 }
             }
         }
@@ -556,6 +632,60 @@ class ReviewController extends BaseController
         
         if ($pageId <= 0) {
             echo json_encode(['success' => false, 'error' => 'ID không hợp lệ']);
+            exit;
+        }
+
+        // Xác thực quyền truy cập trang truyện
+        require_once __DIR__ . '/../models/Page.php';
+        $pageModel = new Page();
+        $page = $pageModel->findById($pageId);
+        if (!$page) {
+            echo json_encode(['success' => false, 'error' => 'Trang truyện không tồn tại']);
+            exit;
+        }
+
+        require_once __DIR__ . '/../models/Chapter.php';
+        $chapterModel = new Chapter();
+        $chapter = $chapterModel->findById($page['chapter_id']);
+        if (!$chapter) {
+            echo json_encode(['success' => false, 'error' => 'Chương truyện không tồn tại']);
+            exit;
+        }
+
+        require_once __DIR__ . '/../models/Series.php';
+        $seriesModel = new Series();
+        $series = $seriesModel->findById($chapter['series_id']);
+        if (!$series) {
+            echo json_encode(['success' => false, 'error' => 'Bộ truyện không tồn tại']);
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        $userId = $_SESSION['user_id'];
+        $hasAccess = false;
+
+        if ($role === 'admin' || $role === 'board') {
+            $hasAccess = true;
+        } elseif ($role === 'editor') {
+            if ($series['editor_id'] == $userId) {
+                $hasAccess = true;
+            }
+        } elseif ($role === 'mangaka') {
+            if ($series['mangaka_id'] == $userId) {
+                $hasAccess = true;
+            }
+        } elseif ($role === 'assistant') {
+            // Kiểm tra xem assistant có được giao task nào trên page này không
+            require_once __DIR__ . '/../models/Task.php';
+            $taskModel = new \Task();
+            if ($taskModel->countByPageAndAssistant($pageId, $userId) > 0) {
+                $hasAccess = true;
+            }
+        }
+
+        if (!$hasAccess) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Bạn không có quyền truy cập thông tin trang truyện này']);
             exit;
         }
 

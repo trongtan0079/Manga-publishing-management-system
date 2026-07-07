@@ -4,6 +4,7 @@
 require_once __DIR__ . '/../core/Auth.php';
 require_once __DIR__ . '/../models/Series.php';
 require_once __DIR__ . '/../models/Chapter.php';
+require_once __DIR__ . '/../models/SystemLog.php';
 
 
 class SeriesController extends BaseController
@@ -34,10 +35,7 @@ class SeriesController extends BaseController
             $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } elseif ($role === 'editor') {
             // Editor chỉ xem các bộ truyện được gán phụ trách và đã được phê duyệt (status !== 'planning')
-            $sql = "SELECT * FROM series WHERE editor_id = :editor_id AND status != 'planning' ORDER BY series_id DESC";
-            $stmt = $this->seriesModel->getConnection()->prepare($sql);
-            $stmt->execute([':editor_id' => $currentUserId]);
-            $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $seriesList = $this->seriesModel->getSeriesByEditorId($currentUserId);
         } elseif ($role === 'mangaka') {
             $seriesList = $this->seriesModel->findByMangakaId($currentUserId);
         } else {
@@ -436,7 +434,7 @@ class SeriesController extends BaseController
         $this->checkOwnership($series, $id);
         
         $chapterModel = new Chapter();
-        $chapters = $chapterModel->findBySeriesId($id);
+        $chapters = $chapterModel->findBySeriesIdWithStats($id);
         
         require_once __DIR__ . '/../views/mangaka/series_detail.php';
     }
@@ -556,18 +554,17 @@ class SeriesController extends BaseController
         $editors = $userModel->findByRoleName('editor');
         
         // Lấy danh sách truyện đang chờ duyệt (planning) và đang xuất bản (ongoing)
-        $sql = "SELECT s.*, u.full_name as mangaka_name, ed.full_name as editor_name,
-                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id) as total_chapters,
-                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id AND status IN ('approved', 'published')) as finished_chapters,
-                (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id AND is_final = 1 AND status IN ('approved', 'published')) as has_final_approved
-                FROM series s 
-                JOIN users u ON s.mangaka_id = u.user_id 
-                LEFT JOIN users ed ON s.editor_id = ed.user_id
-                WHERE s.status IN ('planning', 'ongoing', 'suspended') AND s.publish_type != 'draft'
-                ORDER BY s.created_at DESC";
-        $stmt = $this->seriesModel->getConnection()->prepare($sql);
-        $stmt->execute();
-        $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $seriesList = $this->seriesModel->getSeriesForPublishing();
+
+        // Nạp thống kê bỏ phiếu thực tế từ bảng board_votes
+        require_once __DIR__ . '/../models/BoardVote.php';
+        $boardVoteModel = new \BoardVote();
+        $currentUserId = $_SESSION['user_id'];
+        foreach ($seriesList as &$series) {
+            $series['approval_stats'] = $boardVoteModel->getApprovalStats($series['series_id']);
+            $series['my_vote'] = $boardVoteModel->getMemberVote($series['series_id'], $currentUserId);
+        }
+        unset($series);
         
         require_once __DIR__ . '/../views/board/publish_series.php';
     }
@@ -591,33 +588,85 @@ class SeriesController extends BaseController
                 
                 // Ràng buộc: Không cho phép hoàn thành series nếu vẫn còn các chapter chưa hoàn thành hoặc chưa có chương cuối được duyệt
                 if ($status === 'completed') {
-                    $sql = "SELECT COUNT(*) as unfinished_chapters 
-                            FROM chapters 
-                            WHERE series_id = :series_id AND status IN ('drafting', 'drawing', 'reviewing')";
-                    $stmt = $this->seriesModel->getConnection()->prepare($sql);
-                    $stmt->execute(['series_id' => $id]);
-                    $res = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if ($res && $res['unfinished_chapters'] > 0) {
+                    $chapterModel = new \Chapter();
+                    if ($chapterModel->countUnfinishedChapters($id) > 0) {
                         $_SESSION['error'] = "Không thể hoàn thành bộ truyện khi vẫn còn các chương truyện đang vẽ hoặc chờ duyệt.";
                         header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
                         exit;
                     }
 
                     // Kiểm tra xem đã có chương cuối nào được duyệt/xuất bản chưa
-                    $sqlFinal = "SELECT COUNT(*) as has_final 
-                                 FROM chapters 
-                                 WHERE series_id = :series_id AND is_final = 1 AND status IN ('approved', 'published')";
-                    $stmtFinal = $this->seriesModel->getConnection()->prepare($sqlFinal);
-                    $stmtFinal->execute(['series_id' => $id]);
-                    $resFinal = $stmtFinal->fetch(PDO::FETCH_ASSOC);
-                    if (!$resFinal || $resFinal['has_final'] == 0) {
+                    if (!$chapterModel->hasFinalApprovedChapter($id)) {
                         $_SESSION['error'] = "Không thể hoàn thành bộ truyện khi chưa có chương cuối (End Chapter) nào được phê duyệt.";
                         header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
                         exit;
                     }
                 }
 
+                // Ràng buộc: Đối với đề xuất mới (status = planning), chỉ cho phép chốt quyết định (ongoing hoặc canceled) khi tất cả thành viên Hội đồng đã bỏ phiếu xong.
+                if ($series['status'] === 'planning' && in_array($status, ['ongoing', 'canceled'])) {
+                    require_once __DIR__ . '/../models/BoardVote.php';
+                    $boardVoteModel = new \BoardVote();
+                    $stats = $boardVoteModel->getApprovalStats($id);
+                    $totalVotes = $stats['approve_count'] + $stats['reject_count'];
+                    
+                    if ($totalVotes < $stats['total_members']) {
+                        $_SESSION['error'] = "Không thể chốt quyết định khi chưa đầy đủ phiếu bầu từ các thành viên Hội đồng (Hiện tại: {$totalVotes}/{$stats['total_members']} phiếu).";
+                        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                        exit;
+                    }
+                }
+
                 $editorId = isset($_POST['editor_id']) && $_POST['editor_id'] !== '' ? intval($_POST['editor_id']) : null;
+
+                // Lỗ hổng 1: Bắt buộc chọn Biên tập viên khi phê duyệt bộ truyện đang hoạt động
+                if ($status === 'ongoing' && $editorId === null) {
+                    $_SESSION['error'] = "Vui lòng chọn Biên tập viên chuyên trách (Tantou Editor) khi phê duyệt phát hành bộ truyện.";
+                    header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                    exit;
+                }
+
+                // Ràng buộc: Chỉ cho phép phê duyệt bộ truyện (status = ongoing) khi tỉ lệ tán thành >= 50%
+                if ($status === 'ongoing') {
+                    require_once __DIR__ . '/../models/BoardVote.php';
+                    $boardVoteModel = new \BoardVote();
+                    $stats = $boardVoteModel->getApprovalStats($id);
+                    if ($stats['percentage'] < 50) {
+                        $_SESSION['error'] = "Không thể phê duyệt bộ truyện khi tỉ lệ tán thành của Hội đồng chưa đạt tối thiểu 50% (Hiện tại: " . $stats['percentage'] . "%).";
+                        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                        exit;
+                    }
+                }
+
+                if ($editorId !== null) {
+                    require_once __DIR__ . '/../models/User.php';
+                    $userModel = new \User();
+                    $editorUser = $userModel->getUserByIdWithRole($editorId);
+                    if (!$editorUser || ($editorUser['role_name'] ?? '') !== 'editor' || $editorUser['status'] !== 'active') {
+                        $_SESSION['error'] = "Biên tập viên chuyên trách không hợp lệ hoặc không hoạt động.";
+                        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                        exit;
+                    }
+                }
+
+                // Lỗ hổng 6: Chặn duyệt bộ truyện vẫn còn ở dạng Bản nháp hoặc thiếu file tài liệu đề xuất
+                if ($status === 'ongoing' && (($series['publish_type'] ?? '') === 'draft' || empty($series['proposal_file']))) {
+                    $_SESSION['error'] = "Không thể phê duyệt bộ truyện vẫn ở dạng Bản nháp (Draft) hoặc chưa đính kèm file kịch bản đề xuất.";
+                    header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                    exit;
+                }
+
+                // Lỗ hổng 11: Chặn hạ cấp bộ truyện về trạng thái Kế hoạch (Planning) nếu đã tồn tại chapter
+                if ($status === 'planning') {
+                    $sqlChapCount = "SELECT COUNT(*) FROM chapters WHERE series_id = :series_id";
+                    $stmtChapCount = $this->seriesModel->getConnection()->prepare($sqlChapCount);
+                    $stmtChapCount->execute(['series_id' => $id]);
+                    if ($stmtChapCount->fetchColumn() > 0) {
+                        $_SESSION['error'] = "Không thể hạ cấp bộ truyện về trạng thái Kế hoạch (Planning) khi đã có các chương truyện được tạo.";
+                        header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                        exit;
+                    }
+                }
 
                 try {
                     $this->seriesModel->update($id, [
@@ -626,18 +675,39 @@ class SeriesController extends BaseController
                         'editor_id' => $editorId
                     ]);
                     
+                    // Lỗ hổng 4: Ghi nhật ký hoạt động cho Board
+                    $editorName = 'Chưa gán';
+                    if ($editorId) {
+                        require_once __DIR__ . '/../models/User.php';
+                        $userModel = new \User();
+                        $edObj = $userModel->findById($editorId);
+                        if ($edObj) {
+                            $editorName = $edObj['full_name'];
+                        }
+                    }
+                    $logDetails = "Thay đổi trạng thái bộ truyện '{$series['title']}' (ID: {$id}). Cũ: '{$series['status']}' -> Mới: '{$status}', Lịch: '{$publishType}', Biên tập viên: '{$editorName}'";
+                    \SystemLog::logAction($_SESSION['user_id'], 'Cập nhật trạng thái Series', $logDetails);
+                    
                     // Gửi thông báo đến mangaka
                     require_once __DIR__ . '/../models/Notification.php';
                     $notificationModel = new Notification();
                     $mangakaId = $series['mangaka_id'];
                     $publishTypeViet = $publishType === 'weekly' ? 'Hàng tuần' : 'Hàng tháng';
                     
+                    // Lấy số liệu bỏ phiếu của hội đồng để thông báo chi tiết
+                    require_once __DIR__ . '/../models/BoardVote.php';
+                    $boardVoteModel = new \BoardVote();
+                    $stats = $boardVoteModel->getApprovalStats($id);
+                    $percentage = $stats['percentage'];
+                    $approveCount = $stats['approve_count'];
+                    $totalMembers = $stats['total_members'];
+                    
                     // Kiểm tra xem đây có phải là phê duyệt đề xuất từ nháp/chờ duyệt không
                     if ($series['status'] === 'planning' && ($series['publish_type'] ?? '') === 'submitted') {
                         if ($status === 'ongoing') {
-                            $msg = "Đề xuất bộ truyện '{$series['title']}' của bạn đã được Hội đồng Biên tập PHÊ DUYỆT thành công! Truyện chính thức bắt đầu giai đoạn Đang triển khai với lịch xuất bản: {$publishTypeViet}.";
+                            $msg = "Chúc mừng! Đề xuất bộ truyện '{$series['title']}' của bạn đã chính thức được Hội đồng phê duyệt thông qua với tỉ lệ tán thành đạt {$percentage}% ({$approveCount}/{$totalMembers} phiếu). Truyện chính thức bắt đầu giai đoạn Đang triển khai với lịch xuất bản: {$publishTypeViet}.";
                         } elseif ($status === 'canceled') {
-                            $msg = "Đề xuất bộ truyện '{$series['title']}' của bạn đã bị Hội đồng Biên tập TỪ CHỐI phê duyệt.";
+                            $msg = "Rất tiếc, đề xuất bộ truyện '{$series['title']}' của bạn đã bị từ chối phê duyệt do không đạt đủ số phiếu đồng thuận cần thiết từ Hội đồng Biên tập (Tỉ lệ tán thành đạt: {$percentage}%).";
                         } else {
                             $msg = "Đề xuất bộ truyện '{$series['title']}' của bạn đã được cập nhật trạng thái quyết định.";
                         }
@@ -657,7 +727,7 @@ class SeriesController extends BaseController
                         $msg .= ".";
                     }
                     
-                    $notificationModel->createNotification($mangakaId, 'series_warning', $msg);
+                    $notificationModel->createNotification($mangakaId, 'series_warning', $msg, $id);
 
                     // Gửi thông báo đến editor phụ trách nếu mới gán
                     if ($editorId && $editorId != $series['editor_id']) {
@@ -669,7 +739,8 @@ class SeriesController extends BaseController
                         $notificationModel->createNotification(
                             $editorId,
                             'task_assigned',
-                            "Bạn đã được phân công phụ trách kiểm duyệt bộ truyện mới: '{$series['title']}' của tác giả {$mangakaName} (Lịch xuất bản: {$publishTypeViet})."
+                            "Bạn đã được phân công phụ trách kiểm duyệt bộ truyện mới: '{$series['title']}' của tác giả {$mangakaName} (Lịch xuất bản: {$publishTypeViet}).",
+                            $id
                         );
                     }
 
@@ -685,4 +756,170 @@ class SeriesController extends BaseController
             exit;
         }
     }
+
+    /**
+     * Action: Thành viên Hội đồng Biên tập bỏ phiếu cho bộ truyện đang chờ duyệt
+     */
+    public function vote() {
+        requireRole('board');
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $seriesId = isset($_GET['id']) ? intval($_GET['id']) : 0;
+            $voteValue = isset($_POST['vote']) ? trim($_POST['vote']) : '';
+            $memberId = $_SESSION['user_id'];
+            
+            if ($seriesId <= 0 || !in_array($voteValue, ['approve', 'reject'])) {
+                $_SESSION['error'] = "Dữ liệu bỏ phiếu không hợp lệ.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+            
+            $series = $this->seriesModel->findById($seriesId);
+            if (!$series) {
+                $_SESSION['error'] = "Không tìm thấy bộ truyện.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+            
+            if ($series['status'] !== 'planning') {
+                $_SESSION['error'] = "Chỉ có thể bỏ phiếu cho bộ truyện đang ở trạng thái chờ duyệt (Kế hoạch).";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+            
+            require_once __DIR__ . '/../models/BoardVote.php';
+            $boardVoteModel = new \BoardVote();
+            
+            if ($boardVoteModel->castVote($seriesId, $memberId, $voteValue)) {
+                // Gửi thông báo
+                require_once __DIR__ . '/../models/Notification.php';
+                $notificationModel = new Notification();
+                
+                $stats = $boardVoteModel->getApprovalStats($seriesId);
+                $percentage = $stats['percentage'];
+                $approveCount = $stats['approve_count'];
+                $totalMembers = $stats['total_members'];
+                
+                // 1. Thông báo cho Mangaka
+                $voteViet = $voteValue === 'approve' ? 'Đồng ý' : 'Từ chối';
+                $mangakaMsg = "Đề xuất truyện tranh '{$series['title']}' của bạn vừa nhận thêm 1 phiếu {$voteViet} từ thành viên Hội đồng Biên tập (Tiến độ hiện tại: {$approveCount}/{$totalMembers} phiếu tán thành).";
+                $notificationModel->createNotification($series['mangaka_id'], 'series_warning', $mangakaMsg, $seriesId);
+                
+                // 2. Thông báo cho các thành viên Board khác về việc ghi nhận phiếu bầu mới
+                $voterName = $_SESSION['full_name'] ?? 'Một thành viên Hội đồng';
+                $totalVotes = $stats['approve_count'] + $stats['reject_count'];
+                $boardVoteMsg = "Thành viên {$voterName} vừa bỏ phiếu {$voteViet} cho đề xuất bộ truyện '{$series['title']}' (Tiến độ: {$totalVotes}/{$totalMembers} phiếu).";
+                
+                require_once __DIR__ . '/../models/User.php';
+                $userModel = new \User();
+                $boardMembers = $userModel->findByRoleName('board');
+                foreach ($boardMembers as $bm) {
+                    if ($bm['status'] === 'active' && $bm['user_id'] != $memberId) {
+                        $notificationModel->createNotification($bm['user_id'], 'series_warning', $boardVoteMsg, $seriesId);
+                    }
+                }
+                
+                // 3. Thông báo cho tất cả thành viên Board nếu đã đầy đủ phiếu bầu
+                if ($totalVotes === $totalMembers) {
+                    $resultText = $percentage >= 50 ? "đạt đủ tỉ lệ tán thành tối thiểu ({$percentage}%)" : "chưa đạt tỉ lệ tán thành tối thiểu ({$percentage}%)";
+                    $boardMsg = "Đề xuất bộ truyện '{$series['title']}' đã nhận đầy đủ phiếu bầu từ Hội đồng và {$resultText}. Vui lòng tiến hành chốt quyết định phê duyệt.";
+                    foreach ($boardMembers as $bm) {
+                        if ($bm['status'] === 'active') {
+                            $notificationModel->createNotification($bm['user_id'], 'series_submitted', $boardMsg, $seriesId);
+                        }
+                    }
+                }
+                
+                $_SESSION['success'] = "Ghi nhận phiếu bầu thành công.";
+            } else {
+                $_SESSION['error'] = "Không thể ghi nhận phiếu bầu.";
+            }
+            
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+            exit;
+        }
+    }
+
+    /**
+     * AJAX/HTML: Hiển thị danh sách Hồ sơ & Số liệu bảo vệ Series (Dành cho Editor)
+     */
+    public function dossiers() {
+        requireRole('editor');
+        $editorId = $_SESSION['user_id'];
+
+        $seriesList = $this->seriesModel->getDossiersByEditorId($editorId);
+
+        // Nạp thêm thông tin xếp hạng mới nhất cho từng series
+        require_once __DIR__ . '/../models/SeriesRanking.php';
+        $rankingModel = new \SeriesRanking();
+        foreach ($seriesList as &$series) {
+            $series['latest_ranking'] = $rankingModel->getLatestRanking($series['series_id']);
+        }
+
+        require_once __DIR__ . '/../views/editor/dossiers.php';
+    }
+
+    /**
+     * AJAX/HTML: Chi tiết hồ sơ bảo vệ của một Series cụ thể (Dành cho Editor)
+     */
+    public function dossierDetail() {
+        requireRole('editor');
+        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $series = $this->seriesModel->findById($id);
+        
+        if (!$series || $series['editor_id'] != $_SESSION['user_id'] || $series['status'] === 'planning') {
+            $_SESSION['error'] = "Không tìm thấy bộ truyện hoặc bạn không phụ trách bộ truyện này.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=dossiers');
+            exit;
+        }
+
+        // Lấy thông tin Tác giả
+        require_once __DIR__ . '/../models/User.php';
+        $userModel = new \User();
+        $mangaka = $userModel->findById($series['mangaka_id']);
+
+        // Lấy danh sách lịch sử xếp hạng của Series
+        require_once __DIR__ . '/../models/SeriesRanking.php';
+        $rankingModel = new \SeriesRanking();
+        $rankingHistory = $rankingModel->findBySeriesId($id);
+
+        // Lấy danh sách chapter
+        require_once __DIR__ . '/../models/Chapter.php';
+        $chapterModel = new \Chapter();
+        $chapters = $chapterModel->findBySeriesId($id);
+
+        require_once __DIR__ . '/../views/editor/dossier_detail.php';
+    }
+
+    /**
+     * Xử lý cập nhật ghi chú hồ sơ bảo vệ
+     */
+    public function updateDossierNotes() {
+        requireRole('editor');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+            $series = $this->seriesModel->findById($id);
+            
+            if (!$series || $series['editor_id'] != $_SESSION['user_id'] || $series['status'] === 'planning') {
+                $_SESSION['error'] = "Không tìm thấy bộ truyện hoặc bạn không phụ trách bộ truyện này.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=dossiers');
+                exit;
+            }
+
+            $dossierNotes = isset($_POST['dossier_notes']) ? trim($_POST['dossier_notes']) : '';
+
+            try {
+                $this->seriesModel->update($id, [
+                    'dossier_notes' => $dossierNotes
+                ]);
+                $_SESSION['success'] = "Cập nhật hồ sơ & biện hộ số liệu bảo vệ bộ truyện '{$series['title']}' thành công!";
+            } catch (PDOException $e) {
+                $_SESSION['error'] = "Lỗi khi cập nhật hồ sơ bảo vệ: " . $e->getMessage();
+            }
+
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=dossierDetail&id=' . $id);
+            exit;
+        }
+    }
 }
+

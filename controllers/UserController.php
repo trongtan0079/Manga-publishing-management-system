@@ -314,10 +314,7 @@ class UserController extends BaseController
         $roles = $this->roleModel->findAll();
         
         // Đếm số user thuộc mỗi role
-        $conn = $this->userModel->getConnection();
-        $stmt = $conn->prepare("SELECT r.*, COUNT(u.user_id) as user_count FROM roles r LEFT JOIN users u ON r.role_id = u.role_id GROUP BY r.role_id, r.role_name, r.description ORDER BY r.role_id");
-        $stmt->execute();
-        $rolesWithCount = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $rolesWithCount = $this->roleModel->getRolesWithUserCount();
         
         require_once __DIR__ . '/../views/admin/roles.php';
     }

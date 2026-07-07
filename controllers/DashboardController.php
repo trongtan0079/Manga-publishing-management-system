@@ -59,28 +59,13 @@ class DashboardController extends BaseController {
         $bannedUsers = $userModel->countByCondition(['status' => 'banned']);
         
         // Thống kê User theo Role (cho biểu đồ)
-        $conn = $userModel->getConnection();
-        $stmtRoles = $conn->prepare("SELECT r.role_name, COUNT(u.user_id) as user_count FROM roles r LEFT JOIN users u ON r.role_id = u.role_id GROUP BY r.role_id, r.role_name ORDER BY r.role_id");
-        $stmtRoles->execute();
-        $usersByRole = $stmtRoles->fetchAll(\PDO::FETCH_ASSOC);
+        $usersByRole = $userModel->getRoleStatistics();
         
         // Thống kê Task theo Status (cho biểu đồ)
-        $stmtTaskStatus = $conn->prepare("SELECT status, COUNT(*) as task_count FROM tasks GROUP BY status");
-        $stmtTaskStatus->execute();
-        $tasksByStatusRaw = $stmtTaskStatus->fetchAll(\PDO::FETCH_ASSOC);
-        $tasksByStatus = [];
-        foreach ($tasksByStatusRaw as $row) {
-            $tasksByStatus[$row['status']] = (int)$row['task_count'];
-        }
+        $tasksByStatus = $taskModel->getStatusStatistics();
         
         // Thống kê Submission theo Status (cho biểu đồ)
-        $stmtSubStatus = $conn->prepare("SELECT status, COUNT(*) as sub_count FROM submissions GROUP BY status");
-        $stmtSubStatus->execute();
-        $subsByStatusRaw = $stmtSubStatus->fetchAll(\PDO::FETCH_ASSOC);
-        $subsByStatus = [];
-        foreach ($subsByStatusRaw as $row) {
-            $subsByStatus[$row['status']] = (int)$row['sub_count'];
-        }
+        $subsByStatus = $submissionModel->getStatusStatistics();
         
         require_once __DIR__ . '/../views/admin/dashboard.php';
     }
@@ -106,39 +91,19 @@ class DashboardController extends BaseController {
         $totalSeries = $seriesModel->countByCondition(['mangaka_id' => $userId]);
         
         // Đếm tổng số chương truyện thuộc về tác giả này
-        $stmt = $chapterModel->getConnection()->prepare("SELECT COUNT(*) as total FROM chapters c JOIN series s ON c.series_id = s.series_id WHERE s.mangaka_id = :mangaka_id");
-        $stmt->execute(['mangaka_id' => $userId]);
-        $totalChapters = (int)$stmt->fetchColumn();
+        $totalChapters = $chapterModel->countByMangakaId($userId);
         
         // Đếm tổng số trang truyện thuộc về tác giả này
-        $stmtPages = $pageModel->getConnection()->prepare("SELECT COUNT(*) as total FROM pages p JOIN chapters c ON p.chapter_id = c.chapter_id JOIN series s ON c.series_id = s.series_id WHERE s.mangaka_id = :mangaka_id");
-        $stmtPages->execute(['mangaka_id' => $userId]);
-        $totalPages = (int)$stmtPages->fetchColumn();
+        $totalPages = $pageModel->countByMangakaId($userId);
         
         // Đếm tổng số tasks thuộc về tác giả này
         $totalTasks = $taskModel->countByCondition(['mangaka_id' => $userId]);
         
         // Đếm tổng số submissions thuộc về tác giả này
-        $stmtSub = $submissionModel->getConnection()->prepare("
-            SELECT COUNT(s.submission_id) as total 
-            FROM submissions s
-            LEFT JOIN tasks t ON s.task_id = t.task_id
-            LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
-            LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
-            WHERE t.mangaka_id = :mangaka_id1 OR ser_chap.mangaka_id = :mangaka_id2
-        ");
-        $stmtSub->execute(['mangaka_id1' => $userId, 'mangaka_id2' => $userId]);
-        $totalSubmissions = (int)$stmtSub->fetchColumn();
+        $totalSubmissions = $submissionModel->countByMangakaId($userId);
         
         // Đếm số submissions pending của Assistant (Duyệt bài Trợ lý)
-        $stmtPending = $submissionModel->getConnection()->prepare("
-            SELECT COUNT(s.submission_id) as total 
-            FROM submissions s
-            JOIN tasks t ON s.task_id = t.task_id
-            WHERE s.status = 'pending' AND t.mangaka_id = :mangaka_id
-        ");
-        $stmtPending->execute(['mangaka_id' => $userId]);
-        $pendingReviews = (int)$stmtPending->fetchColumn();
+        $pendingReviews = $submissionModel->countPendingByMangakaId($userId);
         
         // Lấy lịch sử xếp hạng để hiển thị biến động
         $mangakaRankings = $rankingModel->findByMangakaId($userId);
@@ -190,19 +155,7 @@ class DashboardController extends BaseController {
         $activeTasks = $taskModel->findActiveByAssistantId($userId);
         
         // Tính toán thống kê trang đã duyệt và thu nhập theo từng tháng
-        $stmtIncome = $taskModel->getConnection()->prepare("
-            SELECT 
-                DATE_FORMAT(t.updated_at, '%m/%Y') as period,
-                COUNT(DISTINCT t.page_id) as approved_pages_count,
-                COUNT(t.task_id) as completed_tasks_count,
-                COUNT(t.task_id) * 300000 as estimated_income
-            FROM tasks t
-            WHERE t.assistant_id = :assistant_id AND t.status = 'completed'
-            GROUP BY DATE_FORMAT(t.updated_at, '%m/%Y')
-            ORDER BY MIN(t.updated_at) DESC
-        ");
-        $stmtIncome->execute(['assistant_id' => $userId]);
-        $monthlyIncomeStats = $stmtIncome->fetchAll(PDO::FETCH_ASSOC);
+        $monthlyIncomeStats = $taskModel->getMonthlyIncomeStats($userId);
         
         require_once __DIR__ . '/../views/assistant/dashboard.php';
     }
@@ -246,11 +199,83 @@ class DashboardController extends BaseController {
             $stmt->execute(['series_id' => $series['series_id']]);
             $pendingTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
             
+            // Lấy chapter đang vẽ hoặc nháp (active) để Editor xem tiến độ chi tiết của studio
+            $sqlActive = "SELECT * FROM chapters 
+                          WHERE series_id = :series_id AND status IN ('drafting', 'drawing', 'reviewing') 
+                          ORDER BY chapter_number ASC LIMIT 1";
+            $stmtActive = $chapterModel->getConnection()->prepare($sqlActive);
+            $stmtActive->execute(['series_id' => $series['series_id']]);
+            $activeChapter = $stmtActive->fetch(PDO::FETCH_ASSOC);
+
+            $activeChapterPages = [];
+            $activeChapterStats = [
+                'total_tasks' => 0,
+                'completed_tasks' => 0,
+                'completion_rate' => 0
+            ];
+
+            if ($activeChapter) {
+                // Lấy tất cả trang của chapter này
+                $sqlPages = "SELECT * FROM pages WHERE chapter_id = :chapter_id ORDER BY page_number ASC";
+                $stmtPages = $chapterModel->getConnection()->prepare($sqlPages);
+                $stmtPages->execute(['chapter_id' => $activeChapter['chapter_id']]);
+                $pages = $stmtPages->fetchAll(PDO::FETCH_ASSOC);
+
+                // Lấy tất cả task của chapter này
+                $sqlTasks = "SELECT t.*, p.page_number 
+                             FROM tasks t 
+                             JOIN pages p ON t.page_id = p.page_id 
+                             WHERE p.chapter_id = :chapter_id";
+                $stmtTasks = $taskModel->getConnection()->prepare($sqlTasks);
+                $stmtTasks->execute(['chapter_id' => $activeChapter['chapter_id']]);
+                $tasks = $stmtTasks->fetchAll(PDO::FETCH_ASSOC);
+
+                // Tổ chức task theo page_id
+                $tasksByPage = [];
+                $totalActiveTasks = count($tasks);
+                $completedActiveTasks = 0;
+
+                foreach ($tasks as $t) {
+                    $tasksByPage[$t['page_id']][] = $t;
+                    if ($t['status'] === 'completed') {
+                        $completedActiveTasks++;
+                    }
+                }
+
+                $activeChapterStats['total_tasks'] = $totalActiveTasks;
+                $activeChapterStats['completed_tasks'] = $completedActiveTasks;
+                $activeChapterStats['completion_rate'] = $totalActiveTasks > 0 ? round(($completedActiveTasks / $totalActiveTasks) * 100) : 0;
+
+                foreach ($pages as $p) {
+                    $pTasks = $tasksByPage[$p['page_id']] ?? [];
+                    // Phân nhóm task theo loại công việc vẽ
+                    $taskTypesProgress = [
+                        'background' => null,
+                        'inking' => null,
+                        'coloring' => null,
+                        'effects' => null
+                    ];
+                    foreach ($pTasks as $pt) {
+                        if (array_key_exists($pt['task_type'], $taskTypesProgress)) {
+                            $taskTypesProgress[$pt['task_type']] = $pt['status'];
+                        }
+                    }
+
+                    $activeChapterPages[] = [
+                        'page' => $p,
+                        'tasks' => $taskTypesProgress
+                    ];
+                }
+            }
+            
             $progressData[] = [
                 'series' => $series,
                 'total_chapters' => count($chapters),
                 'completed_chapters' => $completedChapters,
-                'pending_tasks' => $pendingTasks
+                'pending_tasks' => $pendingTasks,
+                'active_chapter' => $activeChapter,
+                'active_chapter_pages' => $activeChapterPages,
+                'active_chapter_stats' => $activeChapterStats
             ];
         }
         
@@ -269,40 +294,14 @@ class DashboardController extends BaseController {
         $reviewModel = new Review();
         
         // Lấy số lượng bản thảo chương đang chờ duyệt của các bộ truyện được phân công gán phụ trách
-        $stmt = $submissionModel->getConnection()->prepare("
-            SELECT COUNT(sub.submission_id) as total 
-            FROM submissions sub
-            JOIN chapters c ON sub.chapter_id = c.chapter_id
-            JOIN series s ON c.series_id = s.series_id
-            WHERE sub.status = 'pending' 
-              AND sub.chapter_id IS NOT NULL 
-              AND s.editor_id = :editor_id
-              AND s.status != 'planning'
-        ");
-        $stmt->execute(['editor_id' => $userId]);
-        $pendingSubmissions = (int)$stmt->fetchColumn();
+        $pendingSubmissions = $submissionModel->countPendingChapterSubmissionsByEditor($userId);
         
         // Lấy số lượng đánh giá mà Editor này đã làm
         $recentReviews = $reviewModel->countByCondition(['reviewer_id' => $userId]);
 
         // Đếm Approved và Rejected cho Editor hiện tại
-        $stmtApprove = $reviewModel->getConnection()->prepare("
-            SELECT COUNT(r.review_id) as total 
-            FROM reviews r
-            JOIN submissions s ON r.submission_id = s.submission_id
-            WHERE r.reviewer_id = :reviewer_id AND s.status = 'approved'
-        ");
-        $stmtApprove->execute(['reviewer_id' => $userId]);
-        $approvedSubmissions = (int)$stmtApprove->fetchColumn();
-
-        $stmtReject = $reviewModel->getConnection()->prepare("
-            SELECT COUNT(r.review_id) as total 
-            FROM reviews r
-            JOIN submissions s ON r.submission_id = s.submission_id
-            WHERE r.reviewer_id = :reviewer_id AND s.status = 'rejected'
-        ");
-        $stmtReject->execute(['reviewer_id' => $userId]);
-        $rejectedSubmissions = (int)$stmtReject->fetchColumn();
+        $approvedSubmissions = $reviewModel->countReviewsByEditor($userId, 'approved');
+        $rejectedSubmissions = $reviewModel->countReviewsByEditor($userId, 'rejected');
 
         // Lấy 5 pending submissions của các bộ truyện được phân công gán phụ trách
         $pendingList = array_slice($submissionModel->findPendingSubmissionsByEditorId($userId), 0, 5);
@@ -311,30 +310,11 @@ class DashboardController extends BaseController {
         $recentReviewList = array_slice($reviewModel->findByReviewerId($userId), 0, 5);
 
         // Đếm số lượng Reviewed cho Editor hiện tại
-        $stmtReviewed = $reviewModel->getConnection()->prepare("
-            SELECT COUNT(r.review_id) as total 
-            FROM reviews r
-            JOIN submissions s ON r.submission_id = s.submission_id
-            WHERE r.reviewer_id = :reviewer_id AND s.status = 'reviewed'
-        ");
-        $stmtReviewed->execute(['reviewer_id' => $userId]);
-        $reviewedSubmissions = (int)$stmtReviewed->fetchColumn();
+        $reviewedSubmissions = $reviewModel->countReviewsByEditor($userId, 'reviewed');
 
+        $chapterModel = new Chapter();
         // Lấy danh sách 5 chapter sắp đến hạn deadline của các bộ truyện được phân công gán phụ trách
-        $stmtDeadlines = $submissionModel->getConnection()->prepare("
-            SELECT c.chapter_number, c.title as chapter_title, c.due_date, s.title as series_title, u.full_name as mangaka_name
-            FROM chapters c
-            JOIN series s ON c.series_id = s.series_id
-            JOIN users u ON s.mangaka_id = u.user_id
-            WHERE c.status NOT IN ('approved', 'published') 
-              AND c.due_date IS NOT NULL 
-              AND s.editor_id = :editor_id
-              AND s.status != 'planning'
-            ORDER BY c.due_date ASC
-            LIMIT 5
-        ");
-        $stmtDeadlines->execute(['editor_id' => $userId]);
-        $upcomingChapters = $stmtDeadlines->fetchAll(\PDO::FETCH_ASSOC);
+        $upcomingChapters = $chapterModel->getUpcomingDeadlinesByEditor($userId);
         
         require_once __DIR__ . '/../views/editor/dashboard.php';
     }
@@ -371,10 +351,7 @@ class DashboardController extends BaseController {
         }
         
         $seriesModel = new Series();
-        $conn = $seriesModel->getConnection();
-        $stmtActive = $conn->prepare("SELECT COUNT(*) FROM series WHERE status IN ('ongoing', 'completed', 'suspended')");
-        $stmtActive->execute();
-        $totalActiveSeriesCount = (int)$stmtActive->fetchColumn();
+        $totalActiveSeriesCount = $seriesModel->countActiveSeries();
         $ungradedSeries = max(0, $totalActiveSeriesCount - $evaluatedSeries);
         
         require_once __DIR__ . '/../views/board/dashboard.php';

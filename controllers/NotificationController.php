@@ -93,9 +93,10 @@ class NotificationController extends BaseController
         // Đánh dấu đã đọc
         $this->notificationModel->markAsRead($id, $userId);
 
-        // Xác định trang chuyển hướng dựa trên loại thông báo (type)
+        // Xác định trang chuyển hướng dựa trên loại thông báo (type) và tài nguyên liên quan (related_id)
         $role = $_SESSION['role_name'] ?? '';
         $redirectUrl = BASE_PATH . '/index.php';
+        $relatedId = isset($notification['related_id']) && $notification['related_id'] > 0 ? (int)$notification['related_id'] : 0;
 
         switch ($notification['type']) {
             case 'task_assigned':
@@ -109,35 +110,50 @@ class NotificationController extends BaseController
                 break;
             case 'chapter_submitted':
             case 'submission_submitted':
-                if ($role === 'editor') {
+                if ($relatedId > 0 && ($role === 'editor' || $role === 'mangaka')) {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=review&action=create&submission_id=' . $relatedId;
+                } elseif ($relatedId > 0) {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=submission&action=show&id=' . $relatedId;
+                } elseif ($role === 'editor') {
                     $redirectUrl = BASE_PATH . '/index.php?controller=review&action=index';
                 } else {
                     $redirectUrl = BASE_PATH . '/index.php?controller=submission&action=index';
                 }
                 break;
             case 'review_created':
-                if ($role === 'editor') {
-                    $redirectUrl = BASE_PATH . '/index.php?controller=review&action=index';
-                } elseif ($role === 'mangaka') {
-                    $redirectUrl = BASE_PATH . '/index.php?controller=review&action=index';
-                }
-                break;
             case 'submission_approved':
             case 'submission_rejected':
-                $redirectUrl = BASE_PATH . '/index.php?controller=submission&action=index';
+                if ($relatedId > 0) {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=submission&action=show&id=' . $relatedId;
+                } else {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=submission&action=index';
+                }
                 break;
             case 'ranking_published':
                 $redirectUrl = BASE_PATH . '/index.php?controller=seriesRanking&action=index';
                 break;
+            case 'series_warning':
+                if ($relatedId > 0) {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=series&action=show&id=' . $relatedId;
+                } else {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=series&action=index';
+                }
+                break;
             case 'series_submitted':
                 if ($role === 'board') {
                     $redirectUrl = BASE_PATH . '/index.php?controller=series&action=publish';
+                } elseif ($relatedId > 0) {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=series&action=show&id=' . $relatedId;
                 } else {
                     $redirectUrl = BASE_PATH . '/index.php?controller=series&action=index';
                 }
                 break;
             case 'series_completed':
-                $redirectUrl = BASE_PATH . '/index.php?controller=series&action=index';
+                if ($relatedId > 0) {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=series&action=show&id=' . $relatedId;
+                } else {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=series&action=index';
+                }
                 break;
             default:
                 $redirectUrl = BASE_PATH . '/index.php?controller=notification&action=index';

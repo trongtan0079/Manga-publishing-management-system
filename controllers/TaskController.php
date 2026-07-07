@@ -185,7 +185,10 @@ class TaskController extends BaseController
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : 0;
             $pageRegionId = !empty($_POST['page_region_id']) ? intval($_POST['page_region_id']) : null;
             $title = isset($_POST['title']) ? trim($_POST['title']) : '';
-            $taskType = isset($_POST['task_type']) ? $_POST['task_type'] : 'other';
+            $taskType = isset($_POST['task_type']) ? trim($_POST['task_type']) : 'other';
+            if ($taskType === 'other' && !empty($_POST['custom_task_type'])) {
+                $taskType = trim($_POST['custom_task_type']);
+            }
             $description = isset($_POST['description']) ? trim($_POST['description']) : '';
             $resourceUrl = isset($_POST['resource_url']) ? trim($_POST['resource_url']) : '';
             $priority = isset($_POST['priority']) ? $_POST['priority'] : 'medium';
@@ -211,12 +214,14 @@ class TaskController extends BaseController
                 exit;
             }
             $chapter = $ownership['chapter'];
+            $page = $ownership['page'];
+            $series = $ownership['series'];
             if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
                 $_SESSION['error'] = 'Chương truyện chứa trang này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể giao thêm việc.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapter['chapter_id']);
                 exit;
             }
-            $isDraft = ($chapter['status'] === 'drafting');
+            $isDraft = ($chapter['status'] === 'drafting' || $page['status'] === 'drafting');
 
             // Validation: pageRegionId belongs to pageId
             if ($pageRegionId) {
@@ -252,8 +257,7 @@ class TaskController extends BaseController
             }
 
             // Validate task_type
-            $allowedTypes = ['background', 'inking', 'coloring', 'effects', 'other'];
-            if (!in_array($taskType, $allowedTypes)) {
+            if (empty($taskType) || strlen($taskType) > 50) {
                 $_SESSION['error'] = 'Loại công việc không hợp lệ.';
                 header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
                 exit;
@@ -268,11 +272,16 @@ class TaskController extends BaseController
                     header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
                     exit;
                 }
+                if ($dueTimestamp < time()) {
+                    $_SESSION['error'] = 'Hạn chót công việc không thể ở quá khứ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                    exit;
+                }
                 $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
             }
 
             // Thực hiện thêm mới vào bảng tasks
-            $this->taskModel->insert([
+            $taskId = $this->taskModel->insert([
                 'page_id' => $pageId,
                 'page_region_id' => $pageRegionId,
                 'mangaka_id' => $_SESSION['user_id'], // Lấy ID của Mangaka đang tạo task
@@ -298,7 +307,8 @@ class TaskController extends BaseController
                 $this->notificationModel->createNotification(
                     $assistantId,
                     'task_assigned',
-                    "Bạn được giao công việc mới: '{$title}' thuộc bộ truyện '{$series['title']}' (Chương {$chapter['chapter_number']} - Trang {$page['page_number']})."
+                    "Bạn được giao công việc mới: '{$title}' thuộc bộ truyện '{$series['title']}' (Chương {$chapter['chapter_number']} - Trang {$page['page_number']}).",
+                    $taskId
                 );
             }
 
@@ -443,7 +453,10 @@ class TaskController extends BaseController
                 }
             }
             $title = isset($_POST['title']) ? trim($_POST['title']) : $task['title'];
-            $taskType = isset($_POST['task_type']) ? $_POST['task_type'] : $task['task_type'];
+            $taskType = isset($_POST['task_type']) ? trim($_POST['task_type']) : 'other';
+            if ($taskType === 'other' && !empty($_POST['custom_task_type'])) {
+                $taskType = trim($_POST['custom_task_type']);
+            }
             $description = isset($_POST['description']) ? trim($_POST['description']) : $task['description'];
             $resourceUrl = isset($_POST['resource_url']) ? trim($_POST['resource_url']) : $task['resource_url'];
             $priority = isset($_POST['priority']) ? $_POST['priority'] : $task['priority'];
@@ -478,7 +491,7 @@ class TaskController extends BaseController
             }
 
             // Validate task_type
-            if (!in_array($taskType, ['background', 'inking', 'coloring', 'effects', 'other'])) {
+            if (empty($taskType) || strlen($taskType) > 50) {
                 $_SESSION['error'] = 'Loại công việc không hợp lệ.';
                 header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
                 exit;
@@ -501,6 +514,11 @@ class TaskController extends BaseController
                     exit;
                 }
                 $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
+                if ($dueTimestamp < time() && $formattedDueDate !== $task['due_date']) {
+                    $_SESSION['error'] = 'Hạn chót công việc không thể ở quá khứ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=edit&id=$id");
+                    exit;
+                }
             }
 
             // Update tất cả các trường
@@ -548,13 +566,15 @@ class TaskController extends BaseController
                 $this->notificationModel->createNotification(
                     $assistantId,
                     'task_assigned',
-                    "Mangaka " . $_SESSION['full_name'] . " đã cập nhật thông tin công việc: '{$title}' thuộc bộ truyện '{$seriesTitle}' (Chương {$chapNum} - Trang {$pageNum})."
+                    "Mangaka " . $_SESSION['full_name'] . " đã cập nhật thông tin công việc: '{$title}' thuộc bộ truyện '{$seriesTitle}' (Chương {$chapNum} - Trang {$pageNum}).",
+                    $id
                 );
                 if ($assistantId != $task['assistant_id'] && !empty($task['assistant_id'])) {
                     $this->notificationModel->createNotification(
                         $task['assistant_id'],
                         'task_assigned',
-                        "Công việc '{$task['title']}' trước đó của bạn (thuộc bộ truyện '{$seriesTitle}', Chương {$chapNum} - Trang {$pageNum}) đã được chuyển giao cho người khác."
+                        "Công việc '{$task['title']}' trước đó của bạn (thuộc bộ truyện '{$seriesTitle}', Chương {$chapNum} - Trang {$pageNum}) đã được chuyển giao cho người khác.",
+                        $id
                     );
                 }
             }
@@ -569,6 +589,13 @@ class TaskController extends BaseController
             // Phân quyền: Đảm bảo Assistant chỉ update được Task được giao đích danh cho mình
             if ($task['assistant_id'] != $_SESSION['user_id']) {
                 $_SESSION['error'] = 'Bạn không có quyền sửa task này.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
+                exit;
+            }
+
+            // Chặn thay đổi trạng thái nếu công việc đã hoàn thành
+            if ($task['status'] === 'completed') {
+                $_SESSION['error'] = 'Công việc đã hoàn thành và được duyệt, không thể thay đổi trạng thái.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
                 exit;
             }

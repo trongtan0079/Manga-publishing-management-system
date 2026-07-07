@@ -86,11 +86,15 @@ class PageController extends BaseController
             // Kiểm tra xem assistant có được giao task nào thuộc page này không
             $pageId = $_GET['id'] ?? null;
             if ($pageId) {
-                $sql = "SELECT COUNT(*) as task_count FROM tasks WHERE page_id = :page_id AND assistant_id = :assistant_id";
-                $stmt = $this->pageModel->getConnection()->prepare($sql);
-                $stmt->execute(['page_id' => $pageId, 'assistant_id' => $_SESSION['user_id']]);
-                $res = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($res && $res['task_count'] > 0) {
+                // Chặn Assistant truy cập nếu trang truyện vẫn đang ở dạng Bản nháp (Drafting)
+                $pageObj = $this->pageModel->findById($pageId);
+                if ($pageObj && $pageObj['status'] === 'drafting') {
+                    $_SESSION['error'] = "Truy cập bị từ chối! Trang truyện này hiện đang ở trạng thái Bản nháp.";
+                    header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=assistant');
+                    exit;
+                }
+
+                if ($this->taskModel->countByPageAndAssistant($pageId, $_SESSION['user_id']) > 0) {
                     return ['chapter' => $chapter, 'series' => $series];
                 }
             }
@@ -205,6 +209,9 @@ class PageController extends BaseController
             header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
             exit;
         }
+        
+        // Lấy danh sách số trang đã tồn tại trong chapter để phục vụ validate thời gian thực
+        $existingPageNumbers = $this->pageModel->getPageNumbersByChapterId($chapterId);
         
         require_once __DIR__ . '/../views/mangaka/page_create.php';
     }
@@ -334,7 +341,10 @@ class PageController extends BaseController
             header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$page['chapter_id']}");
             exit;
         }
-
+        
+        // Lấy danh sách số trang đã tồn tại trong chapter (ngoại trừ trang hiện tại) để phục vụ validate thời gian thực
+        $existingPageNumbers = $this->pageModel->getOtherPageNumbers($page['chapter_id'], $id);
+        
         require_once __DIR__ . '/../views/mangaka/page_edit.php';
     }
 
@@ -409,8 +419,28 @@ class PageController extends BaseController
             }
 
             try {
+                $oldStatus = $page['status'];
                 $this->pageModel->update($id, $data);
                 $_SESSION['success'] = "Cập nhật trang {$pageNumber} thành công!";
+                
+                // Nếu trang chuyển từ nháp sang đang vẽ (active)
+                if ($oldStatus === 'drafting' && $status === 'drawing') {
+                    require_once __DIR__ . '/../models/Task.php';
+                    $taskModel = new \Task();
+                    $pageTasks = $taskModel->findByPageId($id);
+                    
+                    require_once __DIR__ . '/../models/Notification.php';
+                    $notificationModel = new \Notification();
+                    
+                    foreach ($pageTasks as $t) {
+                        $notificationModel->createNotification(
+                            $t['assistant_id'],
+                            'task_assigned',
+                            "Bạn được giao công việc mới: '{$t['title']}' thuộc bộ truyện '{$series['title']}' (Chương {$chapter['chapter_number']} - Trang {$page['page_number']}).",
+                            $t['task_id']
+                        );
+                    }
+                }
             } catch (PDOException $e) {
                 $_SESSION['error'] = "Lỗi hệ thống: " . $e->getMessage();
             }
