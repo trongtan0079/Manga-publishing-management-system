@@ -56,7 +56,7 @@ class Task extends Model {
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
                 LEFT JOIN page_regions r ON t.page_region_id = r.region_id
-                WHERE t.assistant_id = :assistant_id AND c.status != 'drafting' AND s.status != 'planning'
+                WHERE t.assistant_id = :assistant_id AND c.status != 'drafting' AND s.status != 'planning' AND p.status != 'drafting'
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':assistant_id', $assistantId);
@@ -76,7 +76,7 @@ class Task extends Model {
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON t.mangaka_id = u.user_id
                 LEFT JOIN page_regions r ON t.page_region_id = r.region_id
-                WHERE t.assistant_id = :assistant_id AND t.status != 'completed' AND c.status != 'drafting' AND s.status != 'planning'
+                WHERE t.assistant_id = :assistant_id AND t.status != 'completed' AND c.status != 'drafting' AND s.status != 'planning' AND p.status != 'drafting'
                 ORDER BY t.due_date ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':assistant_id', $assistantId);
@@ -111,7 +111,7 @@ class Task extends Model {
      * Dùng để gửi thông báo hàng loạt khi chapter chuyển từ drafting sang drawing.
      */
     public function findTasksByChapterId($chapterId) {
-        $sql = "SELECT t.*, c.chapter_number, s.title as series_title
+        $sql = "SELECT t.*, c.chapter_number, s.title as series_title, p.status as page_status
                 FROM {$this->table} t
                 JOIN pages p ON t.page_id = p.page_id
                 JOIN chapters c ON p.chapter_id = c.chapter_id
@@ -121,5 +121,38 @@ class Task extends Model {
         $stmt->bindParam(':chapter_id', $chapterId);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getStatusStatistics() {
+        $stmt = $this->conn->prepare("SELECT status, COUNT(*) as task_count FROM tasks GROUP BY status");
+        $stmt->execute();
+        $raw = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = [];
+        foreach ($raw as $row) {
+            $result[$row['status']] = (int)$row['task_count'];
+        }
+        return $result;
+    }
+
+    public function countByPageAndAssistant($pageId, $assistantId) {
+        $sql = "SELECT COUNT(*) FROM tasks WHERE page_id = :page_id AND assistant_id = :assistant_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['page_id' => $pageId, 'assistant_id' => $assistantId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getMonthlyIncomeStats($assistantId) {
+        $sql = "SELECT 
+                    DATE_FORMAT(updated_at, '%m/%Y') as period,
+                    COUNT(DISTINCT page_id) as approved_pages_count,
+                    COUNT(task_id) as completed_tasks_count,
+                    COUNT(task_id) * 300000 as estimated_income
+                FROM tasks
+                WHERE assistant_id = :assistant_id AND status = 'completed'
+                GROUP BY DATE_FORMAT(updated_at, '%m/%Y')
+                ORDER BY MIN(updated_at) DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['assistant_id' => $assistantId]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }

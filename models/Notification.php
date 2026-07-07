@@ -11,7 +11,7 @@ class Notification extends Model {
     /**
      * Tạo một thông báo mới chuẩn hóa theo type
      */
-    public function createNotification($userId, $type, $message) {
+    public function createNotification($userId, $type, $message, $relatedId = null) {
         $allowedTypes = [
             'task_assigned',
             'submission_submitted',
@@ -35,7 +35,8 @@ class Notification extends Model {
             'user_id' => $userId,
             'type' => $type,
             'message' => $message,
-            'is_read' => 0
+            'is_read' => 0,
+            'related_id' => $relatedId
         ]);
     }
 

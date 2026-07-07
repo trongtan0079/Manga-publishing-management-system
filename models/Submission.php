@@ -90,7 +90,8 @@ class Submission extends Model {
                        t.title as task_title,
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
-                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                       COALESCE(ser_chap.title, ser_task.title) as series_title,
+                       c.status as chapter_status
                 FROM {$this->table} s
                 LEFT JOIN users u ON s.user_id = u.user_id
                 LEFT JOIN tasks t ON s.task_id = t.task_id
@@ -107,9 +108,9 @@ class Submission extends Model {
     }
 
     /**
-     * Lấy danh sách submissions pending thuộc về các task của 1 mangaka cụ thể
+     * Lấy toàn bộ submissions thuộc về các task của 1 mangaka cụ thể (cả pending và đã duyệt)
      */
-    public function findPendingSubmissionsByMangakaId($mangakaId) {
+    public function findAllTaskSubmissionsByMangakaId($mangakaId) {
         $sql = "SELECT s.*, 
                        u.full_name as sender_name,
                        t.title as task_title,
@@ -124,8 +125,8 @@ class Submission extends Model {
                 LEFT JOIN series ser_task ON c_task.series_id = ser_task.series_id
                 LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
                 LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
-                WHERE s.status = 'pending' AND t.mangaka_id = :mangaka_id
-                ORDER BY s.submitted_at DESC";
+                WHERE t.mangaka_id = :mangaka_id
+                ORDER BY CASE WHEN s.status = 'pending' THEN 0 ELSE 1 END, s.submitted_at DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':mangaka_id', $mangakaId);
         $stmt->execute();
@@ -139,13 +140,21 @@ class Submission extends Model {
         $sql = "SELECT s.*, 
                        u.full_name as sender_name,
                        t.title as task_title,
+                       t.description as task_description,
+                       t.task_type as task_type,
+                       t.priority as task_priority,
+                       t.due_date as task_due_date,
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
                        COALESCE(ser_chap.title, ser_task.title) as series_title,
-                       COALESCE(ser_chap.mangaka_id, t.mangaka_id) as mangaka_id
+                       COALESCE(ser_chap.mangaka_id, t.mangaka_id) as mangaka_id,
+                       c.status as chapter_status,
+                       p_task.image_url as page_image_url,
+                       pr.x as region_x, pr.y as region_y, pr.width as region_width, pr.height as region_height, pr.region_type as region_type
                 FROM {$this->table} s
                 LEFT JOIN users u ON s.user_id = u.user_id
                 LEFT JOIN tasks t ON s.task_id = t.task_id
+                LEFT JOIN page_regions pr ON t.page_region_id = pr.region_id
                 LEFT JOIN pages p_task ON t.page_id = p_task.page_id
                 LEFT JOIN chapters c_task ON p_task.chapter_id = c_task.chapter_id
                 LEFT JOIN series ser_task ON c_task.series_id = ser_task.series_id
@@ -167,7 +176,8 @@ class Submission extends Model {
                        t.title as task_title,
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
-                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                       COALESCE(ser_chap.title, ser_task.title) as series_title,
+                       c.status as chapter_status
                 FROM {$this->table} s
                 LEFT JOIN users u ON s.user_id = u.user_id
                 LEFT JOIN tasks t ON s.task_id = t.task_id
@@ -209,5 +219,51 @@ class Submission extends Model {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getStatusStatistics() {
+        $stmt = $this->conn->prepare("SELECT status, COUNT(*) as sub_count FROM submissions GROUP BY status");
+        $stmt->execute();
+        $raw = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = [];
+        foreach ($raw as $row) {
+            $result[$row['status']] = (int)$row['sub_count'];
+        }
+        return $result;
+    }
+
+    public function countByMangakaId($mangakaId) {
+        $sql = "SELECT COUNT(s.submission_id) as total 
+                FROM submissions s
+                LEFT JOIN tasks t ON s.task_id = t.task_id
+                LEFT JOIN chapters c ON s.chapter_id = c.chapter_id
+                LEFT JOIN series ser_chap ON c.series_id = ser_chap.series_id
+                WHERE t.mangaka_id = :mangaka_id1 OR ser_chap.mangaka_id = :mangaka_id2";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['mangaka_id1' => $mangakaId, 'mangaka_id2' => $mangakaId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function countPendingByMangakaId($mangakaId) {
+        $sql = "SELECT COUNT(s.submission_id) as total 
+                FROM submissions s
+                JOIN tasks t ON s.task_id = t.task_id
+                WHERE s.status = 'pending' AND t.mangaka_id = :mangaka_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['mangaka_id' => $mangakaId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function countPendingChapterSubmissionsByEditor($editorId) {
+        $sql = "SELECT COUNT(sub.submission_id) as total 
+                FROM submissions sub
+                JOIN chapters c ON sub.chapter_id = c.chapter_id
+                JOIN series s ON c.series_id = s.series_id
+                WHERE sub.status = 'pending' 
+                  AND sub.chapter_id IS NOT NULL 
+                  AND s.editor_id = :editor_id
+                  AND s.status != 'planning'";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['editor_id' => $editorId]);
+        return (int)$stmt->fetchColumn();
+    }
 }
-?>

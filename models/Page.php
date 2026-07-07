@@ -53,5 +53,40 @@ class Page extends Model {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-}
+    /**
+     * Lấy danh sách trang theo chapter ID, kèm theo số lượng annotation
+     */
+    public function findByChapterIdWithAnnotationCount($chapterId) {
+        $sql = "SELECT p.*, COUNT(ea.annotation_id) AS annotation_count 
+                FROM {$this->table} p 
+                LEFT JOIN editor_annotations ea ON p.page_id = ea.page_id 
+                WHERE p.chapter_id = :chapter_id 
+                GROUP BY p.page_id 
+                ORDER BY p.page_number ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':chapter_id', $chapterId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
+    public function countByMangakaId($mangakaId) {
+        $sql = "SELECT COUNT(*) as total FROM pages p JOIN chapters c ON p.chapter_id = c.chapter_id JOIN series s ON c.series_id = s.series_id WHERE s.mangaka_id = :mangaka_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['mangaka_id' => $mangakaId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getPageNumbersByChapterId($chapterId) {
+        $sql = "SELECT page_number FROM pages WHERE chapter_id = :chapter_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':chapter_id' => $chapterId]);
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    public function getOtherPageNumbers($chapterId, $pageId) {
+        $sql = "SELECT page_number FROM pages WHERE chapter_id = :chapter_id AND page_id != :page_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([':chapter_id' => $chapterId, ':page_id' => $pageId]);
+        return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
+}

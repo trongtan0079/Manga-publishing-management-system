@@ -32,4 +32,14 @@ class Review extends Model {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function countReviewsByEditor($editorId, $status) {
+        $sql = "SELECT COUNT(r.review_id) as total 
+                FROM reviews r
+                JOIN submissions s ON r.submission_id = s.submission_id
+                WHERE r.reviewer_id = :reviewer_id AND s.status = :status";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['reviewer_id' => $editorId, 'status' => $status]);
+        return (int)$stmt->fetchColumn();
+    }
 }
