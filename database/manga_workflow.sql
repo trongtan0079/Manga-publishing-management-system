@@ -44,6 +44,7 @@ CREATE TABLE series (
     cover_image VARCHAR(255),
     proposal_file VARCHAR(255),
     editor_id INT NULL,
+    dossier_notes TEXT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_series_mangaka FOREIGN KEY (mangaka_id) REFERENCES users(user_id) ON DELETE RESTRICT,
@@ -94,7 +95,7 @@ CREATE TABLE page_regions (
     y INT NOT NULL,
     width INT NOT NULL,
     height INT NOT NULL,
-    status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
+    status ENUM('pending', 'in_progress', 'submitted', 'completed', 'rejected') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_regions_page FOREIGN KEY (page_id) REFERENCES pages(page_id) ON DELETE CASCADE
 ) COMMENT 'Lưu trữ thông tin chi tiết về từng phân vùng vẽ tay thủ công trên trang truyện';
@@ -113,7 +114,7 @@ CREATE TABLE tasks (
     description TEXT,
     resource_url VARCHAR(255) NULL,
     priority ENUM('low', 'medium', 'high') DEFAULT 'medium',
-    status ENUM('pending', 'in_progress', 'completed') DEFAULT 'pending',
+    status ENUM('pending', 'in_progress', 'submitted', 'completed', 'rejected') DEFAULT 'pending',
     due_date DATETIME,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -179,6 +180,7 @@ CREATE TABLE notifications (
     type VARCHAR(50) NOT NULL,
     message TEXT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,
+    related_id INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_notifications_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 ) COMMENT 'Lưu trữ thông báo trong hệ thống, đánh dấu đã đọc hoặc chưa';
