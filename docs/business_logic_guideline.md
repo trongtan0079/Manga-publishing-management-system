@@ -26,9 +26,11 @@ graph TD
 ### 🔹 Giai đoạn 1: Đăng ký & Phê duyệt Series mới
 1. **Mangaka** đăng nhập hệ thống, tạo hồ sơ giới thiệu bộ truyện mới (nhập Tên truyện, Mô tả, tải lên Ảnh bìa). Lúc này bộ truyện ở trạng thái **Bản thảo nháp (`planning`)**.
 2. **Mangaka** kiểm tra lại hồ sơ và nhấn **"Gửi đề xuất lên Hội đồng"**. Trạng thái bộ truyện chuyển sang **Đang chờ duyệt (`proposed`)**.
-3. Thành viên **Editorial Board** đăng nhập, xem danh sách đề xuất. Board thực hiện đánh giá hồ sơ và chọn hành động:
-   * **Từ chối (Reject):** Trạng thái quay về `planning` để tác giả chỉnh sửa lại.
-   * **Phê duyệt (Approve):** Board bắt buộc phải chọn Lịch xuất bản là **Hàng tuần (`weekly`)** hoặc **Hàng tháng (`monthly`)**, đồng thời gán một **Biên tập viên chuyên trách (Tantou Editor)** từ danh sách để trực tiếp quản lý và duyệt các chương truyện sau này. Trạng thái bộ truyện chính thức chuyển sang **Đang xuất bản (`ongoing`)**.
+3. Thành viên **Editorial Board** đăng nhập, xem danh sách đề xuất và tiến hành bỏ phiếu độc lập (Đồng ý hoặc Từ chối).
+4. **Quy trình chốt quyết định phê duyệt:**
+   * Hệ thống chỉ mở khóa form quyết định cho người đại diện chốt khi **tất cả** thành viên Hội đồng hoạt động đã bỏ phiếu đầy đủ. Nếu chưa đủ phiếu, hệ thống sẽ ẩn form và hiện cảnh báo chờ đủ phiếu.
+   * Khi đã bỏ phiếu đầy đủ: Quyết định **Từ chối (Hủy dự án - `canceled`)** luôn khả dụng để loại bỏ đề xuất không tốt. Tuy nhiên, quyết định **Phê duyệt (Thông qua - `ongoing`)** chỉ được kích hoạt khi tỷ lệ tán thành của Hội đồng đạt từ **50% trở lên**.
+   * Khi phê duyệt đề xuất, Board bắt buộc phải chọn Lịch xuất bản là **Hàng tuần (`weekly`)** hoặc **Hàng tháng (`monthly`)**, đồng thời gán một **Biên tập viên chuyên trách (Tantou Editor)**. Trạng thái bộ truyện chính thức chuyển sang **Đang xuất bản (`ongoing`)**.
 
 ### 🔹 Giai đoạn 2: Sáng tác & Phối hợp Studio (Mangaka ↔ Assistant)
 1. Khi bộ truyện đã hoạt động (`ongoing`), **Mangaka** có quyền tạo mới các chương truyện (Chapter). Trạng thái khởi tạo ban đầu của Chapter là **Bản nháp (`drafting`)**.
@@ -87,6 +89,12 @@ graph TD
   - Giao diện của Hội đồng Biên tập sử dụng thuộc tính `has_final_approved` để chuyển nhãn Tiến độ Chapter sang **Hoàn tất** (màu xanh lá). Nếu truyện chưa có chương cuối được phê duyệt, cột tiến độ sẽ hiển thị **Đang làm** (màu vàng) kể cả khi toàn bộ chương hiện có đã được duyệt xong.
   - Khi chương cuối được phê duyệt, hệ thống tự động bắn thông báo loại `series_completed` (biểu tượng cờ caro xanh) gửi đến toàn bộ các thành viên Hội đồng Biên tập để họ kiểm tra và đổi trạng thái Series sang **Hoàn thành (Completed)**.
   - **Chốt chặn Backend:** Ở tầng kiểm soát cập nhật trạng thái bộ truyện (`SeriesController::updateStatus`), hệ thống từ chối cho phép đổi trạng thái sang **Hoàn thành (Completed)** nếu phát hiện bộ truyện chưa có bất kỳ chương cuối (`is_final = 1`) nào được phê duyệt thành công.
+
+### 🗳️ 2.6 Quy trình bỏ phiếu xét duyệt đề án bộ truyện (Board Voting & Approval Rules)
+* **Quy tắc bỏ phiếu và chốt quyết định:**
+  - Từng thành viên hội đồng bỏ phiếu độc lập. Hệ thống tự động tính toán tiến độ bỏ phiếu và tỷ lệ đồng thuận thực tế từ Database.
+  - **Chốt chặn Bỏ phiếu đầy đủ:** Toàn bộ form chốt quyết định phê duyệt/từ chối chỉ được hiển thị trên giao diện và được xử lý ở Backend khi **tất cả thành viên hội đồng hoạt động đã bỏ phiếu đầy đủ** (số phiếu = tổng số thành viên active).
+  - **Chốt chặn Ngưỡng phê duyệt (>= 50%):** Chỉ cho phép phê duyệt thông qua (`ongoing`) khi tỷ lệ đồng ý đạt tối thiểu 50% tổng số phiếu bầu. Dưới 50%, tùy chọn "Thông qua" bị vô hiệu hóa trên giao diện và backend sẽ từ chối xử lý duyệt.
 
 ---
 

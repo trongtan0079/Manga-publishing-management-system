@@ -5,7 +5,7 @@ title State Machine Diagram - Chapter Lifecycle Status
 
 Drafting --> Drawing : Mangaka upload trang phác thảo & giao Task\n[PageController::store() / TaskController::store()]
 
-Drawing --> Reviewing : Mangaka nộp bản thảo hoàn thiện (.zip)\n[SubmissionController::store()]
+Drawing --> Reviewing : Mangaka nộp bản thảo hoàn thiện (.zip)\n[SubmissionController::store()]\n[Guard: Series status != 'planning']
 
 Reviewing --> Drawing : Editor từ chối / yêu cầu sửa\n[ReviewController::store() status='rejected']
 

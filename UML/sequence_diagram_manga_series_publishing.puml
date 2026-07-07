@@ -8,22 +8,61 @@ skinparam SequenceMessageAlign center
 title Sequence Diagram - Quy Trình Xuất Bản Series
 
 actor "Editorial Board" as Board
+actor "Mangaka" as Mangaka
 participant "Quản Lý Xuất Bản" as PublishManager
-participant "Quản Lý Xếp Hạng" as RankingManager
 database "Cơ Sở Dữ Liệu" as DB
 participant "Hệ Thống Thông Báo" as Notification
+participant "Quản Lý Xếp Hạng" as RankingManager
 
-Board -> PublishManager : Phê duyệt, Thiết lập lịch & Gán Editor
+== Giai đoạn 1: Bỏ phiếu của Hội đồng ==
+Board -> PublishManager : Bỏ phiếu xét duyệt (Đồng ý/Từ chối)
 activate PublishManager
 
-PublishManager -> DB : Lưu trạng thái (Ongoing), Lịch & editor_id
+PublishManager -> DB : Ghi nhận phiếu bầu (castVote)
+activate DB
+DB --> PublishManager : Thành công
+deactivate DB
+
+PublishManager -> DB : Tính tỷ lệ tán thành (getApprovalStats)
+activate DB
+DB --> PublishManager : Kết quả (Tỷ lệ %, Số phiếu)
+deactivate DB
+
+PublishManager -> Notification : Báo tiến độ phiếu bầu cho Mangaka
+activate Notification
+Notification --> Mangaka : Nhận thông báo tiến độ bỏ phiếu
+deactivate Notification
+
+alt Tỷ lệ tán thành >= 50%
+    PublishManager -> Notification : Báo đủ điều kiện duyệt cho Hội đồng
+    activate Notification
+    Notification --> Board : Nhận thông báo đạt điều kiện phê duyệt
+    deactivate Notification
+end
+deactivate PublishManager
+
+== Giai đoạn 2: Quyết định Phê duyệt ==
+Board -> PublishManager : Ghi nhận quyết định phê duyệt (status=ongoing, editor_id)
+activate PublishManager
+
+PublishManager -> DB : Kiểm tra điều kiện phê duyệt (Tỷ lệ >= 50%)
+activate DB
+DB --> PublishManager : Đạt điều kiện
+deactivate DB
+
+PublishManager -> DB : Cập nhật trạng thái Series (Ongoing), Lịch & editor_id
 activate DB
 DB --> PublishManager : Lưu thành công
 deactivate DB
 
-PublishManager -> Notification : Gửi thông báo xuất bản
+PublishManager -> Notification : Gửi thông báo kết quả phê duyệt kèm tỷ lệ cho Mangaka
 activate Notification
-Notification --> Board : Xác nhận xuất bản
+Notification --> Mangaka : Nhận thông báo được phê duyệt
+deactivate Notification
+
+PublishManager -> Notification : Gửi phân công cho Editor chuyên trách
+activate Notification
+Notification --> PublishManager : Gửi thành công
 deactivate Notification
 
 PublishManager -> RankingManager : Cập nhật bảng xếp hạng
@@ -37,7 +76,7 @@ deactivate DB
 RankingManager --> PublishManager : Hoàn tất cập nhật
 deactivate RankingManager
 
-PublishManager --> Board : Xuất bản hoàn tất
+PublishManager --> Board : Xuất bản và phê duyệt hoàn tất
 deactivate PublishManager
 
 @enduml

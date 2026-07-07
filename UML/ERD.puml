@@ -32,6 +32,8 @@ entity series {
   status : enum
   publish_type : varchar
   cover_image : varchar
+  proposal_file : varchar
+  dossier_notes : text
   created_at : timestamp
   updated_at : timestamp
 }
@@ -130,6 +132,7 @@ entity notifications {
   *notification_id : int <<PK>>
   --
   user_id : int <<FK>>
+  related_id : int <<FK>> <<NULL>>
   type : varchar
   message : text
   is_read : boolean
@@ -159,6 +162,15 @@ entity editor_annotations {
   created_at : timestamp
 }
 
+entity board_votes {
+  *vote_id : int <<PK>>
+  --
+  series_id : int <<FK>>
+  board_member_id : int <<FK>>
+  vote : enum
+  created_at : timestamp
+}
+
 roles ||--o{ users : has
 users ||--o{ system_logs : triggers
 
@@ -173,9 +185,11 @@ users ||--o{ reviews : writes
 users ||--o{ notifications : receives
 users ||--o{ series_rankings : evaluates
 users ||--o{ editor_annotations : annotates
+users ||--o{ board_votes : votes
 
 series ||--o{ chapters : contains
 series ||--o{ series_rankings : ranked
+series ||--o{ board_votes : receives_votes
 
 chapters ||--o{ pages : contains
 chapters ||--o{ submissions : submitted

@@ -104,8 +104,9 @@ Hệ thống áp dụng cơ chế quản lý vòng đời chặt chẽ đối v�
 
 ### 1.5.2 Vận hành phân quyền nhiệm vụ (Tasks & Notifications Visibility)
 - **Giai đoạn Bản nháp (Drafting)**:
-  - Đây là không gian lập kế hoạch riêng tư của Mangaka. Mangaka có thể tạo các phân cảnh, trang truyện và giao việc (Tasks) thử nghiệm cho Trợ lý.
+  - Đây là không gian lập kế hoạch chuyên tư của Mangaka. Mangaka có thể tạo các phân cảnh, trang truyện và giao việc (Tasks) thử nghiệm cho Trợ lý.
   - Các công việc này tạm thời **ẩn hoàn toàn** đối với Trợ lý (Assistant không nhìn thấy trên dashboard công việc) và hệ thống **không gửi thông báo** giao việc, tránh gây nhiễu thông tin.
+  - Trợ lý **không được phép nộp bản thảo/bản vẽ** cho các task thuộc chapter nháp hoặc thuộc bộ truyện chưa phê duyệt (đang ở trạng thái `planning`).
 - **Giai đoạn Đang vẽ (Drawing)**:
   - Khi Mangaka chỉnh sửa chương và nâng trạng thái từ *Bản nháp (Drafting)* sang *Đang vẽ (Drawing)*, hệ thống sẽ chính thức **kích hoạt hiển thị công khai** tất cả các công việc đã phân công cho Trợ lý.
   - Đồng thời, một loạt **thông báo tự động sẽ gửi đến các Trợ lý** tương ứng để báo hiệu bắt đầu làm việc.
@@ -113,6 +114,8 @@ Hệ thống áp dụng cơ chế quản lý vòng đời chặt chẽ đối v�
   - Khi toàn bộ trang vẽ hoàn thành, Mangaka nộp bản thảo và chuyển trạng thái chương sang *Đang chờ duyệt (Reviewing)* để gửi tới Biên tập viên (Tantou Editor) đánh giá chất lượng.
 - **Giai đoạn Đã duyệt (Approved) & Đã xuất bản (Published)**:
   - Biên tập viên phê duyệt đưa chương truyện vào trạng thái sẵn sàng phát hành hoặc xuất bản thương mại. Các trạng thái này là cuối cùng và bị khóa chỉnh sửa.
+- **Ràng buộc khóa trạng thái hoàn thành (Completed Lock):**
+  - Một khi công việc (Task) đã hoàn thành và được Mangaka duyệt (`status = 'completed'`), Trợ lý **bị chặn quyền thay đổi** trạng thái ngược trở lại `pending` hoặc `in_progress` để tránh làm sai lệch dữ liệu tiến độ và doanh thu thù lao.
 
 ---
 
@@ -142,9 +145,11 @@ Hệ thống áp dụng cơ chế quản lý và kiểm duyệt vòng đời vĩ
 Giao diện quản lý của Hội đồng Biên tập được phân tách thành 2 bảng giám sát độc lập để tối ưu hóa vận hành:
 - **Bảng 1: Đề xuất bộ truyện mới (Chờ phê duyệt):**
   - Chỉ hiển thị các bộ truyện đã nộp ở trạng thái `planning`.
-  - Hội đồng Biên tập có quyền đưa ra 2 quyết định:
-    - **Đồng ý phê duyệt:** Đổi trạng thái sang **Đang triển khai (Ongoing)**, thiết lập Lịch phát hành (Hàng tuần/Hàng tháng) và gán Biên tập viên chuyên trách (Tantou Editor) phụ trách bộ truyện.
-    - **Từ chối đề xuất:** Chuyển trạng thái sang **Đã hủy (Canceled)** để khép lại dự án.
+  - **Cơ chế Bỏ phiếu Xét duyệt Đề xuất:** 
+    - Mỗi thành viên Hội đồng Biên tập (Editorial Board) khi đăng nhập sẽ thực hiện bỏ phiếu **Đồng ý (Approve)** hoặc **Từ chối (Reject)** cho từng đề xuất mới.
+    - Tỉ lệ tán thành được tính toán tự động và liên tục dựa trên số lượng phiếu đồng ý chia cho tổng số thành viên hội đồng có trạng thái hoạt động (`active`) trong hệ thống.
+    - **Chốt chặn Ngưỡng phê duyệt (>= 50%):** Hệ thống chỉ cho phép mở khóa tùy chọn "Thông qua (Phê duyệt)" để chuyển trạng thái bộ truyện sang **Đang triển khai (Ongoing)** khi đề xuất đạt tỉ lệ tán thành từ **50% trở lên** (tương đương tối thiểu 3/5 phiếu nếu hội đồng có 5 người). Các trường hợp dưới 50% chỉ được quyền bỏ phiếu tiếp hoặc chọn quyết định **Từ chối (Hủy dự án - Canceled)**.
+    - Khi thông qua đề xuất hợp lệ, hội đồng tiến hành thiết lập Lịch phát hành (Hàng tuần/Hàng tháng) và bắt buộc gán Biên tập viên chuyên trách (Tantou Editor) phụ trách bộ truyện.
 - **Bảng 2: Bộ truyện đang hoạt động (Giám sát & Quản lý):**
   - Hiển thị các bộ truyện đang trong vòng đời sản xuất gồm **Đang triển khai (Ongoing)** và **Tạm ngưng (Suspended)**.
   - Hội đồng Biên tập có quyền cập nhật linh hoạt các trạng thái và thay đổi/gán lại Biên tập viên phụ trách bộ truyện (Tantou Editor).
@@ -178,4 +183,8 @@ Giao diện quản lý của Hội đồng Biên tập được phân tách thà
 - **Giao diện phản hồi của Tác giả (Mangaka Feedback Screen):**
   - Tại màn hình chi tiết trang truyện của Mangaka (`page_detail`), các vùng lỗi được viền khung đứt nét màu đỏ nổi bật.
   - Khi di chuột vào vùng khoanh đỏ, hệ thống kích hoạt Bootstrap Popover hiển thị chi tiết lỗi cần sửa và tên Editor đã đánh dấu. Đồng thời cột bên phải liệt kê danh sách tổng hợp lỗi để tác giả dễ dàng theo dõi sửa chữa.
-- **Ràng buộc Khóa an toàn:** Khi chương truyện đã được phê duyệt (`approved`) hoặc xuất bản (`published`), hệ thống sẽ khóa cứng các API lưu/xóa ghi chú lỗi để tránh làm thay đổi lịch sử duyệt bản thảo.
+- **Ràng buộc Khóa an toàn và Phân quyền:**
+  - Khi chương truyện đã được phê duyệt (`approved`) hoặc xuất bản (`published`), hệ thống sẽ khóa cứng các API lưu/xóa ghi chú lỗi để tránh làm thay đổi lịch sử duyệt bản thảo.
+  - Chỉ những bản thảo ở trạng thái **Chờ duyệt (Pending)** mới được phép đánh giá, chặn hành vi đánh giá lại các bản thảo cũ.
+  - API lấy danh sách ghi chú lỗi (`get_annotations`) được xác thực phân quyền nghiêm ngặt ở backend, chỉ cho phép Admin, Board, Editor phụ trách, Mangaka tác giả và Assistant liên đới truy xuất.
+  - Tọa độ ghi chú lỗi gửi lên bắt buộc phải hợp lệ trong khung ảo $800 \times 1000$ pixels.

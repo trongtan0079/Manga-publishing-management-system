@@ -154,7 +154,7 @@
 * [x] Sequence Diagram
 * [x] System Architecture Diagram (Sơ đồ kiến trúc tầng MVC & Database)
 * [x] Database Documentation
-* [ ] User Manual (Tài liệu hướng dẫn)
+* [x] User Manual (Tài liệu hướng dẫn)
 
 ---
 
@@ -188,7 +188,7 @@
 3. [x] Sửa các bug phát sinh trong quá trình kiểm thử.
 4. [x] Rà soát và hoàn thiện giao diện Dashboard của tất cả các Role.
 5. [x] Hoàn thiện Role Permission (Đảm bảo an toàn phân quyền ở mọi endpoint).
-6. [ ] Chuẩn bị dữ liệu demo (Sample data) và tài liệu User Manual.
+6. [x] Chuẩn bị dữ liệu demo (Sample data) và tài liệu User Manual.
 
 **Kế Hoạch Tương Lai (Post-Demo):**
 - Checkout nhánh `feature/refactor-oop`.

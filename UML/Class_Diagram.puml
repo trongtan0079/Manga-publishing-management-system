@@ -8,46 +8,68 @@ class Role {
   +roleId : int
   +roleName : string
   +description : string
+  +getRolesWithUserCount() : array
 }
 
 class User {
   +userId : int
+  +roleId : int
   +username : string
   +fullName : string
   +email : string
   +passwordHash : string
   +status : string
+  +getRoleStatistics() : array
 }
 
 class Series {
   +seriesId : int
+  +mangakaId : int
+  +editorId : int
   +title : string
   +description : string
   +status : string
   +publishType : string
   +coverImage : string
-  +editorId : int
+  +proposalFile : string
+  +dossierNotes : string
+  +getSeriesForPublishing() : array
+  +getSeriesByEditorId(editorId: int) : array
+  +getDossiersByEditorId(editorId: int) : array
+  +countActiveSeries() : int
 }
 
 class Chapter {
   +chapterId : int
+  +seriesId : int
   +chapterNumber : int
   +title : string
   +status : string
   +dueDate : datetime
   +publishedAt : datetime
   +isFinal : tinyint
+  +hasFinalChapter(seriesId: int) : bool
+  +countUnfinishedChapters(seriesId: int) : int
+  +hasFinalApprovedChapter(seriesId: int) : bool
+  +countByMangakaId(mangakaId: int) : int
+  +getUpcomingDeadlinesByEditor(editorId: int) : array
 }
 
 class Page {
   +pageId : int
+  +chapterId : int
   +pageNumber : int
   +imageUrl : string
   +status : string
+  +findByChapterIdWithAnnotationCount(chapterId: int) : array
+  +countByMangakaId(mangakaId: int) : int
+  +getPageNumbersByChapterId(chapterId: int) : array
+  +getOtherPageNumbers(chapterId: int, pageId: int) : array
 }
 
 class PageRegion {
   +regionId : int
+  +pageId : int
   +regionType : string
   +x : int
   +y : int
@@ -58,6 +80,10 @@ class PageRegion {
 
 class Task {
   +taskId : int
+  +pageId : int
+  +pageRegionId : int
+  +mangakaId : int
+  +assistantId : int
   +title : string
   +taskType : string
   +description : string
@@ -65,25 +91,40 @@ class Task {
   +priority : string
   +status : string
   +dueDate : datetime
+  +getStatusStatistics() : array
+  +countByPageAndAssistant(pageId: int, assistantId: int) : int
+  +getMonthlyIncomeStats(assistantId: int) : array
 }
 
 class Submission {
   +submissionId : int
+  +userId : int
+  +taskId : int
+  +chapterId : int
   +fileUrl : string
   +notes : string
   +status : string
   +submittedAt : datetime
+  +getStatusStatistics() : array
+  +countByMangakaId(mangakaId: int) : int
+  +countPendingByMangakaId(mangakaId: int) : int
+  +countPendingChapterSubmissionsByEditor(editorId: int) : int
 }
 
 class Review {
   +reviewId : int
+  +submissionId : int
+  +reviewerId : int
   +comments : string
   +rating : int
   +createdAt : datetime
+  +countReviewsByEditor(editorId: int, status: string) : int
 }
 
 class SeriesRanking {
   +rankingId : int
+  +seriesId : int
+  +boardMemberId : int
   +rankPosition : int
   +score : decimal
   +periodStartDate : date
@@ -91,6 +132,8 @@ class SeriesRanking {
 
 class Notification {
   +notificationId : int
+  +userId : int
+  +relatedId : int
   +type : string
   +message : string
   +isRead : boolean
@@ -98,6 +141,7 @@ class Notification {
 
 class SystemLog {
   +logId : int
+  +userId : int
   +action : string
   +details : string
   +ipAddress : string
@@ -112,6 +156,14 @@ class EditorAnnotation {
   +width : int
   +height : int
   +comments : string
+  +createdAt : datetime
+}
+
+class BoardVote {
+  +voteId : int
+  +seriesId : int
+  +boardMemberId : int
+  +vote : string
   +createdAt : datetime
 }
 
@@ -142,8 +194,10 @@ Submission "1" -- "*" Review : receives
 
 User "1" -- "*" Review : writes
 User "1" -- "*" EditorAnnotation : annotates
+User "1" -- "*" BoardVote : votes
 
 Series "1" -- "*" SeriesRanking : ranked
+Series "1" -- "*" BoardVote : receives_votes
 
 User "1" -- "*" SeriesRanking : evaluates
 

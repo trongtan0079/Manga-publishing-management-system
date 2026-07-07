@@ -12,9 +12,11 @@ start
 |Editorial Board|
 :Xem thông tin Series;
 :Đánh giá ý tưởng Series;
-:Bỏ phiếu xét duyệt Series;
+:Thành viên Hội đồng bỏ phiếu (Đồng ý/Từ chối);
 
-if (Series được phê duyệt?) then (Có)
+if (Tỷ lệ tán thành >= 50%?) then (Có)
+
+:Quyết định phê duyệt, chọn lịch phát hành & gán Editor;
 
 |Mangaka|
 :Tạo Chapter mới;

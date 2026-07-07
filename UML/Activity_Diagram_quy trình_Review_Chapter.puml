@@ -10,7 +10,12 @@ start
 
 partition Mangaka {
   :Hoàn thành Chapter;
-  :Nộp bản thảo Chapter (Reviewing);
+  if (Series đã được phê duyệt (Ongoing)?) then (Có)
+    :Nộp bản thảo Chapter (Reviewing);
+  else (Không)
+    :Hệ thống chặn nộp bản thảo\n[Yêu cầu phê duyệt bộ truyện trước];
+    detach
+  endif
 }
 
 partition TantouEditor {
