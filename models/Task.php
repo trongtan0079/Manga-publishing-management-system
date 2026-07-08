@@ -134,6 +134,29 @@ class Task extends Model {
         return $result;
     }
 
+    public function countByAssistantIdWithGating($assistantId, $status = null) {
+        $sql = "SELECT COUNT(t.task_id) as total 
+                FROM {$this->table} t
+                JOIN pages p ON t.page_id = p.page_id
+                JOIN chapters c ON p.chapter_id = c.chapter_id
+                JOIN series s ON c.series_id = s.series_id
+                WHERE t.assistant_id = :assistant_id 
+                  AND c.status != 'drafting' 
+                  AND s.status != 'planning' 
+                  AND p.status != 'drafting'";
+        if ($status !== null) {
+            $sql .= " AND t.status = :status";
+        }
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':assistant_id', $assistantId);
+        if ($status !== null) {
+            $stmt->bindParam(':status', $status);
+        }
+        $stmt->execute();
+        $result = $stmt->fetch();
+        return $result ? (int)$result['total'] : 0;
+    }
+
     public function countByPageAndAssistant($pageId, $assistantId) {
         $sql = "SELECT COUNT(*) FROM tasks WHERE page_id = :page_id AND assistant_id = :assistant_id";
         $stmt = $this->conn->prepare($sql);

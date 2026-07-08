@@ -97,7 +97,7 @@ class TaskController extends BaseController
             
             // Hỗ trợ lọc trạng thái theo query parameter
             $status = $_GET['status'] ?? null;
-            if ($status && in_array($status, ['pending', 'in_progress', 'submitted', 'completed'])) {
+            if ($status && in_array($status, ['pending', 'in_progress', 'submitted', 'rejected', 'completed'])) {
                 $tasks = array_filter($tasks, function($t) use ($status) {
                     return $t['status'] === $status;
                 });
@@ -115,7 +115,7 @@ class TaskController extends BaseController
         
         // Hỗ trợ lọc trạng thái theo query parameter
         $status = $_GET['status'] ?? null;
-        if ($status && in_array($status, ['pending', 'in_progress', 'completed'])) {
+        if ($status && in_array($status, ['pending', 'in_progress', 'submitted', 'rejected', 'completed'])) {
             $tasks = array_filter($tasks, function($t) use ($status) {
                 return $t['status'] === $status;
             });

@@ -327,15 +327,20 @@ class ReviewController extends BaseController
             // Nếu là bản thảo chương truyện (Chapter)
             if ($submission['chapter_id']) {
                 require_once __DIR__ . '/../models/Chapter.php';
+                require_once __DIR__ . '/../models/Page.php';
                 $chapterModel = new \Chapter();
+                $pageModel = new \Page();
                 $chapDetail = $chapterModel->findById($submission['chapter_id']);
                 
                 if ($status === 'approved') {
+                    $newChapterStatus = 'approved';
                     if ($chapDetail && $chapDetail['status'] === 'reviewing_draft') {
-                        $chapterModel->update($submission['chapter_id'], ['status' => 'drawing']);
-                    } else {
-                        $chapterModel->update($submission['chapter_id'], ['status' => 'approved']);
+                        $newChapterStatus = 'drawing';
+                    }
+                    $chapterModel->update($submission['chapter_id'], ['status' => $newChapterStatus]);
+                    $pageModel->updateStatusByChapterId($submission['chapter_id'], $newChapterStatus);
 
+                    if ($newChapterStatus === 'approved') {
                         // Kiểm tra xem chapter có phải là chương cuối không để thông báo cho Board
                         if ($chapDetail && !empty($chapDetail['is_final'])) {
                             // Lấy thông tin bộ truyện
@@ -363,9 +368,7 @@ class ReviewController extends BaseController
                     }
 
                     // Dọn dẹp phiên bản vẽ cũ (old_image_url) và ghi chú lỗi của tất cả các trang thuộc chapter khi được duyệt
-                    require_once __DIR__ . '/../models/Page.php';
                     require_once __DIR__ . '/../models/EditorAnnotation.php';
-                    $pageModel = new \Page();
                     $editorAnnotationModel = new \EditorAnnotation();
                     $pagesInChapter = $pageModel->findByChapterId($submission['chapter_id']);
                     if (!empty($pagesInChapter)) {
@@ -383,11 +386,12 @@ class ReviewController extends BaseController
                     }
                 } else {
                     // Nếu bị từ chối (rejected), tự động chuyển trạng thái Chapter
+                    $newChapterStatus = 'drawing';
                     if ($chapDetail && $chapDetail['status'] === 'reviewing_draft') {
-                        $chapterModel->update($submission['chapter_id'], ['status' => 'drafting']);
-                    } else {
-                        $chapterModel->update($submission['chapter_id'], ['status' => 'drawing']);
+                        $newChapterStatus = 'drafting';
                     }
+                    $chapterModel->update($submission['chapter_id'], ['status' => $newChapterStatus]);
+                    $pageModel->updateStatusByChapterId($submission['chapter_id'], $newChapterStatus);
                 }
             }
 

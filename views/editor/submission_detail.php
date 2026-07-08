@@ -433,12 +433,12 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                         <div id="annoImageWrapper" class="position-relative d-inline-block text-start shadow" style="border: 1px solid #cbd5e1; user-select: none;">
                             <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 60vh; pointer-events: none;">
                             <!-- Overlay vẽ -->
-                            <div id="annoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: crosshair;"></div>
+                            <div id="annoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: default;"></div>
                         </div>
                     </div>
                     <!-- Form và danh sách ghi chú bên phải -->
                     <div class="col-lg-4 border-start d-flex flex-column" style="max-height: 70vh; background-color: #f8fafc;">
-                        <?php if ($role === 'editor'): ?>
+                        <?php if ($role === 'editor' && $submission['status'] === 'pending'): ?>
                             <div class="p-4 border-bottom bg-light">
                                 <h6 class="fw-bold text-dark mb-2"><i class="fas fa-plus-circle me-1 text-danger"></i>Thêm ghi chú lỗi mới</h6>
                                 <p class="text-muted" style="font-size: 0.78rem; line-height: 1.4;">Nhấn giữ và kéo chuột vẽ khung đỏ trên ảnh bên trái, sau đó nhập nội dung bên dưới.</p>
@@ -493,12 +493,15 @@ document.addEventListener("DOMContentLoaded", function() {
     const STD_WIDTH = 800;
     const STD_HEIGHT = 1000;
     
-    const isEditor = <?= json_encode($role === 'editor') ?>;
+    const isEditor = <?= json_encode($role === 'editor' && $submission['status'] === 'pending') ?>;
 
     const modal = new bootstrap.Modal(document.getElementById('annotateModal'));
     const modalPageNum = document.getElementById('modal-page-num');
     const annoImage = document.getElementById('annoImage');
     const overlayContainer = document.getElementById('annoOverlayContainer');
+    if (isEditor && overlayContainer) {
+        overlayContainer.style.cursor = 'crosshair';
+    }
     const annoForm = document.getElementById('annoForm');
     const noSelectionWarning = document.getElementById('no-selection-warning');
     const annoList = document.getElementById('anno-list');

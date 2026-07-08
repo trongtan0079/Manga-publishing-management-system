@@ -148,9 +148,9 @@ class DashboardController extends BaseController {
         $userId = $_SESSION['user_id'];
         
         $taskModel = new Task();
-        $assignedTasks = $taskModel->countByCondition(['assistant_id' => $userId]);
-        $inProgressTasks = $taskModel->countByCondition(['assistant_id' => $userId, 'status' => 'in_progress']);
-        $completedTasks = $taskModel->countByCondition(['assistant_id' => $userId, 'status' => 'completed']);
+        $assignedTasks = $taskModel->countByAssistantIdWithGating($userId);
+        $inProgressTasks = $taskModel->countByAssistantIdWithGating($userId, 'in_progress');
+        $completedTasks = $taskModel->countByAssistantIdWithGating($userId, 'completed');
         
         $activeTasks = $taskModel->findActiveByAssistantId($userId);
         
