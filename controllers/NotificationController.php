@@ -103,7 +103,18 @@ class NotificationController extends BaseController
                 if ($role === 'assistant') {
                     $redirectUrl = BASE_PATH . '/index.php?controller=task&action=index';
                 } elseif ($role === 'mangaka') {
-                    $redirectUrl = BASE_PATH . '/index.php?controller=task&action=index';
+                    if ($relatedId > 0) {
+                        require_once __DIR__ . '/../models/Task.php';
+                        $taskModel = new \Task();
+                        $task = $taskModel->findById($relatedId);
+                        if ($task) {
+                            $redirectUrl = BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id'];
+                        } else {
+                            $redirectUrl = BASE_PATH . '/index.php?controller=task&action=index';
+                        }
+                    } else {
+                        $redirectUrl = BASE_PATH . '/index.php?controller=task&action=index';
+                    }
                 } elseif ($role === 'editor') {
                     $redirectUrl = BASE_PATH . '/index.php?controller=dashboard&action=progress';
                 }
