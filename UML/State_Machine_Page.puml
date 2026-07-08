@@ -24,7 +24,15 @@ state published {
 }
 
 drafting --> drawing : Mangaka tạo và giao Task trên phân vùng
-drawing --> approved : Tất cả phân vùng (PageRegions) chuyển sang 'completed'
+drafting --> reviewing_draft : Chapter chứa trang chuyển sang reviewing_draft
+reviewing_draft --> drafting : Chapter bị từ chối duyệt nháp
+reviewing_draft --> drawing : Chapter được duyệt nháp
+drawing --> reviewing_final : Chapter chứa trang chuyển sang reviewing_final
+reviewing_final --> drawing : Chapter bị từ chối duyệt hoàn chỉnh
+
+drawing --> approved : Tất cả phân vùng (PageRegions) chuyển sang 'completed'\nvà tất cả Task đã hoàn thành
+reviewing_final --> approved : Chapter được duyệt hoàn chỉnh
+
 approved --> published : Chapter chứa trang này được duyệt xuất bản
 
 published --> [*]

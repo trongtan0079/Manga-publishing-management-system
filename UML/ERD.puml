@@ -1,6 +1,11 @@
 @startuml
 title ERD - Manga Creation Workflow and Publishing Management System
 
+skinparam linetype ortho
+skinparam ranksep 60
+skinparam nodesep 50
+skinparam titleFontSize 24
+
 entity roles {
   *role_id : int <<PK>>
   --
@@ -71,6 +76,7 @@ entity pages {
   chapter_id : int <<FK>>
   page_number : int
   image_url : varchar
+  old_image_url : varchar <<NULL>>
   status : enum
   created_at : timestamp
   updated_at : timestamp

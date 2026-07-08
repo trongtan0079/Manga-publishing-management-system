@@ -5,7 +5,7 @@ skinparam backgroundColor white
 skinparam shadowing false
 skinparam linetype ortho
 
-[*] --> pending : Mangaka tạo Task mới
+[*] --> pending : Mangaka tạo Task mới [TaskController::store()]
 
 state pending {
     description : Công việc đang chờ Trợ lý tiếp nhận
@@ -15,15 +15,26 @@ state in_progress {
     description : Trợ lý đang thực hiện vẽ phác thảo / đi nét / lên màu...
 }
 
-state completed {
-    description : Công việc hoàn thành xuất sắc & được Mangaka duyệt
+state submitted {
+    description : Trợ lý đã tải lên bản thảo và gửi nộp [SubmissionController::store()]
 }
 
-pending --> in_progress : Assistant xem Task / Bắt đầu vẽ
+state rejected {
+    description : Bản thảo bị Mangaka từ chối, yêu cầu chỉnh sửa [ReviewController::store()]
+}
 
-in_progress --> pending : Mangaka từ chối bản thảo (Rejected)\n[Yêu cầu sửa đổi / Làm lại]
+state completed {
+    description : Công việc hoàn thành xuất sắc & được Mangaka phê duyệt [ReviewController::store()]
+}
 
-in_progress --> completed : Assistant nộp Submission -> Mangaka duyệt (Approved)
+pending --> in_progress : Assistant tiếp nhận / Bắt đầu làm [TaskController::updateStatus()]
+in_progress --> submitted : Assistant nộp bản vẽ [SubmissionController::store()]
+
+submitted --> completed : Mangaka phê duyệt bản vẽ [ReviewController::store() status='approved']
+submitted --> rejected : Mangaka từ chối bản vẽ [ReviewController::store() status='rejected']
+
+rejected --> in_progress : Assistant bắt đầu sửa đổi / vẽ lại [TaskController::updateStatus()]
+rejected --> pending : Mangaka giao lại task hoặc đổi người làm [TaskController::update()]
 
 completed --> [*]
 

@@ -155,6 +155,7 @@
 * [x] System Architecture Diagram (Sơ đồ kiến trúc tầng MVC & Database)
 * [x] Database Documentation
 * [x] User Manual (Tài liệu hướng dẫn)
+* [x] Technology Stack (Tài liệu công nghệ sử dụng trong code)
 
 ---
 

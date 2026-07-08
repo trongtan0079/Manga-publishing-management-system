@@ -60,6 +60,7 @@ class Page {
   +chapterId : int
   +pageNumber : int
   +imageUrl : string
+  +oldImageUrl : string
   +status : string
   +findByChapterIdWithAnnotationCount(chapterId: int) : array
   +countByMangakaId(mangakaId: int) : int
@@ -157,6 +158,7 @@ class EditorAnnotation {
   +height : int
   +comments : string
   +createdAt : datetime
+  +deleteByPageId(pageId: int) : bool
 }
 
 class BoardVote {

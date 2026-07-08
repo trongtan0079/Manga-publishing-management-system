@@ -27,7 +27,7 @@ Tantou Editor
 - Theo dõi tiến độ hoàn thiện của studio theo thời gian thực để đảm bảo kịp deadline giao bản in
 
 Editorial Board
-- Bỏ phiếu thông qua series mới và quyết định lịch xuất bản (hàng tuần hoặc hàng tháng)
+- Bỏ phiếu phê duyệt đề xuất Series mới và quyết định chu kỳ phát hành của Series (Hàng tuần hoặc Hàng tháng). Chu kỳ này là kế hoạch phát hành dự kiến (kỳ vọng) của bộ truyện, được sử dụng để lập kế hoạch sản xuất, giao deadline và theo dõi tiến độ; không phải là thời điểm phát hành bắt buộc của từng Chapter.
 - Ra quyết định huỷ series đang xếp hạng thấp hoặc thay đổi hình thức xuất bản dựa trên kết quả thực tế
 - Nhập dữ liệu bình chọn từ độc giả vào hệ thống sau mỗi kỳ phát hành
 - Xem bảng xếp hạng các series được tổng hợp sau mỗi lần nhập dữ liệu
@@ -82,10 +82,10 @@ Tantou Editor là biên tập viên trực tiếp theo dõi quá trình phát tr
 - Theo dõi các thông báo liên quan đến quá trình kiểm duyệt
 
 1.4.5 Editorial Board  
-Editorial Board là hội đồng biên tập chịu trách nhiệm đánh giá hiệu quả hoạt động của các Series Manga dựa trên dữ liệu bình chọn và kết quả phát hành. Hội đồng đưa ra các quyết định liên quan đến việc tiếp tục xuất bản, thay đổi lịch phát hành hoặc ngừng phát hành Series.
+Editorial Board là hội đồng biên tập chịu trách nhiệm đánh giá hiệu quả hoạt động của các Series Manga dựa trên dữ liệu bình chọn và kết quả phát hành. Hội đồng đưa ra các quyết định liên quan đến việc tiếp tục xuất bản, thay đổi chu kỳ phát hành hoặc ngừng phát hành Series.
 
 - Đánh giá hồ sơ giới thiệu Series mới
-- Bỏ phiếu xét duyệt các Series trước khi phát hành và gán Biên tập viên chuyên trách (Tantou Editor) cho bộ truyện
+- Bỏ phiếu phê duyệt đề xuất Series mới, quyết định chu kỳ phát hành (Hàng tuần hoặc Hàng tháng) và gán Biên tập viên chuyên trách (Tantou Editor) phụ trách bộ truyện
 - Nhập dữ liệu bình chọn của độc giả
 - Theo dõi bảng xếp hạng các Series
 - Xem báo cáo thống kê kết quả phát hành

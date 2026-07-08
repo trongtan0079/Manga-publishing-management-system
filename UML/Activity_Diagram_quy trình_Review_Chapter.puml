@@ -11,7 +11,7 @@ start
 partition Mangaka {
   :Hoàn thành Chapter;
   if (Series đã được phê duyệt (Ongoing)?) then (Có)
-    :Nộp bản thảo Chapter (Reviewing);
+    :Nộp bản thảo Chapter\n(reviewing_draft hoặc reviewing_final);
   else (Không)
     :Hệ thống chặn nộp bản thảo\n[Yêu cầu phê duyệt bộ truyện trước];
     detach
@@ -26,14 +26,18 @@ partition TantouEditor {
 
 if (Phát hiện lỗi?) then (Có)
   partition TantouEditor {
-    :Ghi chú trực tiếp trên trang vẽ;
+    :Ghi chú trực tiếp trên trang vẽ (Annotations);
     :Từ chối bản thảo (Rejected);
-    :Chương tự động chuyển về trạng thái Drawing;
+    if (Là Bản thảo nháp (Storyboard)?) then (Có)
+      :Chương tự động quay về trạng thái phác thảo (drafting);
+    else (Không (Bản thảo hoàn thiện))
+      :Chương tự động quay về trạng thái Đang vẽ (drawing);
+    endif
   }
   partition Mangaka {
     :Nhận phản hồi yêu cầu sửa lỗi;
     :Chỉnh sửa nội dung / phân công trợ lý;
-    :Nộp lại bản thảo Chapter (Reviewing);
+    :Nộp lại bản thảo Chapter\n(reviewing_draft hoặc reviewing_final);
   }
   partition TantouEditor {
     :Review lại Chapter;
@@ -46,14 +50,26 @@ partition TantouEditor {
 
 if (Chương được phê duyệt?) then (Có)
   partition TantouEditor {
-    :Phê duyệt bản thảo Chapter (Approved);
-    :Cập nhật trạng thái Chapter;
-    :Phát hành chương truyện ra công chúng (Published);
+    if (Là Bản thảo nháp (Storyboard)?) then (Có)
+      :Phê duyệt kịch bản phân cảnh;
+      :Chương chuyển sang trạng thái Đang vẽ (drawing);
+      :Mở khóa cho Mangaka và trợ lý tiến hành vẽ chi tiết;
+    else (Không (Bản thảo hoàn thiện))
+      :Phê duyệt bản vẽ Chapter hoàn thiện (Approved);
+      :Chương chuyển sang trạng thái Đã duyệt (approved);
+      |Editorial Board|
+      :Xuất bản chương truyện ra công chúng (Published);
+    endif
   }
   stop
 else (Không)
   partition TantouEditor {
-    :Từ chối hẳn hoặc gửi phản hồi chỉnh sửa bổ sung;
+    :Từ chối duyệt và gửi phản hồi chỉnh sửa bổ sung;
+    if (Là Bản thảo nháp (Storyboard)?) then (Có)
+      :Chương tự động quay về trạng thái phác thảo (drafting);
+    else (Không (Bản thảo hoàn thiện))
+      :Chương tự động quay về trạng thái Đang vẽ (drawing);
+    endif
   }
   stop
 endif

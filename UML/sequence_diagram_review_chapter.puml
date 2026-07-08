@@ -67,13 +67,13 @@ alt Chapter đạt yêu cầu
 
 else Cần chỉnh sửa
 
-    Editor -> Web : Gửi nhận xét
+    Editor -> Web : Yêu cầu chỉnh sửa (Từ chối)
     activate Web
 
-    Web -> ReviewManager : addComment()
+    Web -> ReviewManager : rejectChapter()
     activate ReviewManager
 
-    ReviewManager -> DB : Lưu nhận xét
+    ReviewManager -> DB : Lưu nhận xét & Cập nhật trạng thái
     activate DB
     DB --> ReviewManager : Thành công
     deactivate DB

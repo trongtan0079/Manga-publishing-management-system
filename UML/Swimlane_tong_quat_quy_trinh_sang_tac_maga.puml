@@ -1,6 +1,4 @@
 @startuml
-scale 3
-skinparam dpi 300
 title Swimlane Diagram Tổng Quát Quy Trình Sáng Tác Và Xuất Bản Manga
 
 |Mangaka|
@@ -16,63 +14,78 @@ start
 
 if (Tỷ lệ tán thành >= 50%?) then (Có)
 
-:Quyết định phê duyệt, chọn lịch phát hành & gán Editor;
+:Quyết định phê duyệt, chọn lịch phát hành & gán Editor (Ongoing);
 
 |Mangaka|
-:Tạo Chapter mới;
-:Upload các trang Manga;
-:Phân vùng công việc;
-:Phân công Task cho Assistant;
+:Tạo Chapter mới (Trạng thái: drafting);
+:Upload các trang phác thảo (sketch);
+:Nộp bản thảo phác thảo kịch bản (Draft Storyboard);
 
-|Assistant|
-:Xem danh sách Task;
-:Tải tài nguyên làm việc;
-:Thực hiện công việc được giao;
-:Nộp Submission cho Task;
+|Tantou Editor|
+:Nhận Bản thảo phác thảo kịch bản;
+:Đánh giá và phản hồi Storyboard;
 
-|Mangaka|
-:Kiểm duyệt Submission của Assistant;
-
-while (Submission đạt yêu cầu?) is (Không)
-
-:Gửi yêu cầu chỉnh sửa;
-
-|Assistant|
-:Chỉnh sửa công việc;
-:Nộp lại Submission cho Task;
-
-|Mangaka|
-:Kiểm duyệt lại Submission;
-
+while (Storyboard đạt yêu cầu?) is (Không)
+  :Từ chối kịch bản (Rejected);
+  |Mangaka|
+  :Nhận phản hồi từ Editor;
+  :Chương quay lại trạng thái drafting;
+  :Chỉnh sửa kịch bản vẽ phác thảo;
+  :Nộp lại bản thảo phác thảo;
+  |Tantou Editor|
+  :Đánh giá lại Storyboard;
 endwhile (Có)
 
-:Chấp nhận kết quả vẽ;
-:Hoàn tất các Task của Chapter;
-:Nộp bản thảo Chapter hoàn chỉnh (Trạng thái: Reviewing);
-
-|Tantou Editor|
-:Nhận bản thảo Chapter;
-:Review nội dung và hình ảnh;
-
-if (Bản thảo đạt yêu cầu?) then (Không)
-
-:Từ chối bản thảo (Rejected);
+:Phê duyệt Storyboard;
+:Chương chuyển sang trạng thái Đang vẽ (drawing);
 
 |Mangaka|
-:Nhận phản hồi từ Editor;
-:Chương tự động quay về trạng thái Drawing;
-:Chỉnh sửa nội dung / phân công lại trợ lý;
-:Nộp lại bản thảo Chapter (Trạng thái: Reviewing);
+:Vẽ phân vùng (PageRegions) trên trang truyện;
+:Tạo và giao Task công việc cho Assistant;
 
-else (Có)
+|Assistant|
+:Xem danh sách Task được giao;
+:Tải tài nguyên làm việc;
+:Thực hiện công việc (vẽ nền, tô bóng, sfx);
+:Nộp sản phẩm (Submission) cho Task;
+
+|Mangaka|
+:Kiểm duyệt bài nộp của Assistant;
+
+while (Sản phẩm đạt yêu cầu?) is (Không)
+  :Gửi yêu cầu chỉnh sửa;
+  |Assistant|
+  :Chỉnh sửa lại sản phẩm;
+  :Nộp lại Submission cho Task;
+  |Mangaka|
+  :Kiểm duyệt lại sản phẩm;
+endwhile (Có)
+
+:Chấp nhận kết quả vẽ và hoàn thành Task;
+:Hợp nhất các nét vẽ thành trang hoàn chỉnh;
+:Upload ảnh trang hoàn chỉnh;
+:Nộp bản thảo hoàn thiện (Manuscript) (Trạng thái: reviewing_final);
 
 |Tantou Editor|
-:Phê duyệt bản thảo Chapter (Approved);
-:Phát hành Manga ra công chúng (Published);
+:Nhận bản thảo hoàn thiện (Manuscript);
+:Đánh giá chất lượng và vẽ ghi chú lỗi (Annotations);
 
-endif
+while (Bản thảo đạt yêu cầu?) is (Không)
+  :Từ chối bản thảo;
+  |Mangaka|
+  :Nhận phản hồi lỗi từ Editor (Red annotations);
+  :Chương quay lại trạng thái Đang vẽ (drawing);
+  :Sửa lỗi trực tiếp hoặc giao thêm task cho trợ lý;
+  :Nộp lại bản thảo hoàn thiện (Manuscript);
+  |Tantou Editor|
+  :Đánh giá lại bản thảo;
+endwhile (Có)
+
+:Phê duyệt Bản thảo (Approved);
 
 |Editorial Board|
+:Xuất bản chương truyện ra công chúng (Published);
+
 :Nhập dữ liệu bình chọn từ độc giả sau mỗi kỳ phát hành;
 :Cập nhật bảng xếp hạng các Series;
 :Đánh giá hiệu quả hoạt động của Series;
