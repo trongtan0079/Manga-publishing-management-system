@@ -1,4 +1,11 @@
 <?php 
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện nhập dữ liệu bình chọn của độc giả và tự động xếp hạng (ranking_create.php)
  * Vai trò: Board (Hội đồng/Ban giám đốc)
@@ -100,16 +107,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                 <span class="text-slate-600"><i class="far fa-user me-1 text-muted"></i><?= htmlspecialchars($series['editor_name'] ?? 'Chưa gán') ?></span>
                                             </td>
                                             <td>
-                                                <?php
-                                                $badgeClass = 'bg-secondary';
-                                                $statusLabel = $series['status'];
-                                                switch ($series['status']) {
-                                                    case 'ongoing': $badgeClass = 'bg-primary'; $statusLabel = 'Đang phát hành'; break;
-                                                    case 'completed': $badgeClass = 'bg-success'; $statusLabel = 'Hoàn thành'; break;
-                                                    case 'suspended': $badgeClass = 'bg-warning text-dark'; $statusLabel = 'Tạm ngưng'; break;
-                                                }
-                                                ?>
-                                                <span class="badge <?= $badgeClass ?>" style="font-size: 0.72rem;"><?= htmlspecialchars($statusLabel) ?></span>
+                                                <?= $this->getSeriesStatusBadge($series) ?>
                                             </td>
                                             <td class="text-end pe-4">
                                                 <div class="input-group input-group-sm ms-auto" style="max-width: 160px;">

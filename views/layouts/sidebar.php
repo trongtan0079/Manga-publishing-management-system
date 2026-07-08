@@ -5,7 +5,7 @@
  * 
  * @var string $role Vai trò của người dùng hiện tại lấy từ session
  */
-$role = $_SESSION['role_name'] ?? '';
+$role = isset($_SESSION) ? ($_SESSION['role_name'] ?? '') : '';
 ?>
 <div class="sidebar-custom offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar" aria-labelledby="sidebarLabel">
     <div class="offcanvas-header border-bottom border-light border-opacity-25 d-lg-none">
@@ -140,10 +140,10 @@ $role = $_SESSION['role_name'] ?? '';
         <div class="mt-auto mt-4 px-3 pb-3 pt-2 w-100">
             <div class="border-top border-light border-opacity-25 pt-3">
                 <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=auth&action=profile" class="d-flex align-items-center text-decoration-none rounded-3 px-2 py-2 sidebar-profile-link <?= (isset($current_page) && $current_page == 'profile') ? 'active' : '' ?>">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'U') ?>&background=6366f1&color=fff&size=64&font-size=0.45&bold=true" 
+                    <img src="https://ui-avatars.com/api/?name=<?= urlencode(isset($_SESSION) ? ($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'U') : 'U') ?>&background=6366f1&color=fff&size=64&font-size=0.45&bold=true" 
                          alt="Avatar" class="rounded-circle me-2 flex-shrink-0" width="36" height="36">
                     <div style="min-width: 0;" class="flex-grow-1">
-                        <div class="text-white fw-semibold text-truncate" style="font-size: 0.85rem;"><?= htmlspecialchars($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User') ?></div>
+                        <div class="text-white fw-semibold text-truncate" style="font-size: 0.85rem;"><?= htmlspecialchars(isset($_SESSION) ? ($_SESSION['full_name'] ?? $_SESSION['username'] ?? 'User') : 'User') ?></div>
                         <div class="text-white-50 text-truncate" style="font-size: 0.7rem;"><?= ucfirst(htmlspecialchars($role)) ?></div>
                     </div>
                     <i class="fas fa-ellipsis-v text-white-50 ms-2 flex-shrink-0" style="font-size: 0.75rem;"></i>

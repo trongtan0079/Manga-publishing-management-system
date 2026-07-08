@@ -21,23 +21,45 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 $role = $_SESSION['role_name'] ?? '';
 
-// Nếu là Editor đang xem bản thảo Chapter, truy vấn các trang của Chapter đó để ghi chú lỗi
+// Nếu nộp bản thảo Chapter, truy vấn các trang của Chapter đó để ghi chú lỗi/xem lỗi
 $pages = [];
-if ($role === 'editor' && !empty($submission['chapter_id'])) {
+if (!empty($submission['chapter_id'])) {
     require_once __DIR__ . '/../../models/Page.php';
     $pageModel = new Page();
-    $pages = $pageModel->findByChapterId($submission['chapter_id']);
+    $pages = $pageModel->findByChapterIdWithAnnotationCount($submission['chapter_id']);
+}
+
+// Xác định URL quay lại thông minh (Danh sách bản thảo hay Danh sách chờ đánh giá)
+$backUrl = BASE_PATH . '/index.php?controller=submission&action=index';
+if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'controller=review') !== false) {
+    $backUrl = BASE_PATH . '/index.php?controller=review&action=index';
+} elseif ($role === 'editor') {
+    // Dự phòng nếu không có HTTP_REFERER (Editor mặc định quay lại danh sách review chờ xử lý)
+    $backUrl = BASE_PATH . '/index.php?controller=review&action=index';
 }
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
+        <?php if (!empty($submission['series_title'])): ?>
+            <div class="text-xs text-primary fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;">
+                <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($submission['series_id']) ?>" class="text-primary text-decoration-none hover-underline">
+                    <i class="fas fa-book me-1"></i><?= htmlspecialchars((string)$submission['series_title']) ?> 
+                </a>
+                <?php if (!empty($submission['chapter_number'])): ?>
+                    <span class="text-slate-300 mx-1.5">&middot;</span> Chapter <?= htmlspecialchars((string)$submission['chapter_number']) ?>
+                    <?php if (!empty($submission['chapter_title'])): ?>
+                        <span class="text-slate-400 fw-normal"> (<?= htmlspecialchars((string)$submission['chapter_title']) ?>)</span>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
         <h2 class="h3 mb-1">
             <?= $role === 'assistant' ? 'Chi tiết Sản phẩm đã nộp' : 'Chi tiết Bản thảo nộp' ?>
         </h2>
         <p class="text-muted text-xs mb-0">Xem thông tin tệp gửi lên, ghi chú, người thực hiện và trạng thái phê duyệt.</p>
     </div>
-    <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=index" class="btn btn-outline-secondary btn-sm shadow-sm">
+    <a href="<?= $backUrl ?>" class="btn btn-outline-secondary btn-sm shadow-sm">
         <i class="fas fa-arrow-left me-2"></i>Quay lại danh sách
     </a>
 </div>
@@ -123,23 +145,32 @@ if ($role === 'editor' && !empty($submission['chapter_id'])) {
                         <?php if (!empty($submission['task_id'])): ?>
                             <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
                         <?php else: ?>
-                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
+                            <?php if (isset($submission['chapter_status']) && ($submission['chapter_status'] === 'reviewing_final' || $submission['chapter_status'] === 'reviewing')): ?>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Bản vẽ hoàn thiện (Manuscript)</span>
+                            <?php elseif (isset($submission['chapter_status']) && $submission['chapter_status'] === 'reviewing_draft'): ?>
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Kịch bản thô (Storyboard)</span>
+                            <?php else: ?>
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Chương truyện</span>
+                            <?php endif; ?>
                         <?php endif; ?>
                     </div>
                     <div class="col-6 mb-3">
                         <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Trạng thái hiện tại</small>
                         <?php 
                         $statusClass = 'bg-secondary';
-                        $statusLabel = 'Pending';
+                        $statusLabel = 'Chờ duyệt';
                         if ($submission['status'] === 'reviewed') {
                             $statusClass = 'bg-info';
-                            $statusLabel = 'Reviewed';
+                            $statusLabel = 'Đang đánh giá';
                         } elseif ($submission['status'] === 'approved') {
                             $statusClass = 'bg-success';
-                            $statusLabel = 'Approved';
+                            $statusLabel = 'Đã duyệt';
                         } elseif ($submission['status'] === 'rejected') {
                             $statusClass = 'bg-danger';
-                            $statusLabel = 'Rejected';
+                            $statusLabel = 'Từ chối';
+                        } elseif ($submission['status'] === 'pending') {
+                            $statusClass = 'bg-warning text-dark';
+                            $statusLabel = 'Chờ duyệt';
                         }
                         ?>
                         <span class="badge <?= $statusClass ?> px-2 py-1"><?= $statusLabel ?></span>
@@ -148,7 +179,9 @@ if ($role === 'editor' && !empty($submission['chapter_id'])) {
 
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Series tác phẩm</small>
-                    <span class="text-dark fw-semibold"><?= htmlspecialchars((string)($submission['series_title'] ?? 'Không xác định')) ?></span>
+                    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($submission['series_id']) ?>" class="fw-bold text-primary text-decoration-none hover-underline">
+                        <i class="fas fa-book text-muted me-1"></i><?= htmlspecialchars((string)($submission['series_title'] ?? 'Không xác định')) ?>
+                    </a>
                 </div>
 
                 <div class="mb-3">
@@ -157,7 +190,9 @@ if ($role === 'editor' && !empty($submission['chapter_id'])) {
                         <?php if (!empty($submission['task_id'])): ?>
                             <i class="fas fa-tasks text-muted me-1"></i><?= htmlspecialchars((string)($submission['task_title'] ?? '')) ?>
                         <?php else: ?>
-                            <i class="fas fa-layer-group text-muted me-1"></i>Chương <?= htmlspecialchars((string)($submission['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($submission['chapter_title'] ?? 'Chưa đặt tên')) ?>
+                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($submission['chapter_id']) ?>" class="fw-bold text-primary text-decoration-none hover-underline">
+                                <i class="fas fa-layer-group me-1"></i>Chương <?= htmlspecialchars((string)($submission['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($submission['chapter_title'] ?? 'Chưa đặt tên')) ?>
+                            </a>
                         <?php endif; ?>
                     </span>
                 </div>
@@ -294,32 +329,72 @@ if ($role === 'editor' && !empty($submission['chapter_id'])) {
 </div>
 <?php endif; ?>
 
-<?php if (!empty($pages)): ?>
+<?php if (!empty($pages)): 
+    $isDraftReview = (isset($submission['chapter_status']) && $submission['chapter_status'] === 'reviewing_draft');
+    $pagePhaseText = $isDraftReview ? 'bản phác thảo kịch bản (Storyboard)' : 'bản vẽ hoàn chỉnh (Genko)';
+?>
 <!-- Danh sách các trang để Editor vẽ ghi chú sửa lỗi trực quan -->
 <div class="card shadow-sm border-0 rounded-3 mb-4">
     <div class="card-header bg-white text-dark py-3 border-bottom border-light">
-        <h5 class="card-title mb-0"><i class="fas fa-images me-2 text-primary"></i>Các trang truyện đã hoàn chỉnh (Đánh dấu lỗi trực quan)</h5>
+        <h5 class="card-title mb-0">
+            <i class="fas fa-images me-2 text-primary"></i>
+            <?= $role === 'editor' ? "Các trang {$pagePhaseText} (Đánh dấu lỗi trực quan)" : "Các trang {$pagePhaseText} (Xem ghi chú lỗi)" ?>
+        </h5>
     </div>
     <div class="card-body p-4">
-        <p class="text-muted text-xs mb-3">Nhấp vào nút <strong>"Đánh dấu lỗi"</strong> trên từng trang để mở bản vẽ lỗi trực quan.</p>
+        <p class="text-muted text-xs mb-3">
+            <?= $role === 'editor' 
+                ? 'Nhấp vào nút <strong>"Đánh dấu lỗi"</strong> trên từng trang để mở bản vẽ lỗi trực quan.' 
+                : 'Nhấp vào nút <strong>"Xem ghi chú lỗi"</strong> trên từng trang để xem chi tiết các nhận xét sửa đổi từ Editor.' ?>
+        </p>
         <div class="row g-3">
             <?php foreach ($pages as $p): 
-                $pageImg = (strpos($p['image_url'], 'http') === 0) ? $p['image_url'] : BASE_PATH . '/' . ltrim($p['image_url'], '/');
+                $pageImg = $this->resolvePageImageUrl($p['image_url']);
+                $oldPageImg = $this->resolvePageImageUrl($p['old_image_url']);
+                $isUpdatedAfterAnnotation = $this->isPageUpdatedAfterAnnotation($p);
             ?>
                 <div class="col-md-3 col-sm-6">
                     <div class="card h-100 border shadow-sm rounded-3 overflow-hidden">
                         <div class="position-relative text-center bg-light p-2" style="height: 180px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
                             <img src="<?= htmlspecialchars($pageImg) ?>" class="img-fluid" style="max-height: 100%; object-fit: contain;">
+                            
+                            <?php if ($isUpdatedAfterAnnotation): ?>
+                                <span class="position-absolute top-0 start-0 badge rounded-pill bg-warning text-dark m-2 shadow-sm" style="font-size: 0.8rem; padding: 0.35em 0.6em; z-index: 10; border: 1px solid rgba(0,0,0,0.15);">
+                                    <i class="fas fa-sync-alt me-1"></i>Bản mới
+                                </span>
+                            <?php endif; ?>
+
+                            <?php if (!empty($p['annotation_count']) && $p['annotation_count'] > 0): ?>
+                                <span id="badge-page-<?= $p['page_id'] ?>" class="position-absolute top-0 end-0 badge rounded-pill bg-danger m-2" style="font-size: 0.85rem; padding: 0.35em 0.6em; z-index: 10;">
+                                    <i class="fas fa-exclamation-triangle me-1"></i><?= $p['annotation_count'] ?> lỗi
+                                </span>
+                            <?php else: ?>
+                                <span id="badge-page-<?= $p['page_id'] ?>" class="position-absolute top-0 end-0 badge rounded-pill bg-success m-2" style="font-size: 0.85rem; padding: 0.35em 0.6em; z-index: 10;">
+                                    <i class="fas fa-check-circle me-1"></i>Không có lỗi
+                                </span>
+                            <?php endif; ?>
                         </div>
                         <div class="card-body p-3 text-center border-top">
                             <span class="fw-bold d-block mb-2 text-dark">Trang <?= htmlspecialchars($p['page_number']) ?></span>
-                            <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-annotate fw-bold" 
-                                    data-page-id="<?= $p['page_id'] ?>" 
-                                    data-page-number="<?= $p['page_number'] ?>" 
-                                    data-image-url="<?= htmlspecialchars($pageImg) ?>"
-                                    style="border-radius: 6px;">
-                                <i class="fas fa-edit me-1"></i>Đánh dấu lỗi
-                            </button>
+                            <?php if ($role === 'editor'): ?>
+                                <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-annotate fw-bold" 
+                                        data-page-id="<?= $p['page_id'] ?>" 
+                                        data-page-number="<?= $p['page_number'] ?>" 
+                                        data-image-url="<?= htmlspecialchars($pageImg) ?>"
+                                        data-old-image-url="<?= htmlspecialchars($oldPageImg) ?>"
+                                        style="border-radius: 6px;">
+                                    <i class="fas fa-edit me-1"></i>Đánh dấu lỗi
+                                </button>
+                            <?php else: ?>
+                                <button type="button" class="btn btn-sm btn-outline-primary w-100 btn-annotate fw-bold" 
+                                        data-page-id="<?= $p['page_id'] ?>" 
+                                        data-page-number="<?= $p['page_number'] ?>" 
+                                        data-image-url="<?= htmlspecialchars($pageImg) ?>"
+                                        data-old-image-url="<?= htmlspecialchars($oldPageImg) ?>"
+                                        style="border-radius: 6px;">
+                                    <i class="fas fa-eye me-1"></i>Xem ghi chú lỗi
+                                </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
@@ -333,42 +408,64 @@ if ($role === 'editor' && !empty($submission['chapter_id'])) {
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: none; box-shadow: var(--shadow-lg);">
             <div class="modal-header bg-danger text-white py-3">
-                <h5 class="modal-title fw-bold" id="annotateModalLabel"><i class="fas fa-edit me-2"></i>Đánh dấu lỗi trực quan - Trang <span id="modal-page-num"></span></h5>
+                <h5 class="modal-title fw-bold" id="annotateModalLabel">
+                    <i class="fas fa-edit me-2"></i>
+                    <?= $role === 'editor' ? 'Đánh dấu lỗi trực quan - Trang ' : 'Ghi chú lỗi trực quan - Trang ' ?>
+                    <span id="modal-page-num"></span>
+                </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
                 <div class="row g-0">
                     <!-- Tranh vẽ bên trái -->
-                    <div class="col-lg-8 bg-light p-4 d-flex align-items-center justify-content-center" style="min-height: 500px; max-height: 70vh; overflow: auto;">
+                    <div class="col-lg-8 bg-light p-4 d-flex flex-column align-items-center justify-content-center" style="min-height: 500px; max-height: 70vh; overflow: auto;">
+                        <!-- Nút chuyển phiên bản bản vẽ cũ/mới -->
+                        <div id="versionToggleContainer" class="d-none mb-3">
+                            <div class="btn-group btn-group-sm shadow-sm" role="group">
+                                <input type="radio" class="btn-check" name="version_toggle" id="btn-version-new" checked>
+                                <label class="btn btn-outline-primary" for="btn-version-new"><i class="fas fa-image me-1"></i>Bản vẽ mới</label>
+
+                                <input type="radio" class="btn-check" name="version_toggle" id="btn-version-old">
+                                <label class="btn btn-outline-secondary" for="btn-version-old"><i class="fas fa-history me-1"></i>Bản vẽ cũ (Có lỗi)</label>
+                            </div>
+                        </div>
+                        
                         <div id="annoImageWrapper" class="position-relative d-inline-block text-start shadow" style="border: 1px solid #cbd5e1; user-select: none;">
-                            <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 65vh; pointer-events: none;">
+                            <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 60vh; pointer-events: none;">
                             <!-- Overlay vẽ -->
                             <div id="annoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: crosshair;"></div>
                         </div>
                     </div>
                     <!-- Form và danh sách ghi chú bên phải -->
                     <div class="col-lg-4 border-start d-flex flex-column" style="max-height: 70vh; background-color: #f8fafc;">
-                        <div class="p-4 border-bottom bg-light">
-                            <h6 class="fw-bold text-dark mb-2"><i class="fas fa-plus-circle me-1 text-danger"></i>Thêm ghi chú lỗi mới</h6>
-                            <p class="text-muted" style="font-size: 0.78rem; line-height: 1.4;">Nhấn giữ và kéo chuột vẽ khung đỏ trên ảnh bên trái, sau đó nhập nội dung bên dưới.</p>
-                            
-                            <div id="no-selection-warning" class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.8rem; border-radius: 8px;">
-                                <i class="fas fa-info-circle me-1"></i>Vui lòng vẽ một khung lỗi trên ảnh để kích hoạt form nhập.
-                            </div>
-
-                            <form id="annoForm" style="display: none;">
-                                <input type="hidden" id="anno-x">
-                                <input type="hidden" id="anno-y">
-                                <input type="hidden" id="anno-w">
-                                <input type="hidden" id="anno-h">
+                        <?php if ($role === 'editor'): ?>
+                            <div class="p-4 border-bottom bg-light">
+                                <h6 class="fw-bold text-dark mb-2"><i class="fas fa-plus-circle me-1 text-danger"></i>Thêm ghi chú lỗi mới</h6>
+                                <p class="text-muted" style="font-size: 0.78rem; line-height: 1.4;">Nhấn giữ và kéo chuột vẽ khung đỏ trên ảnh bên trái, sau đó nhập nội dung bên dưới.</p>
                                 
-                                <div class="mb-3">
-                                    <label for="anno-comment" class="form-label fw-bold text-slate-700" style="font-size: 0.825rem;">Nội dung ghi chú lỗi <span class="text-danger">*</span></label>
-                                    <textarea class="form-control" id="anno-comment" rows="3" required placeholder="Ví dụ: Sai lời thoại nhân vật, thiếu đổ bóng nền, cần sửa lại nét vẽ..." style="border-radius: 8px; font-size: 0.88rem;"></textarea>
+                                <div id="no-selection-warning" class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.8rem; border-radius: 8px;">
+                                    <i class="fas fa-info-circle me-1"></i>Vui lòng vẽ một khung lỗi trên ảnh để kích hoạt form nhập.
                                 </div>
-                                <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold py-2" style="border-radius: 8px;"><i class="fas fa-save me-1"></i>Lưu ghi chú lỗi</button>
-                            </form>
-                        </div>
+
+                                <form id="annoForm" style="display: none;">
+                                    <input type="hidden" id="anno-x">
+                                    <input type="hidden" id="anno-y">
+                                    <input type="hidden" id="anno-w">
+                                    <input type="hidden" id="anno-h">
+                                    
+                                    <div class="mb-3">
+                                        <label for="anno-comment" class="form-label fw-bold text-slate-700" style="font-size: 0.825rem;">Nội dung ghi chú lỗi <span class="text-danger">*</span></label>
+                                        <textarea class="form-control" id="anno-comment" rows="3" required placeholder="Ví dụ: Sai lời thoại nhân vật, thiếu đổ bóng nền, cần sửa lại nét vẽ..." style="border-radius: 8px; font-size: 0.88rem;"></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-sm btn-danger w-100 fw-bold py-2" style="border-radius: 8px;"><i class="fas fa-save me-1"></i>Lưu ghi chú lỗi</button>
+                                </form>
+                            </div>
+                        <?php else: ?>
+                            <div class="p-4 border-bottom bg-light">
+                                <h6 class="fw-bold text-dark mb-2"><i class="fas fa-info-circle me-1 text-primary"></i>Chế độ xem ghi chú</h6>
+                                <p class="text-muted mb-0" style="font-size: 0.78rem; line-height: 1.4;">Rà chuột vào các khung đỏ trên trang truyện hoặc xem danh sách lỗi bên dưới để biết chi tiết sửa đổi.</p>
+                            </div>
+                        <?php endif; ?>
                         
                         <div class="flex-grow-1 overflow-y-auto p-4 bg-white" style="min-height: 200px;">
                             <h6 class="fw-bold text-dark mb-3"><i class="fas fa-list me-1 text-muted"></i>Danh sách lỗi đã đánh dấu</h6>
@@ -395,6 +492,8 @@ document.addEventListener("DOMContentLoaded", function() {
     
     const STD_WIDTH = 800;
     const STD_HEIGHT = 1000;
+    
+    const isEditor = <?= json_encode($role === 'editor') ?>;
 
     const modal = new bootstrap.Modal(document.getElementById('annotateModal'));
     const modalPageNum = document.getElementById('modal-page-num');
@@ -409,128 +508,158 @@ document.addEventListener("DOMContentLoaded", function() {
             activePageId = this.getAttribute('data-page-id');
             const pageNum = this.getAttribute('data-page-number');
             const imgUrl = this.getAttribute('data-image-url');
+            const oldImgUrl = this.getAttribute('data-old-image-url');
             
             modalPageNum.textContent = pageNum;
             annoImage.src = imgUrl;
             
             resetDrawingState();
-            loadAnnotations();
+            
+            const toggleContainer = document.getElementById('versionToggleContainer');
+            const btnNew = document.getElementById('btn-version-new');
+            const btnOld = document.getElementById('btn-version-old');
+            
+            if (btnNew && btnOld) {
+                btnNew.checked = true;
+                btnNew.onclick = function() {
+                    annoImage.src = imgUrl;
+                    if (overlayContainer) overlayContainer.style.pointerEvents = 'auto';
+                };
+                btnOld.onclick = function() {
+                    annoImage.src = oldImgUrl;
+                    if (overlayContainer) overlayContainer.style.pointerEvents = 'none'; // Chặn vẽ đè lỗi lên bản cũ
+                };
+            }
+            
+            if (oldImgUrl && oldImgUrl !== '') {
+                if (toggleContainer) toggleContainer.classList.remove('d-none');
+            } else {
+                if (toggleContainer) toggleContainer.classList.add('d-none');
+            }
             
             modal.show();
         });
     });
 
-    overlayContainer.addEventListener('mousedown', function(e) {
-        isDrawing = true;
-        const rect = overlayContainer.getBoundingClientRect();
-        startX = e.clientX - rect.left;
-        startY = e.clientY - rect.top;
-        
-        if (selectedBox && selectedBox.parentNode) {
-            selectedBox.parentNode.removeChild(selectedBox);
-        }
-        
-        selectedBox = document.createElement('div');
-        selectedBox.style.position = 'absolute';
-        selectedBox.style.border = '2px dashed #dc3545';
-        selectedBox.style.backgroundColor = 'rgba(220, 53, 69, 0.15)';
-        selectedBox.style.pointerEvents = 'none';
-        selectedBox.style.left = startX + 'px';
-        selectedBox.style.top = startY + 'px';
-        
-        overlayContainer.appendChild(selectedBox);
+    document.getElementById('annotateModal').addEventListener('shown.bs.modal', function () {
+        loadAnnotations();
     });
 
-    overlayContainer.addEventListener('mousemove', function(e) {
-        if (!isDrawing) return;
-        const rect = overlayContainer.getBoundingClientRect();
-        const currentX = e.clientX - rect.left;
-        const currentY = e.clientY - rect.top;
-        
-        const width = currentX - startX;
-        const height = currentY - startY;
-        
-        selectedBox.style.width = Math.abs(width) + 'px';
-        selectedBox.style.height = Math.abs(height) + 'px';
-        selectedBox.style.left = (width < 0 ? currentX : startX) + 'px';
-        selectedBox.style.top = (height < 0 ? currentY : startY) + 'px';
-    });
-
-    overlayContainer.addEventListener('mouseup', function(e) {
-        if (!isDrawing) return;
-        isDrawing = false;
-        
-        const rect = overlayContainer.getBoundingClientRect();
-        const boxWidth = parseFloat(selectedBox.style.width) || 0;
-        const boxHeight = parseFloat(selectedBox.style.height) || 0;
-        const boxLeft = parseFloat(selectedBox.style.left) || 0;
-        const boxTop = parseFloat(selectedBox.style.top) || 0;
-        
-        if (boxWidth < 10 || boxHeight < 10) {
+    if (isEditor && overlayContainer) {
+        overlayContainer.addEventListener('mousedown', function(e) {
+            isDrawing = true;
+            const rect = overlayContainer.getBoundingClientRect();
+            startX = e.clientX - rect.left;
+            startY = e.clientY - rect.top;
+            
             if (selectedBox && selectedBox.parentNode) {
                 selectedBox.parentNode.removeChild(selectedBox);
             }
-            selectedBox = null;
-            resetDrawingState();
-            return;
-        }
-        
-        const scaleX = STD_WIDTH / rect.width;
-        const scaleY = STD_HEIGHT / rect.height;
-        
-        document.getElementById('anno-x').value = Math.round(boxLeft * scaleX);
-        document.getElementById('anno-y').value = Math.round(boxTop * scaleY);
-        document.getElementById('anno-w').value = Math.round(boxWidth * scaleX);
-        document.getElementById('anno-h').value = Math.round(boxHeight * scaleY);
-        
-        noSelectionWarning.style.display = 'none';
-        annoForm.style.display = 'block';
-        document.getElementById('anno-comment').focus();
-    });
-
-    document.getElementById('annoForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const commentInput = document.getElementById('anno-comment');
-        
-        const data = {
-            page_id: activePageId,
-            x: document.getElementById('anno-x').value,
-            y: document.getElementById('anno-y').value,
-            width: document.getElementById('anno-w').value,
-            height: document.getElementById('anno-h').value,
-            comments: commentInput.value
-        };
-
-        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=save_annotation', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(res => {
-            if (res.success) {
-                commentInput.value = '';
-                resetDrawingState();
-                loadAnnotations();
-            } else {
-                alert('Lỗi: ' + res.error);
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            alert('Lỗi kết nối máy chủ');
+            
+            selectedBox = document.createElement('div');
+            selectedBox.style.position = 'absolute';
+            selectedBox.style.border = '2px dashed #dc3545';
+            selectedBox.style.backgroundColor = 'rgba(220, 53, 69, 0.15)';
+            selectedBox.style.pointerEvents = 'none';
+            selectedBox.style.left = startX + 'px';
+            selectedBox.style.top = startY + 'px';
+            
+            overlayContainer.appendChild(selectedBox);
         });
-    });
+
+        overlayContainer.addEventListener('mousemove', function(e) {
+            if (!isDrawing) return;
+            const rect = overlayContainer.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+            
+            const width = currentX - startX;
+            const height = currentY - startY;
+            
+            selectedBox.style.width = Math.abs(width) + 'px';
+            selectedBox.style.height = Math.abs(height) + 'px';
+            selectedBox.style.left = (width < 0 ? currentX : startX) + 'px';
+            selectedBox.style.top = (height < 0 ? currentY : startY) + 'px';
+        });
+
+        overlayContainer.addEventListener('mouseup', function(e) {
+            if (!isDrawing) return;
+            isDrawing = false;
+            
+            const rect = overlayContainer.getBoundingClientRect();
+            const boxWidth = parseFloat(selectedBox.style.width) || 0;
+            const boxHeight = parseFloat(selectedBox.style.height) || 0;
+            const boxLeft = parseFloat(selectedBox.style.left) || 0;
+            const boxTop = parseFloat(selectedBox.style.top) || 0;
+            
+            if (boxWidth < 10 || boxHeight < 10) {
+                if (selectedBox && selectedBox.parentNode) {
+                    selectedBox.parentNode.removeChild(selectedBox);
+                }
+                selectedBox = null;
+                resetDrawingState();
+                return;
+            }
+            
+            const scaleX = STD_WIDTH / rect.width;
+            const scaleY = STD_HEIGHT / rect.height;
+            
+            document.getElementById('anno-x').value = Math.round(boxLeft * scaleX);
+            document.getElementById('anno-y').value = Math.round(boxTop * scaleY);
+            document.getElementById('anno-w').value = Math.round(boxWidth * scaleX);
+            document.getElementById('anno-h').value = Math.round(boxHeight * scaleY);
+            
+            if (noSelectionWarning) noSelectionWarning.style.display = 'none';
+            if (annoForm) annoForm.style.display = 'block';
+            document.getElementById('anno-comment').focus();
+        });
+    }
+
+    if (annoForm) {
+        annoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentInput = document.getElementById('anno-comment');
+            
+            const data = {
+                page_id: activePageId,
+                x: document.getElementById('anno-x').value,
+                y: document.getElementById('anno-y').value,
+                width: document.getElementById('anno-w').value,
+                height: document.getElementById('anno-h').value,
+                comments: commentInput.value
+            };
+
+            fetch('<?= BASE_PATH ?>/index.php?controller=review&action=save_annotation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(res => {
+                if (res.success) {
+                    commentInput.value = '';
+                    resetDrawingState();
+                    loadAnnotations();
+                } else {
+                    alert('Lỗi: ' + res.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ');
+            });
+        });
+    }
 
     function resetDrawingState() {
         if (selectedBox && selectedBox.parentNode) {
             selectedBox.parentNode.removeChild(selectedBox);
         }
         selectedBox = null;
-        noSelectionWarning.style.display = 'block';
-        annoForm.style.display = 'none';
+        if (noSelectionWarning) noSelectionWarning.style.display = 'block';
+        if (annoForm) annoForm.style.display = 'none';
     }
 
     function loadAnnotations() {
@@ -540,6 +669,19 @@ document.addEventListener("DOMContentLoaded", function() {
             if (res.success) {
                 renderOverlayAnnotations(res.annotations);
                 renderListAnnotations(res.annotations);
+                
+                // Cập nhật badge trên trang cha tương ứng ngay lập tức
+                const badgeEl = document.getElementById('badge-page-' + activePageId);
+                if (badgeEl) {
+                    const count = res.annotations.length;
+                    if (count > 0) {
+                        badgeEl.className = 'position-absolute top-0 end-0 badge rounded-pill bg-danger m-2';
+                        badgeEl.innerHTML = `<i class="fas fa-exclamation-triangle me-1"></i>${count} lỗi`;
+                    } else {
+                        badgeEl.className = 'position-absolute top-0 end-0 badge rounded-pill bg-success m-2';
+                        badgeEl.innerHTML = '<i class="fas fa-check-circle me-1"></i>Không có lỗi';
+                    }
+                }
             }
         });
     }
@@ -586,9 +728,11 @@ document.addEventListener("DOMContentLoaded", function() {
                         <p class="mb-1 text-dark small" style="white-space: pre-wrap; font-size:0.825rem;">${ann.comments}</p>
                         <small class="text-muted" style="font-size:0.75rem;"><i class="fas fa-user-edit me-1"></i>Editor: ${ann.editor_name}</small>
                     </div>
+                    ${isEditor ? `
                     <button class="btn btn-xs btn-link text-danger p-0" onclick="deleteAnnotation(${ann.annotation_id})">
                         <i class="fas fa-trash-alt"></i>
                     </button>
+                    ` : ''}
                 </div>
             `;
             annoList.appendChild(item);

@@ -1,4 +1,11 @@
 <?php
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện duyệt và xuất bản các bộ truyện (publish_series.php)
  * Vai trò: Board (Hội đồng/Ban giám đốc)
@@ -281,17 +288,7 @@ if (!empty($seriesList)) {
                                     <?php endif; ?>
                                 </td>
                                  <td>
-                                     <?php
-                                     $badgeClass = 'bg-secondary';
-                                     $statusLabel = $series['status'];
-                                     switch ($series['status']) {
-                                         case 'ongoing': $badgeClass = 'bg-primary'; $statusLabel = 'Đang phát hành'; break;
-                                         case 'completed': $badgeClass = 'bg-success'; $statusLabel = 'Hoàn thành'; break;
-                                         case 'canceled': $badgeClass = 'bg-danger'; $statusLabel = 'Đã hủy'; break;
-                                         case 'suspended': $badgeClass = 'bg-warning text-dark'; $statusLabel = 'Tạm ngưng'; break;
-                                     }
-                                     ?>
-                                     <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($statusLabel) ?></span>
+                                     <?= $this->getSeriesStatusBadge($series['status']) ?>
                                  </td>
                                  <td>
                                        <?php if ($series['total_chapters'] > 0): ?>
@@ -355,6 +352,64 @@ if (!empty($seriesList)) {
             <div class="text-center text-muted py-5">
                 <div class="mb-2"><i class="fas fa-folder-open fa-2x" style="opacity: 0.4;"></i></div>
                 <p class="mb-0 text-xs text-muted">Không tìm thấy bộ truyện hoạt động nào.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- BẢNG 3: DANH SÁCH CHAPTER ĐÃ DUYỆT (CHỜ HỘI ĐỒNG XUẤT BẢN) -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 border-bottom border-light">
+        <h5 class="card-title mb-0 fw-bold text-primary"><i class="fas fa-upload me-2"></i>Quyết định Xuất bản Chapter (Đã hoàn thành vẽ & Editor đã duyệt)</h5>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($approvedChapters)): ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-bottom border-slate-100">
+                        <tr>
+                            <th class="ps-4 py-3 text-slate-500 fw-bold text-uppercase" style="width: 80px; font-size: 0.72rem; letter-spacing: 0.5px;">Chapter ID</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 250px; font-size: 0.72rem; letter-spacing: 0.5px;">Bộ truyện & Tiêu đề Chương</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 140px; font-size: 0.72rem; letter-spacing: 0.5px;">Tác giả chính</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 120px; font-size: 0.72rem; letter-spacing: 0.5px;">Trạng thái hiện tại</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase text-end pe-4" style="min-width: 150px; font-size: 0.72rem; letter-spacing: 0.5px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($approvedChapters as $chap): ?>
+                            <tr>
+                                <td class="ps-4 text-slate-400 font-monospace" style="font-size: 0.85rem;">#<?= htmlspecialchars($chap['chapter_id']) ?></td>
+                                <td>
+                                    <div class="fw-bold text-slate-800" style="font-size: 0.95rem;">
+                                        <?= htmlspecialchars($chap['series_title']) ?>
+                                    </div>
+                                    <div class="text-muted text-xs">
+                                        Chương <?= htmlspecialchars($chap['chapter_number']) ?>: <?= htmlspecialchars($chap['title'] ?? 'Chưa đặt tên') ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-slate-800 fw-semibold" style="font-size: 0.88rem;"><?= htmlspecialchars($chap['mangaka_name'] ?? 'Không rõ') ?></div>
+                                    <span class="text-muted text-xs">Tác giả</span>
+                                </td>
+                                <td>
+                                    <?= $this->getStatusBadge($chap['status']) ?>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=publish&id=<?= $chap['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Xác nhận chính thức xuất bản Chương <?= htmlspecialchars($chap['chapter_number']) ?> của bộ truyện <?= htmlspecialchars($chap['series_title']) ?> ra công chúng?');">
+                                        <button type="submit" class="btn btn-sm btn-success px-3 rounded-pill shadow-sm d-inline-flex align-items-center gap-1.5 fw-semibold" style="font-size: 0.8rem;">
+                                            <i class="fas fa-paper-plane"></i> Xuất bản ngay
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="text-center text-muted py-4">
+                <div class="mb-2"><i class="fas fa-check-circle fa-2x text-success" style="opacity: 0.4;"></i></div>
+                <p class="mb-0 text-xs text-muted fw-medium">Không có chapter nào đang chờ hội đồng duyệt xuất bản.</p>
             </div>
         <?php endif; ?>
     </div>

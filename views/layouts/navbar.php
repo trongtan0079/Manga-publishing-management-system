@@ -29,7 +29,7 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
             </button>
         </div>
 
-        <a class="navbar-brand d-flex align-items-center" style="margin-left: 68px !important;" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=<?= isset($_SESSION['role_name']) ? htmlspecialchars($_SESSION['role_name']) : '' ?>">
+        <a class="navbar-brand d-flex align-items-center" style="margin-left: 68px !important;" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=<?= (isset($_SESSION) && isset($_SESSION['role_name'])) ? htmlspecialchars($_SESSION['role_name']) : '' ?>">
             <i class="fas fa-book-open me-2 fs-3" style="color: var(--primary);"></i>
             <span class="fw-bold" style="color: var(--slate-800); font-size: 1.45rem; letter-spacing: -0.5px;">Manga<span style="color: var(--primary);">PMS</span></span>
         </a>
@@ -90,10 +90,10 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                 <div class="vr mx-2 d-none d-lg-block" style="height: 30px; align-self: center;"></div>
                 <li class="nav-item dropdown ms-2">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://ui-avatars.com/api/?name=<?php echo urlencode(isset($_SESSION['full_name']) ? $_SESSION['full_name'] : (isset($_SESSION['username']) ? $_SESSION['username'] : 'G')); ?>&background=6366f1&color=fff" alt="User" class="rounded-circle me-2" width="32" height="32">
+                        <img src="https://ui-avatars.com/api/?name=<?php echo urlencode((isset($_SESSION) && isset($_SESSION['full_name'])) ? $_SESSION['full_name'] : ((isset($_SESSION) && isset($_SESSION['username'])) ? $_SESSION['username'] : 'G')); ?>&background=6366f1&color=fff" alt="User" class="rounded-circle me-2" width="32" height="32">
                         <div class="d-none d-md-block text-start lh-1 me-1">
-                            <div class="fw-bold text-dark"><?php echo htmlspecialchars(isset($_SESSION['full_name']) ? $_SESSION['full_name'] : (isset($_SESSION['username']) ? $_SESSION['username'] : 'Khách')); ?></div>
-                            <small class="text-muted" style="font-size: 0.75rem;"><?php echo isset($_SESSION['role_name']) ? ucfirst(htmlspecialchars($_SESSION['role_name'])) : ''; ?></small>
+                            <div class="fw-bold text-dark"><?php echo htmlspecialchars((isset($_SESSION) && isset($_SESSION['full_name'])) ? $_SESSION['full_name'] : ((isset($_SESSION) && isset($_SESSION['username'])) ? $_SESSION['username'] : 'Khách')); ?></div>
+                            <small class="text-muted" style="font-size: 0.75rem;"><?php echo (isset($_SESSION) && isset($_SESSION['role_name'])) ? ucfirst(htmlspecialchars($_SESSION['role_name'])) : ''; ?></small>
                         </div>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3" aria-labelledby="navbarDropdown">

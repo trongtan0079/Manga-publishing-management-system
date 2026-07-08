@@ -1,4 +1,11 @@
 <?php 
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện quản lý danh sách dự án truyện (series.php)
  * Vai trò: Mangaka (Họa sĩ chính)
@@ -73,27 +80,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <strong><?= htmlspecialchars($series['title']) ?></strong>
                         </td>
                         <td>
-                            <?php
-                            $badgeClass = 'bg-secondary';
-                            $statusLabel = $series['status'];
-                            switch ($series['status']) {
-                                case 'planning': 
-                                    if (($series['publish_type'] ?? '') === 'draft') {
-                                        $badgeClass = 'bg-secondary'; $statusLabel = 'Nháp (Chưa nộp)';
-                                    } else {
-                                        $badgeClass = 'bg-info text-dark'; $statusLabel = 'Chờ phê duyệt';
-                                    }
-                                    break;
-                                case 'ongoing': $badgeClass = 'bg-primary'; $statusLabel = 'Đang triển khai'; break;
-                                case 'completed': $badgeClass = 'bg-success'; $statusLabel = 'Hoàn thành'; break;
-                                case 'canceled': 
-                                    $badgeClass = 'bg-danger'; 
-                                    $statusLabel = empty($series['editor_id']) ? 'Từ chối' : 'Đã hủy'; 
-                                    break;
-                                case 'suspended': $badgeClass = 'bg-warning text-dark'; $statusLabel = 'Tạm ngưng'; break;
-                            }
-                            ?>
-                            <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($statusLabel) ?></span>
+                            <?= $this->getSeriesStatusBadge($series) ?>
                         </td>
                         <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></td>
                         

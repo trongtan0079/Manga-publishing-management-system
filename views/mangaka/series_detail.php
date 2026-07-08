@@ -1,4 +1,11 @@
 <?php 
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện chi tiết thông tin bộ truyện (series_detail.php)
  * Vai trò: Mangaka (Họa sĩ chính)
@@ -52,7 +59,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </button>
         </form>
         <?php endif; ?>
-        <?php if (!in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+        <?php if (!$this->isSeriesLocked($series)): ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning shadow-sm text-dark">
             <i class="fas fa-edit me-2"></i>Sửa Truyện
         </a>
@@ -79,29 +86,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="card-body">
                 <h5 class="card-title"><?= htmlspecialchars($series['title']) ?></h5>
                 
-                <?php
-                $badgeClass = 'bg-secondary';
-                $sLabel = $series['status'];
-                switch ($series['status']) {
-                    case 'planning': 
-                        if (($series['publish_type'] ?? '') === 'draft') {
-                            $badgeClass = 'bg-secondary'; $sLabel = 'Nháp (Chưa nộp)';
-                        } else {
-                            $badgeClass = 'bg-info text-dark'; $sLabel = 'Chờ phê duyệt';
-                        }
-                        break;
-                    case 'ongoing': $badgeClass = 'bg-primary'; $sLabel = 'Đang triển khai'; break;
-                    case 'completed': $badgeClass = 'bg-success'; $sLabel = 'Hoàn thành'; break;
-                    case 'canceled': 
-                        $badgeClass = 'bg-danger'; 
-                        $sLabel = empty($series['editor_id']) ? 'Từ chối' : 'Đã hủy'; 
-                        break;
-                    case 'suspended': $badgeClass = 'bg-warning text-dark'; $sLabel = 'Tạm ngưng'; break;
-                }
-                ?>
                 <p class="card-text">
                     <strong>Trạng thái:</strong> 
-                    <span class="badge <?= $badgeClass ?>"><?= htmlspecialchars($sLabel) ?></span>
+                    <?= $this->getSeriesStatusBadge($series) ?>
                 </p>
                 <p class="card-text">
                     <strong>Lịch xuất bản:</strong> 
@@ -167,7 +154,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <div class="card border-primary">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Danh sách Chapter</h5>
-                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && in_array($series['status'], ['planning', 'ongoing'])): ?>
+                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$this->isSeriesLocked($series)): ?>
                 <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Tạo Chapter mới</a>
                 <?php endif; ?>
             </div>
@@ -211,23 +198,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <?php
-                                            $cBadge = 'bg-secondary';
-                                            $cLabel = $chapter['status'];
-                                            switch ($chapter['status']) {
-                                                case 'drafting': $cBadge = 'bg-secondary'; $cLabel = 'Bản nháp'; break;
-                                                case 'drawing': $cBadge = 'bg-primary'; $cLabel = 'Đang vẽ'; break;
-                                                case 'reviewing': $cBadge = 'bg-warning text-dark'; $cLabel = 'Đang chờ duyệt'; break;
-                                                case 'approved': $cBadge = 'bg-info text-dark'; $cLabel = 'Đã duyệt'; break;
-                                                case 'published': $cBadge = 'bg-success'; $cLabel = 'Đã xuất bản'; break;
-                                            }
-                                            ?>
-                                            <span class="badge <?= $cBadge ?>"><?= htmlspecialchars($cLabel) ?></span>
+                                            <?= $this->getStatusBadge($chapter['status']) ?>
                                         </td>
                                         <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></td>
                                         <td class="text-end">
                                             <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">Xem</a>
-                                            <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !in_array($series['status'], ['suspended', 'canceled', 'completed']) && !in_array($chapter['status'], ['reviewing', 'approved', 'published'])): ?>
+                                            <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$this->isSeriesLocked($series) && !$this->isChapterLocked($chapter)): ?>
                                             <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                             <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
                                                 <button type="submit" class="btn btn-sm btn-danger">Xóa</button>

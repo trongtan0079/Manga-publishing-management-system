@@ -1,4 +1,11 @@
 <?php 
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Chi tiết một trang truyện
  * Khai báo biến để Editor/IDE hiểu và không báo lỗi
@@ -11,7 +18,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
-$isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published');
+$isLocked = ($this->isChapterLocked($chapter) || in_array($page['status'], ['approved', 'published']));
 ?>
 <style>
 .selected-card {
@@ -118,7 +125,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
     
     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div>
-        <?php if (!$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+        <?php if (!$isLocked && !$this->isSeriesLocked($series)): ?>
             <!-- Nút sửa trang hiện tại -->
             <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
             <!-- Form xóa trang, dùng onsubmit để hỏi lại trước khi xóa -->
@@ -128,11 +135,11 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
         <?php else: ?>
             <?php 
                 $lockMsg = 'Trang đã được duyệt / phát hành (Khóa)';
-                if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                if ($this->isSeriesLocked($series)) {
                     if ($series['status'] === 'suspended') $lockMsg = 'Bộ truyện đang tạm ngưng (Khóa)';
                     elseif ($series['status'] === 'canceled') $lockMsg = 'Bộ truyện đã hủy (Khóa)';
                     elseif ($series['status'] === 'completed') $lockMsg = 'Bộ truyện đã hoàn thành (Khóa)';
-                } elseif ($chapter['status'] === 'reviewing') {
+                } elseif ($this->isChapterLocked($chapter)) {
                     $lockMsg = 'Chương chứa trang đang chờ duyệt (Khóa)';
                 }
             ?>
@@ -151,21 +158,9 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
         <small class="text-muted">Chapter <?= htmlspecialchars($chapter['chapter_number']) ?> - <?= htmlspecialchars($series['title']) ?></small>
     </div>
     <div class="card-body">
-        <?php
-        // Gán màu huy hiệu (badge) tùy theo trạng thái (status)
-        $pBadge = 'bg-secondary';
-        $statusLabel = $page['status'];
-        switch ($page['status']) {
-            case 'drafting': $pBadge = 'bg-secondary'; $statusLabel = 'Bản nháp'; break;
-            case 'drawing': $pBadge = 'bg-primary'; $statusLabel = 'Đang vẽ'; break;
-            case 'reviewing': $pBadge = 'bg-warning text-dark'; $statusLabel = 'Đang chờ duyệt'; break;
-            case 'approved': $pBadge = 'bg-info text-dark'; $statusLabel = 'Đã duyệt'; break;
-            case 'published': $pBadge = 'bg-success'; $statusLabel = 'Đã xuất bản'; break;
-        }
-        ?>
         <div class="row">
             <div class="col-md-4">
-                <p><strong>Trạng thái:</strong> <span class="badge <?= $pBadge ?>"><?= htmlspecialchars($statusLabel) ?></span></p>
+                <p><strong>Trạng thái:</strong> <?= $this->getStatusBadge($page['status']) ?></p>
                 <p><strong>Ngày tạo:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['created_at']))) ?></p>
                 <p><strong>Cập nhật lần cuối:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></p>
             </div>
@@ -218,12 +213,25 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
             </div>
             <div class="card-body text-center bg-light d-flex flex-column align-items-center justify-content-center p-2" style="min-height: 400px;">
                 <?php if (!empty($page['image_url'])): 
-                    $imageUrl = $page['image_url'];
-                    $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                    $resolvedImage = $this->resolvePageImageUrl($page['image_url']);
+                    $oldImageUrl = $this->resolvePageImageUrl($page['old_image_url'] ?? '');
                 ?>
                     <div id="drawInstruction" class="alert alert-info d-none py-2 mb-3 text-start w-100" style="font-size: 0.85rem;">
                         <i class="fas fa-info-circle me-2"></i><strong>Chế độ vẽ thủ công:</strong> Hãy nhấn giữ chuột trái và kéo trên ảnh truyện để vẽ phân vùng mới.
                     </div>
+                    
+                    <?php if (!empty($oldImageUrl)): ?>
+                        <!-- Nút chuyển phiên bản bản vẽ cũ/mới -->
+                        <div class="mb-3">
+                            <div class="btn-group btn-group-sm shadow-sm" role="group">
+                                <input type="radio" class="btn-check" name="page_version_toggle" id="btn-page-version-new" checked>
+                                <label class="btn btn-outline-primary" for="btn-page-version-new"><i class="fas fa-image me-1"></i>Bản vẽ mới</label>
+
+                                <input type="radio" class="btn-check" name="page_version_toggle" id="btn-page-version-old">
+                                <label class="btn btn-outline-secondary" for="btn-page-version-old"><i class="fas fa-history me-1"></i>Bản vẽ cũ (Có lỗi)</label>
+                            </div>
+                        </div>
+                    <?php endif; ?>
                     
                     <div id="mangaPageWrapper" class="position-relative d-inline-block text-start <?= $hasSpotlight ? 'has-spotlight' : '' ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden;">
                         <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
@@ -494,11 +502,23 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
 
         <!-- Khối Ghi chú lỗi của Editor (nếu có) -->
         <?php if (!empty($editorAnnotations)): ?>
+        <?php 
+            $isUpdatedAfterAnnotation = $this->isPageUpdatedAfterLatestAnnotation($page, $editorAnnotations);
+        ?>
         <div class="card border-danger mt-3">
             <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Ý kiến sửa đổi từ Editor</h5>
+                <?php if ($isUpdatedAfterAnnotation): ?>
+                    <span class="badge bg-warning text-dark"><i class="fas fa-sync-alt me-1"></i>Đã cập nhật ảnh sửa</span>
+                <?php endif; ?>
             </div>
             <div class="card-body">
+                <?php if ($isUpdatedAfterAnnotation): ?>
+                    <div class="alert alert-warning py-2 mb-3 small d-flex align-items-center" style="font-size: 0.825rem; border-radius: var(--radius-sm);">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <span>Bạn đã tải lên bản vẽ mới sau các ghi chú lỗi này. Hãy chờ Editor kiểm tra và phê duyệt.</span>
+                    </div>
+                <?php endif; ?>
                 <p class="text-muted small mb-3">Biên tập viên yêu cầu chỉnh sửa các vị trí được khoanh đỏ nét đứt trên trang truyện:</p>
                 <div class="list-group">
                     <?php foreach ($editorAnnotations as $ann): ?>
@@ -976,6 +996,34 @@ document.addEventListener("DOMContentLoaded", function() {
     var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
         return new bootstrap.Popover(popoverTriggerEl)
     });
+
+    // Xử lý chuyển đổi nhanh phiên bản vẽ cũ/mới của Mangaka
+    const btnPageNew = document.getElementById('btn-page-version-new');
+    const btnPageOld = document.getElementById('btn-page-version-old');
+    const mangaPageImage = document.getElementById('mangaPageImage');
+    
+    if (btnPageNew && btnPageOld && mangaPageImage) {
+        const currentImgUrl = <?= json_encode($resolvedImage) ?>;
+        const oldImgUrl = <?= json_encode($oldImageUrl) ?>;
+        
+        btnPageNew.addEventListener('change', function() {
+            if (this.checked) {
+                mangaPageImage.src = currentImgUrl;
+                // Khôi phục con trỏ vẽ hoặc phân vùng
+                const overlay = document.getElementById('annoOverlayContainer');
+                if (overlay) overlay.style.pointerEvents = 'auto';
+            }
+        });
+        
+        btnPageOld.addEventListener('change', function() {
+            if (this.checked) {
+                mangaPageImage.src = oldImgUrl;
+                // Chặn tương tác vẽ trên bản vẽ cũ
+                const overlay = document.getElementById('annoOverlayContainer');
+                if (overlay) overlay.style.pointerEvents = 'none';
+            }
+        });
+    }
 
     // Xử lý loại phân vùng tự chọn
     const regTypeSelect = document.getElementById('reg_type');

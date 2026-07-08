@@ -21,8 +21,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <div class="mb-4">
-    <a href="<?= BASE_PATH ?>/index.php?controller=review&action=index" class="btn btn-outline-secondary btn-sm mb-3">
-        <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+    <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=show&id=<?= $submission['submission_id'] ?>" class="btn btn-outline-secondary btn-sm mb-3">
+        <i class="fas fa-arrow-left me-1"></i> Quay lại chi tiết bản thảo
     </a>
     <h2 class="h3 mb-1">Đánh giá Bản thảo #<?= $submission['submission_id'] ?></h2>
     <p class="text-muted">Người gửi: <span class="fw-bold text-dark"><?= htmlspecialchars((string)($submission['sender_name'] ?? '')) ?></span></p>
@@ -51,7 +51,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <?php if (!empty($submission['task_id'])): ?>
                                 <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
                             <?php else: ?>
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
+                                <?php if (isset($submission['chapter_status']) && ($submission['chapter_status'] === 'reviewing_final' || $submission['chapter_status'] === 'reviewing')): ?>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Bản Hoàn Chỉnh (Final)</span>
+                                <?php elseif (isset($submission['chapter_status']) && $submission['chapter_status'] === 'reviewing_draft'): ?>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Bản Nháp (Draft Storyboard)</span>
+                                <?php else: ?>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Full Chapter</span>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </p>
                     </div>
@@ -181,13 +187,27 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <div class="form-check custom-radio">
                                 <input class="form-check-input" type="radio" name="decision" id="decision_approve" value="approved" required>
                                 <label class="form-check-label text-success fw-bold w-100" for="decision_approve">
-                                    <i class="fas fa-check-circle me-2"></i> Approve (Phê duyệt)
+                                    <i class="fas fa-check-circle me-2"></i> 
+                                    <?php if (isset($submission['chapter_status']) && $submission['chapter_status'] === 'reviewing_draft'): ?>
+                                        Approve (Duyệt kịch bản nháp & Bắt đầu vẽ)
+                                    <?php elseif (isset($submission['chapter_status']) && ($submission['chapter_status'] === 'reviewing_final' || $submission['chapter_status'] === 'reviewing')): ?>
+                                        Approve (Duyệt phát hành / xuất bản)
+                                    <?php else: ?>
+                                        Approve (Phê duyệt)
+                                    <?php endif; ?>
                                 </label>
                             </div>
                             <div class="form-check custom-radio mt-2">
                                 <input class="form-check-input" type="radio" name="decision" id="decision_reject" value="rejected" required>
                                 <label class="form-check-label text-danger fw-bold w-100" for="decision_reject">
-                                    <i class="fas fa-times-circle me-2"></i> Reject (Yêu cầu sửa/Từ chối)
+                                    <i class="fas fa-times-circle me-2"></i> 
+                                    <?php if (isset($submission['chapter_status']) && $submission['chapter_status'] === 'reviewing_draft'): ?>
+                                        Reject (Yêu cầu chỉnh sửa kịch bản nháp)
+                                    <?php elseif (isset($submission['chapter_status']) && ($submission['chapter_status'] === 'reviewing_final' || $submission['chapter_status'] === 'reviewing')): ?>
+                                        Reject (Yêu cầu vẽ lại nét lỗi / Sửa hình vẽ)
+                                    <?php else: ?>
+                                        Reject (Yêu cầu sửa / Từ chối)
+                                    <?php endif; ?>
                                 </label>
                             </div>
                         </div>

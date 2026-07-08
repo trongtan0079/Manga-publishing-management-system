@@ -51,16 +51,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             <h5 class="card-title mb-0 fw-bold text-dark">
                                 <i class="fas fa-book me-2 text-primary"></i><?= htmlspecialchars($data['series']['title']) ?>
                             </h5>
-                            <?php 
-                                $statusClass = 'secondary';
-                                $statusText = $data['series']['status'];
-                                if ($data['series']['status'] === 'ongoing') { $statusClass = 'success'; $statusText = 'Đang phát hành'; }
-                                elseif ($data['series']['status'] === 'planning') { $statusClass = 'warning text-dark'; $statusText = 'Kế hoạch'; }
-                                elseif ($data['series']['status'] === 'completed') { $statusClass = 'info text-dark'; $statusText = 'Hoàn thành'; }
-                                elseif ($data['series']['status'] === 'suspended') { $statusClass = 'dark'; $statusText = 'Tạm ngưng'; }
-                                elseif ($data['series']['status'] === 'canceled') { $statusClass = 'danger'; $statusText = 'Đã hủy'; }
-                            ?>
-                            <span class="badge bg-<?= $statusClass ?> px-2 py-1"><?= htmlspecialchars($statusText) ?></span>
+                            <?= $this->getSeriesStatusBadge($data['series']['status']) ?>
                         </div>
                     </div>
                     <div class="card-body p-4">
@@ -104,7 +95,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <div>
                                         <strong class="text-slate-800 fs-6">Chương <?= htmlspecialchars($actChap['chapter_number']) ?>: <?= htmlspecialchars($actChap['title'] ?? 'Chưa đặt tên') ?></strong>
-                                        <span class="badge bg-primary text-xs ms-2"><?= $actChap['status'] === 'drawing' ? 'Đang vẽ' : ($actChap['status'] === 'reviewing' ? 'Đang chờ duyệt' : 'Bản thảo') ?></span>
+                                        <span class="badge bg-primary text-xs ms-2"><?= $actChap['status'] === 'drawing' ? 'Đang vẽ' : (in_array($actChap['status'], ['reviewing', 'reviewing_draft', 'reviewing_final']) ? 'Đang chờ duyệt' : 'Bản thảo') ?></span>
                                     </div>
                                     <div>
                                         <span class="text-muted text-xs me-2">Hạn bản in:</span>

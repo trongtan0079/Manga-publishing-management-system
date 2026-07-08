@@ -1,7 +1,7 @@
 <?php
 // Get user info
-$displayName = $_SESSION['full_name'] ?? 'User';
-$role = $_SESSION['role_name'] ?? '';
+$displayName = isset($_SESSION) ? ($_SESSION['full_name'] ?? 'User') : 'User';
+$role = isset($_SESSION) ? ($_SESSION['role_name'] ?? '') : '';
 
 // Custom greeting & subtitle based on role
 $greetingName = htmlspecialchars($displayName);

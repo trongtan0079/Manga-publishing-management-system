@@ -58,6 +58,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <option value="drafting" selected>Bản nháp (Drafting)</option>
                     <option value="drawing">Đang vẽ (Drawing)</option>
                 </select>
+                <?php if ($chapter['status'] === 'drafting' || $chapter['status'] === 'reviewing_draft'): ?>
+                    <div class="form-text text-warning mt-2" style="font-size: 0.8rem; font-weight: 500;">
+                        <i class="fas fa-exclamation-triangle me-1"></i> <strong>Lưu ý:</strong> Vì chương truyện đang ở trạng thái Kịch bản thô (Drafting/Reviewing), các trợ lý sẽ chưa nhận được thông báo và các công việc (Tasks) trên trang này sẽ được ẩn tạm thời cho đến khi kịch bản được Editor duyệt thông qua.
+                    </div>
+                    <div class="form-text text-info mt-1" style="font-size: 0.78rem;">
+                        <i class="fas fa-info-circle me-1"></i> <strong>Quan trọng:</strong> Nếu chương truyện này vừa bị Editor từ chối duyệt kịch bản và yêu cầu chỉnh sửa, vui lòng đảm bảo bạn đã tải lên file ảnh kịch bản mới đã được sửa đổi trước khi đặt trạng thái trang là <em>"Đang vẽ (Drawing)"</em>, nhằm tránh việc trợ lý vẽ nhầm trên bản kịch bản cũ sau khi chương được duyệt lại.
+                    </div>
+                <?php endif; ?>
             </div>
             
             <button type="submit" class="btn btn-primary px-4"><i class="fas fa-save me-1"></i>Lưu Trang</button>

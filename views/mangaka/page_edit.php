@@ -1,4 +1,11 @@
 <?php 
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Chỉnh sửa trang truyện
  * Khai báo biến để Editor/IDE hiểu và không báo lỗi
@@ -11,7 +18,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
-$isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'published' || $page['status'] === 'approved' || $page['status'] === 'published');
+$isLocked = ($this->isChapterLocked($chapter) || in_array($page['status'], ['approved', 'published']));
 ?>
 
 <!-- Nút quay lại trang chi tiết Chapter -->
@@ -71,14 +78,26 @@ $isLocked = ($chapter['status'] === 'approved' || $chapter['status'] === 'publis
             <div class="mb-3">
                 <label for="status" class="form-label fw-bold">Trạng thái</label>
                 <select class="form-select" id="status" name="status" <?= $isLocked ? 'disabled' : '' ?>>
-                    <option value="drafting" <?= $page['status'] === 'drafting' ? 'selected' : '' ?>>Bản nháp (Drafting)</option>
-                    <option value="drawing" <?= $page['status'] === 'drawing' ? 'selected' : '' ?>>Đang vẽ (Drawing)</option>
-                    <?php if (in_array($page['status'], ['reviewing', 'approved', 'published'])): ?>
-                        <option value="reviewing" <?= $page['status'] === 'reviewing' ? 'selected' : '' ?> disabled>Đang chờ duyệt (Reviewing)</option>
-                        <option value="approved" <?= $page['status'] === 'approved' ? 'selected' : '' ?> disabled>Đã duyệt (Approved)</option>
+                    <option value="drafting" <?= $page['status'] === 'drafting' ? 'selected' : '' ?>>Phác thảo Kịch bản (Storyboard)</option>
+                    <option value="drawing" <?= $page['status'] === 'drawing' ? 'selected' : '' ?>>Đang vẽ Chi tiết (Drawing)</option>
+                    <?php if (in_array($page['status'], ['reviewing_draft', 'reviewing_final', 'approved', 'published'])): ?>
+                        <?php if ($page['status'] === 'reviewing_draft'): ?>
+                            <option value="reviewing_draft" selected disabled>Chờ duyệt Kịch bản</option>
+                        <?php elseif ($page['status'] === 'reviewing_final'): ?>
+                            <option value="reviewing_final" selected disabled>Chờ duyệt Bản vẽ</option>
+                        <?php endif; ?>
+                        <option value="approved" <?= $page['status'] === 'approved' ? 'selected' : '' ?> disabled>Đã duyệt phát hành (Approved)</option>
                         <option value="published" <?= $page['status'] === 'published' ? 'selected' : '' ?> disabled>Đã xuất bản (Published)</option>
                     <?php endif; ?>
                 </select>
+                <?php if (!$isLocked && ($chapter['status'] === 'drafting' || $chapter['status'] === 'reviewing_draft')): ?>
+                    <div class="form-text text-warning mt-2" style="font-size: 0.8rem; font-weight: 500;">
+                        <i class="fas fa-exclamation-triangle me-1"></i> <strong>Lưu ý:</strong> Vì chương truyện đang ở trạng thái Kịch bản thô (Drafting/Reviewing), các trợ lý sẽ chưa nhận được thông báo và các công việc (Tasks) trên trang này sẽ được ẩn tạm thời cho đến khi kịch bản được Editor duyệt thông qua.
+                    </div>
+                    <div class="form-text text-info mt-1" style="font-size: 0.78rem;">
+                        <i class="fas fa-info-circle me-1"></i> <strong>Quan trọng:</strong> Nếu chương truyện này vừa bị Editor từ chối duyệt kịch bản và yêu cầu chỉnh sửa, vui lòng đảm bảo bạn đã tải lên file ảnh kịch bản mới đã được sửa đổi trước khi đặt trạng thái trang là <em>"Đang vẽ (Drawing)"</em>, nhằm tránh việc trợ lý vẽ nhầm trên bản kịch bản cũ sau khi chương được duyệt lại.
+                    </div>
+                <?php endif; ?>
             </div>
             
             <button type="submit" class="btn btn-warning px-4" <?= $isLocked ? 'disabled' : '' ?>><i class="fas fa-save me-1"></i>Cập nhật Trang</button>

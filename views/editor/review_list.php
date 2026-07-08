@@ -103,7 +103,7 @@ $renderTable = function($list, $role, $emptyMsg) {
         
         $actionHtml = '';
         if ($sub['status'] === 'pending' || $sub['status'] === 'reviewed') {
-            $actionHtml = '<a href="' . BASE_PATH . '/index.php?controller=review&action=create&submission_id=' . $sub['submission_id'] . '" class="btn btn-sm btn-primary shadow-sm" style="border-radius: 6px;"><i class="fas fa-edit me-1"></i> Review</a>';
+            $actionHtml = '<a href="' . BASE_PATH . '/index.php?controller=submission&action=show&id=' . $sub['submission_id'] . '" class="btn btn-sm btn-primary shadow-sm text-white" style="border-radius: 6px;"><i class="fas fa-clipboard-check me-1"></i> Review</a>';
         } else {
             $actionHtml = '<a href="' . BASE_PATH . '/index.php?controller=submission&action=show&id=' . $sub['submission_id'] . '" class="btn btn-sm btn-outline-secondary shadow-sm" style="border-radius: 6px;"><i class="fas fa-eye me-1"></i> Xem chi tiết</a>';
         }

@@ -1,4 +1,11 @@
 <?php 
+if (!defined('BASE_PATH')) {
+    $scriptName = $_SERVER['SCRIPT_NAME'];
+    $pos = strpos($scriptName, '/views/');
+    $projectUrl = ($pos !== false) ? substr($scriptName, 0, $pos) : '';
+    header('Location: ' . $projectUrl . '/index.php');
+    exit;
+}
 /**
  * View: Giao diện quản lý danh sách trang truyện (page_list.php)
  * Vai trò: Mangaka (Họa sĩ chính)
@@ -71,18 +78,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <small class="text-muted">Chương <?= htmlspecialchars($page['chapter_number']) ?>: <?= htmlspecialchars($page['chapter_title'] ?? '') ?></small>
                                 </td>
                                 <td>
-                                    <?php
-                                    $pBadge = 'bg-secondary';
-                                    $pLabel = $page['status'];
-                                    switch ($page['status']) {
-                                        case 'drafting': $pBadge = 'bg-secondary'; $pLabel = 'Bản nháp'; break;
-                                        case 'drawing': $pBadge = 'bg-primary'; $pLabel = 'Đang vẽ'; break;
-                                        case 'reviewing': $pBadge = 'bg-warning text-dark'; $pLabel = 'Chờ duyệt'; break;
-                                        case 'approved': $pBadge = 'bg-success'; $pLabel = 'Đã duyệt'; break;
-                                        case 'published': $pBadge = 'bg-info text-dark'; $pLabel = 'Đã xuất bản'; break;
-                                    }
-                                    ?>
-                                    <span class="badge <?= $pBadge ?>"><?= htmlspecialchars($pLabel) ?></span>
+                                    <?= $this->getStatusBadge($page['status']) ?>
                                 </td>
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></td>
                                 <td class="text-end pe-4">
