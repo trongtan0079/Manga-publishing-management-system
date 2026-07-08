@@ -67,11 +67,11 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
 <div class="row">
     <!-- Cột bên trái: Hiển thị Preview File / File info -->
     <div class="col-lg-7 mb-4">
-        <div class="card shadow-sm border-0 rounded-3 h-100">
+        <div class="card shadow-sm border-0 rounded-3">
             <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-file-image me-2 text-primary"></i>Xem trước sản phẩm</h5>
             </div>
-            <div class="card-body d-flex flex-column align-items-center justify-content-center p-4 bg-light" style="min-height: 400px;">
+            <div class="card-body d-flex flex-column align-items-center p-4 bg-light" style="min-height: 400px;">
                 <?php 
                 $fileUrl = BASE_PATH . '/' . $submission['file_url'];
                 $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));

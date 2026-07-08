@@ -338,8 +338,8 @@ class PageController extends BaseController
         $chapter = $ownership['chapter'];
         $series = $ownership['series'];
 
-        // Khóa sửa trang nếu chapter đang bị khóa hoặc trang đã duyệt/xuất bản
-        if ($this->isChapterLocked($chapter) || in_array($page['status'], ['approved', 'published'])) {
+        // Khóa sửa trang nếu chapter đang bị khóa hoặc trang đã xuất bản
+        if ($this->isChapterLocked($chapter) || $page['status'] === 'published') {
             $_SESSION['error'] = "Trang truyện hoặc chương truyện đang chờ duyệt, đã phê duyệt hoặc đã xuất bản, không thể chỉnh sửa.";
             header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$page['chapter_id']}");
             exit;
@@ -369,8 +369,8 @@ class PageController extends BaseController
             $ownership = $this->checkChapterOwnership($chapterId);
             $chapter = $ownership['chapter'];
 
-            // Khóa sửa trang nếu chapter đang bị khóa hoặc trang đã duyệt/xuất bản
-            if ($this->isChapterLocked($chapter) || in_array($page['status'], ['approved', 'published'])) {
+            // Khóa sửa trang nếu chapter đang bị khóa hoặc trang đã xuất bản
+            if ($this->isChapterLocked($chapter) || $page['status'] === 'published') {
                 $_SESSION['error'] = "Trang truyện hoặc chương truyện đang chờ duyệt, đã phê duyệt hoặc đã xuất bản, không thể chỉnh sửa.";
                 header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
                 exit;

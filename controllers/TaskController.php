@@ -312,6 +312,9 @@ class TaskController extends BaseController
                 );
             }
 
+            // Đồng bộ lại trạng thái trang truyện
+            $this->syncPageStatus($pageId);
+
             // Chuyển hướng quay lại trang chi tiết (page_detail) cùng thông báo thành công
             $_SESSION['success'] = 'Đã giao task thành công.';
             header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=$pageId");
@@ -579,6 +582,7 @@ class TaskController extends BaseController
                 }
             }
 
+            $this->syncPageStatus($task['page_id']);
             $_SESSION['success'] = 'Cập nhật task thành công.';
             header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=" . $task['page_id']);
             exit;
@@ -609,6 +613,7 @@ class TaskController extends BaseController
             // Validate: Assistant chỉ được quyền đổi status hợp lệ, không được sửa title/deadline...
             if (in_array($status, $allowedStatus)) {
                 $this->taskModel->update($id, ['status' => $status]);
+                $this->syncPageStatus($task['page_id']);
                 $_SESSION['success'] = 'Cập nhật tiến độ thành công.';
             } else {
                 $_SESSION['error'] = 'Trạng thái cập nhật không hợp lệ hoặc bạn không có quyền tự đánh dấu hoàn thành.';
@@ -686,6 +691,7 @@ class TaskController extends BaseController
                 }
 
                 $this->taskModel->delete($id);
+                $this->syncPageStatus($task['page_id']);
                 $_SESSION['success'] = 'Đã xóa task thành công.';
                 
                 // Xóa xong quay lại trang chứa task đó
