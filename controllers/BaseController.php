@@ -89,11 +89,17 @@ class BaseController
                 $statusLabel = 'Chờ duyệt Bản vẽ';
                 break;
             case 'approved':
-                $badgeClass = 'bg-success text-white';
                 if ($chapterStatus && in_array($chapterStatus, ['drafting', 'reviewing_draft'])) {
+                    $badgeClass = 'bg-success text-white';
                     $statusLabel = 'Kịch bản xong';
                 } else {
-                    $statusLabel = 'Bản vẽ xong';
+                    if ($chapterStatus === 'approved' || $chapterStatus === 'published') {
+                        $badgeClass = 'bg-info text-dark';
+                        $statusLabel = 'Đã duyệt phát hành';
+                    } else {
+                        $badgeClass = 'bg-success text-white';
+                        $statusLabel = 'Bản vẽ hoàn thiện';
+                    }
                 }
                 break;
             case 'published':
