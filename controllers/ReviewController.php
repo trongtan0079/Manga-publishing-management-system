@@ -524,8 +524,8 @@ class ReviewController extends BaseController
         $chapterModel = new Chapter();
         $chapter = $chapterModel->findById($page['chapter_id']);
         if ($chapter) {
-            if ($chapter['status'] !== 'reviewing') {
-                echo json_encode(['success' => false, 'error' => 'Chỉ có thể tạo ghi chú lỗi khi chương truyện đang ở trạng thái Chờ duyệt (reviewing)']);
+            if (!in_array($chapter['status'], ['reviewing_draft', 'reviewing_final', 'reviewing'])) {
+                echo json_encode(['success' => false, 'error' => 'Chỉ có thể tạo ghi chú lỗi khi chương truyện đang ở trạng thái Chờ duyệt (Trạng thái hiện tại: ' . $chapter['status'] . ')']);
                 exit;
             }
             require_once __DIR__ . '/../models/Series.php';
@@ -616,8 +616,8 @@ class ReviewController extends BaseController
             $chapterModel = new Chapter();
             $chapter = $chapterModel->findById($page['chapter_id']);
             if ($chapter) {
-                if ($chapter['status'] !== 'reviewing') {
-                    echo json_encode(['success' => false, 'error' => 'Chỉ có thể xóa ghi chú lỗi khi chương truyện đang ở trạng thái Chờ duyệt (reviewing)']);
+                if (!in_array($chapter['status'], ['reviewing_draft', 'reviewing_final', 'reviewing'])) {
+                    echo json_encode(['success' => false, 'error' => 'Chỉ có thể xóa ghi chú lỗi khi chương truyện đang ở trạng thái Chờ duyệt (Trạng thái hiện tại: ' . $chapter['status'] . ')']);
                     exit;
                 }
                 require_once __DIR__ . '/../models/Series.php';
