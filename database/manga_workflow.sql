@@ -78,7 +78,7 @@ CREATE TABLE pages (
     page_number INT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
     old_image_url VARCHAR(255) DEFAULT NULL,
-    status ENUM('drafting', 'drawing', 'reviewing', 'approved', 'published') DEFAULT 'drafting',
+    status ENUM('drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published') DEFAULT 'drafting',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT fk_pages_chapter FOREIGN KEY (chapter_id) REFERENCES chapters(chapter_id) ON DELETE CASCADE,
