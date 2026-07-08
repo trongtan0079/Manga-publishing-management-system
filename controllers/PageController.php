@@ -377,7 +377,7 @@ class PageController extends BaseController
             }
 
             $pageNumber = trim($_POST['page_number'] ?? '');
-            $status = $_POST['status'] ?? 'drafting';
+            $status = $_POST['status'] ?? $page['status'];
 
             // Validation: page_number bắt buộc và > 0
             if ($pageNumber === '' || !is_numeric($pageNumber) || $pageNumber <= 0) {
