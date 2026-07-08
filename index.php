@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 
 // Thiết lập đường dẫn gốc của project
 // Giúp fix lỗi đường dẫn khi chạy project trong thư mục con (VD: localhost/Manga-publishing-management-system)

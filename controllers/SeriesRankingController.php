@@ -66,11 +66,13 @@ class SeriesRankingController extends BaseController
     public function create() {
         \requireRole('board');
         // Lấy danh sách truyện đang hoạt động để đánh giá xếp hạng kèm tên mangaka và editor chuyên trách
-        $sql = "SELECT s.*, u.full_name as mangaka_name, ed.full_name as editor_name
+        // Đồng thời đếm số lượng chapter đã xuất bản để hiển thị và kiểm tra quyền bình chọn công khai
+        $sql = "SELECT s.*, u.full_name as mangaka_name, ed.full_name as editor_name,
+                       (SELECT COUNT(*) FROM chapters WHERE series_id = s.series_id AND status = 'published') as published_chapters_count
                 FROM series s 
                 JOIN users u ON s.mangaka_id = u.user_id 
                 LEFT JOIN users ed ON s.editor_id = ed.user_id
-                WHERE s.status IN ('ongoing', 'completed', 'suspended')
+                WHERE s.status = 'ongoing'
                 ORDER BY s.title ASC";
         $stmt = $this->seriesModel->getConnection()->prepare($sql);
         $stmt->execute();
@@ -119,14 +121,22 @@ class SeriesRankingController extends BaseController
                 if ($voteCount < 0) $voteCount = 0;
 
                 $series = $this->seriesModel->findById($seriesId);
-                if ($series && in_array($series['status'], ['ongoing', 'completed', 'suspended'])) {
-                    $validVotes[$seriesId] = [
-                        'votes' => $voteCount,
-                        'mangaka_id' => $series['mangaka_id'],
-                        'title' => $series['title']
-                    ];
-                    if ($voteCount > $maxVotes) {
-                        $maxVotes = $voteCount;
+                if ($series && $series['status'] === 'ongoing') {
+                    // Kiểm tra xem có ít nhất 1 chapter được xuất bản (published) hay không
+                    $sqlCheck = "SELECT COUNT(*) FROM chapters WHERE series_id = :series_id AND status = 'published'";
+                    $stmtCheck = $this->seriesModel->getConnection()->prepare($sqlCheck);
+                    $stmtCheck->execute(['series_id' => $seriesId]);
+                    $hasPublished = $stmtCheck->fetchColumn() > 0;
+
+                    if ($hasPublished) {
+                        $validVotes[$seriesId] = [
+                            'votes' => $voteCount,
+                            'mangaka_id' => $series['mangaka_id'],
+                            'title' => $series['title']
+                        ];
+                        if ($voteCount > $maxVotes) {
+                            $maxVotes = $voteCount;
+                        }
                     }
                 }
             }
@@ -244,7 +254,7 @@ class SeriesRankingController extends BaseController
         }
         $allSeries = $this->seriesModel->findAll(); 
         $seriesList = array_filter($allSeries, function($s) use ($ranking) {
-            return in_array($s['status'], ['ongoing', 'completed', 'suspended']) || $s['series_id'] == $ranking['series_id'];
+            return $s['status'] === 'ongoing' || $s['series_id'] == $ranking['series_id'];
         });
         require_once __DIR__ . '/../views/board/ranking_edit.php';
     }
@@ -281,8 +291,8 @@ class SeriesRankingController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
             }
-            if (in_array($series['status'], ['planning', 'canceled'])) {
-                $_SESSION['error'] = 'Không thể xếp hạng cho bộ truyện đang ở trạng thái Kế hoạch hoặc Đã hủy.';
+            if ($series['status'] !== 'ongoing') {
+                $_SESSION['error'] = 'Chỉ được phép nhập điểm đánh giá xếp hạng đối với các bộ truyện đang thực sự phát hành (Ongoing).';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
             }

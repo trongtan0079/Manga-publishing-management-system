@@ -81,7 +81,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         <th>Họa sĩ (Mangaka)</th>
                                         <th>Biên tập phụ trách</th>
                                         <th>Trạng thái hiện tại</th>
-                                        <th class="text-end pe-4" style="width: 220px;">Số Phiếu Bình Chọn <span class="text-danger">*</span></th>
+                                        <th>Chương đã xuất bản</th>
+                                        <th class="text-end pe-4" style="width: 260px;">Số Phiếu Bình Chọn <span class="text-danger">*</span></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -109,17 +110,38 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             <td>
                                                 <?= $this->getSeriesStatusBadge($series) ?>
                                             </td>
+                                            <td>
+                                                <?php if ($series['published_chapters_count'] > 0): ?>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style="font-size: 0.78rem; font-weight: 600;">
+                                                        <i class="fas fa-book-open me-1"></i><?= $series['published_chapters_count'] ?> Chương
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1" style="font-size: 0.78rem; font-weight: 600;" title="Chưa có chapter nào được xuất bản công chúng">
+                                                        <i class="fas fa-exclamation-circle me-1"></i>Chưa xuất bản
+                                                    </span>
+                                                <?php endif; ?>
+                                            </td>
                                             <td class="text-end pe-4">
-                                                <div class="input-group input-group-sm ms-auto" style="max-width: 160px;">
-                                                    <input type="number" class="form-control text-end fw-bold" 
-                                                           name="votes[<?= $series['series_id'] ?>]" 
-                                                           min="0" 
-                                                           value="0" 
-                                                           required 
-                                                           style="border-radius: 8px 0 0 8px; border-right: none; font-size: 0.9rem;"
-                                                           placeholder="Nhập số phiếu">
-                                                    <span class="input-group-text bg-light text-muted" style="border-radius: 0 8px 8px 0; font-size: 0.75rem;">Phiếu</span>
-                                                </div>
+                                                <?php if ($series['published_chapters_count'] > 0): ?>
+                                                    <div class="input-group input-group-sm ms-auto" style="max-width: 200px;">
+                                                        <input type="number" class="form-control text-end fw-bold" 
+                                                               name="votes[<?= $series['series_id'] ?>]" 
+                                                               min="0" 
+                                                               value="0" 
+                                                               required 
+                                                               style="border-radius: 8px 0 0 8px; border-right: none; font-size: 0.9rem;"
+                                                               placeholder="Nhập số phiếu">
+                                                        <span class="input-group-text bg-light text-muted" style="border-radius: 0 8px 8px 0; font-size: 0.75rem;">Phiếu</span>
+                                                    </div>
+                                                <?php else: ?>
+                                                    <div class="input-group input-group-sm ms-auto" style="max-width: 200px;" title="Bộ truyện này chưa có chapter nào được xuất bản công khai nên không thể nhận phiếu bình chọn">
+                                                        <input type="text" class="form-control text-end bg-light text-muted fw-bold" 
+                                                               value="Khóa" 
+                                                               disabled 
+                                                               style="border-radius: 8px 0 0 8px; border-right: none; font-size: 0.9rem; cursor: not-allowed;">
+                                                        <span class="input-group-text bg-light text-muted" style="border-radius: 0 8px 8px 0; font-size: 0.75rem; cursor: not-allowed;"><i class="fas fa-lock text-danger"></i></span>
+                                                    </div>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; ?>
