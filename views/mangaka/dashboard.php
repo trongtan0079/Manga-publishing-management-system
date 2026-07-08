@@ -21,6 +21,33 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <?php require_once __DIR__ . '/../layouts/welcome_banner.php'; ?>
 
+<?php 
+// Kiểm tra xem tác giả này có bộ truyện nào bị xếp hạng thấp có nguy cơ bị hủy hay không
+$hasWarningSeries = false;
+$warningSeriesList = [];
+if (!empty($latestRankings)) {
+    foreach ($latestRankings as $r) {
+        if ($r['rank_position'] >= 5 && $r['score'] < 50) {
+            $hasWarningSeries = true;
+            $warningSeriesList[] = $r['series_title'] ?? ('Series #' . $r['series_id']);
+        }
+    }
+}
+?>
+
+<?php if ($hasWarningSeries): ?>
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert" style="border-radius: 12px; border-left: 5px solid #dc3545; background-color: #fdf2f2; border-top: 1px solid #fca5a5; border-right: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5;">
+        <i class="fas fa-exclamation-triangle me-3 text-danger fs-4"></i>
+        <div>
+            <strong class="text-danger d-block mb-1" style="font-size: 0.92rem;"><i class="fas fa-radiation"></i> Cảnh báo Hiệu Năng Tác Phẩm!</strong>
+            <span class="text-muted" style="font-size: 0.82rem; font-weight: 500; line-height: 1.5; display: inline-block;">
+                Tác phẩm của bạn: <strong class="text-dark"><?= implode(', ', array_map('htmlspecialchars', $warningSeriesList)) ?></strong> hiện đang có thứ hạng thấp (Hạng >= 5) và điểm số bình chọn dưới trung bình (Điểm < 50). Có nguy cơ cao bị Hội đồng Biên tập xem xét đình bản (Hủy dự án). Vui lòng liên hệ Editor phụ trách để xây dựng hồ sơ biện hộ hoặc cải thiện chất lượng kịch bản ở chương tiếp theo.
+            </span>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+<?php endif; ?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="h3 mb-1">Không gian Sáng tác</h2>
@@ -260,6 +287,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             break;
                                         case 'submitted':
                                             $statusBadge = '<span class="badge bg-warning text-dark">Đã nộp</span>';
+                                            break;
+                                        case 'rejected':
+                                            $statusBadge = '<span class="badge bg-danger">Yêu cầu sửa</span>';
                                             break;
                                         case 'completed':
                                             $statusBadge = '<span class="badge bg-success">Hoàn thành</span>';

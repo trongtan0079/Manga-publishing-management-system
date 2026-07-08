@@ -109,12 +109,15 @@ class BaseController
         return "<span class=\"badge {$badgeClass}\">{$statusLabel}</span>";
     }
 
-    /**
-     * Kiểm tra xem Series có bị khóa thao tác (suspended, canceled, completed) hay không
-     */
     public function isSeriesLocked($series) {
         if (!$series) return false;
-        return in_array($series['status'], ['suspended', 'canceled', 'completed']);
+        if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+            return true;
+        }
+        if ($series['status'] === 'planning' && ($series['publish_type'] ?? '') === 'submitted') {
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -92,7 +92,7 @@ if (!empty($seriesList)) {
                             <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 140px; font-size: 0.72rem; letter-spacing: 0.5px;">Tác giả</th>
                             <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 260px; font-size: 0.72rem; letter-spacing: 0.5px;">Thảo luận Hội đồng</th>
                             <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 120px; font-size: 0.72rem; letter-spacing: 0.5px;">Ngày tạo</th>
-                            <th class="py-3 text-slate-500 fw-bold text-uppercase text-end pe-4" style="min-width: 380px; font-size: 0.72rem; letter-spacing: 0.5px;">Bỏ phiếu & Lịch phát hành</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase text-end pe-4" style="min-width: 520px; font-size: 0.72rem; letter-spacing: 0.5px;">Bỏ phiếu & Lịch phát hành</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -241,7 +241,7 @@ if (!empty($seriesList)) {
                             <th>Trạng thái</th>
                             <th>Tiến độ Chapter</th>
                             <th>Hồ sơ bảo vệ</th>
-                            <th class="text-end pe-4" style="min-width: 320px;">Hành động điều chỉnh</th>
+                            <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -275,7 +275,7 @@ if (!empty($seriesList)) {
                                                 <span class="badge bg-primary"><?= htmlspecialchars($series['latest_score']) ?> điểm</span>
                                             </div>
                                             <!-- Cảnh báo nếu hạng thấp (từ hạng 5 trở đi) hoặc điểm số quá thấp (< 50) -->
-                                            <?php if ($series['latest_rank'] >= 5 || $series['latest_score'] < 50): ?>
+                                            <?php if ($series['latest_rank'] >= 5 && $series['latest_score'] < 50): ?>
                                                 <span class="badge badge-danger-custom text-xs" style="max-width: fit-content;">
                                                     <i class="fas fa-exclamation-triangle me-1"></i>Có nguy cơ bị hủy
                                                 </span>
@@ -295,13 +295,20 @@ if (!empty($seriesList)) {
                                            <?php 
                                            $chapterPercent = round(($series['finished_chapters'] / $series['total_chapters']) * 100);
                                            ?>
-                                           <div class="d-flex align-items-center" style="gap: 10px;">
-                                               <div class="flex-grow-1" style="min-width: 90px; max-width: 120px;">
-                                                   <div class="progress" style="height: 6px; background-color: #e2e8f0; border-radius: 3px;" title="<?= $series['finished_chapters'] ?>/<?= $series['total_chapters'] ?> chương">
-                                                       <div class="progress-bar bg-success" role="progressbar" style="width: <?= $chapterPercent ?>%; border-radius: 3px;" aria-valuenow="<?= $chapterPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                           <div class="d-flex flex-column gap-1">
+                                               <div class="d-flex align-items-center" style="gap: 10px;">
+                                                   <div class="flex-grow-1" style="min-width: 90px; max-width: 120px;">
+                                                       <div class="progress" style="height: 6px; background-color: #e2e8f0; border-radius: 3px;" title="<?= $series['finished_chapters'] ?>/<?= $series['total_chapters'] ?> chương">
+                                                           <div class="progress-bar bg-success" role="progressbar" style="width: <?= $chapterPercent ?>%; border-radius: 3px;" aria-valuenow="<?= $chapterPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                                       </div>
+                                                       <small class="text-muted" style="font-size: 0.7rem; font-weight: 500;"><?= $series['finished_chapters'] ?>/<?= $series['total_chapters'] ?> chương (<?= $chapterPercent ?>%)</small>
                                                    </div>
-                                                   <small class="text-muted" style="font-size: 0.7rem; font-weight: 500;"><?= $series['finished_chapters'] ?>/<?= $series['total_chapters'] ?> chương (<?= $chapterPercent ?>%)</small>
                                                </div>
+                                               <?php if (($series['has_final_approved'] ?? 0) > 0): ?>
+                                                   <span class="badge bg-success-subtle text-success border border-success-subtle text-xs" style="max-width: fit-content;">Hoàn tất</span>
+                                               <?php else: ?>
+                                                   <span class="badge bg-warning-subtle text-warning border border-warning-subtle text-xs" style="max-width: fit-content;">Đang làm</span>
+                                               <?php endif; ?>
                                            </div>
                                        <?php else: ?>
                                            <span class="text-muted text-xs">Chưa có Chapter</span>
