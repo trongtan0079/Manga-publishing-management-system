@@ -341,6 +341,16 @@ class DashboardController extends BaseController {
             $evaluatedSeries = $rankingModel->getSeriesCountByPeriod($latestPeriod);
             $top5Series = $rankingModel->getTopSeriesByPeriod($latestPeriod, 5);
             $bottom5Series = $rankingModel->getBottomSeriesByPeriod($latestPeriod, 5);
+            
+            // Loại bỏ các bộ truyện xuất hiện ở Top 5 khỏi Bottom 5 để tránh trùng lặp hiển thị khi số lượng series ít
+            if (!empty($top5Series) && !empty($bottom5Series)) {
+                $topIds = array_column($top5Series, 'series_id');
+                $bottom5Series = array_filter($bottom5Series, function($item) use ($topIds) {
+                    return !in_array($item['series_id'], $topIds);
+                });
+                $bottom5Series = array_values($bottom5Series);
+            }
+
             // Lấy tối đa 10 truyện để vẽ biểu đồ
             $chartSeriesData = $rankingModel->getTopSeriesByPeriod($latestPeriod, 10);
             
