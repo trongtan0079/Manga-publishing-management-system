@@ -66,6 +66,45 @@ class BaseController
     }
 
     /**
+     * Helper to render HTML badge for Page status
+     */
+    public function getPageStatusBadge($status, $chapterStatus = null) {
+        $badgeClass = 'bg-secondary';
+        $statusLabel = $status;
+        switch ($status) {
+            case 'drafting':
+                $badgeClass = 'bg-secondary';
+                $statusLabel = 'Bản nháp (Drafting)';
+                break;
+            case 'drawing':
+                $badgeClass = 'bg-primary';
+                $statusLabel = 'Đang vẽ (Drawing)';
+                break;
+            case 'reviewing_draft':
+                $badgeClass = 'bg-warning text-dark';
+                $statusLabel = 'Chờ duyệt Kịch bản';
+                break;
+            case 'reviewing_final':
+                $badgeClass = 'bg-warning text-dark';
+                $statusLabel = 'Chờ duyệt Bản vẽ';
+                break;
+            case 'approved':
+                $badgeClass = 'bg-success text-white';
+                if ($chapterStatus && in_array($chapterStatus, ['drafting', 'reviewing_draft'])) {
+                    $statusLabel = 'Kịch bản xong';
+                } else {
+                    $statusLabel = 'Bản vẽ xong';
+                }
+                break;
+            case 'published':
+                $badgeClass = 'bg-success';
+                $statusLabel = 'Đã xuất bản';
+                break;
+        }
+        return "<span class=\"badge {$badgeClass}\">{$statusLabel}</span>";
+    }
+
+    /**
      * Helper to render HTML badge for Series status
      */
     public function getSeriesStatusBadge($series) {
@@ -156,9 +195,6 @@ class BaseController
         return (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
     }
 
-    /**
-     * Reusable Helper: Kiểm tra xem trang truyện có bản vẽ mới cập nhật đè lên sau khi Editor báo lỗi hay không
-     */
     public function isPageUpdatedAfterAnnotation($page) {
         if (empty($page)) {
             return false;
@@ -166,10 +202,7 @@ class BaseController
         if (empty($page['annotation_count']) || $page['annotation_count'] <= 0) {
             return false;
         }
-        if (empty($page['latest_annotation_time'])) {
-            return false;
-        }
-        return strtotime($page['updated_at']) > (strtotime($page['latest_annotation_time']) + 1);
+        return !empty($page['old_image_url']);
     }
 
     /**
@@ -179,16 +212,35 @@ class BaseController
         if (empty($page) || empty($annotations)) {
             return false;
         }
-        $latestAnnTime = null;
-        foreach ($annotations as $ann) {
-            if (isset($ann['created_at']) && ($latestAnnTime === null || strtotime($ann['created_at']) > strtotime($latestAnnTime))) {
-                $latestAnnTime = $ann['created_at'];
+        return !empty($page['old_image_url']);
+    }
+
+    /**
+     * Đồng bộ trạng thái của Trang truyện dựa trên tiến độ các công việc (Tasks)
+     */
+    public function syncPageStatus($pageId) {
+        require_once __DIR__ . '/../models/Task.php';
+        $taskModel = new \Task();
+        $tasksOnPage = $taskModel->findByPageId($pageId);
+        
+        $allTasksCompleted = true;
+        foreach ($tasksOnPage as $t) {
+            if ($t['status'] !== 'completed') {
+                $allTasksCompleted = false;
+                break;
             }
         }
-        if ($latestAnnTime === null) {
-            return false;
+        
+        require_once __DIR__ . '/../models/Page.php';
+        $pageModel = new \Page();
+        $page = $pageModel->findById($pageId);
+        
+        if ($page && !in_array($page['status'], ['drafting', 'reviewing_draft', 'reviewing_final', 'published'])) {
+            $newStatus = $allTasksCompleted ? 'approved' : 'drawing';
+            if ($page['status'] !== $newStatus) {
+                $pageModel->update($pageId, ['status' => $newStatus]);
+            }
         }
-        return strtotime($page['updated_at']) > (strtotime($latestAnnTime) + 1);
     }
 }
 

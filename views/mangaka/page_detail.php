@@ -18,7 +18,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
-$isLocked = ($this->isChapterLocked($chapter) || in_array($page['status'], ['approved', 'published']));
+$isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published');
 ?>
 <style>
 .selected-card {
@@ -134,7 +134,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
             </form>
         <?php else: ?>
             <?php 
-                $lockMsg = 'Trang đã được duyệt / phát hành (Khóa)';
+                $lockMsg = 'Trang đã hoàn thành (Khóa)';
                 if ($this->isSeriesLocked($series)) {
                     if ($series['status'] === 'suspended') $lockMsg = 'Bộ truyện đang tạm ngưng (Khóa)';
                     elseif ($series['status'] === 'canceled') $lockMsg = 'Bộ truyện đã hủy (Khóa)';
@@ -160,7 +160,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
     <div class="card-body">
         <div class="row">
             <div class="col-md-4">
-                <p><strong>Trạng thái:</strong> <?= $this->getStatusBadge($page['status']) ?></p>
+                <p><strong>Trạng thái:</strong> <?= $this->getPageStatusBadge($page['status'], $chapter['status']) ?></p>
                 <p><strong>Ngày tạo:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['created_at']))) ?></p>
                 <p><strong>Cập nhật lần cuối:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></p>
             </div>

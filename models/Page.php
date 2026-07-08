@@ -42,7 +42,7 @@ class Page extends Model {
      * Lấy danh sách tất cả các trang vẽ thuộc các bộ truyện của Mangaka
      */
     public function findByMangakaId($mangakaId) {
-        $sql = "SELECT p.*, c.chapter_number, c.title as chapter_title, s.title as series_title 
+        $sql = "SELECT p.*, c.chapter_number, c.status as chapter_status, c.title as chapter_title, s.title as series_title 
                 FROM {$this->table} p 
                 JOIN chapters c ON p.chapter_id = c.chapter_id
                 JOIN series s ON c.series_id = s.series_id 
@@ -58,8 +58,9 @@ class Page extends Model {
      * Lấy danh sách trang theo chapter ID, kèm theo số lượng annotation và mốc thời gian annotation gần nhất
      */
     public function findByChapterIdWithAnnotationCount($chapterId) {
-        $sql = "SELECT p.*, COUNT(ea.annotation_id) AS annotation_count, MAX(ea.created_at) AS latest_annotation_time
+        $sql = "SELECT p.*, c.status AS chapter_status, COUNT(ea.annotation_id) AS annotation_count, MAX(ea.created_at) AS latest_annotation_time
                 FROM {$this->table} p 
+                JOIN chapters c ON p.chapter_id = c.chapter_id
                 LEFT JOIN editor_annotations ea ON p.page_id = ea.page_id 
                 WHERE p.chapter_id = :chapter_id 
                 GROUP BY p.page_id 

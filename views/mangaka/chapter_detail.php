@@ -138,7 +138,7 @@ $isLocked = $this->isChapterLocked($chapter);
                                     </div>
                                 </td>
                                 <td>
-                                    <?= $this->getStatusBadge($page['status']) ?>
+                                     <?= $this->getPageStatusBadge($page['status'], $chapter['status']) ?>
                                     <?php if ($isUpdatedAfterAnnotation): ?>
                                         <span class="badge bg-warning text-dark ms-1" style="font-size: 0.75rem;" title="Đã tải lên ảnh mới sau khi Editor báo lỗi. Đang chờ duyệt.">
                                             <i class="fas fa-sync-alt me-1"></i>Bản mới
@@ -148,7 +148,7 @@ $isLocked = $this->isChapterLocked($chapter);
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></td>
                                 <td>
                                     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-info text-white">Xem</a>
-                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && $page['status'] !== 'approved' && $page['status'] !== 'published' && !$this->isSeriesLocked($series)): ?>
+                                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && $page['status'] !== 'published' && !$this->isSeriesLocked($series)): ?>
                                     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                     <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
                                         <button type="submit" class="btn btn-sm btn-danger">Xóa</button>

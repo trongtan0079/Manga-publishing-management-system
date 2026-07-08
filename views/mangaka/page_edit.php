@@ -18,7 +18,7 @@ $current_page = 'series';
 require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
-$isLocked = ($this->isChapterLocked($chapter) || in_array($page['status'], ['approved', 'published']));
+$isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published');
 ?>
 
 <!-- Nút quay lại trang chi tiết Chapter -->
@@ -78,15 +78,15 @@ $isLocked = ($this->isChapterLocked($chapter) || in_array($page['status'], ['app
             <div class="mb-3">
                 <label for="status" class="form-label fw-bold">Trạng thái</label>
                 <select class="form-select" id="status" name="status" <?= $isLocked ? 'disabled' : '' ?>>
-                    <option value="drafting" <?= $page['status'] === 'drafting' ? 'selected' : '' ?>>Phác thảo Kịch bản (Storyboard)</option>
-                    <option value="drawing" <?= $page['status'] === 'drawing' ? 'selected' : '' ?>>Đang vẽ Chi tiết (Drawing)</option>
+                    <option value="drafting" <?= $page['status'] === 'drafting' ? 'selected' : '' ?>>Bản nháp (Drafting)</option>
+                    <option value="drawing" <?= $page['status'] === 'drawing' ? 'selected' : '' ?>>Đang vẽ (Drawing)</option>
                     <?php if (in_array($page['status'], ['reviewing_draft', 'reviewing_final', 'approved', 'published'])): ?>
                         <?php if ($page['status'] === 'reviewing_draft'): ?>
                             <option value="reviewing_draft" selected disabled>Chờ duyệt Kịch bản</option>
                         <?php elseif ($page['status'] === 'reviewing_final'): ?>
                             <option value="reviewing_final" selected disabled>Chờ duyệt Bản vẽ</option>
                         <?php endif; ?>
-                        <option value="approved" <?= $page['status'] === 'approved' ? 'selected' : '' ?> disabled>Đã duyệt phát hành (Approved)</option>
+                        <option value="approved" <?= $page['status'] === 'approved' ? 'selected' : '' ?> disabled>Đã hoàn thành (Approved)</option>
                         <option value="published" <?= $page['status'] === 'published' ? 'selected' : '' ?> disabled>Đã xuất bản (Published)</option>
                     <?php endif; ?>
                 </select>
