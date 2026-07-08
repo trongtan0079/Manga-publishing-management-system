@@ -106,7 +106,7 @@ class Chapter extends Model {
      * Đếm số lượng chapter chưa hoàn thành của một truyện
      */
     public function countUnfinishedChapters($seriesId) {
-        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE series_id = :series_id AND status IN ('drafting', 'drawing', 'reviewing')";
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE series_id = :series_id AND status IN ('drafting', 'drawing', 'reviewing', 'reviewing_draft', 'reviewing_final')";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':series_id', $seriesId);
         $stmt->execute();
@@ -114,14 +114,29 @@ class Chapter extends Model {
     }
 
     /**
-     * Kiểm tra truyện đã có chapter cuối và chapter đó đã được approved chưa
+     * Kiểm tra truyện đã có chapter cuối và chapter đó đã được approved/published chưa
      */
     public function hasFinalApprovedChapter($seriesId) {
-        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE series_id = :series_id AND is_final = 1 AND status = 'approved'";
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE series_id = :series_id AND is_final = 1 AND status IN ('approved', 'published')";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':series_id', $seriesId);
         $stmt->execute();
         return $stmt->fetchColumn() > 0;
+    }
+
+    /**
+     * Lấy danh sách chapter đã được Editor duyệt (approved) nhưng chưa xuất bản
+     */
+    public function findApprovedChapters() {
+        $sql = "SELECT c.*, s.title as series_title, u.full_name as mangaka_name
+                FROM {$this->table} c
+                JOIN series s ON c.series_id = s.series_id
+                JOIN users u ON s.mangaka_id = u.user_id
+                WHERE c.status = 'approved'
+                ORDER BY s.title ASC, c.chapter_number ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function countByMangakaId($mangakaId) {

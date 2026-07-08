@@ -53,7 +53,7 @@ class Series extends Model {
                 FROM {$this->table} s 
                 JOIN users u ON s.mangaka_id = u.user_id 
                 LEFT JOIN users ed ON s.editor_id = ed.user_id
-                WHERE s.status IN ('planning', 'ongoing', 'suspended', 'canceled') AND s.publish_type != 'draft'
+                WHERE s.status IN ('planning', 'ongoing', 'suspended') AND s.publish_type != 'draft'
                 ORDER BY s.created_at DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();

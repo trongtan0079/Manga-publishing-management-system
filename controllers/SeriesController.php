@@ -301,32 +301,21 @@ class SeriesController extends BaseController
             exit;
         }
 
-        // Chặn chỉnh sửa bộ truyện nếu đã tạm ngưng, đã hủy hoặc đã hoàn thành
+        // Chặn chỉnh sửa bộ truyện nếu đã bị khóa
         $action = $_GET['action'] ?? '';
-        if (in_array($action, ['edit', 'update']) && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+        if (in_array($action, ['edit', 'update']) && $this->isSeriesLocked($series)) {
             $_SESSION['error'] = "Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa thông tin.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $id);
             exit;
         }
 
-        // Admin, Board có quyền xem thông tin chi tiết các bộ truyện đã nộp hoặc đang hoạt động
-        if ($role === 'admin' || $role === 'board') {
-            return;
-        }
-
-        // Editor chỉ được xem nếu được gán phụ trách và bộ truyện đã được duyệt (status !== 'planning')
-        if ($role === 'editor') {
-            if ($series['editor_id'] == $_SESSION['user_id'] && $series['status'] !== 'planning') {
-                return;
+        if (!$this->hasSeriesAccess($series)) {
+            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện này.";
+            if ($role === 'editor') {
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            } else {
+                header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             }
-            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không được phân công quản lý bộ truyện này.";
-            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
-            exit;
-        }
-
-        if ($series['mangaka_id'] != $_SESSION['user_id']) {
-            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện của người khác.";
-            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             exit;
         }
     }
@@ -565,6 +554,11 @@ class SeriesController extends BaseController
             $series['my_vote'] = $boardVoteModel->getMemberVote($series['series_id'], $currentUserId);
         }
         unset($series);
+        
+        // Lấy danh sách các chapter đã duyệt nhưng chưa xuất bản
+        require_once __DIR__ . '/../models/Chapter.php';
+        $chapterModel = new \Chapter();
+        $approvedChapters = $chapterModel->findApprovedChapters();
         
         require_once __DIR__ . '/../views/board/publish_series.php';
     }
@@ -867,7 +861,7 @@ class SeriesController extends BaseController
         $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
         $series = $this->seriesModel->findById($id);
         
-        if (!$series || $series['editor_id'] != $_SESSION['user_id'] || $series['status'] === 'planning') {
+        if (!$series || !$this->hasSeriesAccess($series)) {
             $_SESSION['error'] = "Không tìm thấy bộ truyện hoặc bạn không phụ trách bộ truyện này.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=dossiers');
             exit;
@@ -900,7 +894,7 @@ class SeriesController extends BaseController
             $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             $series = $this->seriesModel->findById($id);
             
-            if (!$series || $series['editor_id'] != $_SESSION['user_id'] || $series['status'] === 'planning') {
+            if (!$series || !$this->hasSeriesAccess($series)) {
                 $_SESSION['error'] = "Không tìm thấy bộ truyện hoặc bạn không phụ trách bộ truyện này.";
                 header('Location: ' . BASE_PATH . '/index.php?controller=series&action=dossiers');
                 exit;

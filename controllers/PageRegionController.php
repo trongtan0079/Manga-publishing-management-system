@@ -34,7 +34,7 @@ class PageRegionController extends BaseController {
         if (!$chapter) return false;
 
         // Chặn sửa đổi phân vùng nếu chapter đang chờ duyệt, đã duyệt hoặc đã xuất bản
-        if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+        if (in_array($chapter['status'], ['reviewing_draft', 'reviewing_final', 'approved', 'published'])) {
             return false;
         }
 

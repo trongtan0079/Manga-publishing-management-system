@@ -14,7 +14,7 @@ class ChapterController extends BaseController
     private $pageModel;
     
     // Các trạng thái (status) hợp lệ của một chapter tương ứng với CSDL
-    private $allowedStatuses = ['drafting', 'drawing', 'reviewing', 'approved', 'published'];
+    private $allowedStatuses = ['drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published'];
 
     public function __construct() {
         parent::__construct();
@@ -29,6 +29,8 @@ class ChapterController extends BaseController
                 echo "Access Denied: You do not have the required role to access this page.";
                 exit;
             }
+        } elseif ($action === 'publish') {
+            requireRole('board');
         } else {
             requireRole('mangaka');
         }
@@ -55,36 +57,25 @@ class ChapterController extends BaseController
         }
 
         $role = $_SESSION['role_name'] ?? '';
-        // Admin, Board có quyền xem chi tiết bộ truyện/chapter
-        if ($role === 'admin' || $role === 'board') {
-            return $series;
-        }
-
-        if ($role === 'editor') {
-            // Editor chỉ được xem nếu được gán phụ trách và bộ truyện đã được duyệt (status !== 'planning')
-            if ($series['editor_id'] == $_SESSION['user_id'] && $series['status'] !== 'planning') {
-                return $series;
-            }
-            $_SESSION['error'] = "Truy cập bị từ chối! Bạn không được phân công quản lý bộ truyện này.";
-            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
-            exit;
-        }
-
-        if ($series['mangaka_id'] != $_SESSION['user_id']) {
+        if (!$this->hasSeriesAccess($series)) {
             $_SESSION['error'] = "Truy cập bị từ chối! Bạn không có quyền thao tác trên bộ truyện này.";
-            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
+            if ($role === 'editor') {
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
+            } else {
+                header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
+            }
             exit;
         }
 
-        // Chỉ cho phép tạo chapter mới khi bộ truyện đã được duyệt hoạt động (ongoing)
-        if (($action === 'create' || $action === 'store') && $series['status'] !== 'ongoing') {
-            $_SESSION['error'] = "Bộ truyện chưa được phê duyệt (Đang ở giai đoạn Kế hoạch/Nháp), hoặc đang tạm ngưng, đã hủy. Không thể tạo thêm chapter mới.";
+        // Chỉ cho phép tạo chapter mới khi bộ truyện đang lập kế hoạch (planning) hoặc hoạt động (ongoing)
+        if (($action === 'create' || $action === 'store') && !in_array($series['status'], ['planning', 'ongoing'])) {
+            $_SESSION['error'] = "Bộ truyện chưa được phê duyệt hoặc đang tạm ngưng, đã hủy. Không thể tạo thêm chapter mới.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
             exit;
         }
 
-        // Chặn sửa/xóa/nộp chapter nếu bộ truyện đang tạm ngưng, đã hủy hoặc đã hoàn thành
-        if (in_array($action, ['edit', 'update', 'delete', 'submit']) && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+        // Chặn sửa/xóa/nộp chapter nếu bộ truyện đang bị khóa
+        if (in_array($action, ['edit', 'update', 'delete', 'submit']) && $this->isSeriesLocked($series)) {
             $_SESSION['error'] = "Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa hoặc thao tác trên các chương.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
             exit;
@@ -146,7 +137,7 @@ class ChapterController extends BaseController
 
             $chapterNumber = trim($_POST['chapter_number'] ?? '');
             $title = trim($_POST['title'] ?? '');
-            $status = $_POST['status'] ?? 'drafting';
+            $status = 'drafting'; // Mặc định luôn là Bản nháp khi tạo mới
 
             // Validation
             if ($chapterNumber === '' || !is_numeric($chapterNumber) || $chapterNumber <= 0) {
@@ -163,12 +154,6 @@ class ChapterController extends BaseController
 
             if ($this->chapterModel->isChapterNumberExists($seriesId, $chapterNumber)) {
                 $_SESSION['error'] = "Chapter Number {$chapterNumber} đã tồn tại trong bộ truyện này.";
-                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
-                exit;
-            }
-
-            if (!in_array($status, ['drafting', 'drawing'])) {
-                $_SESSION['error'] = "Trạng thái chapter khởi tạo không hợp lệ! Chỉ cho phép Bản nháp hoặc Đang vẽ.";
                 header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=create&series_id={$seriesId}");
                 exit;
             }
@@ -235,8 +220,8 @@ class ChapterController extends BaseController
 
         $series = $this->checkSeriesOwnership($chapter['series_id']);
 
-        // Khóa truy cập trang sửa nếu chương đang chờ duyệt, đã duyệt hoặc đã xuất bản
-        if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+        // Khóa truy cập trang sửa nếu chương đang bị khóa
+        if ($this->isChapterLocked($chapter)) {
             $_SESSION['error'] = "Chương truyện đang trong quá trình duyệt, đã phê duyệt hoặc đã xuất bản, không thể chỉnh sửa.";
             header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id=" . $chapter['series_id']);
             exit;
@@ -264,7 +249,6 @@ class ChapterController extends BaseController
 
             $chapterNumber = trim($_POST['chapter_number'] ?? '');
             $title = trim($_POST['title'] ?? '');
-            $status = $_POST['status'] ?? 'drafting';
 
             // Validation
             if ($chapterNumber === '' || !is_numeric($chapterNumber) || $chapterNumber <= 0) {
@@ -285,46 +269,11 @@ class ChapterController extends BaseController
                 exit;
             }
 
-            // Khóa cập nhật nếu chương đang chờ duyệt, đã duyệt hoặc đã xuất bản
-            if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+            // Khóa cập nhật nếu chương đang bị khóa
+            if ($this->isChapterLocked($chapter)) {
                 $_SESSION['error'] = "Chương truyện đang trong quá trình duyệt, đã phê duyệt hoặc đã xuất bản, không thể chỉnh sửa.";
                 header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
                 exit;
-            }
-
-            $allowed = ['drafting', 'drawing', 'reviewing'];
-            if (!in_array($status, $allowed)) {
-                $_SESSION['error'] = "Trạng thái chapter không hợp lệ!";
-                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
-                exit;
-            }
-
-            // Ngăn nộp chương rỗng chưa có bất kỳ trang nào hoặc vẫn còn task chưa xong
-            if ($status === 'reviewing') {
-                if ($series['status'] === 'planning') {
-                    $_SESSION['error'] = "Không thể nộp duyệt chương truyện khi bộ truyện đang ở trạng thái Kế hoạch hoặc chưa được phê duyệt phát hành.";
-                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
-                    exit;
-                }
-                $pages = $this->pageModel->findByChapterId($id);
-                if (empty($pages)) {
-                    $_SESSION['error'] = "Chương truyện phải có ít nhất 1 trang vẽ mới có thể nộp duyệt.";
-                    header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
-                    exit;
-                }
-
-                require_once __DIR__ . '/../models/Task.php';
-                $taskModel = new \Task();
-                $tasks = $taskModel->findTasksByChapterId($id);
-                if (!empty($tasks)) {
-                    foreach ($tasks as $task) {
-                        if ($task['status'] !== 'completed') {
-                            $_SESSION['error'] = "Không thể nộp duyệt chương truyện khi vẫn còn công việc (Task) chưa hoàn thành của các Trợ lý.";
-                            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=edit&id={$id}");
-                            exit;
-                        }
-                    }
-                }
             }
 
             $formattedDueDate = null;
@@ -359,40 +308,11 @@ class ChapterController extends BaseController
                 'chapter_number' => $chapterNumber,
                 'title' => $title,
                 'due_date' => $formattedDueDate,
-                'status' => $status,
                 'is_final' => $isFinal
             ];
 
-            $oldStatus = $chapter['status'];
-            $newStatus = $status;
-            $shouldNotify = ($oldStatus === 'drafting' && ($newStatus === 'drawing' || $newStatus === 'reviewing'));
-
             try {
                 $this->chapterModel->update($id, $data);
-                
-                // Nếu kích hoạt chương từ Bản nháp sang Đang vẽ/Chờ duyệt, gửi thông báo cho Trợ lý
-                if ($shouldNotify) {
-                    require_once __DIR__ . '/../models/Task.php';
-                    require_once __DIR__ . '/../models/Notification.php';
-                    $taskModel = new \Task();
-                    $notificationModel = new \Notification();
-                    
-                    $tasks = $taskModel->findTasksByChapterId($id);
-                    if (!empty($tasks)) {
-                        foreach ($tasks as $task) {
-                            if (($task['page_status'] ?? '') === 'drafting') {
-                                continue; // Bỏ qua không gửi thông báo nếu trang liên kết vẫn là nháp
-                            }
-                            $notificationModel->createNotification(
-                                $task['assistant_id'],
-                                'task_assigned',
-                                "Bạn được giao công việc mới: '{$task['title']}' thuộc bộ truyện '{$task['series_title']}' (Chương {$chapterNumber}).",
-                                $task['task_id']
-                            );
-                        }
-                    }
-                }
-                
                 $_SESSION['success'] = "Cập nhật chapter {$chapterNumber} thành công!";
             } catch (PDOException $e) {
                 $_SESSION['error'] = "Lỗi hệ thống khi cập nhật chapter: " . $e->getMessage();
@@ -449,8 +369,8 @@ class ChapterController extends BaseController
             $seriesId = $chapter['series_id'];
             $this->checkSeriesOwnership($seriesId);
 
-            // Khóa xóa nếu chương đang chờ duyệt, đã duyệt hoặc đã xuất bản
-            if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+            // Khóa xóa nếu chương đang bị khóa
+            if ($this->isChapterLocked($chapter)) {
                 $_SESSION['error'] = "Chương truyện đang trong quá trình duyệt, đã phê duyệt hoặc đã xuất bản, không thể xóa.";
                 header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
                 exit;
@@ -512,6 +432,55 @@ class ChapterController extends BaseController
             }
             
             header("Location: " . BASE_PATH . "/index.php?controller=series&action=show&id={$seriesId}");
+            exit;
+        }
+    }
+
+    /**
+     * Thực hiện xuất bản Chapter (Dành cho Editorial Board)
+     * 
+     * @param int $id ID của Chapter cần xuất bản
+     */
+    public function publish($id) {
+        requireRole('board');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $chapter = $this->chapterModel->findById($id);
+            if (!$chapter) {
+                $_SESSION['error'] = "Không tìm thấy chapter.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
+            if ($chapter['status'] !== 'approved') {
+                $_SESSION['error'] = "Chương truyện chưa được phê duyệt, không thể xuất bản.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
+            try {
+                $this->chapterModel->update($id, ['status' => 'published']);
+                $this->pageModel->updateStatusByChapterId($id, 'published');
+                
+                // Gửi thông báo đến Mangaka khi chapter của họ được xuất bản
+                $series = $this->seriesModel->findById($chapter['series_id']);
+                $mangakaId = $series ? $series['mangaka_id'] : null;
+                if ($mangakaId) {
+                    require_once __DIR__ . '/../models/Notification.php';
+                    $notificationModel = new \Notification();
+                    $notificationModel->createNotification(
+                        $mangakaId,
+                        'chapter_published',
+                        "Chương {$chapter['chapter_number']}: '{$chapter['title']}' thuộc bộ truyện '{$series['title']}' của bạn đã được xuất bản chính thức!",
+                        $id
+                    );
+                }
+
+                $_SESSION['success'] = "Xuất bản chương {$chapter['chapter_number']} thành công!";
+            } catch (PDOException $e) {
+                $_SESSION['error'] = "Lỗi hệ thống khi xuất bản chapter: " . $e->getMessage();
+            }
+
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
             exit;
         }
     }

@@ -33,4 +33,17 @@ class EditorAnnotation extends Model {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Xóa tất cả các ghi chú lỗi của 1 trang truyện.
+     * 
+     * @param int $pageId ID của trang truyện
+     * @return bool Trả về true nếu thành công
+     */
+    public function deleteByPageId($pageId) {
+        $sql = "DELETE FROM {$this->table} WHERE page_id = :page_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':page_id', $pageId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
 }

@@ -226,7 +226,9 @@ class ReviewController extends BaseController
                 $series = $chapter ? $serModel->findById($chapter['series_id']) : null;
                 $seriesTitle = $series ? $series['title'] : 'Không rõ';
                 $chapNum = $chapter ? $chapter['chapter_number'] : 'Không rõ';
-                $itemInfo = "Chapter {$chapNum} của bộ truyện '{$seriesTitle}'";
+                $chapStatus = $chapter ? $chapter['status'] : '';
+                $subType = ($chapStatus === 'reviewing_draft') ? 'Kịch bản thô (Storyboard)' : 'Bản vẽ hoàn thiện (Manuscript)';
+                $itemInfo = "{$subType} của Chapter {$chapNum} thuộc bộ truyện '{$seriesTitle}'";
             } elseif (!empty($submission['task_id'])) {
                 require_once __DIR__ . '/../models/Task.php';
                 require_once __DIR__ . '/../models/Page.php';
@@ -357,6 +359,26 @@ class ReviewController extends BaseController
                                     );
                                 }
                             }
+                        }
+                    }
+
+                    // Dọn dẹp phiên bản vẽ cũ (old_image_url) và ghi chú lỗi của tất cả các trang thuộc chapter khi được duyệt
+                    require_once __DIR__ . '/../models/Page.php';
+                    require_once __DIR__ . '/../models/EditorAnnotation.php';
+                    $pageModel = new \Page();
+                    $editorAnnotationModel = new \EditorAnnotation();
+                    $pagesInChapter = $pageModel->findByChapterId($submission['chapter_id']);
+                    if (!empty($pagesInChapter)) {
+                        foreach ($pagesInChapter as $pInC) {
+                            if (!empty($pInC['old_image_url'])) {
+                                $oldFilePath = __DIR__ . '/../' . ltrim($pInC['old_image_url'], '/');
+                                if (file_exists($oldFilePath)) {
+                                    @unlink($oldFilePath);
+                                }
+                                $pageModel->update($pInC['page_id'], ['old_image_url' => null]);
+                            }
+                            // Xóa toàn bộ ghi chú lỗi của trang này vì đã được phê duyệt thành công
+                            $editorAnnotationModel->deleteByPageId($pInC['page_id']);
                         }
                     }
                 } else {

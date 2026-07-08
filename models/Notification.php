@@ -22,7 +22,8 @@ class Notification extends Model {
             'ranking_published',
             'series_warning',
             'series_completed',
-            'series_submitted'
+            'series_submitted',
+            'chapter_published'
         ];
 
         if (!in_array($type, $allowedTypes)) {

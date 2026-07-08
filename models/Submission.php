@@ -39,7 +39,8 @@ class Submission extends Model {
                        t.title as task_title,
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
-                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                       COALESCE(ser_chap.title, ser_task.title) as series_title,
+                       c.status as chapter_status
                 FROM {$this->table} s
                 LEFT JOIN users u ON s.user_id = u.user_id
                 LEFT JOIN tasks t ON s.task_id = t.task_id
@@ -65,7 +66,8 @@ class Submission extends Model {
                        t.title as task_title,
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
-                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                       COALESCE(ser_chap.title, ser_task.title) as series_title,
+                       c.status as chapter_status
                 FROM {$this->table} s
                 LEFT JOIN users u ON s.user_id = u.user_id
                 LEFT JOIN tasks t ON s.task_id = t.task_id
@@ -116,7 +118,8 @@ class Submission extends Model {
                        t.title as task_title,
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
-                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                       COALESCE(ser_chap.title, ser_task.title) as series_title,
+                       c.status as chapter_status
                 FROM {$this->table} s
                 LEFT JOIN users u ON s.user_id = u.user_id
                 LEFT JOIN tasks t ON s.task_id = t.task_id
@@ -147,6 +150,7 @@ class Submission extends Model {
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
                        COALESCE(ser_chap.title, ser_task.title) as series_title,
+                       COALESCE(ser_chap.series_id, ser_task.series_id) as series_id,
                        COALESCE(ser_chap.mangaka_id, t.mangaka_id) as mangaka_id,
                        c.status as chapter_status,
                        p_task.image_url as page_image_url,
@@ -203,7 +207,8 @@ class Submission extends Model {
                        t.title as task_title,
                        COALESCE(c.chapter_number, c_task.chapter_number) as chapter_number,
                        COALESCE(c.title, c_task.title) as chapter_title,
-                       COALESCE(ser_chap.title, ser_task.title) as series_title
+                       COALESCE(ser_chap.title, ser_task.title) as series_title,
+                       c.status as chapter_status
                 FROM {$this->table} s
                 LEFT JOIN users u ON s.user_id = u.user_id
                 LEFT JOIN tasks t ON s.task_id = t.task_id

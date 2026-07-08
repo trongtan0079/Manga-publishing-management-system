@@ -201,7 +201,7 @@ class DashboardController extends BaseController {
             
             // Lấy chapter đang vẽ hoặc nháp (active) để Editor xem tiến độ chi tiết của studio
             $sqlActive = "SELECT * FROM chapters 
-                          WHERE series_id = :series_id AND status IN ('drafting', 'drawing', 'reviewing') 
+                          WHERE series_id = :series_id AND status IN ('drafting', 'drawing', 'reviewing_draft', 'reviewing_final') 
                           ORDER BY chapter_number ASC LIMIT 1";
             $stmtActive = $chapterModel->getConnection()->prepare($sqlActive);
             $stmtActive->execute(['series_id' => $series['series_id']]);

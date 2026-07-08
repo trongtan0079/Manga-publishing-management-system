@@ -110,9 +110,7 @@ class NotificationController extends BaseController
                 break;
             case 'chapter_submitted':
             case 'submission_submitted':
-                if ($relatedId > 0 && ($role === 'editor' || $role === 'mangaka')) {
-                    $redirectUrl = BASE_PATH . '/index.php?controller=review&action=create&submission_id=' . $relatedId;
-                } elseif ($relatedId > 0) {
+                if ($relatedId > 0) {
                     $redirectUrl = BASE_PATH . '/index.php?controller=submission&action=show&id=' . $relatedId;
                 } elseif ($role === 'editor') {
                     $redirectUrl = BASE_PATH . '/index.php?controller=review&action=index';
@@ -131,6 +129,13 @@ class NotificationController extends BaseController
                 break;
             case 'ranking_published':
                 $redirectUrl = BASE_PATH . '/index.php?controller=seriesRanking&action=index';
+                break;
+            case 'chapter_published':
+                if ($relatedId > 0) {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $relatedId;
+                } else {
+                    $redirectUrl = BASE_PATH . '/index.php?controller=series&action=index';
+                }
                 break;
             case 'series_warning':
                 if ($relatedId > 0) {

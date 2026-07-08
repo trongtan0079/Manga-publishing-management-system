@@ -70,9 +70,9 @@ class TaskController extends BaseController
         $series = $this->seriesModel->findById($chapter['series_id']);
         if (!$series) return false;
 
-        // Chặn sửa đổi task nếu bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành
+        // Chặn sửa đổi task nếu bộ truyện đang bị khóa
         $action = $_GET['action'] ?? '';
-        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete']) && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete']) && $this->isSeriesLocked($series)) {
             return false;
         }
 
@@ -149,7 +149,7 @@ class TaskController extends BaseController
         }
 
         $chapter = $ownership['chapter'];
-        if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+        if ($this->isChapterLocked($chapter)) {
             $_SESSION['error'] = 'Chương truyện chứa trang này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể giao thêm việc.';
             header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapter['chapter_id']);
             exit;
@@ -216,7 +216,7 @@ class TaskController extends BaseController
             $chapter = $ownership['chapter'];
             $page = $ownership['page'];
             $series = $ownership['series'];
-            if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+            if ($this->isChapterLocked($chapter)) {
                 $_SESSION['error'] = 'Chương truyện chứa trang này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể giao thêm việc.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapter['chapter_id']);
                 exit;
@@ -349,13 +349,13 @@ class TaskController extends BaseController
         if ($page) {
             $chapter = $this->chapterModel->findById($page['chapter_id']);
             if ($chapter) {
-                if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                if ($this->isChapterLocked($chapter)) {
                     $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể sửa công việc.';
                     header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                     exit;
                 }
                 $series = $this->seriesModel->findById($chapter['series_id']);
-                if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                if ($series && $this->isSeriesLocked($series)) {
                     $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa công việc.';
                     header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                     exit;
@@ -404,7 +404,7 @@ class TaskController extends BaseController
         if ($page) {
             $chapter = $this->chapterModel->findById($page['chapter_id']);
             if ($chapter) {
-                if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                if ($this->isChapterLocked($chapter)) {
                     $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể cập nhật.';
                     if ($_SESSION['role_name'] === 'assistant') {
                         header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
@@ -414,7 +414,7 @@ class TaskController extends BaseController
                     exit;
                 }
                 $series = $this->seriesModel->findById($chapter['series_id']);
-                if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                if ($series && $this->isSeriesLocked($series)) {
                     $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể cập nhật công việc.';
                     if ($_SESSION['role_name'] === 'assistant') {
                         header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
@@ -647,13 +647,13 @@ class TaskController extends BaseController
             if ($page) {
                 $chapter = $this->chapterModel->findById($page['chapter_id']);
                 if ($chapter) {
-                    if (in_array($chapter['status'], ['reviewing', 'approved', 'published'])) {
+                    if ($this->isChapterLocked($chapter)) {
                         $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã duyệt hoặc đã xuất bản, không thể xóa.';
                         header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                         exit;
                     }
                     $series = $this->seriesModel->findById($chapter['series_id']);
-                    if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                    if ($series && $this->isSeriesLocked($series)) {
                         $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể xóa công việc.';
                         header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                         exit;

@@ -53,11 +53,12 @@ class Page extends Model {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
     /**
-     * Lấy danh sách trang theo chapter ID, kèm theo số lượng annotation
+     * Lấy danh sách trang theo chapter ID, kèm theo số lượng annotation và mốc thời gian annotation gần nhất
      */
     public function findByChapterIdWithAnnotationCount($chapterId) {
-        $sql = "SELECT p.*, COUNT(ea.annotation_id) AS annotation_count 
+        $sql = "SELECT p.*, COUNT(ea.annotation_id) AS annotation_count, MAX(ea.created_at) AS latest_annotation_time
                 FROM {$this->table} p 
                 LEFT JOIN editor_annotations ea ON p.page_id = ea.page_id 
                 WHERE p.chapter_id = :chapter_id 
@@ -88,5 +89,16 @@ class Page extends Model {
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([':chapter_id' => $chapterId, ':page_id' => $pageId]);
         return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Cập nhật trạng thái cho tất cả các trang thuộc chapter
+     */
+    public function updateStatusByChapterId($chapterId, $status) {
+        $sql = "UPDATE {$this->table} SET status = :status WHERE chapter_id = :chapter_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':chapter_id', $chapterId);
+        return $stmt->execute();
     }
 }

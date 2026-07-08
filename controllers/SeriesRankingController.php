@@ -180,8 +180,8 @@ class SeriesRankingController extends BaseController
                     $message = "Thông báo xếp hạng kỳ mới (" . date('d/m/Y', $periodStartTimestamp) . "): Bộ truyện '{$info['title']}' của bạn đạt thứ hạng #{$rank} với điểm số bình chọn quy chuẩn là {$score}/100 ({$votesVal} phiếu).";
                     $this->notificationModel->createNotification($info['mangaka_id'], 'ranking_published', $message, $seriesId);
 
-                    // Lỗ hổng 3: Chỉ gửi cảnh báo đặc biệt (series_warning) nếu điểm thấp (< 50)
-                    if ($score < 50) {
+                    // Gửi cảnh báo đặc biệt (series_warning) nếu điểm thấp (< 50) hoặc thứ hạng thấp (>= 5)
+                    if ($score < 50 || $rank >= 5) {
                         $warningMsg = "Cảnh báo: Bộ truyện '{$info['title']}' của bạn đang xếp hạng thấp (Hạng {$rank}, Điểm {$score}). Có nguy cơ bị Hội đồng Biên tập xem xét ngưng xuất bản hoặc hủy dự án.";
                         $this->notificationModel->createNotification($info['mangaka_id'], 'series_warning', $warningMsg, $seriesId);
                     }
@@ -328,8 +328,8 @@ class SeriesRankingController extends BaseController
             try {
                 $this->rankingModel->update($id, $data);
 
-                // Lỗ hổng 10: Tự động gửi cảnh báo nếu điểm số cập nhật thủ công dưới 50
-                if ($score < 50) {
+                // Tự động gửi cảnh báo nếu điểm số cập nhật thủ công dưới 50 hoặc thứ hạng thấp (>= 5)
+                if ($score < 50 || $rankPosition >= 5) {
                     $warningMsg = "Cảnh báo chỉnh sửa: Bộ truyện '{$series['title']}' của bạn đang xếp hạng thấp (Hạng {$rankPosition}, Điểm {$score}). Có nguy cơ bị Hội đồng Biên tập xem xét ngưng xuất bản hoặc hủy dự án.";
                     $this->notificationModel->createNotification($series['mangaka_id'], 'series_warning', $warningMsg, $seriesId);
                 }
