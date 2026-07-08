@@ -139,6 +139,21 @@ class Chapter extends Model {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * Lấy danh sách các chapter đã được xuất bản (published)
+     */
+    public function findPublishedChapters() {
+        $sql = "SELECT c.*, s.title as series_title, u.full_name as mangaka_name
+                FROM {$this->table} c
+                JOIN series s ON c.series_id = s.series_id
+                JOIN users u ON s.mangaka_id = u.user_id
+                WHERE c.status = 'published'
+                ORDER BY c.updated_at DESC, s.title ASC, c.chapter_number ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function countByMangakaId($mangakaId) {
         $sql = "SELECT COUNT(*) as total FROM chapters c JOIN series s ON c.series_id = s.series_id WHERE s.mangaka_id = :mangaka_id";
         $stmt = $this->conn->prepare($sql);

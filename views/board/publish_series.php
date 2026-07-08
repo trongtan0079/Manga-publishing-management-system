@@ -21,13 +21,22 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 // Phân lọc danh sách truyện theo nhóm trạng thái
 $pendingSeries = [];
-$activeSeries = [];
+$ongoingSeries = [];
+$completedSeries = [];
+$canceledSeries = [];
+$suspendedSeries = [];
 if (!empty($seriesList)) {
     foreach ($seriesList as $series) {
         if ($series['status'] === 'planning') {
             $pendingSeries[] = $series;
-        } else {
-            $activeSeries[] = $series;
+        } elseif ($series['status'] === 'ongoing') {
+            $ongoingSeries[] = $series;
+        } elseif ($series['status'] === 'completed') {
+            $completedSeries[] = $series;
+        } elseif ($series['status'] === 'canceled') {
+            $canceledSeries[] = $series;
+        } elseif ($series['status'] === 'suspended') {
+            $suspendedSeries[] = $series;
         }
     }
 }
@@ -222,14 +231,12 @@ if (!empty($seriesList)) {
         <?php endif; ?>
     </div>
 </div>
-
-<!-- BẢNG 2: CÁC BỘ TRUYỆN ĐANG HOẠT ĐỘNG (THEO DÕI XẾP HẠNG & QUYẾT ĐỊNH HỦY/DỪNG) -->
 <div class="card shadow-sm border-0 rounded-3 mb-4">
     <div class="card-header bg-white py-3 border-bottom border-light">
-        <h5 class="card-title mb-0 fw-bold text-success"><i class="fas fa-book-open me-2"></i>Bộ truyện đang phát hành (Giám sát Xếp hạng & Quyết định đình bản)</h5>
+        <h5 class="card-title mb-0 fw-bold text-success"><i class="fas fa-book-open me-2"></i>Bộ truyện đang phát hành (Ongoing)</h5>
     </div>
     <div class="card-body p-0">
-        <?php if (!empty($activeSeries)): ?>
+        <?php if (!empty($ongoingSeries)): ?>
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead class="table-light">
@@ -245,7 +252,7 @@ if (!empty($seriesList)) {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($activeSeries as $series): ?>
+                        <?php foreach ($ongoingSeries as $series): ?>
                             <tr>
                                 <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
                                 <td>
@@ -326,10 +333,10 @@ if (!empty($seriesList)) {
                                   <td class="text-end pe-4">
                                      <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái và định hướng phát hành cho bộ truyện này?');">
                                          <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
-                                             <option value="ongoing" <?= $series['status'] == 'ongoing' ? 'selected' : '' ?>>Đang phát hành</option>
-                                             <option value="completed" <?= $series['status'] == 'completed' ? 'selected' : '' ?>>Hoàn thành</option>
-                                             <option value="canceled" <?= $series['status'] == 'canceled' ? 'selected' : '' ?>>Đình bản (Hủy)</option>
-                                             <option value="suspended" <?= $series['status'] == 'suspended' ? 'selected' : '' ?>>Tạm ngưng</option>
+                                             <option value="ongoing" selected>Đang phát hành</option>
+                                             <option value="completed">Hoàn thành</option>
+                                             <option value="canceled">Đình bản (Hủy)</option>
+                                             <option value="suspended">Tạm ngưng</option>
                                          </select>
                                          <select name="editor_id" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Biên tập viên chuyên trách">
                                              <option value="">-- Editor phụ trách --</option>
@@ -356,9 +363,9 @@ if (!empty($seriesList)) {
                 </table>
             </div>
         <?php else: ?>
-            <div class="text-center text-muted py-5">
+            <div class="text-center text-muted py-4">
                 <div class="mb-2"><i class="fas fa-folder-open fa-2x" style="opacity: 0.4;"></i></div>
-                <p class="mb-0 text-xs text-muted">Không tìm thấy bộ truyện hoạt động nào.</p>
+                <p class="mb-0 text-xs text-muted">Không có bộ truyện nào đang phát hành.</p>
             </div>
         <?php endif; ?>
     </div>
@@ -422,9 +429,409 @@ if (!empty($seriesList)) {
     </div>
 </div>
 
+<!-- BẢNG 3.2: LỊCH SỬ CHAPTER ĐÃ XUẤT BẢN -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 border-bottom border-light">
+        <h5 class="card-title mb-0 fw-bold text-success"><i class="fas fa-check-circle me-2"></i>Lịch sử Chapter đã xuất bản</h5>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($publishedChapters)): ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light border-bottom border-slate-100">
+                        <tr>
+                            <th class="ps-4 py-3 text-slate-500 fw-bold text-uppercase" style="width: 80px; font-size: 0.72rem; letter-spacing: 0.5px;">Chapter ID</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 250px; font-size: 0.72rem; letter-spacing: 0.5px;">Bộ truyện & Tiêu đề Chương</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 140px; font-size: 0.72rem; letter-spacing: 0.5px;">Tác giả chính</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase" style="min-width: 120px; font-size: 0.72rem; letter-spacing: 0.5px;">Trạng thái</th>
+                            <th class="py-3 text-slate-500 fw-bold text-uppercase text-end pe-4" style="min-width: 150px; font-size: 0.72rem; letter-spacing: 0.5px;">Ngày xuất bản</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($publishedChapters as $chap): ?>
+                            <tr>
+                                <td class="ps-4 text-slate-400 font-monospace" style="font-size: 0.85rem;">#<?= htmlspecialchars($chap['chapter_id']) ?></td>
+                                <td>
+                                    <div class="fw-bold text-slate-800" style="font-size: 0.95rem;">
+                                        <?= htmlspecialchars($chap['series_title']) ?>
+                                    </div>
+                                    <div class="text-muted text-xs">
+                                        Chương <?= htmlspecialchars($chap['chapter_number']) ?>: <?= htmlspecialchars($chap['title'] ?? 'Chưa đặt tên') ?>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="text-slate-800 fw-semibold" style="font-size: 0.88rem;"><?= htmlspecialchars($chap['mangaka_name'] ?? 'Không rõ') ?></div>
+                                    <span class="text-muted text-xs">Tác giả</span>
+                                </td>
+                                <td>
+                                    <?= $this->getStatusBadge($chap['status']) ?>
+                                </td>
+                                <td class="text-end pe-4 font-monospace text-slate-500" style="font-size: 0.85rem;">
+                                    <i class="far fa-calendar-alt me-1"></i><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chap['updated_at']))) ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="text-center text-muted py-4">
+                <div class="mb-2"><i class="fas fa-history fa-2x" style="opacity: 0.3;"></i></div>
+                <p class="mb-0 text-xs text-muted fw-medium">Chưa có chapter nào được xuất bản trước đây.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- BẢNG 4: BỘ TRUYỆN ĐÃ HOÀN THÀNH (COMPLETED) -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 border-bottom border-light">
+        <h5 class="card-title mb-0 fw-bold text-primary"><i class="fas fa-check-double me-2"></i>Bộ truyện đã hoàn thành (Completed)</h5>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($completedSeries)): ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4" style="width: 80px;">ID</th>
+                            <th style="min-width: 200px;">Tên Truyện</th>
+                            <th>Tác giả</th>
+                            <th>Xếp hạng & Điểm</th>
+                            <th>Trạng thái</th>
+                            <th>Tổng số Chapter</th>
+                            <th>Hồ sơ bảo vệ</th>
+                            <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($completedSeries as $series): ?>
+                            <tr>
+                                <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <?php if (!empty($series['cover_image'])): 
+                                            $coverUrl = $series['cover_image'];
+                                            $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
+                                        ?>
+                                            <img src="<?= htmlspecialchars($resolvedCover) ?>" alt="Cover" width="36" height="52" class="me-2 object-fit-cover rounded flex-shrink-0 shadow-sm">
+                                        <?php endif; ?>
+                                        <div>
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="fw-bold text-decoration-none series-title-link" title="Xem chi tiết bộ truyện"><?= htmlspecialchars($series['title']) ?></a>
+                                            <small class="text-muted d-block text-xs"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                     <?= htmlspecialchars($series['mangaka_name'] ?? 'Không rõ') ?>
+                                     <br>
+                                     <small class="text-slate-500 text-xs">Editor: <?= htmlspecialchars($series['editor_name'] ?? 'Chưa gán') ?></small>
+                                 </td>
+                                <td>
+                                    <?php if (isset($series['latest_rank']) && $series['latest_rank'] > 0): ?>
+                                        <div>
+                                            <span class="badge bg-dark">Hạng #<?= htmlspecialchars($series['latest_rank']) ?></span>
+                                            <span class="badge bg-primary"><?= htmlspecialchars($series['latest_score']) ?> điểm</span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted text-xs">Chưa có xếp hạng</span>
+                                    <?php endif; ?>
+                                </td>
+                                 <td>
+                                     <?= $this->getSeriesStatusBadge($series['status']) ?>
+                                 </td>
+                                 <td>
+                                     <span class="badge bg-light text-dark border"><?= $series['total_chapters'] ?> chương</span>
+                                  </td>
+                                  <td>
+                                      <?php if (!empty($series['dossier_notes'])): ?>
+                                          <button type="button" class="btn btn-xs btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#dossierModal<?= $series['series_id'] ?>" style="font-size: 0.72rem; border-radius: 6px;">
+                                              <i class="fas fa-shield-alt me-1"></i>Có Biện Hộ
+                                          </button>
+                                      <?php else: ?>
+                                          <span class="text-muted text-xs">Không có</span>
+                                      <?php endif; ?>
+                                  </td>
+                                  <td class="text-end pe-4">
+                                     <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái bộ truyện này?');">
+                                         <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
+                                             <option value="ongoing">Đang phát hành</option>
+                                             <option value="completed" selected>Hoàn thành</option>
+                                             <option value="canceled">Đình bản (Hủy)</option>
+                                             <option value="suspended">Tạm ngưng</option>
+                                         </select>
+                                         <select name="editor_id" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Biên tập viên chuyên trách">
+                                             <option value="">-- Editor phụ trách --</option>
+                                             <?php if (!empty($editors)): ?>
+                                                 <?php foreach ($editors as $ed): ?>
+                                                     <option value="<?= $ed['user_id'] ?>" <?= $series['editor_id'] == $ed['user_id'] ? 'selected' : '' ?>>
+                                                         <?= htmlspecialchars($ed['full_name']) ?>
+                                                     </option>
+                                                 <?php endforeach; ?>
+                                             <?php endif; ?>
+                                         </select>
+                                         <select name="publish_type" class="form-select form-select-sm w-auto" style="max-width: 110px; border-radius: 6px;" title="Lịch xuất bản">
+                                             <option value="weekly" <?= ($series['publish_type'] ?? 'weekly') == 'weekly' ? 'selected' : '' ?>>Hàng tuần</option>
+                                             <option value="monthly" <?= ($series['publish_type'] ?? 'weekly') == 'monthly' ? 'selected' : '' ?>>Hàng tháng</option>
+                                         </select>
+                                         <button type="submit" class="btn btn-sm btn-primary" style="border-radius: 6px;" title="Cập nhật">
+                                             <i class="fas fa-save"></i>
+                                         </button>
+                                     </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="text-center text-muted py-4">
+                <div class="mb-2"><i class="fas fa-folder-open fa-2x" style="opacity: 0.4;"></i></div>
+                <p class="mb-0 text-xs text-muted">Không có bộ truyện nào đã hoàn thành.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- BẢNG 5: BỘ TRUYỆN ĐANG TẠM NGƯNG (SUSPENDED) -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 border-bottom border-light">
+        <h5 class="card-title mb-0 fw-bold text-warning"><i class="fas fa-pause-circle me-2"></i>Bộ truyện đang tạm ngưng (Suspended)</h5>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($suspendedSeries)): ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4" style="width: 80px;">ID</th>
+                            <th style="min-width: 200px;">Tên Truyện</th>
+                            <th>Tác giả</th>
+                            <th>Xếp hạng & Điểm</th>
+                            <th>Trạng thái</th>
+                            <th>Tiến độ Chapter</th>
+                            <th>Hồ sơ bảo vệ</th>
+                            <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($suspendedSeries as $series): ?>
+                            <tr>
+                                <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <?php if (!empty($series['cover_image'])): 
+                                            $coverUrl = $series['cover_image'];
+                                            $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
+                                        ?>
+                                            <img src="<?= htmlspecialchars($resolvedCover) ?>" alt="Cover" width="36" height="52" class="me-2 object-fit-cover rounded flex-shrink-0 shadow-sm">
+                                        <?php endif; ?>
+                                        <div>
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="fw-bold text-decoration-none series-title-link" title="Xem chi tiết bộ truyện"><?= htmlspecialchars($series['title']) ?></a>
+                                            <small class="text-muted d-block text-xs"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                     <?= htmlspecialchars($series['mangaka_name'] ?? 'Không rõ') ?>
+                                     <br>
+                                     <small class="text-slate-500 text-xs">Editor: <?= htmlspecialchars($series['editor_name'] ?? 'Chưa gán') ?></small>
+                                 </td>
+                                <td>
+                                    <?php if (isset($series['latest_rank']) && $series['latest_rank'] > 0): ?>
+                                        <div>
+                                            <span class="badge bg-dark">Hạng #<?= htmlspecialchars($series['latest_rank']) ?></span>
+                                            <span class="badge bg-primary"><?= htmlspecialchars($series['latest_score']) ?> điểm</span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted text-xs">Chưa có xếp hạng</span>
+                                    <?php endif; ?>
+                                </td>
+                                 <td>
+                                     <?= $this->getSeriesStatusBadge($series['status']) ?>
+                                 </td>
+                                 <td>
+                                       <?php if ($series['total_chapters'] > 0): ?>
+                                           <?php 
+                                           $chapterPercent = round(($series['finished_chapters'] / $series['total_chapters']) * 100);
+                                           ?>
+                                           <div class="d-flex flex-column gap-1">
+                                               <div class="d-flex align-items-center" style="gap: 10px;">
+                                                   <div class="flex-grow-1" style="min-width: 90px; max-width: 120px;">
+                                                       <div class="progress" style="height: 6px; background-color: #e2e8f0; border-radius: 3px;" title="<?= $series['finished_chapters'] ?>/<?= $series['total_chapters'] ?> chương">
+                                                           <div class="progress-bar bg-success" role="progressbar" style="width: <?= $chapterPercent ?>%; border-radius: 3px;" aria-valuenow="<?= $chapterPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                                       </div>
+                                                       <small class="text-muted" style="font-size: 0.7rem; font-weight: 500;"><?= $series['finished_chapters'] ?>/<?= $series['total_chapters'] ?> chương (<?= $chapterPercent ?>%)</small>
+                                                   </div>
+                                               </div>
+                                           </div>
+                                       <?php else: ?>
+                                           <span class="text-muted text-xs">Chưa có Chapter</span>
+                                       <?php endif; ?>
+                                  </td>
+                                  <td>
+                                      <?php if (!empty($series['dossier_notes'])): ?>
+                                          <button type="button" class="btn btn-xs btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#dossierModal<?= $series['series_id'] ?>" style="font-size: 0.72rem; border-radius: 6px;">
+                                              <i class="fas fa-shield-alt me-1"></i>Có Biện Hộ
+                                          </button>
+                                      <?php else: ?>
+                                          <span class="text-muted text-xs">Không có</span>
+                                      <?php endif; ?>
+                                  </td>
+                                  <td class="text-end pe-4">
+                                     <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái bộ truyện này?');">
+                                         <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
+                                             <option value="ongoing">Đang phát hành</option>
+                                             <option value="completed">Hoàn thành</option>
+                                             <option value="canceled">Đình bản (Hủy)</option>
+                                             <option value="suspended" selected>Tạm ngưng</option>
+                                         </select>
+                                         <select name="editor_id" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Biên tập viên chuyên trách">
+                                             <option value="">-- Editor phụ trách --</option>
+                                             <?php if (!empty($editors)): ?>
+                                                 <?php foreach ($editors as $ed): ?>
+                                                     <option value="<?= $ed['user_id'] ?>" <?= $series['editor_id'] == $ed['user_id'] ? 'selected' : '' ?>>
+                                                         <?= htmlspecialchars($ed['full_name']) ?>
+                                                     </option>
+                                                 <?php endforeach; ?>
+                                             <?php endif; ?>
+                                         </select>
+                                         <select name="publish_type" class="form-select form-select-sm w-auto" style="max-width: 110px; border-radius: 6px;" title="Lịch xuất bản">
+                                             <option value="weekly" <?= ($series['publish_type'] ?? 'weekly') == 'weekly' ? 'selected' : '' ?>>Hàng tuần</option>
+                                             <option value="monthly" <?= ($series['publish_type'] ?? 'weekly') == 'monthly' ? 'selected' : '' ?>>Hàng tháng</option>
+                                         </select>
+                                         <button type="submit" class="btn btn-sm btn-primary" style="border-radius: 6px;" title="Cập nhật">
+                                             <i class="fas fa-save"></i>
+                                         </button>
+                                     </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="text-center text-muted py-4">
+                <div class="mb-2"><i class="fas fa-folder-open fa-2x" style="opacity: 0.4;"></i></div>
+                <p class="mb-0 text-xs text-muted">Không có bộ truyện nào đang tạm ngưng.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- BẢNG 6: BỘ TRUYỆN BỊ ĐÌNH BẢN (CANCELED) -->
+<div class="card shadow-sm border-0 rounded-3 mb-4">
+    <div class="card-header bg-white py-3 border-bottom border-light">
+        <h5 class="card-title mb-0 fw-bold text-danger"><i class="fas fa-ban me-2"></i>Bộ truyện bị đình bản / hủy bỏ (Canceled)</h5>
+    </div>
+    <div class="card-body p-0">
+        <?php if (!empty($canceledSeries)): ?>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4" style="width: 80px;">ID</th>
+                            <th style="min-width: 200px;">Tên Truyện</th>
+                            <th>Tác giả</th>
+                            <th>Xếp hạng & Điểm</th>
+                            <th>Trạng thái</th>
+                            <th>Tổng số Chapter</th>
+                            <th>Hồ sơ bảo vệ</th>
+                            <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($canceledSeries as $series): ?>
+                            <tr>
+                                <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <?php if (!empty($series['cover_image'])): 
+                                            $coverUrl = $series['cover_image'];
+                                            $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
+                                        ?>
+                                            <img src="<?= htmlspecialchars($resolvedCover) ?>" alt="Cover" width="36" height="52" class="me-2 object-fit-cover rounded flex-shrink-0 shadow-sm">
+                                        <?php endif; ?>
+                                        <div>
+                                            <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>" class="fw-bold text-decoration-none series-title-link" title="Xem chi tiết bộ truyện"><?= htmlspecialchars($series['title']) ?></a>
+                                            <small class="text-muted d-block text-xs"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                     <?= htmlspecialchars($series['mangaka_name'] ?? 'Không rõ') ?>
+                                     <br>
+                                     <small class="text-slate-500 text-xs">Editor: <?= htmlspecialchars($series['editor_name'] ?? 'Chưa gán') ?></small>
+                                 </td>
+                                <td>
+                                    <?php if (isset($series['latest_rank']) && $series['latest_rank'] > 0): ?>
+                                        <div>
+                                            <span class="badge bg-dark">Hạng #<?= htmlspecialchars($series['latest_rank']) ?></span>
+                                            <span class="badge bg-primary"><?= htmlspecialchars($series['latest_score']) ?> điểm</span>
+                                        </div>
+                                    <?php else: ?>
+                                        <span class="text-muted text-xs">Chưa có xếp hạng</span>
+                                    <?php endif; ?>
+                                </td>
+                                 <td>
+                                     <?= $this->getSeriesStatusBadge($series['status']) ?>
+                                 </td>
+                                 <td>
+                                     <span class="badge bg-light text-dark border"><?= $series['total_chapters'] ?> chương</span>
+                                  </td>
+                                  <td>
+                                      <?php if (!empty($series['dossier_notes'])): ?>
+                                          <button type="button" class="btn btn-xs btn-outline-danger fw-bold" data-bs-toggle="modal" data-bs-target="#dossierModal<?= $series['series_id'] ?>" style="font-size: 0.72rem; border-radius: 6px;">
+                                              <i class="fas fa-shield-alt me-1"></i>Có Biện Hộ
+                                          </button>
+                                      <?php else: ?>
+                                          <span class="text-muted text-xs">Không có</span>
+                                      <?php endif; ?>
+                                  </td>
+                                  <td class="text-end pe-4">
+                                     <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái bộ truyện này?');">
+                                         <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
+                                             <option value="ongoing">Đang phát hành</option>
+                                             <option value="completed">Hoàn thành</option>
+                                             <option value="canceled" selected>Đình bản (Hủy)</option>
+                                             <option value="suspended">Tạm ngưng</option>
+                                         </select>
+                                         <select name="editor_id" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Biên tập viên chuyên trách">
+                                             <option value="">-- Editor phụ trách --</option>
+                                             <?php if (!empty($editors)): ?>
+                                                 <?php foreach ($editors as $ed): ?>
+                                                     <option value="<?= $ed['user_id'] ?>" <?= $series['editor_id'] == $ed['user_id'] ? 'selected' : '' ?>>
+                                                         <?= htmlspecialchars($ed['full_name']) ?>
+                                                     </option>
+                                                 <?php endforeach; ?>
+                                             <?php endif; ?>
+                                         </select>
+                                         <select name="publish_type" class="form-select form-select-sm w-auto" style="max-width: 110px; border-radius: 6px;" title="Lịch xuất bản">
+                                             <option value="weekly" <?= ($series['publish_type'] ?? 'weekly') == 'weekly' ? 'selected' : '' ?>>Hàng tuần</option>
+                                             <option value="monthly" <?= ($series['publish_type'] ?? 'weekly') == 'monthly' ? 'selected' : '' ?>>Hàng tháng</option>
+                                         </select>
+                                         <button type="submit" class="btn btn-sm btn-primary" style="border-radius: 6px;" title="Cập nhật">
+                                             <i class="fas fa-save"></i>
+                                         </button>
+                                     </form>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="text-center text-muted py-4">
+                <div class="mb-2"><i class="fas fa-folder-open fa-2x" style="opacity: 0.4;"></i></div>
+                <p class="mb-0 text-xs text-muted">Không có bộ truyện nào bị đình bản.</p>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
 <!-- ĐĂNG KÝ MODAL XEM HỒ SƠ BIỆN HỘ CỦA EDITOR CHO TỪNG SERIES -->
-<?php if (!empty($activeSeries)): ?>
-    <?php foreach ($activeSeries as $series): ?>
+<?php if (!empty($seriesList)): ?>
+    <?php foreach ($seriesList as $series): ?>
         <?php if (!empty($series['dossier_notes'])): ?>
             <div class="modal fade" id="dossierModal<?= $series['series_id'] ?>" tabindex="-1" aria-labelledby="dossierModalLabel<?= $series['series_id'] ?>" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered">

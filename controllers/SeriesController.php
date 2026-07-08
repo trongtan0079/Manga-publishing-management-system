@@ -559,6 +559,7 @@ class SeriesController extends BaseController
         require_once __DIR__ . '/../models/Chapter.php';
         $chapterModel = new \Chapter();
         $approvedChapters = $chapterModel->findApprovedChapters();
+        $publishedChapters = $chapterModel->findPublishedChapters();
         
         require_once __DIR__ . '/../views/board/publish_series.php';
     }
