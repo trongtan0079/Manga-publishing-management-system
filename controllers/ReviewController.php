@@ -295,17 +295,7 @@ class ReviewController extends BaseController
                         }
                     }
 
-                    // Đồng thời kiểm tra xem tất cả các phân vùng của trang này đã hoàn thành chưa (để đồng bộ)
-                    $regions = $pageRegionModel->findByPageId($pageId);
-                    $allRegionsCompleted = true;
-                    foreach ($regions as $r) {
-                        if ($r['status'] !== 'completed') {
-                            $allRegionsCompleted = false;
-                            break;
-                        }
-                    }
-
-                    if ($allTasksCompleted && $allRegionsCompleted) {
+                    if ($allTasksCompleted) {
                         require_once __DIR__ . '/../models/Page.php';
                         $pageModel = new \Page();
                         $pageModel->update($pageId, ['status' => 'approved']);
@@ -341,21 +331,29 @@ class ReviewController extends BaseController
                     $pageModel->updateStatusByChapterId($submission['chapter_id'], $newChapterStatus);
 
                     if ($newChapterStatus === 'approved') {
-                        // Kiểm tra xem chapter có phải là chương cuối không để thông báo cho Board
-                        if ($chapDetail && !empty($chapDetail['is_final'])) {
-                            // Lấy thông tin bộ truyện
-                            require_once __DIR__ . '/../models/Series.php';
-                            $seriesModel = new \Series();
-                            $seriesDetail = $seriesModel->findById($chapDetail['series_id']);
-                            $seriesTitle = $seriesDetail ? $seriesDetail['title'] : 'bộ truyện';
-                            
-                            // Tìm toàn bộ tài khoản có role là 'board' đang hoạt động để gửi thông báo
-                            require_once __DIR__ . '/../models/User.php';
-                            $userModel = new \User();
-                            $boardMembers = $userModel->findByRoleName('board');
-                            
-                            if (!empty($boardMembers)) {
-                                foreach ($boardMembers as $member) {
+                        // Lấy thông tin bộ truyện
+                        require_once __DIR__ . '/../models/Series.php';
+                        $seriesModel = new \Series();
+                        $seriesDetail = $seriesModel->findById($chapDetail['series_id']);
+                        $seriesTitle = $seriesDetail ? $seriesDetail['title'] : 'bộ truyện';
+                        
+                        // Tìm toàn bộ tài khoản có role là 'board' đang hoạt động để gửi thông báo
+                        require_once __DIR__ . '/../models/User.php';
+                        $userModel = new \User();
+                        $boardMembers = $userModel->findByRoleName('board');
+                        
+                        if (!empty($boardMembers)) {
+                            foreach ($boardMembers as $member) {
+                                // 1. Thông báo cho Board để xuất bản chương truyện này
+                                $this->notificationModel->createNotification(
+                                    $member['user_id'],
+                                    'chapter_approved',
+                                    "Chương {$chapDetail['chapter_number']} của bộ truyện '{$seriesTitle}' đã được Biên tập viên phê duyệt và đang chờ xuất bản.",
+                                    $chapDetail['series_id']
+                                );
+                                
+                                // 2. Nếu là chương cuối, gửi thêm thông báo xác nhận hoàn thành bộ truyện
+                                if ($chapDetail && !empty($chapDetail['is_final'])) {
                                     $this->notificationModel->createNotification(
                                         $member['user_id'],
                                         'series_completed',

@@ -145,6 +145,7 @@ class NotificationController extends BaseController
                 }
                 break;
             case 'series_submitted':
+            case 'chapter_approved':
                 if ($role === 'board') {
                     $redirectUrl = BASE_PATH . '/index.php?controller=series&action=publish';
                 } elseif ($relatedId > 0) {
