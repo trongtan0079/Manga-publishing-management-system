@@ -73,7 +73,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
             </div>
             <div class="card-body d-flex flex-column align-items-center p-4 bg-light" style="min-height: 400px;">
                 <?php 
-                $fileUrl = BASE_PATH . '/' . $submission['file_url'];
+                $fileUrl = (strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/');
                 $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
                 $isImage = in_array($ext, ['png', 'jpg', 'jpeg']);
                 ?>

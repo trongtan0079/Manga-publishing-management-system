@@ -135,10 +135,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <?php $ext = pathinfo($submission['file_url'], PATHINFO_EXTENSION); ?>
                         <?php if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
                             <div class="text-center bg-light p-2 rounded border">
-                                <img src="<?= BASE_PATH ?>/<?= htmlspecialchars((string)($submission['file_url'] ?? '')) ?>" class="img-fluid rounded shadow-sm" alt="Submission file" style="max-height: 500px;">
+                                <img src="<?= htmlspecialchars((strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/')) ?>" class="img-fluid rounded shadow-sm" alt="Submission file" style="max-height: 500px;">
                             </div>
                         <?php else: ?>
-                            <a href="<?= BASE_PATH ?>/<?= htmlspecialchars((string)($submission['file_url'] ?? '')) ?>" class="btn btn-outline-primary" target="_blank">
+                            <a href="<?= htmlspecialchars((strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/')) ?>" class="btn btn-outline-primary" target="_blank">
                                 <i class="fas fa-download me-2"></i> Tải xuống bản thảo đính kèm
                             </a>
                         <?php endif; ?>
