@@ -27,7 +27,7 @@ $hasWarningSeries = false;
 $warningSeriesList = [];
 if (!empty($latestRankings)) {
     foreach ($latestRankings as $r) {
-        if ($r['rank_position'] >= 5 && $r['score'] < 50) {
+        if ($r['rank_position'] >= 5 || $r['score'] < 50) {
             $hasWarningSeries = true;
             $warningSeriesList[] = $r['series_title'] ?? ('Series #' . $r['series_id']);
         }
@@ -41,7 +41,7 @@ if (!empty($latestRankings)) {
         <div>
             <strong class="text-danger d-block mb-1" style="font-size: 0.92rem;"><i class="fas fa-radiation"></i> Cảnh báo Hiệu Năng Tác Phẩm!</strong>
             <span class="text-muted" style="font-size: 0.82rem; font-weight: 500; line-height: 1.5; display: inline-block;">
-                Tác phẩm của bạn: <strong class="text-dark"><?= implode(', ', array_map('htmlspecialchars', $warningSeriesList)) ?></strong> hiện đang có thứ hạng thấp (Hạng >= 5) và điểm số bình chọn dưới trung bình (Điểm < 50). Có nguy cơ cao bị Hội đồng Biên tập xem xét đình bản (Hủy dự án). Vui lòng liên hệ Editor phụ trách để xây dựng hồ sơ biện hộ hoặc cải thiện chất lượng kịch bản ở chương tiếp theo.
+                Tác phẩm của bạn: <strong class="text-dark"><?= implode(', ', array_map('htmlspecialchars', $warningSeriesList)) ?></strong> hiện đang có thứ hạng thấp (Hạng >= 5) hoặc điểm số bình chọn dưới trung bình (Điểm < 50). Có nguy cơ cao bị Hội đồng Biên tập xem xét đình bản (Hủy dự án). Vui lòng liên hệ Editor phụ trách để xây dựng hồ sơ biện hộ hoặc cải thiện chất lượng kịch bản ở chương tiếp theo.
             </span>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>

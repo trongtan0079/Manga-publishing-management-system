@@ -191,7 +191,7 @@ class SeriesRankingController extends BaseController
                     $this->notificationModel->createNotification($info['mangaka_id'], 'ranking_published', $message, $seriesId);
 
                     // Gửi cảnh báo đặc biệt (series_warning) nếu điểm thấp (< 50) hoặc thứ hạng thấp (>= 5)
-                    if ($score < 50 && $rank >= 5) {
+                    if ($score < 50 || $rank >= 5) {
                         $warningMsg = "Cảnh báo: Bộ truyện '{$info['title']}' của bạn đang xếp hạng thấp (Hạng {$rank}, Điểm {$score}). Có nguy cơ bị Hội đồng Biên tập xem xét ngưng xuất bản hoặc hủy dự án.";
                         $this->notificationModel->createNotification($info['mangaka_id'], 'series_warning', $warningMsg, $seriesId);
                     }
@@ -339,7 +339,7 @@ class SeriesRankingController extends BaseController
                 $this->rankingModel->update($id, $data);
 
                 // Tự động gửi cảnh báo nếu điểm số cập nhật thủ công dưới 50 hoặc thứ hạng thấp (>= 5)
-                if ($score < 50 && $rankPosition >= 5) {
+                if ($score < 50 || $rankPosition >= 5) {
                     $warningMsg = "Cảnh báo chỉnh sửa: Bộ truyện '{$series['title']}' của bạn đang xếp hạng thấp (Hạng {$rankPosition}, Điểm {$score}). Có nguy cơ bị Hội đồng Biên tập xem xét ngưng xuất bản hoặc hủy dự án.";
                     $this->notificationModel->createNotification($series['mangaka_id'], 'series_warning', $warningMsg, $seriesId);
                 }

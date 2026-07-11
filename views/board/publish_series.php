@@ -282,7 +282,7 @@ if (!empty($seriesList)) {
                                                 <span class="badge bg-primary"><?= htmlspecialchars($series['latest_score']) ?> điểm</span>
                                             </div>
                                             <!-- Cảnh báo nếu hạng thấp (từ hạng 5 trở đi) hoặc điểm số quá thấp (< 50) -->
-                                            <?php if ($series['latest_rank'] >= 5 && $series['latest_score'] < 50): ?>
+                                            <?php if ($series['latest_rank'] >= 5 || $series['latest_score'] < 50): ?>
                                                 <span class="badge badge-danger-custom text-xs" style="max-width: fit-content;">
                                                     <i class="fas fa-exclamation-triangle me-1"></i>Có nguy cơ bị hủy
                                                 </span>

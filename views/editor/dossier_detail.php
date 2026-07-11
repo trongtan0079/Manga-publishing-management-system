@@ -158,7 +158,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         </td>
                                         <td><strong><?= $rank['score'] ?> / 100</strong></td>
                                         <td class="text-end pe-4">
-                                            <?php if ($rank['score'] < 50 && $rank['rank_position'] >= 5): ?>
+                                            <?php if ($rank['score'] < 50 || $rank['rank_position'] >= 5): ?>
                                                 <span class="text-danger fw-bold"><i class="fas fa-exclamation-triangle me-1"></i>Nguy cơ bị hủy</span>
                                             <?php else: ?>
                                                 <span class="text-success"><i class="fas fa-check-circle me-1"></i>An toàn</span>

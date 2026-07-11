@@ -34,7 +34,7 @@ Hệ thống cung cấp không gian làm việc chuyên biệt cho từng tác n
 ### 1.4. Hội Đồng Biên Tập (Editorial Board)
 * **Duyệt xuất bản Series:** Quyết định phê duyệt phát hành hoặc đình bản các bộ truyện đang phát hành.
 * **Xếp hạng & Thống kê:** Nhập số phiếu bình chọn của độc giả định kỳ để hệ thống tự động sắp xếp thứ tự và tính điểm số quy chuẩn (0 - 100).
-* **Cảnh báo rủi ro:** Tự động phát hiện và cảnh báo các bộ truyện có hiệu suất kém (Hạng >= 5 và Điểm số < 50) có nguy cơ bị hủy dự án.
+* **Cảnh báo rủi ro:** Tự động phát hiện và cảnh báo các bộ truyện có hiệu suất kém (Hạng >= 5 hoặc Điểm số < 50) có nguy cơ bị hủy dự án.
 
 ### 1.5. Quản Trị Viên (Admin)
 * **Quản trị tài khoản:** Thêm, sửa, khóa tài khoản người dùng trong hệ thống.
