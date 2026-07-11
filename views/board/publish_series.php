@@ -313,6 +313,8 @@ if (!empty($seriesList)) {
                                                </div>
                                                <?php if (($series['has_final_approved'] ?? 0) > 0): ?>
                                                    <span class="badge bg-success-subtle text-success border border-success-subtle text-xs" style="max-width: fit-content;">Hoàn tất</span>
+                                               <?php elseif ($series['finished_chapters'] == $series['total_chapters']): ?>
+                                                   <span class="badge bg-info-subtle text-info border border-info-subtle text-xs" style="max-width: fit-content;">Chờ chương mới</span>
                                                <?php else: ?>
                                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle text-xs" style="max-width: fit-content;">Đang làm</span>
                                                <?php endif; ?>
