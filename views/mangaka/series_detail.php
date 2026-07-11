@@ -154,7 +154,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <div class="card border-primary">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Danh sách Chapter</h5>
-                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$this->isSeriesLocked($series)): ?>
+                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && $series['status'] === 'ongoing'): ?>
                 <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Tạo Chapter mới</a>
                 <?php endif; ?>
             </div>

@@ -106,7 +106,7 @@ class ReviewController extends BaseController
                 require_once __DIR__ . '/../models/Series.php';
                 $seriesModel = new \Series();
                 $series = $seriesModel->findById($chapter['series_id']);
-                if ($series && in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                if ($series && $series['status'] !== 'ongoing') {
                     return false;
                 }
             }
@@ -121,7 +121,7 @@ class ReviewController extends BaseController
                 require_once __DIR__ . '/../models/Series.php';
                 $seriesModel = new \Series();
                 $series = $seriesModel->findById($chapter['series_id']);
-                if ($series && $series['editor_id'] == $_SESSION['user_id'] && $series['status'] !== 'planning') {
+                if ($series && $series['editor_id'] == $_SESSION['user_id'] && $series['status'] === 'ongoing') {
                     return true;
                 }
             }
@@ -534,8 +534,8 @@ class ReviewController extends BaseController
             $seriesModel = new Series();
             $series = $seriesModel->findById($chapter['series_id']);
             if ($series) {
-                if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
-                    echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa ghi chú lỗi']);
+                if ($series['status'] !== 'ongoing') {
+                    echo json_encode(['success' => false, 'error' => 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể chỉnh sửa ghi chú lỗi']);
                     exit;
                 }
                 if ($series['editor_id'] != $_SESSION['user_id']) {
@@ -626,8 +626,8 @@ class ReviewController extends BaseController
                 $seriesModel = new Series();
                 $series = $seriesModel->findById($chapter['series_id']);
                 if ($series) {
-                    if (in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
-                        echo json_encode(['success' => false, 'error' => 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể xóa ghi chú lỗi']);
+                    if ($series['status'] !== 'ongoing') {
+                        echo json_encode(['success' => false, 'error' => 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể xóa ghi chú lỗi']);
                         exit;
                     }
                     if ($series['editor_id'] != $_SESSION['user_id']) {

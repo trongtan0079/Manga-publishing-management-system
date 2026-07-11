@@ -67,16 +67,16 @@ class ChapterController extends BaseController
             exit;
         }
 
-        // Chỉ cho phép tạo chapter mới khi bộ truyện đang lập kế hoạch (planning) hoặc hoạt động (ongoing)
-        if (($action === 'create' || $action === 'store') && !in_array($series['status'], ['planning', 'ongoing'])) {
+        // Chỉ cho phép tạo chapter mới khi bộ truyện đã được duyệt hoạt động chính thức (ongoing)
+        if (($action === 'create' || $action === 'store') && !in_array($series['status'], ['ongoing'])) {
             $_SESSION['error'] = "Bộ truyện chưa được phê duyệt hoặc đang tạm ngưng, đã hủy. Không thể tạo thêm chapter mới.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
             exit;
         }
 
-        // Chặn sửa/xóa/nộp chapter nếu bộ truyện đang bị khóa
-        if (in_array($action, ['edit', 'update', 'delete', 'submit']) && $this->isSeriesLocked($series)) {
-            $_SESSION['error'] = "Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa hoặc thao tác trên các chương.";
+        // Chặn sửa/xóa/nộp chapter nếu bộ truyện không hoạt động chính thức (ongoing)
+        if (in_array($action, ['edit', 'update', 'delete', 'submit']) && $series['status'] !== 'ongoing') {
+            $_SESSION['error'] = "Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể chỉnh sửa hoặc thao tác trên các chương.";
             header('Location: ' . BASE_PATH . '/index.php?controller=series&action=show&id=' . $seriesId);
             exit;
         }

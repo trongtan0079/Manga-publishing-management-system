@@ -98,10 +98,10 @@ class PageController extends BaseController
             exit;
         }
 
-        // Chặn sửa/xóa/nộp trang nếu bộ truyện đang bị khóa
+        // Chặn sửa/xóa/nộp trang nếu bộ truyện không hoạt động chính thức (ongoing)
         $action = $_GET['action'] ?? '';
-        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete']) && $this->isSeriesLocked($series)) {
-            $_SESSION['error'] = "Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa trang truyện.";
+        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete']) && $series['status'] !== 'ongoing') {
+            $_SESSION['error'] = "Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể chỉnh sửa trang truyện.";
             header('Location: ' . BASE_PATH . '/index.php?controller=chapter&action=show&id=' . $chapterId);
             exit;
         }

@@ -70,9 +70,9 @@ class TaskController extends BaseController
         $series = $this->seriesModel->findById($chapter['series_id']);
         if (!$series) return false;
 
-        // Chặn sửa đổi task nếu bộ truyện đang bị khóa
+        // Chặn sửa đổi task nếu bộ truyện không hoạt động chính thức (ongoing)
         $action = $_GET['action'] ?? '';
-        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete']) && $this->isSeriesLocked($series)) {
+        if (in_array($action, ['create', 'store', 'edit', 'update', 'delete']) && $series['status'] !== 'ongoing') {
             return false;
         }
 
@@ -358,8 +358,8 @@ class TaskController extends BaseController
                     exit;
                 }
                 $series = $this->seriesModel->findById($chapter['series_id']);
-                if ($series && $this->isSeriesLocked($series)) {
-                    $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể chỉnh sửa công việc.';
+                if ($series && $series['status'] !== 'ongoing') {
+                    $_SESSION['error'] = 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể chỉnh sửa công việc.';
                     header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                     exit;
                 }
@@ -417,8 +417,8 @@ class TaskController extends BaseController
                     exit;
                 }
                 $series = $this->seriesModel->findById($chapter['series_id']);
-                if ($series && $this->isSeriesLocked($series)) {
-                    $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể cập nhật công việc.';
+                if ($series && $series['status'] !== 'ongoing') {
+                    $_SESSION['error'] = 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể cập nhật công việc.';
                     if ($_SESSION['role_name'] === 'assistant') {
                         header('Location: ' . BASE_PATH . '/index.php?controller=task&action=index');
                     } else {
@@ -658,8 +658,8 @@ class TaskController extends BaseController
                         exit;
                     }
                     $series = $this->seriesModel->findById($chapter['series_id']);
-                    if ($series && $this->isSeriesLocked($series)) {
-                        $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể xóa công việc.';
+                    if ($series && $series['status'] !== 'ongoing') {
+                        $_SESSION['error'] = 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể xóa công việc.';
                         header('Location: ' . BASE_PATH . '/index.php?controller=page&action=show&id=' . $task['page_id']);
                         exit;
                     }

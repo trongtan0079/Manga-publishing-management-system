@@ -167,13 +167,8 @@ class SubmissionController extends BaseController
                     require_once __DIR__ . '/../models/Series.php';
                     $seriesModel = new \Series();
                     $series = $seriesModel->findById($chapter['series_id']);
-                    if ($series && $this->isSeriesLocked($series)) {
-                        $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể nộp bản vẽ cho công việc này.';
-                        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
-                        exit;
-                    }
-                    if ($series && $series['status'] === 'planning') {
-                        $_SESSION['error'] = 'Không thể nộp bản vẽ cho bộ truyện đang ở trạng thái Kế hoạch hoặc chưa được phê duyệt phát hành.';
+                    if ($series && $series['status'] !== 'ongoing') {
+                        $_SESSION['error'] = 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể nộp bản vẽ cho công việc này.';
                         header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
                         exit;
                     }
@@ -216,13 +211,8 @@ class SubmissionController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=' . urlencode($submissionType));
                 exit;
             }
-            if ($this->isSeriesLocked($series)) {
-                $_SESSION['error'] = 'Bộ truyện đã tạm ngưng, đã hủy hoặc đã hoàn thành. Không thể nộp bản thảo.';
-                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=' . urlencode($submissionType));
-                exit;
-            }
-            if ($series['status'] === 'planning') {
-                $_SESSION['error'] = 'Không thể nộp bản thảo khi bộ truyện đang ở trạng thái Kế hoạch hoặc chưa được phê duyệt phát hành.';
+            if ($series['status'] !== 'ongoing') {
+                $_SESSION['error'] = 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể nộp bản thảo.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=' . urlencode($submissionType));
                 exit;
             }
