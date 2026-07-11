@@ -109,7 +109,7 @@ class SeriesRankingController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=create');
                 exit;
             }
-            $periodStartDateFormatted = date('Y-m-d', $periodStartTimestamp);
+            $periodStartDateFormatted = date('Y-m-01', $periodStartTimestamp);
 
             // Tìm số phiếu cao nhất để tính điểm quy chuẩn (0 - 100)
             $maxVotes = 0;
@@ -318,7 +318,7 @@ class SeriesRankingController extends BaseController
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
             }
-            $periodStartDateFormatted = date('Y-m-d', $periodStartTimestamp);
+            $periodStartDateFormatted = date('Y-m-01', $periodStartTimestamp);
 
             // Chỉ kiểm tra trùng lặp dữ liệu (Duplicate) nếu Series hoặc Kỳ đánh giá bị thay đổi
             if (($seriesId != $ranking['series_id'] || $periodStartDateFormatted != $ranking['period_start_date']) && 
