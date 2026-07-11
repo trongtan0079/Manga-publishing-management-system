@@ -247,7 +247,7 @@ if (!empty($seriesList)) {
                             <th>Xếp hạng & Điểm</th>
                             <th>Trạng thái</th>
                             <th>Tiến độ</th>
-                            <th>Biện hộ</th>
+                            <th class="text-nowrap">Hồ sơ bảo vệ</th>
                             <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
                         </tr>
                     </thead>
@@ -502,7 +502,7 @@ if (!empty($seriesList)) {
                             <th>Xếp hạng & Điểm</th>
                             <th>Trạng thái</th>
                             <th>Tổng số chương</th>
-                            <th>Biện hộ</th>
+                            <th class="text-nowrap">Hồ sơ bảo vệ</th>
                             <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
                         </tr>
                     </thead>
@@ -612,7 +612,7 @@ if (!empty($seriesList)) {
                             <th>Xếp hạng & Điểm</th>
                             <th>Trạng thái</th>
                             <th>Tiến độ</th>
-                            <th>Biện hộ</th>
+                            <th class="text-nowrap">Hồ sơ bảo vệ</th>
                             <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
                         </tr>
                     </thead>
@@ -738,7 +738,7 @@ if (!empty($seriesList)) {
                             <th>Xếp hạng & Điểm</th>
                             <th>Trạng thái</th>
                             <th>Tổng số chương</th>
-                            <th>Biện hộ</th>
+                            <th class="text-nowrap">Hồ sơ bảo vệ</th>
                             <th class="text-end pe-4" style="min-width: 430px;">Hành động điều chỉnh</th>
                         </tr>
                     </thead>
