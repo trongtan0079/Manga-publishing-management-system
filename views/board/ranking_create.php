@@ -112,9 +112,26 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             </td>
                                             <td>
                                                 <?php if ($series['published_chapters_count'] > 0): ?>
-                                                    <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style="font-size: 0.78rem; font-weight: 600;">
-                                                        <i class="fas fa-book-open me-1"></i><?= $series['published_chapters_count'] ?> Chương
-                                                    </span>
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1" style="font-size: 0.78rem; font-weight: 600; width: fit-content;">
+                                                            <i class="fas fa-book-open me-1"></i><?= $series['published_chapters_count'] ?> Chương
+                                                        </span>
+                                                        <div class="d-flex flex-column gap-1 mt-1 ps-1" style="font-size: 0.72rem; max-height: 80px; overflow-y: auto;">
+                                                            <?php if (!empty($series['published_chapters'])): ?>
+                                                                <?php 
+                                                                $chapsCount = count($series['published_chapters']);
+                                                                $displayChaps = array_slice($series['published_chapters'], -3);
+                                                                foreach ($displayChaps as $chap): ?>
+                                                                    <div class="text-slate-600 text-xs text-start" style="max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="Chương <?= htmlspecialchars($chap['chapter_number']) ?>: <?= htmlspecialchars($chap['title']) ?>">
+                                                                        <i class="far fa-file-alt text-muted me-1"></i>Ch.<?= htmlspecialchars($chap['chapter_number']) ?>: <?= htmlspecialchars($chap['title']) ?>
+                                                                    </div>
+                                                                <?php endforeach; ?>
+                                                                <?php if ($chapsCount > 3): ?>
+                                                                    <div class="text-muted text-xs text-start ps-3"><i>và <?= $chapsCount - 3 ?> chương khác...</i></div>
+                                                                <?php endif; ?>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
                                                 <?php else: ?>
                                                     <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1" style="font-size: 0.78rem; font-weight: 600;" title="Chưa có chapter nào được xuất bản công chúng">
                                                         <i class="fas fa-exclamation-circle me-1"></i>Chưa xuất bản

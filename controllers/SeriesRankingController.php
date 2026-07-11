@@ -78,6 +78,15 @@ class SeriesRankingController extends BaseController
         $stmt->execute();
         $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Lấy danh sách chi tiết các chapter đã xuất bản của từng series để hiển thị trên giao diện đánh giá
+        foreach ($seriesList as &$series) {
+            $sqlChaps = "SELECT chapter_number, title FROM chapters WHERE series_id = :series_id AND status = 'published' ORDER BY chapter_number ASC";
+            $stmtChaps = $this->seriesModel->getConnection()->prepare($sqlChaps);
+            $stmtChaps->execute(['series_id' => $series['series_id']]);
+            $series['published_chapters'] = $stmtChaps->fetchAll(PDO::FETCH_ASSOC);
+        }
+        unset($series);
+
         require_once __DIR__ . '/../views/board/ranking_create.php';
     }
 
