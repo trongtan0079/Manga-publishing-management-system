@@ -53,7 +53,7 @@ Hệ thống cung cấp không gian làm việc chuyên biệt cho từng tác n
 
 ---
 
-![Sơ đồ swimlane quy trình sáng tác và xuất bản](assets/images/swimlane.png)
+![Sơ đồ swimlane quy trình sáng tác và xuất bản](assets/images/manga_workflow_swimlane.png)
 
 ---
 
