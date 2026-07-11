@@ -53,6 +53,10 @@ Hệ thống cung cấp không gian làm việc chuyên biệt cho từng tác n
 
 ---
 
+## 3. Quy Trình Hoạt Động Tổng Quát (General System Workflow)
+
+Dưới đây là sơ đồ luồng hoạt động phân vai (Swimlane Diagram) tổng quát của toàn bộ hệ thống từ lúc đề xuất Series mới, sáng tác kịch bản, giao việc trợ lý, kiểm duyệt bản thảo cho đến lúc xuất bản và xếp hạng định kỳ:
+
 ![Sơ đồ swimlane quy trình sáng tác và xuất bản](assets/images/manga_workflow_swimlane.png)
 
 ---
