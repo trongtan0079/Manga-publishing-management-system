@@ -170,7 +170,7 @@ class BaseController
      */
     public function isChapterLocked($chapter) {
         if (!$chapter) return false;
-        return in_array($chapter['status'], ['reviewing_draft', 'reviewing_final', 'approved', 'published']);
+        return in_array($chapter['status'], ['reviewing', 'approved', 'published']);
     }
 
     /**
