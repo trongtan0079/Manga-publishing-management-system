@@ -106,7 +106,7 @@ if (!empty($seriesList)) {
                     </thead>
                     <tbody>
                         <?php foreach ($pendingSeries as $series): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>">
                                 <td class="ps-4 text-slate-400 font-monospace" style="font-size: 0.85rem;">#<?= htmlspecialchars($series['series_id']) ?></td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -253,7 +253,7 @@ if (!empty($seriesList)) {
                     </thead>
                     <tbody>
                         <?php foreach ($ongoingSeries as $series): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>">
                                 <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -393,7 +393,7 @@ if (!empty($seriesList)) {
                     </thead>
                     <tbody>
                         <?php foreach ($approvedChapters as $chap): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chap['chapter_id'] ?>">
                                 <td class="ps-4 text-slate-400 font-monospace" style="font-size: 0.85rem;">#<?= htmlspecialchars($chap['chapter_id']) ?></td>
                                 <td>
                                     <div class="fw-bold text-slate-800" style="font-size: 0.95rem;">
@@ -451,7 +451,7 @@ if (!empty($seriesList)) {
                     </thead>
                     <tbody>
                         <?php foreach ($publishedChapters as $chap): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chap['chapter_id'] ?>">
                                 <td class="ps-4 text-slate-400 font-monospace" style="font-size: 0.85rem;">#<?= htmlspecialchars($chap['chapter_id']) ?></td>
                                 <td>
                                     <div class="fw-bold text-slate-800" style="font-size: 0.95rem;">
@@ -508,7 +508,7 @@ if (!empty($seriesList)) {
                     </thead>
                     <tbody>
                         <?php foreach ($completedSeries as $series): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>">
                                 <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -618,7 +618,7 @@ if (!empty($seriesList)) {
                     </thead>
                     <tbody>
                         <?php foreach ($suspendedSeries as $series): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>">
                                 <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -744,7 +744,7 @@ if (!empty($seriesList)) {
                     </thead>
                     <tbody>
                         <?php foreach ($canceledSeries as $series): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>">
                                 <td class="ps-4 text-slate-500 font-monospace">#<?= htmlspecialchars($series['series_id']) ?></td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -917,6 +917,21 @@ document.addEventListener("DOMContentLoaded", function() {
         
         updateFormState();
         select.addEventListener("change", updateFormState);
+    });
+
+    // Clickable rows handler to make entire row clickable to view details
+    const clickableRows = document.querySelectorAll(".clickable-row");
+    clickableRows.forEach(row => {
+        row.addEventListener("click", function(e) {
+            // Đảm bảo không kích hoạt chuyển trang nếu click trúng nút, dropdown hoặc link con
+            if (e.target.closest('a') || e.target.closest('button') || e.target.closest('select') || e.target.closest('form') || e.target.closest('input')) {
+                return;
+            }
+            const href = this.getAttribute("data-href");
+            if (href) {
+                window.location.href = href;
+            }
+        });
     });
 });
 </script>
