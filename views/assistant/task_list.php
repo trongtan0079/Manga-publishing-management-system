@@ -93,7 +93,10 @@ if (!function_exists('renderTaskTable')) {
                                     $typeLabel = htmlspecialchars($typeKey);
                                     $typeClass = 'task-type-bg-other';
                                     
-                                    if ($typeKey === 'background') { 
+                                    if (strpos($task['title'], '(Nhóm:') !== false) {
+                                        $typeLabel = 'Tổ hợp (Group)';
+                                        $typeClass = 'bg-primary text-white border border-primary';
+                                    } elseif ($typeKey === 'background') { 
                                         $typeLabel = 'Vẽ nền (Background)'; 
                                         $typeClass = 'task-type-bg-background'; 
                                     } elseif ($typeKey === 'inking') { 
