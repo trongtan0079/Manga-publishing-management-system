@@ -198,6 +198,13 @@ class PageController extends BaseController
             header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
             exit;
         }
+
+        // Chặn thêm trang nếu chapter không còn ở trạng thái Bản nháp
+        if ($chapter['status'] !== 'drafting') {
+            $_SESSION['error'] = "Chỉ được phép thêm trang truyện mới khi Chương đang ở trạng thái Bản nháp (Drafting).";
+            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
+            exit;
+        }
         
         // Lấy danh sách số trang đã tồn tại trong chapter để phục vụ validate thời gian thực
         $existingPageNumbers = $this->pageModel->getPageNumbersByChapterId($chapterId);
@@ -223,6 +230,13 @@ class PageController extends BaseController
             // Khóa tạo trang nếu chapter đang bị khóa
             if ($this->isChapterLocked($chapter)) {
                 $_SESSION['error'] = "Chương truyện đang chờ duyệt, đã phê duyệt hoặc đã xuất bản, không thể thêm trang vẽ mới.";
+                header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
+                exit;
+            }
+
+            // Chặn thêm trang nếu chapter không còn ở trạng thái Bản nháp
+            if ($chapter['status'] !== 'drafting') {
+                $_SESSION['error'] = "Chỉ được phép thêm trang truyện mới khi Chương đang ở trạng thái Bản nháp (Drafting).";
                 header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
                 exit;
             }
