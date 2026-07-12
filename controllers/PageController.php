@@ -464,7 +464,7 @@ class PageController extends BaseController
                 $_SESSION['error'] = "Lỗi hệ thống: " . $e->getMessage();
             }
             
-            header("Location: " . BASE_PATH . "/index.php?controller=chapter&action=show&id={$chapterId}");
+            header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id={$id}");
             exit;
         }
     }
