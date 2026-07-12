@@ -83,7 +83,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         ?>
                             <tr>
                                 <td class="ps-4">
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text" title="Xem chi tiết phân trang & phân vùng">
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text" title="Xem chi tiết phân trang & phân vùng">
                                         <strong><?= htmlspecialchars($task['series_title']) ?></strong><br>
                                         <small class="text-muted">Chương <?= htmlspecialchars($task['chapter_number']) ?> - Trang <?= htmlspecialchars($task['page_number']) ?></small>
                                     </a>
@@ -159,7 +159,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                                 <td class="text-end pe-4">
                                     <div class="btn-group">
-                                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="btn btn-sm btn-outline-info" title="Xem chi tiết trang">
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="btn btn-sm btn-outline-info" title="Xem chi tiết trang">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                         <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-outline-warning" title="Sửa công việc">

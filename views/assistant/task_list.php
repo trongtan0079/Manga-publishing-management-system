@@ -57,9 +57,9 @@ if (!function_exists('renderTaskTable')) {
                     </thead>
                     <tbody>
                         <?php foreach ($taskList as $task): ?>
-                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>">
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>">
                                 <td class="ps-4" style="width: 200px;">
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text d-block" title="Xem chi tiết phân trang & phân vùng">
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text d-block" title="Xem chi tiết phân trang & phân vùng">
                                         <div class="fw-bold text-slate-800" style="font-size: 0.9rem; line-height: 1.25;"><?= htmlspecialchars($task['series_title']) ?></div>
                                         <small class="text-slate-500 font-medium">Ch. <?= htmlspecialchars($task['chapter_number']) ?> - Tr. <?= htmlspecialchars($task['page_number']) ?></small>
                                         <?php if (!empty($task['page_region_id'])): ?>
@@ -112,7 +112,7 @@ if (!function_exists('renderTaskTable')) {
                                     ?>
                                     <span class="badge <?= $typeClass ?> mb-1" style="font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 12px;"><?= $typeLabel ?></span>
                                     <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-slate-800 hover-primary-text fw-bold fs-6" title="Xem chi tiết trang">
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="text-decoration-none text-slate-800 hover-primary-text fw-bold fs-6" title="Xem chi tiết trang">
                                             <?= htmlspecialchars($task['title']) ?>
                                         </a>
                                         <?php if (!empty($task['description'])): ?>
@@ -182,7 +182,7 @@ if (!function_exists('renderTaskTable')) {
                                           <?php endif; ?>
 
                                           <!-- Nút xem chi tiết -->
-                                          <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="btn btn-sm btn-light text-slate-600 border border-slate-200 d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 32px; height: 32px; transition: all 0.15s;" title="Xem chi tiết trang">
+                                          <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="btn btn-sm btn-light text-slate-600 border border-slate-200 d-inline-flex align-items-center justify-content-center" style="border-radius: 8px; width: 32px; height: 32px; transition: all 0.15s;" title="Xem chi tiết trang">
                                               <i class="fas fa-eye" style="font-size: 0.78rem;"></i>
                                           </a>
 

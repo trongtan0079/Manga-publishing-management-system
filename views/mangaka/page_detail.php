@@ -57,18 +57,27 @@ $isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published'
 <?php
 
 // Spotlight logic for Assistant tasks
-$highlightRegionId = $_GET['highlight_region'] ?? null;
-if (!$highlightRegionId && isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
+$highlightRegionIds = [];
+$hrParam = $_GET['highlight_region'] ?? null;
+if ($hrParam) {
+    $highlightRegionIds = array_filter(array_map('trim', explode(',', $hrParam)));
+}
+if (empty($highlightRegionIds) && isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
     if (!empty($tasks)) {
         foreach ($tasks as $t) {
-            if ($t['assistant_id'] == $_SESSION['user_id'] && !empty($t['page_region_id'])) {
-                $highlightRegionId = $t['page_region_id'];
-                break;
+            if ($t['assistant_id'] == $_SESSION['user_id']) {
+                if (!empty($t['grouped_region_ids'])) {
+                    $highlightRegionIds = array_filter(array_map('trim', explode(',', $t['grouped_region_ids'])));
+                    break;
+                } elseif (!empty($t['page_region_id'])) {
+                    $highlightRegionIds[] = $t['page_region_id'];
+                    break;
+                }
             }
         }
     }
 }
-$hasSpotlight = !empty($highlightRegionId);
+$hasSpotlight = !empty($highlightRegionIds);
 
 // Filter regions and tasks for Assistant to only show their assigned items
 if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
@@ -270,7 +279,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                     $borderColor = '#fd7e14'; // Cam cho SFX
                                     $bgColor = 'rgba(253, 126, 20, 0.15)';
                                 }
-                                $isSpotlight = ($highlightRegionId && $region['region_id'] == $highlightRegionId);
+                                $isSpotlight = in_array($region['region_id'], $highlightRegionIds);
                                 $spotlightClass = $isSpotlight ? ' assistant-spotlight' : '';
                                 ?>
                                 <div class="ai-region-overlay<?= $spotlightClass ?>" 
