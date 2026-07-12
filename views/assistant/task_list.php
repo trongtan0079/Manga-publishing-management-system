@@ -59,15 +59,15 @@ if (!function_exists('renderTaskTable')) {
                         <?php foreach ($taskList as $task): ?>
                             <tr>
                                 <td class="ps-4" style="width: 200px;">
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text" title="Xem chi tiết phân trang & phân vùng">
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text d-block" title="Xem chi tiết phân trang & phân vùng">
                                         <div class="fw-bold text-slate-800" style="font-size: 0.9rem; line-height: 1.25;"><?= htmlspecialchars($task['series_title']) ?></div>
                                         <small class="text-slate-500 font-medium">Ch. <?= htmlspecialchars($task['chapter_number']) ?> - Tr. <?= htmlspecialchars($task['page_number']) ?></small>
+                                        <?php if (!empty($task['page_region_id'])): ?>
+                                            <div class="mt-1">
+                                                <span class="region-ai-badge"><i class="fas fa-project-diagram me-1" style="font-size: 9px;"></i>Phân vùng #<?= $task['page_region_id'] ?> (AI)</span>
+                                            </div>
+                                        <?php endif; ?>
                                     </a>
-                                    <?php if (!empty($task['page_region_id'])): ?>
-                                        <div class="mt-1">
-                                            <span class="region-ai-badge"><i class="fas fa-project-diagram me-1" style="font-size: 9px;"></i>Phân vùng #<?= $task['page_region_id'] ?> (AI)</span>
-                                        </div>
-                                    <?php endif; ?>
                                     <small class="text-slate-400 d-block mt-1"><i class="fas fa-user-edit me-1"></i><?= htmlspecialchars($task['mangaka_name']) ?></small>
                                 </td>
                                 <td style="width: 140px;">
@@ -109,7 +109,9 @@ if (!function_exists('renderTaskTable')) {
                                     ?>
                                     <span class="badge <?= $typeClass ?> mb-1" style="font-size: 0.7rem; font-weight: 600; padding: 3px 8px; border-radius: 12px;"><?= $typeLabel ?></span>
                                     <div class="d-flex align-items-center gap-1.5 flex-wrap">
-                                        <div class="fw-bold text-slate-800 fs-6"><?= htmlspecialchars($task['title']) ?></div>
+                                        <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-slate-800 hover-primary-text fw-bold fs-6" title="Xem chi tiết trang">
+                                            <?= htmlspecialchars($task['title']) ?>
+                                        </a>
                                         <?php if (!empty($task['description'])): ?>
                                             <button class="btn btn-link btn-xs p-0 text-decoration-none text-indigo-500 ms-1 d-inline-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#task-desc-<?= $task['task_id'] ?><?= $isActive ? '-active' : '-completed' ?>" aria-expanded="false" aria-controls="task-desc-<?= $task['task_id'] ?><?= $isActive ? '-active' : '-completed' ?>" title="Xem chi tiết mô tả" style="font-size: 0.72rem; font-weight: 600; box-shadow: none;">
                                                 <i class="fas fa-info-circle me-1"></i>Chi tiết
