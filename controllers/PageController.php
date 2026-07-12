@@ -411,9 +411,17 @@ class PageController extends BaseController
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $imageUrl = $this->handleImageUpload();
                 if ($imageUrl) {
-                    $data['old_image_url'] = $page['image_url'];
+                    // Chỉ cập nhật old_image_url nếu chưa có bản vẽ gốc trước đó (giữ lại bản gốc đầu tiên)
+                    if (empty($page['old_image_url'])) {
+                        $data['old_image_url'] = $page['image_url'];
+                    } else {
+                        // Nếu đã lưu bản gốc đầu tiên, xóa bản vẽ trung gian cũ vừa sửa để giải phóng dung lượng
+                        $oldTempPath = __DIR__ . '/../' . ltrim($page['image_url'], '/');
+                        if (!empty($page['image_url']) && file_exists($oldTempPath)) {
+                            @unlink($oldTempPath);
+                        }
+                    }
                     $data['image_url'] = $imageUrl;
-                    // Yêu cầu: Không xóa file cũ.
                 } else {
                     // Xảy ra lỗi upload (dung lượng, định dạng)
                     header("Location: " . BASE_PATH . "/index.php?controller=page&action=edit&id={$id}");
