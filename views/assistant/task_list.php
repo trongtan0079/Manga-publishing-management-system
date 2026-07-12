@@ -16,16 +16,33 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </a>
 </div>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="h3 mb-1">Công việc của tôi</h2>
-        <p class="text-muted text-xs mb-0">Danh sách công việc được giao.</p>
-    </div>
-</div>
+<?php 
+// Phân loại các task thành active và completed
+$activeTasks = [];
+$completedTasks = [];
+if (!empty($tasks)) {
+    foreach ($tasks as $task) {
+        if ($task['status'] === 'completed') {
+            $completedTasks[] = $task;
+        } else {
+            $activeTasks[] = $task;
+        }
+    }
+}
 
-<div class="card border-0 bg-transparent mb-4">
-    <div class="card-body p-0">
-        <?php if (!empty($tasks)): ?>
+// Xử lý bộ lọc từ URL
+$statusFilter = $_GET['status'] ?? '';
+$activeTabClass = 'active';
+$completedTabClass = '';
+if ($statusFilter === 'completed') {
+    $activeTabClass = '';
+    $completedTabClass = 'active';
+}
+
+// Hàm render bảng công việc dùng chung
+if (!function_exists('renderTaskTable')) {
+    function renderTaskTable($taskList, $isActive = true) {
+        if (!empty($taskList)): ?>
             <div class="table-responsive" style="overflow: visible;">
                 <table class="table premium-table align-middle mb-0">
                     <thead>
@@ -39,7 +56,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($tasks as $task): ?>
+                        <?php foreach ($taskList as $task): ?>
                             <tr>
                                 <td class="ps-4" style="width: 200px;">
                                     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text" title="Xem chi tiết phân trang & phân vùng">
@@ -94,13 +111,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <div class="d-flex align-items-center gap-1.5 flex-wrap">
                                         <div class="fw-bold text-slate-800 fs-6"><?= htmlspecialchars($task['title']) ?></div>
                                         <?php if (!empty($task['description'])): ?>
-                                            <button class="btn btn-link btn-xs p-0 text-decoration-none text-indigo-500 ms-1 d-inline-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#task-desc-<?= $task['task_id'] ?>" aria-expanded="false" aria-controls="task-desc-<?= $task['task_id'] ?>" title="Xem chi tiết mô tả" style="font-size: 0.72rem; font-weight: 600; box-shadow: none;">
+                                            <button class="btn btn-link btn-xs p-0 text-decoration-none text-indigo-500 ms-1 d-inline-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#task-desc-<?= $task['task_id'] ?><?= $isActive ? '-active' : '-completed' ?>" aria-expanded="false" aria-controls="task-desc-<?= $task['task_id'] ?><?= $isActive ? '-active' : '-completed' ?>" title="Xem chi tiết mô tả" style="font-size: 0.72rem; font-weight: 600; box-shadow: none;">
                                                 <i class="fas fa-info-circle me-1"></i>Chi tiết
                                             </button>
                                         <?php endif; ?>
                                     </div>
                                     <?php if (!empty($task['description'])): ?>
-                                        <div class="collapse mt-2" id="task-desc-<?= $task['task_id'] ?>">
+                                        <div class="collapse mt-2" id="task-desc-<?= $task['task_id'] ?><?= $isActive ? '-active' : '-completed' ?>">
                                             <div class="card card-body bg-slate-50 p-2.5 border-slate-100 text-slate-600 shadow-none text-start" style="font-size: 0.8rem; max-width: 400px; max-height: 250px; overflow-y: auto; line-height: 1.5; border-radius: 8px;">
                                                 <?= renderMarkdown($task['description']) ?>
                                             </div>
@@ -142,7 +159,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                  </td>
                                  <td class="text-end pe-4" style="width: 250px;">
                                      <div class="d-flex align-items-center justify-content-end gap-2">
-                                          <!-- Dropdown cập nhật trạng thái (tự động lưu khi đổi tùy chọn) -->
+                                          <!-- Dropdown cập nhật trạng thái hoặc Badge hoàn thành -->
                                           <?php if ($task['status'] == 'completed'): ?>
                                               <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;"><i class="fas fa-check-circle me-1.5 text-success"></i>Đã hoàn thành</span>
                                           <?php elseif ($task['status'] == 'submitted'): ?>
@@ -171,57 +188,68 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                               </a>
                                           <?php endif; ?>
                                       </div>
-                                  </td>
-                             </tr>
-                         <?php endforeach; ?>
-                     </tbody>
-                 </table>
-             </div>
+                                 </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         <?php else: ?>
             <div class="text-center py-5 bg-white rounded-3 shadow-sm border border-slate-100">
                 <div class="mb-3 text-muted">
                     <i class="fas fa-tasks fa-3x text-slate-300"></i>
                 </div>
-                <p class="text-slate-500 fw-semibold mb-1">Hộp thư công việc trống</p>
-                <p class="text-slate-400 text-xs mb-0">Bạn hiện chưa được giao công việc nào.</p>
+                <p class="text-slate-500 fw-semibold mb-1"><?= $isActive ? 'Không có công việc đang làm' : 'Chưa có công việc nào hoàn thành' ?></p>
+                <p class="text-slate-400 text-xs mb-0"><?= $isActive ? 'Bạn hiện không có công việc nào cần thực hiện.' : 'Lịch sử công việc đã hoàn thành của bạn sẽ xuất hiện tại đây.' ?></p>
             </div>
-        <?php endif; ?>
+        <?php endif;
+    }
+}
+?>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h3 mb-1">Công việc của tôi</h2>
+        <p class="text-muted text-xs mb-0">Danh sách công việc được giao.</p>
     </div>
+    <?php if (!empty($statusFilter)): ?>
+        <a href="<?= BASE_PATH ?>/index.php?controller=task&action=index" class="btn btn-sm btn-outline-secondary py-1.5 px-3" style="border-radius: 8px; font-size: 0.78rem;">
+            <i class="fas fa-times me-1"></i>Xóa bộ lọc
+        </a>
+    <?php endif; ?>
 </div>
 
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const filterStatus = urlParams.get('status');
-    if (filterStatus) {
-        const rows = document.querySelectorAll("tbody tr");
-        let foundCount = 0;
-        rows.forEach(row => {
-            const selectEl = row.querySelector("td select[name='status']");
-            if (selectEl) {
-                const statusVal = selectEl.value;
-                if (statusVal === filterStatus) {
-                    row.style.display = "";
-                    foundCount++;
-                } else {
-                    row.style.display = "none";
-                }
-            }
-        });
-        
-        const pageHeader = document.querySelector(".d-flex.justify-content-between.align-items-center.mb-4");
-        if (pageHeader) {
-            const clearBtn = document.createElement("a");
-            clearBtn.href = window.location.pathname + "?controller=task&action=index";
-            clearBtn.className = "btn btn-sm btn-outline-secondary py-1.5 px-3";
-            clearBtn.style.fontSize = "0.78rem";
-            clearBtn.style.borderRadius = "8px";
-            clearBtn.innerHTML = "<i class='fas fa-times me-1'></i>Xóa bộ lọc";
-            pageHeader.appendChild(clearBtn);
-        }
-    }
-});
-</script>
+<ul class="nav nav-tabs border-0 mb-4 gap-2" id="taskTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link <?= $activeTabClass === 'active' ? 'active' : '' ?> px-4 py-2.5 d-flex align-items-center" id="active-tab" data-bs-toggle="tab" data-bs-target="#active-pane" type="button" role="tab" aria-controls="active-pane" aria-selected="<?= $activeTabClass === 'active' ? 'true' : 'false' ?>">
+            <i class="fas fa-spinner me-2 text-warning"></i> Đang thực hiện
+            <span class="badge bg-warning text-dark ms-2" style="font-size: 0.72rem; border-radius: 6px;"><?= count($activeTasks) ?></span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link <?= $completedTabClass === 'active' ? 'active' : '' ?> px-4 py-2.5 d-flex align-items-center" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-pane" type="button" role="tab" aria-controls="completed-pane" aria-selected="<?= $completedTabClass === 'active' ? 'true' : 'false' ?>">
+            <i class="fas fa-check-circle me-2 text-success"></i> Lịch sử hoàn thành
+            <span class="badge bg-success text-white ms-2" style="font-size: 0.72rem; border-radius: 6px;"><?= count($completedTasks) ?></span>
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="taskTabContent">
+    <div class="tab-pane fade <?= $activeTabClass === 'active' ? 'show active' : '' ?>" id="active-pane" role="tabpanel" aria-labelledby="active-tab">
+        <div class="card border-0 bg-transparent mb-4">
+            <div class="card-body p-0">
+                <?php renderTaskTable($activeTasks, true); ?>
+            </div>
+        </div>
+    </div>
+    <div class="tab-pane fade <?= $completedTabClass === 'active' ? 'show active' : '' ?>" id="completed-pane" role="tabpanel" aria-labelledby="completed-tab">
+        <div class="card border-0 bg-transparent mb-4">
+            <div class="card-body p-0">
+                <?php renderTaskTable($completedTasks, false); ?>
+            </div>
+        </div>
+    </div>
+</div>
 
 <style>
 .hover-primary-text {
@@ -300,6 +328,23 @@ document.addEventListener("DOMContentLoaded", function() {
     padding: 3px 8px; 
     border-radius: 20px;
     display: inline-block;
+}
+
+/* Custom Tabs styling */
+#taskTabs .nav-link {
+    color: #64748b;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+#taskTabs .nav-link:hover {
+    color: #4f46e5;
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+#taskTabs .nav-link.active {
+    color: #ffffff;
+    background-color: #4f46e5;
+    border-color: #4f46e5;
 }
 </style>
 
