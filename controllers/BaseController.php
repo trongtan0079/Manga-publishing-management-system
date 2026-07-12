@@ -195,7 +195,7 @@ class BaseController
      * Reusable Helper: Giải quyết và trả về đường dẫn đầy đủ của file ảnh vẽ trang truyện
      */
     public function resolvePageImageUrl($imageUrl) {
-        if (empty($imageUrl)) {
+        if (empty($imageUrl) || $imageUrl === 'no_genko') {
             return '';
         }
         return (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
