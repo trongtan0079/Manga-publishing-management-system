@@ -78,6 +78,7 @@ if (empty($highlightRegionIds) && isset($_SESSION['role_name']) && $_SESSION['ro
     }
 }
 $hasSpotlight = !empty($highlightRegionIds);
+$highlightRegionId = $hasSpotlight ? reset($highlightRegionIds) : null;
 
 // Filter regions and tasks for Assistant to only show their assigned items
 if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
@@ -282,8 +283,8 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                 $isSpotlight = in_array($region['region_id'], $highlightRegionIds);
                                 $spotlightClass = $isSpotlight ? ' assistant-spotlight' : '';
                                 ?>
-                                <div class="ai-region-overlay<?= $spotlightClass ?>" 
-                                     id="overlay-region-<?= $region['region_id'] ?>"
+                                 <div class="ai-region-overlay page-region-overlay<?= $spotlightClass ?>" 
+                                      id="overlay-region-<?= $region['region_id'] ?>"
                                      style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 2px dashed <?= $borderColor ?>; background-color: <?= $bgColor ?>; cursor: pointer; transition: all 0.2s;"
                                      title="<?= htmlspecialchars(ucfirst($region['region_type'])) ?> (Vẽ tay)"
                                      onclick="highlightTableRecord(<?= $region['region_id'] ?>)"
