@@ -697,7 +697,8 @@ function updateSelectedTaskBox(regionId) {
         document.getElementById('selectedTaskTitle').innerText = task.title;
         
         let typeLabel = task.task_type;
-        if (task.task_type === 'background') typeLabel = 'Vẽ nền (Background)';
+        if (task.title.indexOf('(Nhóm:') !== -1) typeLabel = 'Tổ hợp (Group)';
+        else if (task.task_type === 'background') typeLabel = 'Vẽ nền (Background)';
         else if (task.task_type === 'inking') typeLabel = 'Đi nét (Inking)';
         else if (task.task_type === 'coloring') typeLabel = 'Lên màu (Coloring)';
         else if (task.task_type === 'effects') typeLabel = 'Hiệu ứng (Effects)';
@@ -1130,12 +1131,17 @@ document.addEventListener("DOMContentLoaded", function() {
                                     <?php
                                     $typeLabel = htmlspecialchars($task['task_type'] ?? 'Khác');
                                     $typeBadge = 'bg-secondary';
-                                    switch ($task['task_type']) {
-                                        case 'background': $typeLabel = 'Vẽ nền'; $typeBadge = 'bg-dark'; break;
-                                        case 'inking': $typeLabel = 'Đi nét'; $typeBadge = 'bg-secondary'; break;
-                                        case 'coloring': $typeLabel = 'Lên màu'; $typeBadge = 'bg-success'; break;
-                                        case 'effects': $typeLabel = 'Hiệu ứng'; $typeBadge = 'bg-info text-dark'; break;
-                                        case 'other': $typeLabel = 'Khác'; $typeBadge = 'bg-secondary'; break;
+                                    if (strpos($task['title'], '(Nhóm:') !== false) {
+                                        $typeLabel = 'Tổ hợp (Group)';
+                                        $typeBadge = 'bg-primary';
+                                    } else {
+                                        switch ($task['task_type']) {
+                                            case 'background': $typeLabel = 'Vẽ nền'; $typeBadge = 'bg-dark'; break;
+                                            case 'inking': $typeLabel = 'Đi nét'; $typeBadge = 'bg-secondary'; break;
+                                            case 'coloring': $typeLabel = 'Lên màu'; $typeBadge = 'bg-success'; break;
+                                            case 'effects': $typeLabel = 'Hiệu ứng'; $typeBadge = 'bg-info text-dark'; break;
+                                            case 'other': $typeLabel = 'Khác'; $typeBadge = 'bg-secondary'; break;
+                                        }
                                     }
                                     ?>
                                     <span class="badge <?= $typeBadge ?>"><?= $typeLabel ?></span>
