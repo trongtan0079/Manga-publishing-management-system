@@ -183,10 +183,11 @@ class TaskController extends BaseController
             // Nhận dữ liệu từ form submit lên
             $pageId = isset($_POST['page_id']) ? intval($_POST['page_id']) : 0;
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : 0;
+
             $pageRegionId = !empty($_POST['page_region_id']) ? intval($_POST['page_region_id']) : null;
+            $groupedRegionIds = !empty($_POST['grouped_region_ids']) ? trim($_POST['grouped_region_ids']) : null;
             $title = isset($_POST['title']) ? trim($_POST['title']) : '';
             $isMultiTask = isset($_POST['is_multi_task']) && $_POST['is_multi_task'] == '1';
-            
             $taskType = isset($_POST['task_type']) ? trim($_POST['task_type']) : 'other';
             if ($taskType === 'other' && !empty($_POST['custom_task_type'])) {
                 $taskType = trim($_POST['custom_task_type']);
@@ -339,6 +340,7 @@ class TaskController extends BaseController
             $taskId = $this->taskModel->insert([
                 'page_id' => $pageId,
                 'page_region_id' => $pageRegionId,
+                'grouped_region_ids' => $groupedRegionIds,
                 'mangaka_id' => $_SESSION['user_id'], // Lấy ID của Mangaka đang tạo task
                 'assistant_id' => $assistantId,
                 'title' => $finalTitle,
@@ -351,10 +353,17 @@ class TaskController extends BaseController
             ]);
 
             // Đồng thời cập nhật trạng thái của PageRegion liên kết thành 'in_progress'
-            if ($pageRegionId && $taskId) {
+            if ($taskId) {
                 require_once __DIR__ . '/../models/PageRegion.php';
                 $pageRegionModel = new \PageRegion();
-                $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
+                if (!empty($groupedRegionIds)) {
+                    $ids = explode(',', $groupedRegionIds);
+                    foreach ($ids as $id) {
+                        $pageRegionModel->update(intval($id), ['status' => 'in_progress']);
+                    }
+                } elseif ($pageRegionId) {
+                    $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
+                }
             }
 
             // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc (chỉ khi không phải Bản nháp)
@@ -737,14 +746,17 @@ class TaskController extends BaseController
                         }
                     }
                 }
-
                 // Hoàn trả trạng thái phân vùng liên kết (nếu có)
-                if (!empty($task['page_region_id'])) {
-                    require_once __DIR__ . '/../models/PageRegion.php';
-                    $pageRegionModel = new \PageRegion();
+                require_once __DIR__ . '/../models/PageRegion.php';
+                $pageRegionModel = new \PageRegion();
+                if (!empty($task['grouped_region_ids'])) {
+                    $ids = explode(',', $task['grouped_region_ids']);
+                    foreach ($ids as $id) {
+                        $pageRegionModel->update(intval($id), ['status' => 'pending']);
+                    }
+                } elseif (!empty($task['page_region_id'])) {
                     $pageRegionModel->update($task['page_region_id'], ['status' => 'pending']);
                 }
-
                 $this->taskModel->delete($id);
                 $this->syncPageStatus($task['page_id']);
                 $_SESSION['success'] = 'Đã xóa task thành công.';
