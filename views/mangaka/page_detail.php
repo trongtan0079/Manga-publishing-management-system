@@ -356,6 +356,9 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                 <h5 class="mb-0 text-slate-800 fw-bold" style="font-size: 1.05rem;"><i class="fas fa-crop me-2 text-primary"></i>Phân vùng bản vẽ</h5>
                 <div class="d-flex gap-2">
                     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+                        <button id="btnGroupAssign" class="btn btn-sm text-white px-3 rounded-pill fw-bold shadow-sm d-none" style="background: #6366f1; font-size: 0.78rem; border: none; transition: all 0.2s;" onclick="assignGroupedRegions()">
+                            <i class="fas fa-layer-group me-1"></i>Giao việc nhóm
+                        </button>
                         <button id="btnDrawToggle" class="btn btn-sm px-3 rounded-pill fw-bold text-white shadow-sm border-0" style="background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%); font-size: 0.78rem; transition: all 0.2s;">
                             <i class="fas fa-edit me-1"></i>Vẽ thủ công
                         </button>
@@ -416,7 +419,10 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                      onmouseleave="hoverOverlay(<?= $region['region_id'] ?>, false)"
                                      style="cursor: pointer;">
                                     <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <h6 class="mb-1 fw-bold text-dark">
+                                        <h6 class="mb-1 fw-bold text-dark d-flex align-items-center">
+                                            <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+                                                <input type="checkbox" class="form-check-input region-select-cb me-2" value="<?= $region['region_id'] ?>" onclick="event.stopPropagation(); updateGroupButton();" style="width: 15px; height: 15px; cursor: pointer; margin-top: 0;">
+                                            <?php endif; ?>
                                             <span class="badge <?= $typeClass ?> me-2"><?= $typeLabel ?></span>
                                             ID #<?= $region['region_id'] ?>
                                         </h6>
@@ -1062,9 +1068,26 @@ document.addEventListener("DOMContentLoaded", function() {
         }, 500);
     <?php endif; ?>
 });
+
+function updateGroupButton() {
+    const checked = document.querySelectorAll('.region-select-cb:checked');
+    const btn = document.getElementById('btnGroupAssign');
+    if (btn) {
+        if (checked.length > 0) {
+            btn.classList.remove('d-none');
+        } else {
+            btn.classList.add('d-none');
+        }
+    }
+}
+
+function assignGroupedRegions() {
+    const checked = document.querySelectorAll('.region-select-cb:checked');
+    const ids = Array.from(checked).map(cb => cb.value).join(',');
+    const pageId = "<?= $page['page_id'] ?>";
+    window.location.href = `<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=${pageId}&grouped_region_ids=${ids}`;
+}
 </script>
-
-
 <!-- 
   Khối Quản lý Công việc (Task Management)
   Được hiển thị ngay dưới nội dung chính của Trang truyện.
