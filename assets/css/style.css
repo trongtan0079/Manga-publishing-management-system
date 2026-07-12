@@ -911,3 +911,10 @@ a {
     left: 15px !important;
 }
 
+/* Clickable rows across lists */
+.clickable-row {
+    cursor: pointer;
+    transition: background-color var(--transition) !important;
+}
+
+
