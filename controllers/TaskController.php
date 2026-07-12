@@ -185,6 +185,8 @@ class TaskController extends BaseController
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : 0;
             $pageRegionId = !empty($_POST['page_region_id']) ? intval($_POST['page_region_id']) : null;
             $title = isset($_POST['title']) ? trim($_POST['title']) : '';
+            $isMultiTask = isset($_POST['is_multi_task']) && $_POST['is_multi_task'] == '1';
+            
             $taskType = isset($_POST['task_type']) ? trim($_POST['task_type']) : 'other';
             if ($taskType === 'other' && !empty($_POST['custom_task_type'])) {
                 $taskType = trim($_POST['custom_task_type']);
@@ -257,10 +259,19 @@ class TaskController extends BaseController
             }
 
             // Validate task_type
-            if (empty($taskType) || strlen($taskType) > 50) {
-                $_SESSION['error'] = 'Loại công việc không hợp lệ.';
-                header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
-                exit;
+            if (!$isMultiTask) {
+                if (empty($taskType) || strlen($taskType) > 50) {
+                    $_SESSION['error'] = 'Loại công việc không hợp lệ.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                    exit;
+                }
+            } else {
+                $taskTypes = isset($_POST['task_types']) ? $_POST['task_types'] : [];
+                if (empty($taskTypes)) {
+                    $_SESSION['error'] = 'Vui lòng chọn ít nhất một loại công việc.';
+                    header("Location: " . BASE_PATH . "/index.php?controller=task&action=create&page_id=$pageId");
+                    exit;
+                }
             }
 
             // 5. Validation: due_date
@@ -280,43 +291,81 @@ class TaskController extends BaseController
                 $formattedDueDate = date('Y-m-d H:i:s', $dueTimestamp);
             }
 
-            // Thực hiện thêm mới vào bảng tasks
-            $taskId = $this->taskModel->insert([
-                'page_id' => $pageId,
-                'page_region_id' => $pageRegionId,
-                'mangaka_id' => $_SESSION['user_id'], // Lấy ID của Mangaka đang tạo task
-                'assistant_id' => $assistantId,
-                'title' => $title,
-                'task_type' => $taskType,
-                'description' => $description,
-                'resource_url' => $resourceUrl,
-                'priority' => $priority,
-                'status' => 'pending', // Mặc định khi vừa tạo là pending (Chưa làm)
-                'due_date' => $formattedDueDate
-            ]);
+            // Lấy danh sách loại công việc cần tạo
+            $tasksToCreate = [];
+            if ($isMultiTask) {
+                $taskTypes = isset($_POST['task_types']) ? $_POST['task_types'] : [];
+                foreach ($taskTypes as $type) {
+                    $actualType = $type;
+                    if ($type === 'other') {
+                        $actualType = isset($_POST['custom_multi_task_type']) ? trim($_POST['custom_multi_task_type']) : 'other';
+                        if (empty($actualType)) {
+                            $actualType = 'other';
+                        }
+                    }
+                    
+                    // Map nhãn tiếng Việt để ghép vào tiêu đề cho rõ ràng
+                    $typeLabel = $actualType;
+                    if ($actualType === 'background') $typeLabel = 'Vẽ nền';
+                    elseif ($actualType === 'inking') $typeLabel = 'Đi nét';
+                    elseif ($actualType === 'coloring') $typeLabel = 'Lên màu';
+                    elseif ($actualType === 'effects') $typeLabel = 'Hiệu ứng';
+                    
+                    $tasksToCreate[] = [
+                        'type' => $actualType,
+                        'title' => $title . " (" . $typeLabel . ")"
+                    ];
+                }
+            } else {
+                $tasksToCreate[] = [
+                    'type' => $taskType,
+                    'title' => $title
+                ];
+            }
+
+            // Thực hiện tạo các tasks trong vòng lặp
+            $successCount = 0;
+            foreach ($tasksToCreate as $tInfo) {
+                $taskId = $this->taskModel->insert([
+                    'page_id' => $pageId,
+                    'page_region_id' => $pageRegionId,
+                    'mangaka_id' => $_SESSION['user_id'], // Lấy ID của Mangaka đang tạo task
+                    'assistant_id' => $assistantId,
+                    'title' => $tInfo['title'],
+                    'task_type' => $tInfo['type'],
+                    'description' => $description,
+                    'resource_url' => $resourceUrl,
+                    'priority' => $priority,
+                    'status' => 'pending', // Mặc định khi vừa tạo là pending (Chưa làm)
+                    'due_date' => $formattedDueDate
+                ]);
+
+                if ($taskId) {
+                    $successCount++;
+                    // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc (chỉ khi không phải Bản nháp)
+                    if (!$isDraft) {
+                        $this->notificationModel->createNotification(
+                            $assistantId,
+                            'task_assigned',
+                            "Bạn được giao công việc mới: '{$tInfo['title']}' thuộc bộ truyện '{$series['title']}' (Chương {$chapter['chapter_number']} - Trang {$page['page_number']}).",
+                            $taskId
+                        );
+                    }
+                }
+            }
 
             // Đồng thời cập nhật trạng thái của PageRegion liên kết thành 'in_progress'
-            if ($pageRegionId) {
+            if ($pageRegionId && $successCount > 0) {
                 require_once __DIR__ . '/../models/PageRegion.php';
                 $pageRegionModel = new \PageRegion();
                 $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
-            }
-
-            // Đồng thời tạo một thông báo gửi tới Assistant vừa được giao việc (chỉ khi không phải Bản nháp)
-            if (!$isDraft) {
-                $this->notificationModel->createNotification(
-                    $assistantId,
-                    'task_assigned',
-                    "Bạn được giao công việc mới: '{$title}' thuộc bộ truyện '{$series['title']}' (Chương {$chapter['chapter_number']} - Trang {$page['page_number']}).",
-                    $taskId
-                );
             }
 
             // Đồng bộ lại trạng thái trang truyện
             $this->syncPageStatus($pageId);
 
             // Chuyển hướng quay lại trang chi tiết (page_detail) cùng thông báo thành công
-            $_SESSION['success'] = 'Đã giao task thành công.';
+            $_SESSION['success'] = "Đã giao thành công {$successCount} công việc.";
             header("Location: " . BASE_PATH . "/index.php?controller=page&action=show&id=$pageId");
             exit;
         } else {
