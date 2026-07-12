@@ -57,7 +57,7 @@ if (!function_exists('renderTaskTable')) {
                     </thead>
                     <tbody>
                         <?php foreach ($taskList as $task): ?>
-                            <tr>
+                            <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>">
                                 <td class="ps-4" style="width: 200px;">
                                     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text d-block" title="Xem chi tiết phân trang & phân vùng">
                                         <div class="fw-bold text-slate-800" style="font-size: 0.9rem; line-height: 1.25;"><?= htmlspecialchars($task['series_title']) ?></div>
@@ -348,6 +348,28 @@ if (!function_exists('renderTaskTable')) {
     background-color: #4f46e5;
     border-color: #4f46e5;
 }
+
+.clickable-row {
+    cursor: pointer;
+}
 </style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const clickableRows = document.querySelectorAll(".clickable-row");
+    clickableRows.forEach(row => {
+        row.addEventListener("click", function(e) {
+            // Đảm bảo không kích hoạt chuyển trang nếu click trúng nút, dropdown hoặc link con
+            if (e.target.closest('a') || e.target.closest('button') || e.target.closest('select') || e.target.closest('form')) {
+                return;
+            }
+            const href = this.getAttribute("data-href");
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
