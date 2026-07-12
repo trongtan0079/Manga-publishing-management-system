@@ -216,9 +216,11 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                     $resolvedImage = $this->resolvePageImageUrl($page['image_url']);
                     $oldImageUrl = $this->resolvePageImageUrl($page['old_image_url'] ?? '');
                 ?>
-                    <div id="drawInstruction" class="alert alert-info d-none py-2 mb-3 text-start w-100" style="font-size: 0.85rem;">
-                        <i class="fas fa-info-circle me-2"></i><strong>Chế độ vẽ thủ công:</strong> Hãy nhấn giữ chuột trái và kéo trên ảnh truyện để vẽ phân vùng mới.
+                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+                    <div id="drawInstruction" class="alert alert-info py-2 mb-3 text-start w-100" style="font-size: 0.85rem;">
+                        <i class="fas fa-info-circle me-2"></i><strong>Mẹo:</strong> Hãy rê chuột và kéo trên ảnh truyện bên dưới để vẽ phân vùng mới.
                     </div>
+                    <?php endif; ?>
                     
                     <?php if (!empty($oldImageUrl)): ?>
                         <!-- Nút chuyển phiên bản bản vẽ cũ/mới -->
@@ -233,7 +235,13 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         </div>
                     <?php endif; ?>
                     
-                    <div id="mangaPageWrapper" class="position-relative d-inline-block text-start <?= $hasSpotlight ? 'has-spotlight' : '' ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden;">
+                    <?php
+                        $canDraw = (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed']));
+                        $wrapperClasses = 'position-relative d-inline-block text-start';
+                        if ($hasSpotlight) $wrapperClasses .= ' has-spotlight';
+                        if ($canDraw) $wrapperClasses .= ' drawing-active';
+                    ?>
+                    <div id="mangaPageWrapper" class="<?= $wrapperClasses ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden;">
                         <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%;">
                         
                         <?php if (!empty($regions)): ?>
@@ -359,9 +367,6 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         <button id="btnGroupAssign" class="btn btn-sm text-white px-3 rounded-pill fw-bold shadow-sm d-none" style="background: #6366f1; font-size: 0.78rem; border: none; transition: all 0.2s;" onclick="assignGroupedRegions()">
                             <i class="fas fa-layer-group me-1"></i>Giao việc nhóm
                         </button>
-                        <button id="btnDrawToggle" class="btn btn-sm px-3 rounded-pill fw-bold text-white shadow-sm border-0" style="background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%); font-size: 0.78rem; transition: all 0.2s;">
-                            <i class="fas fa-edit me-1"></i>Vẽ thủ công
-                        </button>
                     <?php endif; ?>
                 </div>
             </div>
@@ -375,9 +380,9 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         <p class="text-slate-500 px-4 mb-4 text-xs" style="max-width: 320px; line-height: 1.6; font-size: 0.8rem;">Hãy sử dụng bộ công cụ <strong>Vẽ thủ công</strong> chuyên nghiệp để tự vẽ và phân chia khung hình, ô thoại, nhân vật trên trang truyện.</p>
                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                         <div class="d-flex gap-2 justify-content-center mt-2">
-                            <button onclick="document.getElementById('btnDrawToggle').click();" class="btn btn-sm px-4 py-2 rounded-pill fw-bold text-white shadow" style="background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%); border: none; font-size: 0.8rem; transition: all 0.2s;">
-                                <i class="fas fa-plus-circle me-1.5"></i>Bắt đầu vẽ phân vùng
-                            </button>
+                            <span class="badge bg-primary px-3 py-2 rounded-pill fw-bold shadow-sm" style="font-size: 0.8rem;">
+                                <i class="fas fa-mouse-pointer me-1.5"></i>Rê chuột vào ảnh bên trái để vẽ
+                            </span>
                         </div>
                         <?php endif; ?>
                     </div>
@@ -866,29 +871,15 @@ function highlightTableRecord(regionId) {
 }
 
 // Xử lý vẽ phân vùng thủ công bằng cách nhấn giữ và kéo chuột
-let isDrawingMode = false;
+let isDrawingMode = <?= isset($canDraw) && $canDraw ? 'true' : 'false' ?>;
 let isDragging = false;
 let startX = 0, startY = 0;
 let selectionBox = null;
 const wrapper = document.getElementById('mangaPageWrapper');
 const img = document.getElementById('mangaPageImage');
-const btnDrawToggle = document.getElementById('btnDrawToggle');
 const drawInstruction = document.getElementById('drawInstruction');
 
-if (btnDrawToggle && wrapper && img) {
-    btnDrawToggle.addEventListener('click', function() {
-        isDrawingMode = !isDrawingMode;
-        if (isDrawingMode) {
-            btnDrawToggle.innerHTML = '<i class="fas fa-times me-1"></i>Hủy vẽ';
-            btnDrawToggle.classList.remove('btn-info');
-            btnDrawToggle.classList.add('btn-danger');
-            wrapper.classList.add('drawing-active');
-            drawInstruction.classList.remove('d-none');
-        } else {
-            resetDrawingMode();
-        }
-    });
-
+if (wrapper && img) {
     wrapper.addEventListener('mousedown', function(e) {
         if (!isDrawingMode) return;
         
@@ -971,7 +962,6 @@ if (btnDrawToggle && wrapper && img) {
                     selectionBox.parentNode.removeChild(selectionBox);
                 }
                 selectionBox = null;
-                resetDrawingMode();
             }, { once: true });
         } else {
             if (selectionBox && selectionBox.parentNode) {
@@ -980,21 +970,6 @@ if (btnDrawToggle && wrapper && img) {
             selectionBox = null;
         }
     });
-}
-
-function resetDrawingMode() {
-    isDrawingMode = false;
-    if (btnDrawToggle) {
-        btnDrawToggle.innerHTML = '<i class="fas fa-edit me-1"></i>Vẽ thủ công';
-        btnDrawToggle.classList.remove('btn-danger');
-        btnDrawToggle.classList.add('btn-info');
-    }
-    if (wrapper) {
-        wrapper.classList.remove('drawing-active');
-    }
-    if (drawInstruction) {
-        drawInstruction.classList.add('d-none');
-    }
 }
 
 // Kích hoạt bootstrap popovers để xem ghi chú Editor khi rê chuột
