@@ -156,6 +156,7 @@ h3, .h3 { font-size: 1.25rem; font-weight: 700; }
     font-size: 1.3rem;
     letter-spacing: -0.5px;
     display: flex;
+    align-items: center;
 }
 
 /* Sidebar collapsed adjustments for Navbar toggle */

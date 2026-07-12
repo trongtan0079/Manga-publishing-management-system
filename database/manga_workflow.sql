@@ -1,5 +1,8 @@
--- Database schema for MangaWorkflowSystem
-CREATE DATABASE IF NOT EXISTS manga_workflow;
+-- ==============================================================================
+-- CƠ SỞ DỮ LIỆU: Manga Creation Workflow and Publishing Management System
+-- ==============================================================================
+
+CREATE DATABASE IF NOT EXISTS manga_workflow CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE manga_workflow;
 
 -- ------------------------------------------------------------------------------

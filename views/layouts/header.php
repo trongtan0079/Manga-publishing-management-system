@@ -76,7 +76,7 @@ function renderMarkdown($text) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -91,7 +91,3 @@ function renderMarkdown($text) {
     <link href="<?= BASE_PATH ?>/assets/css/style.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 <body>
-    <?php include 'navbar.php'; ?>
-    <div class="container">
-        <?php include 'sidebar.php'; ?>
-        <main>

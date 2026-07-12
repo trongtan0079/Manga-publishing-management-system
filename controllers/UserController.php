@@ -44,10 +44,20 @@ class UserController extends BaseController
         require_once __DIR__ . '/../views/admin/users.php';
     }
 
+    /**
+     * Hiển thị form thêm mới người dùng
+     */
     public function create() {
-        // TODO: Implement create()
+        // Lấy danh sách roles để hiển thị trong thẻ <select>
+        $roles = $this->roleModel->findAll();
+        
+        // Gọi view form thêm mới
+        require_once __DIR__ . '/../views/admin/user_create.php';
     }
 
+    /**
+     * Xử lý lưu thông tin người dùng mới vào Database
+     */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');
@@ -127,6 +137,10 @@ class UserController extends BaseController
         }
     }
 
+    /**
+     * Hiển thị form chỉnh sửa thông tin người dùng
+     * @param int $id ID của người dùng cần sửa
+     */
     public function edit($id) {
         // Lấy thông tin người dùng hiện tại
         $user = $this->userModel->getUserByIdWithRole($id);
@@ -145,6 +159,10 @@ class UserController extends BaseController
         require_once __DIR__ . '/../views/admin/user_edit.php';
     }
 
+    /**
+     * Xử lý cập nhật thông tin người dùng vào Database
+     * @param int $id ID của người dùng cần cập nhật
+     */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $username = trim($_POST['username'] ?? '');

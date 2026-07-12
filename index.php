@@ -49,6 +49,25 @@ if ($controllerName && $actionName) {
     }
 }
 
-// Nếu không tìm thấy controller hoặc action → hiển thị trang đăng nhập
-header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=showLoginForm');
-exit;
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+// Loại bỏ BASE_PATH khỏi URI để lấy đường dẫn tương đối (route)
+$relativeUri = substr($uri, strlen(BASE_PATH));
+if ($relativeUri === false) $relativeUri = '';
+
+// Fallback Basic Routing
+switch ($relativeUri) {
+    case '':
+    case '/':
+    case '/index.php':
+    case '/login':
+        header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=login');
+        break;
+    case '/admin/dashboard':
+        header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=admin');
+        break;
+    default:
+        http_response_code(404);
+        echo '404 Not Found';
+        break;
+}

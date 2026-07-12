@@ -1,4 +1,5 @@
 <?php
+// controllers/AuthController.php
 
 require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../core/Auth.php';
@@ -131,8 +132,11 @@ class AuthController extends BaseController {
         exit;
     }
 
-    public function update($id) {
-        // TODO: Implement update()
+    /**
+     * Kiểm tra trạng thái đăng nhập
+     */
+    public function checkAuth() {
+        return isset($_SESSION['user_id']);
     }
 
     /**

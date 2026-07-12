@@ -177,6 +177,9 @@ class PageController extends BaseController
         exit;
     }
 
+    /**
+     * Hiển thị form tạo trang mới
+     */
     public function create() {
         $chapterId = $_GET['chapter_id'] ?? null;
         if (!$chapterId) {
@@ -209,6 +212,9 @@ class PageController extends BaseController
         require_once __DIR__ . '/../views/mangaka/page_create.php';
     }
 
+    /**
+     * Lưu trang mới vào DB
+     */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $chapterId = $_POST['chapter_id'] ?? null;
@@ -359,6 +365,9 @@ class PageController extends BaseController
         require_once __DIR__ . '/../views/mangaka/page_edit.php';
     }
 
+    /**
+     * Cập nhật thông tin trang
+     */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $page = $this->pageModel->findById($id);
@@ -474,6 +483,9 @@ class PageController extends BaseController
         }
     }
 
+    /**
+     * Xóa một trang
+     */
     public function delete($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $page = $this->pageModel->findById($id);

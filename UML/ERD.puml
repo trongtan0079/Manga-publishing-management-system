@@ -8,17 +8,23 @@ skinparam titleFontSize 24
 
 entity roles {
   *role_id : int <<PK>>
+  --
   role_name : varchar
   description : varchar
+  created_at : timestamp
 }
 
 entity users {
   *user_id : int <<PK>>
+  --
   role_id : int <<FK>>
+  username : varchar
   full_name : varchar
   email : varchar
   password_hash : varchar
-  account_status : varchar
+  status : enum
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity series {
@@ -39,6 +45,7 @@ entity series {
 
 entity chapters {
   *chapter_id : int <<PK>>
+  --
   series_id : int <<FK>>
   chapter_number : int
   title : varchar
@@ -65,6 +72,7 @@ entity page_regions {
 
 entity pages {
   *page_id : int <<PK>>
+  --
   chapter_id : int <<FK>>
   page_number : int
   image_url : varchar
@@ -76,6 +84,7 @@ entity pages {
 
 entity tasks {
   *task_id : int <<PK>>
+  --
   page_id : int <<FK>>
   page_region_id : int <<FK>> <<NULL>>
   mangaka_id : int <<FK>>
@@ -93,38 +102,47 @@ entity tasks {
 
 entity submissions {
   *submission_id : int <<PK>>
-  task_id : int <<FK>>
-  submitted_by : int <<FK>>
-  submit_date : date
-  submission_file : varchar
-  submission_status : varchar
+  --
+  user_id : int <<FK>>
+  task_id : int <<FK>> <<NULL>>
+  chapter_id : int <<FK>> <<NULL>>
+  file_url : varchar
+  notes : text
+  status : enum
+  submitted_at : timestamp
+  updated_at : timestamp
 }
 
 entity reviews {
   *review_id : int <<PK>>
+  --
   submission_id : int <<FK>>
   reviewer_id : int <<FK>>
-  review_comment : text
-  review_date : date
-  review_status : varchar
+  comments : text
+  rating : int
+  created_at : timestamp
 }
 
-entity rankings {
+entity series_rankings {
   *ranking_id : int <<PK>>
+  --
   series_id : int <<FK>>
-  vote_count : int
+  board_member_id : int <<FK>>
   rank_position : int
-  period : varchar
-  updated_date : date
+  score : decimal
+  period_start_date : date
+  created_at : timestamp
 }
 
 entity notifications {
   *notification_id : int <<PK>>
+  --
   user_id : int <<FK>>
   related_id : int <<FK>> <<NULL>>
   type : varchar
   message : text
   is_read : boolean
+  created_at : timestamp
 }
 
 entity system_logs {

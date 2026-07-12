@@ -21,6 +21,7 @@ class Database
     {
         // Đảm bảo khởi tạo kết nối rỗng trước mỗi lần gọi
         $this->conn = null;
+
         try {
             // Xây dựng chuỗi kết nối DSN (Data Source Name)
             // Bao gồm định dạng host, port, dbname và thiết lập charset là utf8mb4 để hỗ trợ Unicode (như tiếng Việt, Emoji)
@@ -40,6 +41,7 @@ class Database
             // Trong môi trường thực tế, nên ghi lỗi này ra file log (error_log) thay vì echo trực tiếp ra màn hình
             echo "Lỗi kết nối cơ sở dữ liệu: " . $e->getMessage();
         }
+
         return $this->conn;
     }
 }

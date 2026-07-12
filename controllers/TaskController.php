@@ -125,6 +125,9 @@ class TaskController extends BaseController
         require __DIR__ . '/../views/assistant/task_list.php';
     }
 
+    /**
+     * Action: Hiển thị form tạo Task mới (Chỉ dành cho Mangaka)
+     */
     public function create() {
         // Chỉ Mangaka mới có quyền tạo Task
         \requireRole('mangaka');
@@ -169,6 +172,9 @@ class TaskController extends BaseController
         require __DIR__ . '/../views/mangaka/task_create.php';
     }
 
+    /**
+     * Action: Xử lý lưu Task mới vào cơ sở dữ liệu
+     */
     public function store() {
         // Chỉ Mangaka mới có quyền lưu Task
         \requireRole('mangaka');

@@ -106,6 +106,9 @@ class ChapterController extends BaseController
         exit;
     }
 
+    /**
+     * Hiển thị Form tạo Chapter mới
+     */
     public function create() {
         $seriesId = $_GET['series_id'] ?? null;
         if (!$seriesId) {
@@ -118,6 +121,9 @@ class ChapterController extends BaseController
         require_once __DIR__ . '/../views/mangaka/chapter_create.php';
     }
 
+    /**
+     * Xử lý dữ liệu POST khi submit Form tạo Chapter
+     */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $seriesId = $_POST['series_id'] ?? null;
@@ -199,6 +205,11 @@ class ChapterController extends BaseController
         }
     }
 
+    /**
+     * Hiển thị Form chỉnh sửa Chapter
+     * 
+     * @param int $id ID của Chapter cần sửa
+     */
     public function edit($id) {
         $chapter = $this->chapterModel->findById($id);
         if (!$chapter) {
@@ -219,6 +230,11 @@ class ChapterController extends BaseController
         require_once __DIR__ . '/../views/mangaka/chapter_edit.php';
     }
 
+    /**
+     * Xử lý dữ liệu POST khi submit Form chỉnh sửa Chapter
+     * 
+     * @param int $id ID của Chapter cần sửa
+     */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $chapter = $this->chapterModel->findById($id);

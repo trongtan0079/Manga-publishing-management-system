@@ -48,6 +48,9 @@ class SeriesController extends BaseController
         require_once __DIR__ . '/../views/mangaka/series.php';
     }
 
+    /**
+     * Hiển thị form tạo bộ truyện mới
+     */
     public function create() {
         requireRole('mangaka');
         require_once __DIR__ . '/../views/mangaka/series_create.php';
@@ -328,6 +331,9 @@ class SeriesController extends BaseController
         require_once __DIR__ . '/../views/mangaka/series_edit.php';
     }
 
+    /**
+     * Cập nhật thông tin bộ truyện
+     */
     public function update($id) {
         requireRole('mangaka');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
