@@ -36,7 +36,7 @@ if (!empty($latestRankings)) {
 ?>
 
 <?php if ($hasWarningSeries): ?>
-    <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert" style="border-radius: 12px; border-left: 5px solid #dc3545; background-color: #fdf2f2; border-top: 1px solid #fca5a5; border-right: 1px solid #fca5a5; border-bottom: 1px solid #fca5a5;">
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm d-flex align-items-center mb-4" role="alert" style="border-radius: 12px; border: 1px solid #fca5a5; background-color: #fdf2f2;">
         <i class="fas fa-exclamation-triangle me-3 text-danger fs-4"></i>
         <div>
             <strong class="text-danger d-block mb-1" style="font-size: 0.92rem;"><i class="fas fa-radiation"></i> Cảnh báo Hiệu Năng Tác Phẩm!</strong>
