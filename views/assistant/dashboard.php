@@ -27,7 +27,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <style>
     .stat-card-link {
         text-decoration: none !important;
-        display: block;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
         transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .stat-card-link:hover {
