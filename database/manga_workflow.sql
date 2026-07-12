@@ -108,6 +108,7 @@ CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     page_id INT NOT NULL,
     page_region_id INT NULL,
+    grouped_region_ids VARCHAR(255) NULL,
     mangaka_id INT NOT NULL,
     assistant_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
