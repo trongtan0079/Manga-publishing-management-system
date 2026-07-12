@@ -371,13 +371,21 @@ class ReviewController extends BaseController
                     $pagesInChapter = $pageModel->findByChapterId($submission['chapter_id']);
                     if (!empty($pagesInChapter)) {
                         foreach ($pagesInChapter as $pInC) {
-                            if (!empty($pInC['old_image_url'])) {
+                            if (!empty($pInC['old_image_url']) && $pInC['old_image_url'] !== 'no_genko') {
                                 $oldFilePath = __DIR__ . '/../' . ltrim($pInC['old_image_url'], '/');
                                 if (file_exists($oldFilePath)) {
                                     @unlink($oldFilePath);
                                 }
-                                $pageModel->update($pInC['page_id'], ['old_image_url' => null]);
                             }
+                            
+                            // Nếu duyệt kịch bản thô (reviewing_draft -> drawing), đánh dấu old_image_url là 'no_genko'
+                            // để phục vụ lưu bản vẽ Genko gốc đầu tiên sau đó.
+                            $newOldImageUrl = null;
+                            if ($newChapterStatus === 'drawing') {
+                                $newOldImageUrl = 'no_genko';
+                            }
+                            $pageModel->update($pInC['page_id'], ['old_image_url' => $newOldImageUrl]);
+                            
                             // Xóa toàn bộ ghi chú lỗi của trang này vì đã được phê duyệt thành công
                             $editorAnnotationModel->deleteByPageId($pInC['page_id']);
                         }

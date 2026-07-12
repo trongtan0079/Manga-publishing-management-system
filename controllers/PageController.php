@@ -411,14 +411,19 @@ class PageController extends BaseController
             if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                 $imageUrl = $this->handleImageUpload();
                 if ($imageUrl) {
-                    // Chỉ cập nhật old_image_url nếu chưa có bản vẽ gốc trước đó (giữ lại bản gốc đầu tiên)
-                    if (empty($page['old_image_url'])) {
-                        $data['old_image_url'] = $page['image_url'];
+                    // Nếu đây là lần tải lên Genko đầu tiên sau khi duyệt Storyboard (được đánh dấu bằng 'no_genko')
+                    if ($page['old_image_url'] === 'no_genko') {
+                        $data['old_image_url'] = null; // Reset để bản vẽ Genko tiếp theo sẽ được lưu làm bản vẽ gốc Genko
                     } else {
-                        // Nếu đã lưu bản gốc đầu tiên, xóa bản vẽ trung gian cũ vừa sửa để giải phóng dung lượng
-                        $oldTempPath = __DIR__ . '/../' . ltrim($page['image_url'], '/');
-                        if (!empty($page['image_url']) && file_exists($oldTempPath)) {
-                            @unlink($oldTempPath);
+                        // Chỉ cập nhật old_image_url nếu chưa có bản vẽ gốc trước đó (giữ lại bản gốc đầu tiên)
+                        if (empty($page['old_image_url'])) {
+                            $data['old_image_url'] = $page['image_url'];
+                        } else {
+                            // Nếu đã lưu bản gốc đầu tiên, xóa bản vẽ trung gian cũ vừa sửa để giải phóng dung lượng
+                            $oldTempPath = __DIR__ . '/../' . ltrim($page['image_url'], '/');
+                            if (!empty($page['image_url']) && file_exists($oldTempPath)) {
+                                @unlink($oldTempPath);
+                            }
                         }
                     }
                     $data['image_url'] = $imageUrl;
