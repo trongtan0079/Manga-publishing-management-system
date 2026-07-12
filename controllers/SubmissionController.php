@@ -466,13 +466,18 @@ class SubmissionController extends BaseController
                 if ($task) {
                     // Cập nhật trạng thái Task thành 'submitted' khi Assistant nộp bài
                     $this->taskModel->update($taskId, ['status' => 'submitted']);
-
-                    if (!empty($task['page_region_id'])) {
+                    if (!empty($task['grouped_region_ids'])) {
+                        require_once __DIR__ . '/../models/PageRegion.php';
+                        $pageRegionModel = new \PageRegion();
+                        $ids = explode(',', $task['grouped_region_ids']);
+                        foreach ($ids as $id) {
+                            $pageRegionModel->update(intval($id), ['status' => 'submitted']);
+                        }
+                    } elseif (!empty($task['page_region_id'])) {
                         require_once __DIR__ . '/../models/PageRegion.php';
                         $pageRegionModel = new \PageRegion();
                         $pageRegionModel->update($task['page_region_id'], ['status' => 'submitted']);
                     }
-
                     require_once __DIR__ . '/../models/Page.php';
                     require_once __DIR__ . '/../models/Chapter.php';
                     require_once __DIR__ . '/../models/Series.php';
