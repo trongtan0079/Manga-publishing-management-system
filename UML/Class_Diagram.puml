@@ -5,87 +5,202 @@ class Role {
   +roleId : int
   +roleName : string
   +description : string
+  +getRolesWithUserCount() : array
 }
 
 class User {
   +userId : int
+  +roleId : int
+  +username : string
   +fullName : string
   +email : string
   +passwordHash : string
-  +accountStatus : string
-}
-
-class Task {
-  +taskId : int
-  +taskType : string
-  +description : string
-  +taskStatus : string
-  +deadline : date
-}
-
-class Submission {
-  +submissionId : int
-  +submitDate : date
-  +submissionFile : string
-  +submissionStatus : string
-}
-
-class Review {
-  +reviewId : int
-  +reviewComment : string
-  +reviewDate : date
-  +reviewStatus : string
-}
-
-class Notification {
-  +notificationId : int
-  +notificationContent : string
-  +createdDate : date
-  +isRead : boolean
+  +status : string
+  +getRoleStatistics() : array
 }
 
 class Series {
   +seriesId : int
+  +mangakaId : int
+  +editorId : int
   +title : string
   +description : string
-  +seriesStatus : string
-  +publishSchedule : string
-  +createdDate : date
-}
-
-class SeriesRanking {
-  +rankIngId : int
-  +voteCount : int
-  +rankPosition : int
-  +period : string
-  +updatedDate : date
+  +status : string
+  +publishType : string
+  +coverImage : string
+  +proposalFile : string
+  +dossierNotes : string
+  +getSeriesForPublishing() : array
+  +getSeriesByEditorId(editorId: int) : array
+  +getDossiersByEditorId(editorId: int) : array
+  +countActiveSeries() : int
 }
 
 class Chapter {
   +chapterId : int
+  +seriesId : int
   +chapterNumber : int
   +title : string
-  +chapterStatus : string
-  +uploadDate : date
+  +status : string
+  +dueDate : datetime
+  +publishedAt : datetime
+  +isFinal : tinyint
+  +hasFinalChapter(seriesId: int) : bool
+  +countUnfinishedChapters(seriesId: int) : int
+  +hasFinalApprovedChapter(seriesId: int) : bool
+  +countByMangakaId(mangakaId: int) : int
+  +getUpcomingDeadlinesByEditor(editorId: int) : array
 }
 
 class Page {
   +pageId : int
+  +chapterId : int
   +pageNumber : int
-  +imagePath : string
-  +pageStatus : string
+  +imageUrl : string
+  +oldImageUrl : string
+  +status : string
+  +findByChapterIdWithAnnotationCount(chapterId: int) : array
+  +countByMangakaId(mangakaId: int) : int
+  +getPageNumbersByChapterId(chapterId: int) : array
+  +getOtherPageNumbers(chapterId: int, pageId: int) : array
 }
 
-Role "1" -- "many" User : assigned to
-User "1" -- "many" Series : creates
-Series "1" -- "1" SeriesRanking : ranked by
-Series "1" -- "many" Chapter : contains
-Chapter "1" -- "many" Page : contains
-User "1" -- "many" Submission : submits
-Submission "1" -- "1" Review : reviewed by
-User "1" -- "many" Task : assigns
-Task "1" -- "many" Submission : generates
-Task "1" -- "many" Review : writes
-User "1" -- "many" Notification : receives
+class PageRegion {
+  +regionId : int
+  +pageId : int
+  +regionType : string
+  +x : int
+  +y : int
+  +width : int
+  +height : int
+  +status : string
+}
+
+class Task {
+  +taskId : int
+  +pageId : int
+  +pageRegionId : int
+  +mangakaId : int
+  +assistantId : int
+  +title : string
+  +taskType : string
+  +description : string
+  +resourceUrl : string
+  +priority : string
+  +status : string
+  +dueDate : datetime
+  +getStatusStatistics() : array
+  +countByPageAndAssistant(pageId: int, assistantId: int) : int
+  +getMonthlyIncomeStats(assistantId: int) : array
+}
+
+class Submission {
+  +submissionId : int
+  +userId : int
+  +taskId : int
+  +chapterId : int
+  +fileUrl : string
+  +notes : string
+  +status : string
+  +submittedAt : datetime
+  +getStatusStatistics() : array
+  +countByMangakaId(mangakaId: int) : int
+  +countPendingByMangakaId(mangakaId: int) : int
+  +countPendingChapterSubmissionsByEditor(editorId: int) : int
+}
+
+class Review {
+  +reviewId : int
+  +submissionId : int
+  +reviewerId : int
+  +comments : string
+  +rating : int
+  +createdAt : datetime
+  +countReviewsByEditor(editorId: int, status: string) : int
+}
+
+class SeriesRanking {
+  +rankingId : int
+  +seriesId : int
+  +boardMemberId : int
+  +rankPosition : int
+  +score : decimal
+  +periodStartDate : date
+}
+
+class Notification {
+  +notificationId : int
+  +userId : int
+  +relatedId : int
+  +type : string
+  +message : string
+  +isRead : boolean
+}
+
+class SystemLog {
+  +logId : int
+  +userId : int
+  +action : string
+  +details : string
+  +ipAddress : string
+}
+
+class EditorAnnotation {
+  +annotationId : int
+  +pageId : int
+  +editorId : int
+  +x : int
+  +y : int
+  +width : int
+  +height : int
+  +comments : string
+  +createdAt : datetime
+  +deleteByPageId(pageId: int) : bool
+}
+
+class BoardVote {
+  +voteId : int
+  +seriesId : int
+  +boardMemberId : int
+  +vote : string
+  +createdAt : datetime
+}
+
+Role "1" -- "*" User : assigned
+
+User "1" -- "*" Series : creates
+User "1" -- "*" Series : manages
+
+Series "1" -- "*" Chapter : contains
+
+Chapter "1" -- "*" Page : contains
+
+Page "1" -- "*" PageRegion : segment
+Page "1" -- "*" Task : requires
+Page "1" -- "*" EditorAnnotation : has
+PageRegion "1" -- "*" Task : targetedAt
+
+User "1" -- "*" Task : manager_assigns
+User "1" -- "*" Task : assistant_receives
+
+Task "1" -- "*" Submission : generates
+
+Chapter "1" -- "*" Submission : submitted
+
+User "1" -- "*" Submission : submits
+
+Submission "1" -- "*" Review : receives
+
+User "1" -- "*" Review : writes
+User "1" -- "*" EditorAnnotation : annotates
+User "1" -- "*" BoardVote : votes
+
+Series "1" -- "*" SeriesRanking : ranked
+Series "1" -- "*" BoardVote : receives_votes
+
+User "1" -- "*" SeriesRanking : evaluates
+
+User "1" -- "*" Notification : receives
+User "1" -- "*" SystemLog : triggers
 
 @enduml

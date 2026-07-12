@@ -1,0 +1,42 @@
+@startuml
+title State Machine Diagram - Vòng Đời Trạng Thái Của Phân Vùng (Page Region)
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+
+[*] --> pending : Mangaka vẽ phân vùng mới [PageRegionController::store()]
+
+state pending {
+    description : Vùng vừa được tạo, chưa giao việc
+}
+
+state in_progress {
+    description : Đã giao Task cho Assistant và đang vẽ
+}
+
+state submitted {
+    description : Trợ lý đã vẽ xong và gửi nộp bản thảo [SubmissionController::store()]
+}
+
+state rejected {
+    description : Bản thảo trên phân vùng bị Mangaka từ chối [ReviewController::store()]
+}
+
+state completed {
+    description : Bản thảo phân vùng được Mangaka phê duyệt [ReviewController::store()]
+}
+
+pending --> in_progress : Mangaka tạo và giao Task mới gắn với vùng [TaskController::store()]
+
+in_progress --> submitted : Trợ lý nộp bản thảo gắn với vùng [SubmissionController::store()]
+
+submitted --> completed : Mangaka phê duyệt bản thảo [ReviewController::store() status='approved']
+submitted --> rejected : Mangaka từ chối bản thảo [ReviewController::store() status='rejected']
+
+rejected --> in_progress : Trợ lý vẽ lại trên phân vùng này [TaskController::updateStatus()]
+rejected --> pending : Hủy giao việc hoặc giao lại task cho người khác [TaskController::update()]
+
+completed --> [*]
+
+@enduml

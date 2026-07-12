@@ -1,32 +1,669 @@
 <?php
 
-namespace App\Controllers;
 
-use App\Models\Submission;
+require_once __DIR__ . '/../core/Auth.php';
+require_once __DIR__ . '/../models/Submission.php';
+require_once __DIR__ . '/../models/Task.php';
+require_once __DIR__ . '/../models/Chapter.php';
+require_once __DIR__ . '/../models/Review.php';
+require_once __DIR__ . '/../models/Series.php';
+require_once __DIR__ . '/../models/Page.php';
 
-class SubmissionController
+
+class SubmissionController extends BaseController
 {
+    private $submissionModel;
+    private $taskModel;
+    private $chapterModel;
+    private $seriesModel;
+
+    public function __construct() {
+        parent::__construct();
+        // Yêu cầu người dùng đăng nhập trước khi thao tác
+        \requireLogin();
+        
+        $this->submissionModel = new Submission();
+        $this->taskModel = new Task();
+        $this->chapterModel = new Chapter();
+        $this->seriesModel = new Series();
+    }
+
+    /**
+     * Hiển thị danh sách Submission
+     */
     public function index() {
-        // TODO: Implement index()
+        $role = $_SESSION['role_name'] ?? '';
+        $userId = $_SESSION['user_id'];
+
+        if ($role === 'editor') {
+            // Editor chỉ xem các bản thảo của các bộ truyện được phân công gán phụ trách
+            $submissions = $this->submissionModel->findAllChapterSubmissionsByEditorId($userId);
+
+            // Hỗ trợ lọc trạng thái theo query parameter
+            $status = $_GET['status'] ?? null;
+            if ($status) {
+                if (in_array($status, ['pending', 'approved', 'rejected'])) {
+                    $submissions = array_filter($submissions, function($s) use ($status) {
+                        return $s['status'] === $status;
+                    });
+                } elseif ($status === 'reviewed') {
+                    $submissions = array_filter($submissions, function($s) {
+                        return in_array($s['status'], ['approved', 'rejected']);
+                    });
+                }
+            }
+        } elseif ($role === 'mangaka' || $role === 'assistant') {
+            // Assistant và Mangaka xem lịch sử nộp bài của chính mình
+            $submissions = $this->submissionModel->findByUserId($userId);
+        } else {
+            http_response_code(403);
+            $_SESSION['error'] = 'Bạn không có quyền xem danh sách bản thảo.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
+            exit;
+        }
+
+        // Nạp view danh sách
+        require_once __DIR__ . '/../views/editor/submission_list.php';
     }
 
+    /**
+     * Hiển thị form upload
+     */
+    /**
+     * Hiển thị form upload
+     */
     public function create() {
-        // TODO: Implement create()
+        $role = $_SESSION['role_name'] ?? '';
+        $userId = $_SESSION['user_id'];
+
+        if ($role === 'assistant') {
+            // Chỉ hiển thị task được giao cho assistant và chưa hoàn thành
+            $tasks = $this->taskModel->findActiveByAssistantId($userId);
+            require_once __DIR__ . '/../views/assistant/upload_submission.php';
+        } elseif ($role === 'mangaka') {
+            $type = $_GET['type'] ?? '';
+            $selectedChapterId = isset($_GET['chapter_id']) ? intval($_GET['chapter_id']) : 0;
+            
+            $allChapters = $this->chapterModel->findByMangakaId($userId);
+            
+            // Nếu có chapter_id được truyền, tự động đồng bộ type dựa trên trạng thái của chapter đó
+            if ($selectedChapterId > 0 && empty($type)) {
+                $selChap = $this->chapterModel->findById($selectedChapterId);
+                if ($selChap) {
+                    $type = ($selChap['status'] === 'drafting') ? 'draft' : 'final';
+                }
+            }
+
+            // Nếu vẫn rỗng hoặc không hợp lệ, mặc định là draft
+            if ($type !== 'draft' && $type !== 'final') {
+                $type = 'draft';
+            }
+
+            // Lọc danh sách chapters
+            $chapters = array_filter($allChapters, function($c) use ($type) {
+                if ($type === 'draft') {
+                    return $c['status'] === 'drafting';
+                } else {
+                    return $c['status'] === 'drawing';
+                }
+            });
+
+            $submissionType = $type;
+            require_once __DIR__ . '/../views/mangaka/submission_create.php';
+        } else {
+            http_response_code(403);
+            $_SESSION['error'] = 'Bạn không có quyền nộp bản thảo mới.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
     }
 
+    /**
+     * Lưu Submission mới
+     */
     public function store() {
-        // TODO: Implement store()
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        $userId = $_SESSION['user_id'];
+
+        $taskId = null;
+        $chapterId = null;
+
+        // 1. Phân quyền và validate thực thể liên quan
+        if ($role === 'assistant') {
+            $taskId = isset($_POST['task_id']) ? intval($_POST['task_id']) : 0;
+            if ($taskId <= 0) {
+                $_SESSION['error'] = 'Vui lòng chọn Task cần nộp.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+
+            // Kiểm tra Task có thuộc về Assistant hiện tại không
+            $task = $this->taskModel->findById($taskId);
+            if (!$task || $task['assistant_id'] != $userId) {
+                $_SESSION['error'] = 'Task không hợp lệ hoặc không thuộc quyền sở hữu của bạn.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+            if ($task['status'] === 'completed') {
+                $_SESSION['error'] = 'Công việc này đã hoàn thành, không thể nộp thêm bản thảo.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+
+            // Kiểm tra xem chapter và series có bị khóa hoặc tạm ngưng không
+            require_once __DIR__ . '/../models/Page.php';
+            $pageModel = new \Page();
+            $page = $pageModel->findById($task['page_id']);
+            if ($page) {
+                require_once __DIR__ . '/../models/Chapter.php';
+                $chapterModel = new \Chapter();
+                $chapter = $chapterModel->findById($page['chapter_id']);
+                if ($chapter) {
+                    require_once __DIR__ . '/../models/Series.php';
+                    $seriesModel = new \Series();
+                    $series = $seriesModel->findById($chapter['series_id']);
+                    if ($series && $series['status'] !== 'ongoing') {
+                        $_SESSION['error'] = 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể nộp bản vẽ cho công việc này.';
+                        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                        exit;
+                    }
+                    if ($chapter && $chapter['status'] === 'drafting') {
+                        $_SESSION['error'] = 'Không thể nộp bản vẽ cho chương truyện đang ở trạng thái Bản nháp.';
+                        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                        exit;
+                    }
+                    if ($this->isChapterLocked($chapter)) {
+                        $_SESSION['error'] = 'Chương truyện chứa công việc này đang chờ duyệt, đã được phê duyệt hoặc xuất bản, không thể nộp bản thảo.';
+                        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                        exit;
+                    }
+                }
+            }
+        } elseif ($role === 'mangaka') {
+            $chapterId = isset($_POST['chapter_id']) ? intval($_POST['chapter_id']) : 0;
+            $submissionType = $_POST['submission_type'] ?? '';
+
+            if ($chapterId <= 0) {
+                $_SESSION['error'] = 'Vui lòng chọn Chapter cần nộp.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=' . urlencode($submissionType));
+                exit;
+            }
+
+            // Kiểm tra Chapter có thuộc series của Mangaka không
+            $chapter = $this->chapterModel->findById($chapterId);
+            if (!$chapter) {
+                $_SESSION['error'] = 'Chương truyện không tồn tại.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=' . urlencode($submissionType));
+                exit;
+            }
+
+            // Nạp model Series để kiểm tra tác giả
+            require_once __DIR__ . '/../models/Series.php';
+            $seriesModel = new \Series();
+            $series = $seriesModel->findById($chapter['series_id']);
+            if (!$series || !$this->hasSeriesAccess($series)) {
+                $_SESSION['error'] = 'Chương truyện không thuộc Series của bạn.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=' . urlencode($submissionType));
+                exit;
+            }
+            if ($series['status'] !== 'ongoing') {
+                $_SESSION['error'] = 'Bộ truyện chưa được phê duyệt hoặc đã kết thúc, tạm ngưng, đã hủy. Không thể nộp bản thảo.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=' . urlencode($submissionType));
+                exit;
+            }
+            
+            // Kiểm tra tính đồng nhất của loại nộp bài (submissionType) và trạng thái chapter hiện tại
+            if ($submissionType === 'draft') {
+                if ($chapter['status'] !== 'drafting') {
+                    $_SESSION['error'] = 'Chương truyện không ở trạng thái Phác thảo Kịch bản, không thể nộp Bản nháp.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=draft');
+                    exit;
+                }
+            } elseif ($submissionType === 'final') {
+                if ($chapter['status'] !== 'drawing') {
+                    $_SESSION['error'] = 'Chương truyện không ở trạng thái Đang vẽ Chi tiết, không thể nộp Bản hoàn chỉnh.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create&type=final');
+                    exit;
+                }
+            } else {
+                $_SESSION['error'] = 'Loại nộp bài không hợp lệ.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+
+            // Nếu nộp Bản Hoàn Chỉnh (đang ở trạng thái drawing), kiểm tra xem có task nào chưa hoàn thành không
+            if ($chapter['status'] === 'drawing') {
+                require_once __DIR__ . '/../models/Task.php';
+                $taskModel = new \Task();
+                $tasks = $taskModel->findTasksByChapterId($chapterId);
+                $hasUncompleted = false;
+                foreach ($tasks as $t) {
+                    if ($t['status'] !== 'completed') {
+                        $hasUncompleted = true;
+                        break;
+                    }
+                }
+                if ($hasUncompleted) {
+                    $_SESSION['error'] = 'Không thể nộp Bản Hoàn Chỉnh khi vẫn còn công việc (Task) chưa hoàn thành của các Trợ lý.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                    exit;
+                }
+            }
+
+            // Chặn nộp chương rỗng chưa có bất kỳ trang nào
+            $pageModel = new \Page();
+            $pages = $pageModel->findByChapterId($chapterId);
+            if (empty($pages)) {
+                $_SESSION['error'] = 'Chương truyện phải có ít nhất 1 trang vẽ được tải lên hệ thống mới có thể nộp duyệt.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+        } else {
+            http_response_code(403);
+            $_SESSION['error'] = 'Vai trò này không được phép nộp bản thảo.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        // 2. Validate File Upload
+        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            $_SESSION['error'] = 'Vui lòng chọn file hợp lệ để tải lên.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+            exit;
+        }
+
+        $file = $_FILES['file'];
+        $originalName = basename($file['name']);
+        $fileSize = $file['size'];
+        $tmpPath = $file['tmp_name'];
+
+        // Kiểm tra kích thước (tối đa 20MB)
+        $maxSizeBytes = 20 * 1024 * 1024;
+        if ($fileSize > $maxSizeBytes) {
+            $_SESSION['error'] = 'Kích thước file vượt quá giới hạn cho phép (20MB).';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+            exit;
+        }
+
+        // Kiểm tra phần mở rộng file (whitelist)
+        $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'pdf', 'zip'];
+        if (!in_array($ext, $allowedExtensions)) {
+            $_SESSION['error'] = 'Định dạng file không hợp lệ. Chỉ cho phép: jpg, jpeg, png, pdf, zip.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+            exit;
+        }
+
+        // Kiểm tra MIME Type thực tế
+        $allowedMimes = [
+            'jpg' => ['image/jpeg', 'image/jpg', 'image/pjpeg'],
+            'jpeg' => ['image/jpeg', 'image/jpg', 'image/pjpeg'],
+            'png' => ['image/png', 'image/x-png'],
+            'pdf' => ['application/pdf'],
+            'zip' => ['application/zip', 'application/x-zip-compressed', 'application/x-zip', 'multipart/x-zip']
+        ];
+
+        $mimeType = '';
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $tmpPath);
+            finfo_close($finfo);
+        } elseif (function_exists('mime_content_type')) {
+            $mimeType = mime_content_type($tmpPath);
+        } else {
+            $mimeType = $file['type'];
+        }
+
+        $validMime = false;
+        if (isset($allowedMimes[$ext]) && in_array($mimeType, $allowedMimes[$ext])) {
+            $validMime = true;
+        } else {
+            // Cải thiện UX: Tự động đổi đuôi file nếu MIME type hợp lệ với một định dạng khác
+            foreach ($allowedMimes as $correctExt => $mimes) {
+                if (in_array($mimeType, $mimes)) {
+                    $ext = $correctExt;
+                    $validMime = true;
+                    // Cập nhật lại tên file gốc với đuôi mới
+                    $originalName = pathinfo($originalName, PATHINFO_FILENAME) . '.' . $ext;
+                    break;
+                }
+            }
+        }
+
+        if (!$validMime) {
+            $_SESSION['error'] = 'Nội dung file không hợp lệ (MIME type không được hỗ trợ).';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+            exit;
+        }
+
+        // --- BỔ SUNG KIỂM TRA ĐĂNG KÝ PHẦN MỞ RỘNG VÀ CHỮ KÝ FILE THẬT ---
+        // 1. Kiểm tra ảnh bằng getimagesize()
+        if (in_array($ext, ['jpg', 'jpeg', 'png'])) {
+            $imageInfo = @getimagesize($tmpPath);
+            if ($imageInfo === false) {
+                $_SESSION['error'] = 'File ảnh không hợp lệ hoặc bị giả mạo.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+        }
+
+        // 2. Kiểm tra PDF bằng Signature (%PDF)
+        if ($ext === 'pdf') {
+            $handle = @fopen($tmpPath, 'rb');
+            if ($handle) {
+                $firstBytes = fread($handle, 4);
+                fclose($handle);
+                if ($firstBytes !== '%PDF') {
+                    $_SESSION['error'] = 'File PDF không hợp lệ hoặc bị giả mạo.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                    exit;
+                }
+            } else {
+                $_SESSION['error'] = 'Không thể đọc file PDF để kiểm tra chữ ký.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+        }
+
+        // 3. Kiểm tra ZIP bằng Signature (PK\x03\x04)
+        if ($ext === 'zip') {
+            $handle = @fopen($tmpPath, 'rb');
+            if ($handle) {
+                $firstBytes = fread($handle, 4);
+                fclose($handle);
+                if ($firstBytes !== "PK\x03\x04") {
+                    $_SESSION['error'] = 'File ZIP không hợp lệ hoặc bị giả mạo.';
+                    header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                    exit;
+                }
+            } else {
+                $_SESSION['error'] = 'Không thể đọc file ZIP để kiểm tra chữ ký.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+                exit;
+            }
+        }
+
+        // 3. Tiến hành lưu file
+        $uploadDir = __DIR__ . '/../uploads/submissions/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        // Tạo tên file an toàn: timestamp_tengoc
+        $safeName = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '_', $originalName);
+        $targetPath = $uploadDir . $safeName;
+        $dbFileUrl = 'uploads/submissions/' . $safeName;
+
+        if (!move_uploaded_file($tmpPath, $targetPath)) {
+            $_SESSION['error'] = 'Lỗi hệ thống khi lưu trữ file tải lên.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=create');
+            exit;
+        }
+
+        // 4. Lưu vào Database
+        $submissionData = [
+            'user_id' => $userId,
+            'task_id' => $taskId ?: null,
+            'chapter_id' => $chapterId ?: null,
+            'file_url' => $dbFileUrl,
+            'notes' => trim($_POST['notes'] ?? ''),
+            'status' => 'pending'
+        ];
+
+        $submissionId = $this->submissionModel->insert($submissionData);
+
+        if ($submissionId) {
+            require_once __DIR__ . '/../models/Notification.php';
+            $notificationModel = new \Notification();
+
+            if ($role === 'mangaka' && $chapterId > 0) {
+                $newStatus = ($chapter['status'] === 'drafting') ? 'reviewing_draft' : 'reviewing_final';
+                $this->chapterModel->update($chapterId, ['status' => $newStatus]);
+                
+                require_once __DIR__ . '/../models/Page.php';
+                $pageModel = new \Page();
+                $pageModel->updateStatusByChapterId($chapterId, $newStatus);
+                
+                require_once __DIR__ . '/../models/User.php';
+                $userModel = new \User();
+                
+                $chapter = $this->chapterModel->findById($chapterId);
+                $series = null;
+                if ($chapter) {
+                    $series = $this->seriesModel->findById($chapter['series_id']);
+                }
+                $seriesTitle = $series ? $series['title'] : 'bộ truyện';
+                
+                $subTypeText = ($newStatus === 'reviewing_draft') ? "Kịch bản thô (Storyboard)" : "Bản vẽ hoàn thiện (Manuscript)";
+
+                if ($series && !empty($series['editor_id'])) {
+                    // Gửi DUY NHẤT cho Editor chuyên trách
+                    $notificationModel->createNotification(
+                        $series['editor_id'],
+                        'chapter_submitted',
+                        "Mangaka " . $_SESSION['full_name'] . " vừa nộp {$subTypeText} cho Chapter " . ($chapter['chapter_number'] ?? '') . " của bộ truyện: '{$seriesTitle}'.",
+                        $submissionId
+                    );
+                } else {
+                    // Bể duyệt chung fallback
+                    $editors = $userModel->findByRoleName('editor');
+                    foreach ($editors as $editor) {
+                        $notificationModel->createNotification(
+                            $editor['user_id'],
+                            'chapter_submitted',
+                            "Mangaka " . $_SESSION['full_name'] . " vừa nộp {$subTypeText} cho Chapter " . ($chapter['chapter_number'] ?? '') . " của bộ truyện: '{$seriesTitle}' (Chưa gán Editor chuyên trách).",
+                            $submissionId
+                        );
+                    }
+                }
+            } elseif ($role === 'assistant' && $taskId > 0) {
+                $task = $this->taskModel->findById($taskId);
+                if ($task) {
+                    // Cập nhật trạng thái Task thành 'submitted' khi Assistant nộp bài
+                    $this->taskModel->update($taskId, ['status' => 'submitted']);
+                    if (!empty($task['grouped_region_ids'])) {
+                        require_once __DIR__ . '/../models/PageRegion.php';
+                        $pageRegionModel = new \PageRegion();
+                        $ids = explode(',', $task['grouped_region_ids']);
+                        foreach ($ids as $id) {
+                            $pageRegionModel->update(intval($id), ['status' => 'submitted']);
+                        }
+                    } elseif (!empty($task['page_region_id'])) {
+                        require_once __DIR__ . '/../models/PageRegion.php';
+                        $pageRegionModel = new \PageRegion();
+                        $pageRegionModel->update($task['page_region_id'], ['status' => 'submitted']);
+                    }
+                    require_once __DIR__ . '/../models/Page.php';
+                    require_once __DIR__ . '/../models/Chapter.php';
+                    require_once __DIR__ . '/../models/Series.php';
+                    $pageModel = new \Page();
+                    $chapterModel = new \Chapter();
+                    $seriesModel = new \Series();
+                    
+                    $page = $pageModel->findById($task['page_id']);
+                    $chapter = $page ? $chapterModel->findById($page['chapter_id']) : null;
+                    $series = $chapter ? $seriesModel->findById($chapter['series_id']) : null;
+                    $seriesTitle = $series ? $series['title'] : 'Không rõ';
+                    $chapNum = $chapter ? $chapter['chapter_number'] : 'Không rõ';
+                    $pageNum = $page ? $page['page_number'] : 'Không rõ';
+                    
+                    $assistantName = $_SESSION['full_name'] ?? $_SESSION['username'];
+
+                    $notificationModel->createNotification(
+                        $task['mangaka_id'],
+                        'submission_submitted',
+                        "Trợ lý {$assistantName} vừa nộp bản vẽ cho công việc: '{$task['title']}' thuộc bộ truyện '{$seriesTitle}' (Chương {$chapNum} - Trang {$pageNum}).",
+                        $submissionId
+                    );
+                }
+            }
+
+            $_SESSION['success'] = 'Nộp bản thảo thành công và đang chờ review.';
+        } else {
+            // Xóa file đã upload nếu chèn database thất bại
+            if (file_exists($targetPath)) {
+                @unlink($targetPath);
+            }
+            $_SESSION['error'] = 'Không thể lưu thông tin Submission vào Database.';
+        }
+
+        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+        exit;
     }
 
-    public function edit($id) {
-        // TODO: Implement edit()
+    /**
+     * Xem chi tiết Submission
+     */
+    public function show($id) {
+        $id = intval($id);
+        if ($id <= 0) {
+            $_SESSION['error'] = 'ID bản thảo không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        $userId = $_SESSION['user_id'];
+
+        $submission = $this->submissionModel->findWithMetadataById($id);
+        if (!$submission) {
+            http_response_code(404);
+            $_SESSION['error'] = 'Không tìm thấy bản thảo yêu cầu.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        // Kiểm tra quyền xem chi tiết bản thảo:
+        // - Editor xem tất cả
+        // - Assistant chỉ được xem của chính mình
+        // - Mangaka được xem của chính mình hoặc các bản thảo thuộc series/task thuộc quyền của mình
+        $hasAccess = false;
+        if ($role === 'editor') {
+            // Chỉ Editor được gán chuyên trách cho bộ truyện mới được xem bản thảo
+            if ($submission['chapter_id']) {
+                require_once __DIR__ . '/../models/Chapter.php';
+                require_once __DIR__ . '/../models/Series.php';
+                $chapModel = new \Chapter();
+                $seriesModel = new \Series();
+                $ch = $chapModel->findById($submission['chapter_id']);
+                if ($ch) {
+                    $se = $seriesModel->findById($ch['series_id']);
+                    if ($se && $this->hasSeriesAccess($se)) {
+                        $hasAccess = true;
+                    }
+                }
+            }
+        } elseif ($role === 'assistant') {
+            if ($submission['user_id'] == $userId) {
+                $hasAccess = true;
+            }
+        } elseif ($role === 'mangaka') {
+            if ($submission['user_id'] == $userId || $submission['mangaka_id'] == $userId) {
+                $hasAccess = true;
+            }
+        }
+
+        if (!$hasAccess) {
+            http_response_code(403);
+            $_SESSION['error'] = 'Bạn không có quyền truy cập xem bản thảo này.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        $reviewModel = new \Review();
+        $reviews = $reviewModel->findBySubmissionId($id);
+
+        $pages = [];
+        if (!empty($submission['chapter_id'])) {
+            require_once __DIR__ . '/../models/Page.php';
+            $pageModel = new \Page();
+            $pages = $pageModel->findByChapterIdWithAnnotationCount($submission['chapter_id']);
+        }
+
+        // Nạp view chi tiết
+        require_once __DIR__ . '/../views/editor/submission_detail.php';
     }
 
-    public function update($id) {
-        // TODO: Implement update()
-    }
-
+    /**
+     * Xóa Submission chưa được review (chỉ ở trạng thái pending)
+     */
     public function delete($id) {
-        // TODO: Implement delete()
+        $id = intval($id);
+        if ($id <= 0 || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $_SESSION['error'] = 'Yêu cầu không hợp lệ.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        $userId = $_SESSION['user_id'];
+
+        $submission = $this->submissionModel->findById($id);
+        if (!$submission) {
+            $_SESSION['error'] = 'Không tìm thấy bản thảo cần xóa.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        // Kiểm tra quyền sở hữu: chỉ người nộp mới được xóa
+        if ($submission['user_id'] != $userId) {
+            $_SESSION['error'] = 'Bạn không có quyền xóa bản thảo này.';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        // Kiểm tra trạng thái: chỉ cho phép xóa nếu là 'pending'
+        if ($submission['status'] !== 'pending') {
+            $_SESSION['error'] = 'Không thể xóa bản thảo đã được đánh giá (reviewed/approved/rejected).';
+            header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+            exit;
+        }
+
+        // Xóa file vật lý khỏi đĩa
+        if (!empty($submission['file_url'])) {
+            $filePath = __DIR__ . '/../' . $submission['file_url'];
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+        }
+
+        // Xóa dòng trong Database
+        if ($this->submissionModel->delete($id)) {
+            // Khôi phục trạng thái chương truyện/trang vẽ hoặc nhiệm vụ khi xóa bản thảo
+            if (!empty($submission['chapter_id'])) {
+                $chapter = $this->chapterModel->findById($submission['chapter_id']);
+                if ($chapter) {
+                    $newChapterStatus = 'drawing';
+                    if ($chapter['status'] === 'reviewing_draft') {
+                        $newChapterStatus = 'drafting';
+                    }
+                    $this->chapterModel->update($submission['chapter_id'], ['status' => $newChapterStatus]);
+                    
+                    require_once __DIR__ . '/../models/Page.php';
+                    $pageModel = new \Page();
+                    $pageModel->updateStatusByChapterId($submission['chapter_id'], $newChapterStatus);
+                }
+            } elseif (!empty($submission['task_id'])) {
+                $task = $this->taskModel->findById($submission['task_id']);
+                if ($task && $task['status'] === 'submitted') {
+                    $this->taskModel->update($submission['task_id'], ['status' => 'in_progress']);
+                    if (!empty($task['page_region_id'])) {
+                        require_once __DIR__ . '/../models/PageRegion.php';
+                        $pageRegionModel = new \PageRegion();
+                        $pageRegionModel->update($task['page_region_id'], ['status' => 'in_progress']);
+                    }
+                }
+            }
+            $_SESSION['success'] = 'Xóa bản thảo thành công.';
+        } else {
+            $_SESSION['error'] = 'Có lỗi xảy ra trong quá trình xóa dữ liệu.';
+        }
+
+        header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
+        exit;
     }
 }

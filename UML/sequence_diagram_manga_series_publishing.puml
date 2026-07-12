@@ -8,43 +8,77 @@ skinparam SequenceMessageAlign center
 title Sequence Diagram - Quy Trình Xuất Bản Series
 
 actor "Editorial Board" as Board
-participant "Quản Lý Xuất Bản" as PublishManager
-participant "Quản Lý Xếp Hạng" as RankingManager
+actor "Mangaka" as Mangaka
+participant "Quản Lý Xuất Bản\n(SeriesController)" as PublishManager
 database "Cơ Sở Dữ Liệu" as DB
-participant "Hệ Thống Thông Báo" as Notification
+participant "Hệ Thống Thông Báo\n(NotificationModel)" as Notification
+participant "Nhật Ký Hệ Thống\n(SystemLog)" as SystemLog
 
-Board -> PublishManager : Phê duyệt Chapter
+== Giai đoạn 1: Bỏ phiếu của Hội đồng ==
+Board -> PublishManager : Bỏ phiếu xét duyệt (Đồng ý/Từ chối)
 activate PublishManager
 
-PublishManager -> DB : Cập nhật trạng thái Chapter
+PublishManager -> DB : Ghi nhận phiếu bầu (castVote)
 activate DB
-DB --> PublishManager : Trạng thái đã cập nhật
+DB --> PublishManager : Thành công
 deactivate DB
 
-Board -> PublishManager : Thiết lập lịch phát hành
+PublishManager -> DB : Tính tỷ lệ tán thành (getApprovalStats)
+activate DB
+DB --> PublishManager : Kết quả (Tỷ lệ %, Số phiếu)
+deactivate DB
 
-PublishManager -> DB : Lưu lịch phát hành
+PublishManager -> Notification : Báo tiến độ phiếu bầu cho Mangaka
+activate Notification
+Notification --> Mangaka : Nhận thông báo tiến độ bỏ phiếu
+deactivate Notification
+
+PublishManager -> Notification : Báo tiến độ phiếu bầu cho Hội đồng
+activate Notification
+Notification --> Board : Nhận thông báo tiến độ
+deactivate Notification
+
+alt Tổng số phiếu == Số thành viên Hội đồng
+    PublishManager -> Notification : Báo kết quả bầu cử đủ phiếu cho Hội đồng
+    activate Notification
+    Notification --> Board : Nhận thông báo đủ phiếu bầu & tỷ lệ đạt/không đạt
+    deactivate Notification
+end
+deactivate PublishManager
+
+== Giai đoạn 2: Quyết định Phê duyệt ==
+Board -> PublishManager : Ghi nhận quyết định phê duyệt\n(status=ongoing, publish_type, editor_id)
+activate PublishManager
+
+PublishManager -> DB : Tính tỷ lệ tán thành (getApprovalStats)
+activate DB
+DB --> PublishManager : Tỷ lệ %
+deactivate DB
+
+PublishManager -> PublishManager : Kiểm tra tỷ lệ tán thành >= 50%
+PublishManager -> PublishManager : Kiểm tra không phải bản nháp & có bản thảo
+
+PublishManager -> DB : Cập nhật trạng thái Series (Ongoing), Lịch (publish_type) & editor_id
 activate DB
 DB --> PublishManager : Lưu thành công
 deactivate DB
 
-PublishManager -> Notification : Gửi thông báo xuất bản
+PublishManager -> SystemLog : Ghi nhật ký "Cập nhật trạng thái Series"
+activate SystemLog
+SystemLog --> PublishManager : Ghi log thành công
+deactivate SystemLog
+
+PublishManager -> Notification : Gửi thông báo kết quả phê duyệt cho Mangaka
 activate Notification
-Notification --> Board : Xác nhận xuất bản
+Notification --> Mangaka : Nhận thông báo phê duyệt
 deactivate Notification
 
-PublishManager -> RankingManager : Cập nhật bảng xếp hạng
-activate RankingManager
+PublishManager -> Notification : Gửi phân công cho Editor chuyên trách
+activate Notification
+Notification --> PublishManager : Gửi thành công
+deactivate Notification
 
-RankingManager -> DB : Cập nhật dữ liệu Ranking
-activate DB
-DB --> RankingManager : Ranking đã cập nhật
-deactivate DB
-
-RankingManager --> PublishManager : Hoàn tất cập nhật
-deactivate RankingManager
-
-PublishManager --> Board : Xuất bản hoàn tất
+PublishManager --> Board : Phê duyệt xuất bản hoàn tất
 deactivate PublishManager
 
 @enduml

@@ -1,0 +1,2 @@
+# Module 5 Summary
+Module 5 đã hoàn thành toàn bộ các yêu cầu được giao phó: Xếp hạng (Ranking), Bảng điều khiển (Dashboard), Thông báo (Notification), và chuẩn bị Demo. Các tính năng được xây dựng bám sát kiến trúc hệ thống hiện có, không thay đổi cấu trúc Database Schema và đáp ứng đầy đủ yêu cầu về Bảo mật, Validation.

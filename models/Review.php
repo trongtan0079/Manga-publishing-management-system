@@ -12,5 +12,43 @@ class Review
     public $reviewed_at;
 
     public function __construct() {
+        parent::__construct();
+        $this->table = 'reviews';
+        $this->primaryKey = 'review_id';
+    }
+
+    /**
+     * Lấy các đánh giá của một submission
+     */
+    public function findBySubmissionId($submissionId) {
+        $sql = "SELECT * FROM {$this->table} WHERE submission_id = :submission_id ORDER BY created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':submission_id', $submissionId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Lấy các đánh giá của một reviewer
+     */
+    public function findByReviewerId($reviewerId) {
+        $sql = "SELECT r.*, s.task_id, s.chapter_id, s.user_id as submitter_id 
+                FROM {$this->table} r
+                JOIN submissions s ON r.submission_id = s.submission_id
+                WHERE r.reviewer_id = :reviewer_id ORDER BY r.created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':reviewer_id', $reviewerId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function countReviewsByEditor($editorId, $status) {
+        $sql = "SELECT COUNT(r.review_id) as total 
+                FROM reviews r
+                JOIN submissions s ON r.submission_id = s.submission_id
+                WHERE r.reviewer_id = :reviewer_id AND s.status = :status";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute(['reviewer_id' => $editorId, 'status' => $status]);
+        return (int)$stmt->fetchColumn();
     }
 }

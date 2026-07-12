@@ -12,7 +12,7 @@ participant "Hệ Thống Web" as Web
 participant "Quản Lý Submission" as SubmissionManager
 database "Cơ Sở Dữ Liệu" as DB
 participant "Hệ Thống Thông Báo" as Notification
-actor "Tantou Editor" as Editor
+actor Mangaka as Reviewer
 
 Assistant -> Web : Nộp Submission
 activate Web
@@ -27,7 +27,7 @@ deactivate DB
 
 SubmissionManager -> Notification : Gửi thông báo Submission mới
 activate Notification
-Notification -> Editor : Thông báo cần review
+Notification -> Reviewer : Thông báo cần review
 deactivate Notification
 
 SubmissionManager --> Web : Nộp thành công
@@ -36,7 +36,7 @@ deactivate SubmissionManager
 Web --> Assistant : Hiển thị kết quả
 deactivate Web
 
-Editor -> Web : Xem danh sách Submission
+Reviewer -> Web : Xem danh sách Submission
 activate Web
 
 Web -> SubmissionManager : getSubmissionList()
@@ -50,7 +50,7 @@ deactivate DB
 SubmissionManager --> Web : Trả dữ liệu Submission
 deactivate SubmissionManager
 
-Web --> Editor : Hiển thị Submission
+Web --> Reviewer : Hiển thị Submission
 deactivate Web
 
 @enduml

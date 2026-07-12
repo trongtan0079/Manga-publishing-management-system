@@ -1,0 +1,31 @@
+@startuml
+title Deployment Diagram - Kiến Trúc Triển Khai Hệ Thống Manga PMS
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+
+node "Client Device (PC/Laptop/Tablet)" {
+    node "Web Browser (Chrome/Firefox/Edge)" as browser {
+        artifact "Web Frontend Assets\n(HTML5, CSS3, JavaScript, Bootstrap 5)" as assets
+    }
+}
+
+node "Application Server (Apache)" as web_server {
+    node "PHP Engine (v8.x)" as php_engine {
+        artifact "Manga PMS Core App\n(Custom MVC Engine)" as mvc_app
+    }
+}
+
+node "Database Server Host" as db_host {
+    node "MySQL DBMS" as mysql_db {
+        database "manga_workflow Database" as db {
+            folder "Schema Tables & Relations"
+        }
+    }
+}
+
+browser -- web_server : HTTP / HTTPS (Port 80 / 443)
+php_engine -- db_host : PDO MySQL Driver (Port 3307)
+
+@enduml

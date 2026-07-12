@@ -1,0 +1,37 @@
+@startuml
+title State Machine Diagram - Vòng Đời Trạng Thái Của Bộ Truyện (Series)
+
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam linetype ortho
+
+[*] --> draft : Mangaka tạo Series mới\n[publish_type = 'draft', status = 'planning']
+
+draft --> submitted : Mangaka bấm Nộp đề xuất\n[publish_type = 'submitted', status = 'planning']
+
+state submitted {
+    description : Đang nằm trong hàng đợi chờ Editorial Board phê duyệt
+}
+
+submitted --> ongoing : Editorial Board phê duyệt\n[status = 'ongoing']\n[Bắt buộc gán BTV chuyên trách - Tantou Editor]
+
+submitted --> canceled : Editorial Board từ chối đề xuất\n[status = 'canceled']
+
+state ongoing {
+    description : Bộ truyện đang trong quá trình sáng tác và xuất bản thương mại
+}
+
+ongoing --> suspended : Editorial Board tạm ngưng phát hành (treo bút)\n[status = 'suspended']
+
+suspended --> ongoing : Editorial Board khôi phục trạng thái phát hành\n[status = 'ongoing']
+
+ongoing --> completed : Editorial Board đánh dấu hoàn thành bộ truyện\n[status = 'completed']\n[Guard: Hết chapter chưa duyệt VÀ đã duyệt xong Chương cuối (is_final=1)]
+
+ongoing --> canceled : Editorial Board hủy phát hành bộ truyện\n[status = 'canceled']
+
+suspended --> canceled : Editorial Board hủy phát hành bộ truyện\n[status = 'canceled']
+
+completed --> [*]
+canceled --> [*]
+
+@enduml

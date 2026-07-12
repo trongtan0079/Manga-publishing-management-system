@@ -1,0 +1,59 @@
+@startuml
+title Use Case Diagram - Manga Creation and Publishing Management System
+
+left to right direction
+
+actor "Admin" as Admin
+actor "Mangaka" as Mangaka
+actor "Assistant" as Assistant
+actor "Tantou Editor" as Editor
+actor "Editorial Board" as Board
+
+rectangle "Manga Creation & Publishing System" {
+  ' Admin Use Cases
+  usecase "Quản lý Tài khoản & Phân quyền" as UC_Admin_Users
+  usecase "Theo dõi Hoạt động Hệ thống" as UC_Admin_Logs
+
+  ' Mangaka Use Cases
+  usecase "Quản lý Hồ sơ Series" as UC_Mangaka_Series
+  usecase "Quản lý Chương (Chapter)" as UC_Mangaka_Chapter
+  usecase "Phân công & Giao việc (Task)" as UC_Mangaka_Task
+  usecase "Kiểm duyệt kết quả của Trợ lý" as UC_Mangaka_Review_Task
+  usecase "Nộp Bản thảo Chương truyện" as UC_Mangaka_Submit_Chapter
+  usecase "Vẽ phân vùng bản vẽ thủ công" as UC_Mangaka_Region
+
+  ' Assistant Use Cases
+  usecase "Xem Công việc được giao" as UC_Assistant_Tasks
+  usecase "Nộp sản phẩm hoàn thiện (Submission)" as UC_Assistant_Submit
+
+  ' Editor Use Cases
+  usecase "Kiểm duyệt Bản thảo Chương" as UC_Editor_Review
+  usecase "Đưa ra Nhận xét & Đề xuất sửa đổi" as UC_Editor_Feedback
+  usecase "Đánh dấu lỗi trực quan trên trang" as UC_Editor_Annotate
+
+  ' Board Use Cases
+  usecase "Duyệt xuất bản Series Manga" as UC_Board_Publish
+  usecase "Đánh giá & Xếp hạng Series" as UC_Board_Rank
+}
+
+Admin --> UC_Admin_Users
+Admin --> UC_Admin_Logs
+
+Mangaka --> UC_Mangaka_Series
+Mangaka --> UC_Mangaka_Chapter
+Mangaka --> UC_Mangaka_Task
+Mangaka --> UC_Mangaka_Review_Task
+Mangaka --> UC_Mangaka_Submit_Chapter
+Mangaka --> UC_Mangaka_Region
+
+Assistant --> UC_Assistant_Tasks
+Assistant --> UC_Assistant_Submit
+
+Editor --> UC_Editor_Review
+Editor --> UC_Editor_Feedback
+Editor --> UC_Editor_Annotate
+
+Board --> UC_Board_Publish
+Board --> UC_Board_Rank
+
+@enduml

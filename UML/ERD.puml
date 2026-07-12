@@ -1,6 +1,11 @@
 @startuml
 title ERD - Manga Creation Workflow and Publishing Management System
 
+skinparam linetype ortho
+skinparam ranksep 60
+skinparam nodesep 50
+skinparam titleFontSize 24
+
 entity roles {
   *role_id : int <<PK>>
   role_name : varchar
@@ -18,12 +23,18 @@ entity users {
 
 entity series {
   *series_id : int <<PK>>
-  user_id : int <<FK>>
+  --
+  mangaka_id : int <<FK>>
+  editor_id : int <<FK>> <<NULL>>
   title : varchar
   description : text
-  series_status : varchar
-  publish_schedule : varchar
-  created_date : date
+  status : enum
+  publish_type : varchar
+  cover_image : varchar
+  proposal_file : varchar
+  dossier_notes : text
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity chapters {
@@ -31,27 +42,53 @@ entity chapters {
   series_id : int <<FK>>
   chapter_number : int
   title : varchar
-  chapter_status : varchar
-  upload_date : date
+  status : enum
+  due_date : datetime
+  published_at : datetime
+  is_final : tinyint
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity page_regions {
+  *region_id : int <<PK>>
+  --
+  page_id : int <<FK>>
+  region_type : enum
+  x : int
+  y : int
+  width : int
+  height : int
+  status : enum
+  created_at : timestamp
 }
 
 entity pages {
   *page_id : int <<PK>>
   chapter_id : int <<FK>>
   page_number : int
-  image_path : varchar
-  page_status : varchar
+  image_url : varchar
+  old_image_url : varchar <<NULL>>
+  status : enum
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity tasks {
   *task_id : int <<PK>>
   page_id : int <<FK>>
-  assigned_by : int <<FK>>
-  assigned_to : int <<FK>>
-  task_type : varchar
+  page_region_id : int <<FK>> <<NULL>>
+  mangaka_id : int <<FK>>
+  assistant_id : int <<FK>>
+  title : varchar
+  task_type : enum
   description : text
-  task_status : varchar
-  deadline : date
+  resource_url : varchar
+  priority : enum
+  status : enum
+  due_date : datetime
+  created_at : timestamp
+  updated_at : timestamp
 }
 
 entity submissions {
@@ -84,20 +121,73 @@ entity rankings {
 entity notifications {
   *notification_id : int <<PK>>
   user_id : int <<FK>>
-  notification_content : text
-  created_date : date
+  related_id : int <<FK>> <<NULL>>
+  type : varchar
+  message : text
   is_read : boolean
 }
 
-roles ||--o{ users : "has"
-users ||--o{ series : "creates"
-series ||--o{ chapters : "contains"
-chapters ||--o{ pages : "contains"
-pages ||--o{ tasks : "related to"
-users ||--o{ tasks : "assigns"
-tasks ||--o{ submissions : "generates"
-submissions ||--o{ reviews : "reviewed by"
-series ||--o{ rankings : "ranked by"
-users ||--o{ notifications : "receives"
+entity system_logs {
+  *log_id : int <<PK>>
+  --
+  user_id : int <<FK>> <<NULL>>
+  action : varchar
+  details : text
+  ip_address : varchar
+  created_at : timestamp
+}
+
+entity editor_annotations {
+  *annotation_id : int <<PK>>
+  --
+  page_id : int <<FK>>
+  editor_id : int <<FK>>
+  x : int
+  y : int
+  width : int
+  height : int
+  comments : text
+  created_at : timestamp
+}
+
+entity board_votes {
+  *vote_id : int <<PK>>
+  --
+  series_id : int <<FK>>
+  board_member_id : int <<FK>>
+  vote : enum
+  created_at : timestamp
+}
+
+roles ||--o{ users : has
+users ||--o{ system_logs : triggers
+
+users ||--o{ series : creates
+users ||--o{ series : manages
+
+users ||--o{ tasks : assigns
+users ||--o{ tasks : receives
+
+users ||--o{ submissions : submits
+users ||--o{ reviews : writes
+users ||--o{ notifications : receives
+users ||--o{ series_rankings : evaluates
+users ||--o{ editor_annotations : annotates
+users ||--o{ board_votes : votes
+
+series ||--o{ chapters : contains
+series ||--o{ series_rankings : ranked
+series ||--o{ board_votes : receives_votes
+
+chapters ||--o{ pages : contains
+chapters ||--o{ submissions : submitted
+
+pages ||--o{ page_regions : segment
+pages ||--o{ tasks : requires
+pages ||--o{ editor_annotations : has
+page_regions ||--o{ tasks : targetedAt
+tasks ||--o{ submissions : generates
+
+submissions ||--o{ reviews : receives
 
 @enduml
