@@ -17,8 +17,14 @@ class NotificationController extends BaseController
 
     public function index() {
         $userId = $_SESSION['user_id'];
-        // Lấy tất cả thông báo của user (cả đã đọc và chưa đọc)
-        $notifications = $this->notificationModel->findByUserId($userId);
+        $role = $_SESSION['role_name'] ?? '';
+        
+        // Nếu là Admin, lấy tất cả thông báo hệ thống
+        if ($role === 'admin') {
+            $notifications = $this->notificationModel->findAllWithUser();
+        } else {
+            $notifications = $this->notificationModel->findByUserId($userId);
+        }
         
         require_once __DIR__ . '/../views/shared/notifications.php';
     }
@@ -81,17 +87,26 @@ class NotificationController extends BaseController
         }
 
         $userId = $_SESSION['user_id'];
+        $role = $_SESSION['role_name'] ?? '';
         $notification = $this->notificationModel->findById($id);
 
-        if (!$notification || $notification['user_id'] != $userId) {
+        if (!$notification) {
+            header('Location: ' . BASE_PATH . '/index.php');
+            exit;
+        }
+
+        // Nếu là admin thì được xem tất cả, ngược lại kiểm tra sở hữu
+        if ($role !== 'admin' && $notification['user_id'] != $userId) {
             http_response_code(403);
             $_SESSION['error'] = 'Bạn không có quyền truy cập thông báo này.';
             header('Location: ' . BASE_PATH . '/index.php');
             exit;
         }
 
-        // Đánh dấu đã đọc
-        $this->notificationModel->markAsRead($id, $userId);
+        // Chỉ đánh dấu đã đọc nếu là thông báo của chính mình
+        if ($notification['user_id'] == $userId) {
+            $this->notificationModel->markAsRead($id, $userId);
+        }
 
         // Xác định trang chuyển hướng dựa trên loại thông báo (type) và tài nguyên liên quan (related_id)
         $role = $_SESSION['role_name'] ?? '';

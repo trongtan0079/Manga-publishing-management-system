@@ -65,6 +65,11 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                             <div class="d-flex w-100 justify-content-between align-items-center mb-1">
                                 <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>" class="text-decoration-none text-dark hover-primary-text">
                                     <strong class="mb-1"><?= $typeLabel ?></strong>
+                                    <?php if (isset($notif['username']) && isset($notif['full_name'])): ?>
+                                        <span class="badge bg-secondary ms-2" style="font-size: 0.7rem; font-weight: normal; vertical-align: middle;">
+                                            Gửi tới: <?= htmlspecialchars($notif['full_name'] . ' (@' . $notif['username'] . ')') ?>
+                                        </span>
+                                    <?php endif; ?>
                                 </a>
                                 <small class="text-muted" style="font-size: 0.8rem;"><?= date('d/m/Y H:i', strtotime($notif['created_at'])) ?></small>
                             </div>

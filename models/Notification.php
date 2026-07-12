@@ -108,4 +108,17 @@ class Notification extends Model {
         $stmt->bindParam(':user_id', $userId);
         return $stmt->execute();
     }
+
+    /**
+     * Lấy toàn bộ thông báo hệ thống kèm thông tin người nhận (dành cho Admin)
+     */
+    public function findAllWithUser() {
+        $sql = "SELECT n.*, u.username, u.full_name 
+                FROM {$this->table} n 
+                LEFT JOIN users u ON n.user_id = u.user_id 
+                ORDER BY n.created_at DESC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
 }
