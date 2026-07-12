@@ -32,6 +32,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <form action="<?= BASE_PATH ?>/index.php?controller=task&action=store" method="POST">
             <!-- page_id được truyền ngầm để Controller biết task này thuộc về trang nào -->
             <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
+            <?php if (!empty($groupedRegionIds)): ?>
+                <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 0.85rem; border-radius: 8px;">
+                    <i class="fas fa-info-circle me-2 text-info"></i>
+                    <span>Bạn đang giao việc nhóm cho các phân vùng: <strong>#<?= htmlspecialchars($groupedRegionIds) ?></strong>. Trợ lý chỉ cần nộp bài một lần cho cả nhóm vùng này.</span>
+                </div>
+                <input type="hidden" name="grouped_region_ids" value="<?= htmlspecialchars($groupedRegionIds) ?>">
+            <?php endif; ?>
             
             <!-- Trường Tiêu đề (Bắt buộc) -->
             <div class="mb-3">
@@ -41,6 +48,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
             <?php
             $selectedRegionId = isset($_GET['page_region_id']) ? intval($_GET['page_region_id']) : 0;
+            $groupedRegionIds = isset($_GET['grouped_region_ids']) ? $_GET['grouped_region_ids'] : '';
             ?>
 
             <!-- Trường Mô tả chi tiết (Tùy chọn) -->
@@ -207,17 +215,24 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 
                 <div class="col-md-6">
                     <label for="page_region_id" class="form-label fw-bold">Phân vùng ảnh</label>
-                    <select class="form-select" id="page_region_id" name="page_region_id">
-                        <option value="">-- Toàn bộ trang truyện --</option>
-                        <?php if (!empty($regions)): ?>
-                            <?php foreach ($regions as $region): 
-                                $lbl = ucfirst($region['region_type']) . " #" . $region['region_id'] . " (" . $region['width'] . "x" . $region['height'] . ")";
-                                $selected = ($region['region_id'] == $selectedRegionId) ? 'selected' : '';
-                            ?>
-                                <option value="<?= $region['region_id'] ?>" <?= $selected ?>><?= htmlspecialchars($lbl) ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
+                    <?php if (!empty($groupedRegionIds)): 
+                        $firstRegionId = explode(',', $groupedRegionIds)[0];
+                    ?>
+                        <input type="hidden" name="page_region_id" value="<?= htmlspecialchars($firstRegionId) ?>">
+                        <div class="form-control bg-light text-muted">Nhóm các phân vùng: #<?= htmlspecialchars($groupedRegionIds) ?></div>
+                    <?php else: ?>
+                        <select class="form-select" id="page_region_id" name="page_region_id">
+                            <option value="">-- Toàn bộ trang truyện --</option>
+                            <?php if (!empty($regions)): ?>
+                                <?php foreach ($regions as $region): 
+                                    $lbl = ucfirst($region['region_type']) . " #" . $region['region_id'] . " (" . $region['width'] . "x" . $region['height'] . ")";
+                                    $selected = ($region['region_id'] == $selectedRegionId) ? 'selected' : '';
+                                ?>
+                                    <option value="<?= $region['region_id'] ?>" <?= $selected ?>><?= htmlspecialchars($lbl) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    <?php endif; ?>
                 </div>
             </div>
 
