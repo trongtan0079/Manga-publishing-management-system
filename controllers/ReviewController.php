@@ -526,7 +526,7 @@ class ReviewController extends BaseController
         $chapterModel = new Chapter();
         $chapter = $chapterModel->findById($page['chapter_id']);
         if ($chapter) {
-            if (!in_array($chapter['status'], ['reviewing_draft', 'reviewing_final', 'reviewing'])) {
+            if (!in_array($chapter['status'], ['reviewing', 'reviewing_draft', 'reviewing_final'])) {
                 echo json_encode(['success' => false, 'error' => 'Chỉ có thể tạo ghi chú lỗi khi chương truyện đang ở trạng thái Chờ duyệt (Trạng thái hiện tại: ' . $chapter['status'] . ')']);
                 exit;
             }
