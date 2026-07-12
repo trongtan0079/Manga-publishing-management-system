@@ -628,6 +628,31 @@ class SubmissionController extends BaseController
 
         // Xóa dòng trong Database
         if ($this->submissionModel->delete($id)) {
+            // Khôi phục trạng thái chương truyện/trang vẽ hoặc nhiệm vụ khi xóa bản thảo
+            if (!empty($submission['chapter_id'])) {
+                $chapter = $this->chapterModel->findById($submission['chapter_id']);
+                if ($chapter) {
+                    $newChapterStatus = 'drawing';
+                    if ($chapter['status'] === 'reviewing_draft') {
+                        $newChapterStatus = 'drafting';
+                    }
+                    $this->chapterModel->update($submission['chapter_id'], ['status' => $newChapterStatus]);
+                    
+                    require_once __DIR__ . '/../models/Page.php';
+                    $pageModel = new \Page();
+                    $pageModel->updateStatusByChapterId($submission['chapter_id'], $newChapterStatus);
+                }
+            } elseif (!empty($submission['task_id'])) {
+                $task = $this->taskModel->findById($submission['task_id']);
+                if ($task && $task['status'] === 'submitted') {
+                    $this->taskModel->update($submission['task_id'], ['status' => 'in_progress']);
+                    if (!empty($task['page_region_id'])) {
+                        require_once __DIR__ . '/../models/PageRegion.php';
+                        $pageRegionModel = new \PageRegion();
+                        $pageRegionModel->update($task['page_region_id'], ['status' => 'in_progress']);
+                    }
+                }
+            }
             $_SESSION['success'] = 'Xóa bản thảo thành công.';
         } else {
             $_SESSION['error'] = 'Có lỗi xảy ra trong quá trình xóa dữ liệu.';
