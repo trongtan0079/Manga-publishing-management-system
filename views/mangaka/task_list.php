@@ -90,15 +90,20 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                                 <td>
                                     <?php
-                                    $typeLabel = htmlspecialchars($task['task_type'] ?? 'Khác');
-                                    $typeBadge = 'bg-secondary';
-                                    switch ($task['task_type'] ?? 'other') {
-                                        case 'background': $typeLabel = 'Vẽ nền'; $typeBadge = 'bg-dark'; break;
-                                        case 'inking': $typeLabel = 'Đi nét'; $typeBadge = 'bg-secondary'; break;
-                                        case 'coloring': $typeLabel = 'Lên màu'; $typeBadge = 'bg-success'; break;
-                                        case 'effects': $typeLabel = 'Hiệu ứng'; $typeBadge = 'bg-info text-dark'; break;
-                                        case 'other': $typeLabel = 'Khác'; $typeBadge = 'bg-secondary'; break;
-                                    }
+                                     $typeLabel = htmlspecialchars($task['task_type'] ?? 'Khác');
+                                     $typeBadge = 'bg-secondary';
+                                     if (strpos($task['title'], '(Nhóm:') !== false) {
+                                         $typeLabel = 'Tổ hợp (Group)';
+                                         $typeBadge = 'bg-primary';
+                                     } else {
+                                         switch ($task['task_type'] ?? 'other') {
+                                             case 'background': $typeLabel = 'Vẽ nền'; $typeBadge = 'bg-dark'; break;
+                                             case 'inking': $typeLabel = 'Đi nét'; $typeBadge = 'bg-secondary'; break;
+                                             case 'coloring': $typeLabel = 'Lên màu'; $typeBadge = 'bg-success'; break;
+                                             case 'effects': $typeLabel = 'Hiệu ứng'; $typeBadge = 'bg-info text-dark'; break;
+                                             case 'other': $typeLabel = 'Khác'; $typeBadge = 'bg-secondary'; break;
+                                         }
+                                     }
                                     ?>
                                     <span class="badge <?= $typeBadge ?> mb-1"><?= $typeLabel ?></span><br>
                                     <strong><?= htmlspecialchars($task['title']) ?></strong>
