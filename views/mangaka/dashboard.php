@@ -84,7 +84,7 @@ if (!empty($latestRankings)) {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Series đang quản lý</div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;">Series quản lý</div>
                             <div class="h2 mb-0 fw-bold text-white"><?= isset($totalSeries) ? $totalSeries : 0 ?></div>
                         </div>
                         <div class="stat-icon info" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-book"></i></div>
@@ -100,7 +100,7 @@ if (!empty($latestRankings)) {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Tổng số Chapter</div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;">Tổng số Chapter</div>
                             <div class="h2 mb-0 fw-bold text-white"><?= isset($totalChapters) ? $totalChapters : 0 ?></div>
                         </div>
                         <div class="stat-icon primary" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-file-alt"></i></div>
@@ -116,7 +116,7 @@ if (!empty($latestRankings)) {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Tổng Bản thảo</div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;">Tổng Bản thảo</div>
                             <div class="h2 mb-0 fw-bold text-white"><?= isset($totalSubmissions) ? $totalSubmissions : 0 ?></div>
                         </div>
                         <div class="stat-icon success" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-file-upload"></i></div>
@@ -132,7 +132,7 @@ if (!empty($latestRankings)) {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Duyệt bài Trợ lý</div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;">Duyệt bài Trợ lý</div>
                             <div class="h2 mb-0 fw-bold text-white"><?= isset($pendingReviews) ? $pendingReviews : 0 ?></div>
                         </div>
                         <div class="stat-icon warning" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-clock"></i></div>
@@ -148,7 +148,7 @@ if (!empty($latestRankings)) {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Tổng Pages</div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;">Tổng Pages</div>
                             <div class="h2 mb-0 fw-bold text-white"><?= isset($totalPages) ? $totalPages : 0 ?></div>
                         </div>
                         <div class="stat-icon primary" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-images"></i></div>
@@ -164,7 +164,7 @@ if (!empty($latestRankings)) {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
-                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px;">Tổng Tasks</div>
+                            <div class="text-xs fw-bold text-white text-opacity-75 text-uppercase mb-2" style="font-size: 0.72rem; letter-spacing: 0.5px; white-space: nowrap;">Tổng Tasks</div>
                             <div class="h2 mb-0 fw-bold text-white"><?= isset($totalTasks) ? $totalTasks : 0 ?></div>
                         </div>
                         <div class="stat-icon info" style="background: rgba(255,255,255,0.15); color: #ffffff;"><i class="fas fa-tasks"></i></div>
