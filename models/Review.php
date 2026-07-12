@@ -1,16 +1,7 @@
 <?php
+require_once __DIR__ . '/../core/Model.php';
 
-namespace App\Models;
-
-class Review
-{
-    public $id;
-    public $submission_id;
-    public $reviewer_id;
-    public $comments;
-    public $status;
-    public $reviewed_at;
-
+class Review extends Model {
     public function __construct() {
         parent::__construct();
         $this->table = 'reviews';

@@ -1,15 +1,7 @@
 <?php
+require_once __DIR__ . '/../core/Model.php';
 
-namespace App\Models;
-
-class Notification
-{
-    public $id;
-    public $user_id;
-    public $message;
-    public $is_read;
-    public $created_at;
-
+class Notification extends Model {
     public function __construct() {
         parent::__construct();
         $this->table = 'notifications';

@@ -1,16 +1,12 @@
 <?php
+require_once __DIR__ . '/../core/Model.php';
 
-namespace App\Models;
-
-class Task
-{
-    public $id;
-    public $chapter_id;
-    public $assigned_to;
-    public $type;
-    public $status;
-    public $due_date;
-
+class Task extends Model {
+    
+    /**
+     * Khởi tạo Model Task
+     * Thiết lập tên bảng 'tasks' và khóa chính 'task_id' để kế thừa các hàm CRUD cơ bản từ Model cha
+     */
     public function __construct() {
         parent::__construct();
         $this->table = 'tasks';

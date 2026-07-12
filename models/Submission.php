@@ -1,15 +1,7 @@
 <?php
+require_once __DIR__ . '/../core/Model.php';
 
-namespace App\Models;
-
-class Submission
-{
-    public $id;
-    public $task_id;
-    public $file_url;
-    public $submitted_by;
-    public $submitted_at;
-
+class Submission extends Model {
     public function __construct() {
         parent::__construct();
         $this->table = 'submissions';

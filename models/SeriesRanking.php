@@ -1,16 +1,7 @@
 <?php
+require_once __DIR__ . '/../core/Model.php';
 
-namespace App\Models;
-
-class SeriesRanking
-{
-    public $id;
-    public $series_id;
-    public $views;
-    public $rating;
-    public $rank;
-    public $updated_at;
-
+class SeriesRanking extends Model {
     public function __construct() {
         parent::__construct();
         $this->table = 'series_rankings';
