@@ -68,7 +68,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <tbody>
             <?php if (!empty($seriesList)): ?>
                 <?php foreach ($seriesList as $series): ?>
-                    <tr>
+                    <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= $series['series_id'] ?>">
                         <td><?= htmlspecialchars($series['series_id']) ?></td>
                         <td>
                             <?php if (!empty($series['cover_image'])): 
@@ -123,5 +123,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const clickableRows = document.querySelectorAll(".clickable-row");
+    clickableRows.forEach(row => {
+        row.addEventListener("click", function(e) {
+            // Đảm bảo không kích hoạt chuyển trang nếu click trúng nút, dropdown hoặc link con
+            if (e.target.closest('a') || e.target.closest('button') || e.target.closest('select') || e.target.closest('form') || e.target.closest('input')) {
+                return;
+            }
+            const href = this.getAttribute("data-href");
+            if (href) {
+                window.location.href = href;
+            }
+        });
+    });
+});
+</script>
 
 <?php include __DIR__ . '/../layouts/footer.php'; ?>
