@@ -280,11 +280,14 @@ class ReviewController extends BaseController
                     $pageId = $taskDetail['page_id'];
                     require_once __DIR__ . '/../models/PageRegion.php';
                     $pageRegionModel = new \PageRegion();
-
-                    if (!empty($taskDetail['page_region_id'])) {
+                    if (!empty($taskDetail['grouped_region_ids'])) {
+                        $ids = explode(',', $taskDetail['grouped_region_ids']);
+                        foreach ($ids as $id) {
+                            $pageRegionModel->update(intval($id), ['status' => 'completed']);
+                        }
+                    } elseif (!empty($taskDetail['page_region_id'])) {
                         $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'completed']);
                     }
-
                     // Tự động duyệt trang vẽ (Page status = 'approved') nếu tất cả các Task của trang này đã hoàn thành
                     $tasksOnPage = $taskModel->findByPageId($pageId);
                     $allTasksCompleted = true;
@@ -305,15 +308,20 @@ class ReviewController extends BaseController
                 require_once __DIR__ . '/../models/Task.php';
                 $taskModel = new \Task();
                 $taskModel->update($submission['task_id'], ['status' => 'rejected']);
-
                 $taskDetail = $taskModel->findById($submission['task_id']);
-                if ($taskDetail && !empty($taskDetail['page_region_id'])) {
+                if ($taskDetail) {
                     require_once __DIR__ . '/../models/PageRegion.php';
                     $pageRegionModel = new \PageRegion();
-                    $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'rejected']);
+                    if (!empty($taskDetail['grouped_region_ids'])) {
+                        $ids = explode(',', $taskDetail['grouped_region_ids']);
+                        foreach ($ids as $id) {
+                            $pageRegionModel->update(intval($id), ['status' => 'rejected']);
+                        }
+                    } elseif (!empty($taskDetail['page_region_id'])) {
+                        $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'rejected']);
+                    }
                 }
             }
-
             // Nếu là bản thảo chương truyện (Chapter)
             if ($submission['chapter_id']) {
                 require_once __DIR__ . '/../models/Chapter.php';
