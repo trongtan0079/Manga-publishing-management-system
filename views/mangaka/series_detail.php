@@ -168,19 +168,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <p class="text-slate-500 text-sm mt-1 mb-0">Thông tin chi tiết và tiến độ triển khai tác phẩm</p>
 </div>
 
-<?php
-// Tính toán các chỉ số thống kê
-$totalChapters = isset($chapters) ? count($chapters) : 0;
-$totalTasks = 0;
-$completedTasks = 0;
-if ($totalChapters > 0) {
-    foreach ($chapters as $ch) {
-        $totalTasks += $ch['total_tasks'] ?? 0;
-        $completedTasks += $ch['completed_tasks'] ?? 0;
-    }
-}
-$overallPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100) : 0;
-?>
+
 
 <div class="row">
     <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
@@ -236,65 +224,6 @@ $overallPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100)
 
     <!-- Cột phải: Mô tả và Danh sách Chapters -->
     <div class="col-md-8 col-lg-9 mb-4">
-        <!-- Dashboard Tiến độ -->
-        <div class="row g-3 mb-4">
-            <div class="col-md-4">
-                <div class="card stat-card primary border-0 h-100">
-                    <div class="card-body p-4 d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-xs">Tổng số Chapter</span>
-                            <div class="h3 mb-0 mt-2"><?= $totalChapters ?></div>
-                        </div>
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
-                            <i class="fa-solid fa-list-ol fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card stat-card success border-0 h-100">
-                    <div class="card-body p-4">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-xs">Tiến độ Studio</span>
-                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
-                                <i class="fa-solid fa-circle-check fs-5"></i>
-                            </div>
-                        </div>
-                        <div class="h3 mb-2" style="font-size: 1.5rem; font-weight: 800;">
-                            <?php if ($totalTasks > 0): ?>
-                                <?= $overallPercent ?>% <span style="font-size: 0.78rem; font-weight: 600; opacity: 0.85; display: inline-block; margin-left: 4px;">(<?= $completedTasks ?>/<?= $totalTasks ?> việc)</span>
-                            <?php else: ?>
-                                Tự vẽ <span style="font-size: 0.72rem; font-weight: 600; opacity: 0.85; display: inline-block; margin-left: 4px;">(Tác giả tự vẽ)</span>
-                            <?php endif; ?>
-                        </div>
-                        <div class="progress" style="height: 6px; background-color: rgba(255, 255, 255, 0.22); border-radius: 3px; border: 0; box-shadow: none;">
-                            <div class="progress-bar" role="progressbar" style="width: <?= $overallPercent ?>%; background-color: #ffffff; border-radius: 3px;" aria-valuenow="<?= $overallPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-md-4">
-                <div class="card stat-card warning border-0 h-100">
-                    <div class="card-body p-4 d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-xs">Lịch xuất bản</span>
-                            <div class="h3 mb-0 mt-2" style="font-size: 1.4rem; font-weight: 800;">
-                                <?php if ($series['status'] === 'planning'): ?>
-                                    Chờ duyệt
-                                <?php else: ?>
-                                    <?= ($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng' ?>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
-                            <i class="fa-regular fa-calendar-days fs-5"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <div class="card detail-card mb-4">
             <div class="card-header bg-white py-3 border-bottom border-light">
