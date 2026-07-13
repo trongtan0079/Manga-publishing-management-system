@@ -63,7 +63,7 @@ $rankingModel = new SeriesRanking();
                                     <div class="fw-bold text-primary fs-5">#<?= htmlspecialchars($ranking['rank_position']) ?></div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-success"><?= htmlspecialchars($ranking['score']) ?></span>
+                                    <span class="badge bg-success"><?= htmlspecialchars($ranking['score']) ?> / 100</span>
                                 </td>
                                 <td>
                                     <?= $trendIcon ?>

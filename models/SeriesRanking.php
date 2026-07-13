@@ -35,10 +35,11 @@ class SeriesRanking extends Model {
     }
 
     public function findAllWithSeries() {
-        $sql = "SELECT sr.*, s.title as series_title, u.full_name as mangaka_name 
+        $sql = "SELECT sr.*, s.title as series_title, u.full_name as mangaka_name, b.full_name as board_member_name 
                 FROM {$this->table} sr
                 JOIN series s ON sr.series_id = s.series_id
                 JOIN users u ON s.mangaka_id = u.user_id
+                JOIN users b ON sr.board_member_id = b.user_id
                 ORDER BY sr.period_start_date DESC, sr.rank_position ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
