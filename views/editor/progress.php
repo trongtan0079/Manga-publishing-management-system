@@ -479,11 +479,11 @@ if (!function_exists('renderTaskStatusDot')) {
                                 </div>
                             <?php endif; ?>
                             <div class="flex-grow-1">
-                                <h5 class="card-title mb-1 fw-bold text-dark text-truncate" style="max-width: 250px;">
+                                <h5 class="card-title mb-1 fw-extrabold text-slate-800 text-truncate" style="max-width: 250px;">
                                     <?= htmlspecialchars($data['series']['title']) ?>
                                 </h5>
                                 <div class="text-xs text-muted">
-                                    <i class="fa-regular fa-folder me-1"></i> ID bộ truyện: #<?= $data['series']['series_id'] ?>
+                                    <i class="fa-regular fa-folder-open me-1"></i> ID bộ truyện: #<?= $data['series']['series_id'] ?>
                                 </div>
                             </div>
                             <div>
@@ -493,17 +493,19 @@ if (!function_exists('renderTaskStatusDot')) {
                     </div>
                     
                     <div class="card-body p-4">
+                        <?php 
+                        $percent = $data['total_chapters'] > 0 ? round(($data['completed_chapters'] / $data['total_chapters']) * 100) : 0; 
+                        ?>
                         <!-- 1. Tiến độ xuất bản tổng thể -->
-                        <div class="mb-4 bg-light p-3 rounded-3" style="border-left: 4px solid var(--success);">
-                            <div class="d-flex justify-content-between mb-1 align-items-center">
-                                <span class="text-muted text-xs text-uppercase fw-bold"><i class="fas fa-layer-group me-1"></i>Tiến độ xuất bản tổng thể</span>
-                                <span class="text-dark fw-bold text-xs bg-white px-2 py-1 rounded shadow-sm"><?= $data['completed_chapters'] ?> / <?= $data['total_chapters'] ?> chương đã duyệt</span>
+                        <div class="mb-4 p-3 overall-progress-box">
+                            <div class="d-flex justify-content-between mb-2 align-items-center">
+                                <span class="text-slate-600 text-xs text-uppercase fw-bold"><i class="fa-solid fa-square-poll-horizontal me-1 text-success"></i> Tiến độ xuất bản tổng thể</span>
+                                <span class="text-slate-700 fw-extrabold text-xs bg-white px-2.5 py-1 rounded-2 border border-light-subtle shadow-xs">
+                                    <?= $data['completed_chapters'] ?> / <?= $data['total_chapters'] ?> chương (<?= $percent ?>%)
+                                </span>
                             </div>
-                            <?php 
-                            $percent = $data['total_chapters'] > 0 ? round(($data['completed_chapters'] / $data['total_chapters']) * 100) : 0; 
-                            ?>
-                            <div class="progress mt-2" style="height: 8px; border-radius: 4px;">
-                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?= $percent ?>%; border-radius: 4px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress mt-2" style="height: 6px; border-radius: 4px; background-color: var(--slate-200); box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                                <div class="progress-bar gradient-progress-bar" role="progressbar" style="width: <?= $percent ?>%; border-radius: 4px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
 
