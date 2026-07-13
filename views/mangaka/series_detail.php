@@ -131,26 +131,26 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
     <!-- Cột phải: Mô tả và Danh sách Chapters -->
     <div class="col-md-8 mb-4">
-        <div class="card mb-4">
-            <div class="card-header">
-                <h5>Mô tả / Tóm tắt</h5>
+        <div class="card detail-card mb-4">
+            <div class="card-header bg-white py-3 border-bottom border-light">
+                <h5 class="mb-0 fw-extrabold text-slate-800" style="font-size: 1rem;"><i class="fa-solid fa-file-lines me-2 text-primary"></i>Mô tả / Tóm tắt</h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <?php if (!empty($series['description'])): ?>
-                    <div class="card-text" style="white-space: pre-wrap;"><?= renderMarkdown($series['description'] ?? '') ?></div>
+                    <div class="card-text text-slate-700 font-medium" style="white-space: pre-wrap; font-size: 0.85rem; line-height: 1.6;"><?= renderMarkdown($series['description'] ?? '') ?></div>
                 <?php else: ?>
-                    <p class="text-muted fst-italic">Chưa có mô tả.</p>
+                    <p class="text-muted fst-italic text-xs mb-0">Chưa có mô tả chi tiết cho bộ truyện này.</p>
                 <?php endif; ?>
             </div>
         </div>
 
         <?php if (!empty($series['dossier_notes'])): ?>
-        <div class="card border-danger mb-4 shadow-sm">
-            <div class="card-header bg-danger text-white">
-                <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Biện hộ & Hồ sơ bảo vệ tác phẩm (Từ Editor phụ trách)</h5>
+        <div class="card detail-card border-danger mb-4 shadow-sm">
+            <div class="card-header bg-danger text-white py-3">
+                <h5 class="mb-0 text-white fw-extrabold" style="font-size: 1rem;"><i class="fa-solid fa-shield-halved me-2"></i>Biện hộ & Hồ sơ bảo vệ tác phẩm (BTV phụ trách)</h5>
             </div>
-            <div class="card-body">
-                <div class="card-text text-dark" style="white-space: pre-wrap; font-size: 0.95rem;"><?= htmlspecialchars($series['dossier_notes']) ?></div>
+            <div class="card-body p-4">
+                <div class="card-text text-slate-700 font-medium" style="white-space: pre-wrap; font-size: 0.85rem; line-height: 1.6;"><?= htmlspecialchars($series['dossier_notes']) ?></div>
             </div>
         </div>
         <?php endif; ?>
