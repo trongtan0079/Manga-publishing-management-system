@@ -507,6 +507,14 @@ class TaskController extends BaseController
             // Lấy toàn bộ dữ liệu mangaka có thể đổi
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : intval($task['assistant_id']);
             $pageRegionId = !empty($_POST['page_region_id']) ? intval($_POST['page_region_id']) : null;
+            // Giữ lại grouped_region_ids từ form (chặn encode an toàn: chỉ chấp nhận số và dấu phẩy)
+            $groupedRegionIds = null;
+            if (isset($_POST['grouped_region_ids']) && preg_match('/^[0-9,\s]+$/', $_POST['grouped_region_ids'])) {
+                $groupedRegionIds = trim($_POST['grouped_region_ids']);
+            } elseif (!empty($task['grouped_region_ids'])) {
+                // Fallback: giữ nguyên giá trị cũ nếu không có trong POST
+                $groupedRegionIds = $task['grouped_region_ids'];
+            }
 
             // Validation: pageRegionId belongs to task's pageId
             if ($pageRegionId) {
@@ -592,6 +600,7 @@ class TaskController extends BaseController
             $this->taskModel->update($id, [
                 'assistant_id' => $assistantId,
                 'page_region_id' => $pageRegionId,
+                'grouped_region_ids' => $groupedRegionIds,
                 'title' => $title,
                 'task_type' => $taskType,
                 'description' => $description,
