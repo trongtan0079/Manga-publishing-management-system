@@ -1151,39 +1151,8 @@ document.addEventListener("DOMContentLoaded", function() {
     versionRadios.forEach(radio => {
         radio.addEventListener('change', function() {
             if (this.checked) {
-                const url = this.dataset.url;
-                const notes = this.dataset.notes;
-                activeSubmissionId = parseInt(this.value);
-                
-                // Switch image in single panel
-                const singleImg = document.getElementById('subAnnoImage');
-                if (singleImg) {
-                    singleImg.src = url;
-                    const baseName = url.substring(url.lastIndexOf('/') + 1);
-                    singleImg.setAttribute('onerror', `this.onerror=null; this.src='uploads/submissions/${baseName}';`);
-                }
-                
-                // Switch physical filename label
-                const filenameLabel = document.getElementById('physicalFileNameLabel');
-                if (filenameLabel) {
-                    filenameLabel.innerText = url.substring(url.lastIndexOf('/') + 1);
-                }
-                
-                // Switch download button href
-                const downloadBtn = document.getElementById('downloadPhysicalFileBtn');
-                if (downloadBtn) {
-                    downloadBtn.href = url;
-                }
-                
-                // Update notes text dynamically
-                const notesTextEl = document.getElementById('submissionNotesText');
-                if (notesTextEl) {
-                    notesTextEl.innerHTML = notes ? escapeHtml(notes) : '<em>Không có ghi chú nào đi kèm.</em>';
-                }
-                
-                enableDrawing();
-                resetSubDrawingState();
-                loadSubAnnotations();
+                const subId = this.value;
+                window.location.href = `<?= BASE_PATH ?>/index.php?controller=submission&action=show&id=` + subId;
             }
         });
     });
