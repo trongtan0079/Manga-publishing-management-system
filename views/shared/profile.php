@@ -164,7 +164,7 @@ $roleName = strtolower($user['role_name'] ?? '');
                             <span class="input-group-text bg-light"><i class="fas fa-image text-muted"></i></span>
                             <input type="file" class="form-control" id="avatar_file" name="avatar_file" accept="image/jpeg,image/png,image/webp">
                         </div>
-                        <div class="form-text"><i class="fas fa-info-circle me-1" style="font-size: 0.7rem;"></i>Hỗ trợ các định dạng: JPG, JPEG, PNG, WEBP. Dung lượng tối đa 2MB.</div>
+                        <div class="form-text"><i class="fas fa-info-circle me-1" style="font-size: 0.7rem;"></i>Hỗ trợ các định dạng: JPG, JPEG, PNG, WEBP. Dung lượng tối đa 10MB.</div>
                     </div>
 
                     <hr class="my-4">

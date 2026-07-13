@@ -294,9 +294,9 @@ class AuthController extends BaseController {
         if (isset($_FILES['avatar_file']) && $_FILES['avatar_file']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['avatar_file'];
             
-            // Kiểm tra dung lượng (tối đa 2MB)
-            if ($file['size'] > 2 * 1024 * 1024) {
-                $_SESSION['error'] = 'Kích thước ảnh đại diện vượt quá dung lượng cho phép (2MB).';
+            // Kiểm tra dung lượng (tối đa 10MB)
+            if ($file['size'] > 10 * 1024 * 1024) {
+                $_SESSION['error'] = 'Kích thước ảnh đại diện vượt quá dung lượng cho phép (10MB).';
                 header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
                 exit;
             }
