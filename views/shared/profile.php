@@ -61,9 +61,16 @@ $roleName = strtolower($user['role_name'] ?? '');
         <div class="card border-0 shadow-sm rounded-3 text-center">
             <div class="card-body py-5">
                 <!-- Avatar -->
-                <div class="mb-3">
+                <div class="position-relative d-inline-block mx-auto mb-3" style="width: 100px; height: 100px;">
                     <img src="<?= getUserAvatarUrl($user['user_id'], $user['full_name']) ?>"
-                        alt="Avatar" class="rounded-circle shadow" width="100" height="100" style="object-fit: cover;">
+                        alt="Avatar" class="rounded-circle shadow" width="100" height="100" style="object-fit: cover;" id="profileAvatarPreview">
+                    <label for="avatar_file" class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                        style="width: 30px; height: 30px; border: 2px solid #ffffff; cursor: pointer; transition: all 0.2s;" 
+                        title="Đổi ảnh đại diện"
+                        onmouseover="this.style.transform='scale(1.15)'; this.style.backgroundColor='#4f46e5';"
+                        onmouseout="this.style.transform='scale(1)'; this.style.backgroundColor='#6366f1';">
+                        <i class="fas fa-pencil-alt" style="font-size: 0.75rem;"></i>
+                    </label>
                 </div>
                 <h5 class="fw-bold mb-1"><?= htmlspecialchars($user['full_name']) ?></h5>
                 <p class="text-muted mb-2" style="font-size: 0.9rem;">@<?= htmlspecialchars($user['username']) ?></p>
@@ -204,5 +211,16 @@ $roleName = strtolower($user['role_name'] ?? '');
         </div>
     </div>
 </div>
+<script>
+document.getElementById('avatar_file').addEventListener('change', function(e) {
+    if (this.files && this.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profileAvatarPreview').src = e.target.result;
+        }
+        reader.readAsDataURL(this.files[0]);
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
