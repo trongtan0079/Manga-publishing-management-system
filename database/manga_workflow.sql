@@ -209,3 +209,12 @@ CREATE TABLE IF NOT EXISTS system_logs (
     CONSTRAINT fk_logs_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL,
     INDEX idx_system_logs_user (user_id)
 ) COMMENT 'Nhật ký hoạt động nhạy cảm trong hệ thống như đăng nhập, thay đổi thông tin người dùng';
+
+-- ------------------------------------------------------------------------------
+-- SCHEMA PATCHES / UPGRADES (Đảm bảo đồng bộ cột/kiểu dữ liệu nếu bảng đã tồn tại)
+-- ------------------------------------------------------------------------------
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_head_board TINYINT DEFAULT 0 AFTER status;
+ALTER TABLE pages ADD COLUMN IF NOT EXISTS old_image_url VARCHAR(255) DEFAULT NULL AFTER image_url;
+ALTER TABLE chapters MODIFY COLUMN status ENUM('drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published') DEFAULT 'drafting';
+ALTER TABLE pages MODIFY COLUMN status ENUM('drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published') DEFAULT 'drafting';
+
