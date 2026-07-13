@@ -179,6 +179,8 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                 </div>
             </div>
         </div>
+    </div>
+
 
         <!-- Card Ghi chú lỗi trực quan trên bản vẽ -->
         <?php if ($isImage && !empty($submission['task_id'])): ?>
