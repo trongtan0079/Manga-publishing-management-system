@@ -1,6 +1,10 @@
 -- database/seed_users.sql
 USE manga_workflow;
 
+-- Đảm bảo cột is_head_board tồn tại trong bảng users
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_head_board TINYINT DEFAULT 0 AFTER status;
+
+
 -- Thêm dữ liệu roles (Sử dụng IGNORE để tránh lỗi khi chạy lại file nhiều lần)
 INSERT IGNORE INTO roles (role_name, description) VALUES 
 ('admin', 'Quản trị viên hệ thống'),
