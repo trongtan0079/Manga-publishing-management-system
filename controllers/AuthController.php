@@ -290,6 +290,49 @@ class AuthController extends BaseController {
             $data['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
         }
 
+        // 4. Xử lý upload avatar nếu có tải file lên
+        if (isset($_FILES['avatar_file']) && $_FILES['avatar_file']['error'] === UPLOAD_ERR_OK) {
+            $file = $_FILES['avatar_file'];
+            
+            // Kiểm tra dung lượng (tối đa 2MB)
+            if ($file['size'] > 2 * 1024 * 1024) {
+                $_SESSION['error'] = 'Kích thước ảnh đại diện vượt quá dung lượng cho phép (2MB).';
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+                exit;
+            }
+            
+            // Kiểm tra định dạng
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            if (!in_array($ext, $allowedExtensions)) {
+                $_SESSION['error'] = 'Định dạng ảnh đại diện không hỗ trợ. Chỉ cho phép JPG, JPEG, PNG, WEBP.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+                exit;
+            }
+            
+            // Đảm bảo thư mục upload tồn tại
+            $uploadDir = __DIR__ . '/../uploads/avatars/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            // Xóa tất cả file ảnh cũ của user này trước (để tránh trùng lặp nhiều phần mở rộng khác nhau)
+            $oldFiles = glob($uploadDir . 'user_' . $userId . '.*');
+            if (!empty($oldFiles)) {
+                foreach ($oldFiles as $oldFile) {
+                    @unlink($oldFile);
+                }
+            }
+            
+            // Lưu file mới
+            $newFileName = 'user_' . $userId . '.' . $ext;
+            if (!move_uploaded_file($file['tmp_name'], $uploadDir . $newFileName)) {
+                $_SESSION['error'] = 'Có lỗi xảy ra khi lưu ảnh đại diện.';
+                header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
+                exit;
+            }
+        }
+
         try {
             $this->userModel->update($userId, $data);
             $_SESSION['full_name'] = $fullName;
