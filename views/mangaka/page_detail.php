@@ -889,12 +889,12 @@ function updateSelectedTaskBox(regionId) {
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
                         Yêu cầu sửa lại
                     </span>
-                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-success py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500; background-color: #10b981; border-color: #10b981; transition: all 0.2s;">
+                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
                         <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
                     </a>`;
             } else {
                 submissionContainer.innerHTML = `
-                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-success py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500; background-color: #10b981; border-color: #10b981; transition: all 0.2s;">
+                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
                         <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
                     </a>`;
         }
