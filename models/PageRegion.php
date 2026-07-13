@@ -18,4 +18,19 @@ class PageRegion extends Model {
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Lấy nhiều vùng theo danh sách ID (dùng cho group tasks)
+     * @param array $ids Mảng các region_id (int[])
+     * @return array Danh sách các vùng, mỗi vùng chứa x, y, width, height, region_type, region_id
+     */
+    public function findByIds(array $ids) {
+        if (empty($ids)) return [];
+        $ids = array_map('intval', $ids);
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $sql = "SELECT * FROM {$this->table} WHERE region_id IN ({$placeholders}) ORDER BY region_id ASC";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($ids);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
