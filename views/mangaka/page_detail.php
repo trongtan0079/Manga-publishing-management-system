@@ -485,6 +485,9 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                                          <i class="fas <?= $isGroupTask ? 'fa-layer-group' : 'fa-tasks' ?> me-1 text-indigo-500"></i><?= htmlspecialchars($rt['title']) ?>
                                                      </span>
                                                      <div class="d-flex align-items-center gap-1">
+                                                         <?php if (!empty($rt['submission_id'])): ?>
+                                                             <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=show&id=<?= $rt['submission_id'] ?>" class="text-info text-decoration-none fw-bold me-1" onclick="event.stopPropagation();" style="font-size: 10px;" title="Xem bài nộp và ghi chú lỗi trực quan">Xem bài nộp</a>
+                                                         <?php endif; ?>
                                                          <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant' && $rt['status'] !== 'completed'): ?>
                                                              <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&task_id=<?= $rt['task_id'] ?>" class="text-success text-decoration-none fw-bold" onclick="event.stopPropagation();" style="font-size: 10px;">Nộp bài</a>
                                                          <?php endif; ?>
@@ -684,7 +687,8 @@ if (!empty($tasks)) {
             'priority' => $t['priority'],
             'status' => $t['status'],
             'due_date' => $t['due_date'] ? date('d/m/Y H:i', strtotime($t['due_date'])) : 'Không có',
-            'assistant_name' => $t['assistant_name'] ?? 'Chưa rõ'
+            'assistant_name' => $t['assistant_name'] ?? 'Chưa rõ',
+            'submission_id' => $t['submission_id'] ?? null
         ];
     }
 }
@@ -779,13 +783,20 @@ function updateSelectedTaskBox(regionId) {
         // Cập nhật nút nộp bài cho trợ lý
         const submissionContainer = document.getElementById('submissionButtonContainer');
         if (submissionContainer) {
+            let viewBtnHtml = '';
+            if (task.submission_id) {
+                viewBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-info py-1.5 px-3 me-2" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
+                    <i class="fas fa-eye me-1.5"></i>Xem bài nộp
+                </a>`;
+            }
+            
             if (task.status === 'completed') {
-                submissionContainer.innerHTML = `
+                submissionContainer.innerHTML = viewBtnHtml + `
                     <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
                         <i class="fas fa-check-circle me-1.5 text-success"></i>Công việc đã hoàn thành
                     </span>`;
             } else if (task.status === 'submitted') {
-                submissionContainer.innerHTML = `
+                submissionContainer.innerHTML = viewBtnHtml + `
                     <span class="badge bg-info-subtle text-info border border-info-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
                         <i class="fas fa-spinner fa-spin me-1.5 text-info"></i>Đang chờ duyệt bài
                     </span>
@@ -793,9 +804,15 @@ function updateSelectedTaskBox(regionId) {
                         Nộp lại bản thảo mới
                     </a>`;
             } else if (task.status === 'rejected') {
-                submissionContainer.innerHTML = `
+                let errorBtnHtml = '';
+                if (task.submission_id) {
+                    errorBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-danger py-1.5 px-3 me-2 fw-bold" style="border-radius: 8px; font-size: 0.75rem;">
+                        <i class="fas fa-exclamation-triangle me-1.5"></i>Xem ghi chú lỗi
+                    </a>`;
+                }
+                submissionContainer.innerHTML = errorBtnHtml + `
                     <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
-                        <i class="fas fa-exclamation-triangle me-1.5 text-danger"></i>Mangaka yêu cầu sửa lại (Bị từ chối)
+                        Yêu cầu sửa lại
                     </span>
                     <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-success py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500; background-color: #10b981; border-color: #10b981; transition: all 0.2s;">
                         <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
