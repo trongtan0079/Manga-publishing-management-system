@@ -27,21 +27,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <a href="<?= BASE_PATH ?>/index.php?controller=user&action=index" class="btn btn-outline-secondary btn-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
 </div>
 
-<?php if (isset($_SESSION['error'])): ?>
-    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i><?= htmlspecialchars($_SESSION['error']) ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
-
-<?php if (isset($_SESSION['success'])): ?>
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
-        <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($_SESSION['success']) ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['success']); ?>
-<?php endif; ?>
+<?php require __DIR__ . '/../layouts/alerts.php'; ?>
 
 <div class="card shadow-sm border-0 rounded-3">
     <div class="card-header bg-white border-bottom pt-3 pb-3">

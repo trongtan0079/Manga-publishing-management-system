@@ -26,21 +26,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <?php endif; ?>
 </div>
 
-<?php if (isset($_SESSION['success'])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['success']) ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['success']); ?>
-<?php endif; ?>
-
-<?php if (isset($_SESSION['error'])): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <?= htmlspecialchars($_SESSION['error']) ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
+<?php require __DIR__ . '/../layouts/alerts.php'; ?>
 
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">

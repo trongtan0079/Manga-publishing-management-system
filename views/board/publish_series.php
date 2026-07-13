@@ -69,21 +69,7 @@ if (!empty($seriesList)) {
     </div>
 </div>
 
-<?php if (isset($_SESSION['success'])): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 12px;">
-        <i class="fas fa-check-circle me-2"></i><?= htmlspecialchars($_SESSION['success']) ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['success']); ?>
-<?php endif; ?>
-
-<?php if (isset($_SESSION['error'])): ?>
-    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius: 12px;">
-        <i class="fas fa-exclamation-triangle me-2"></i><?= htmlspecialchars($_SESSION['error']) ?>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    <?php unset($_SESSION['error']); ?>
-<?php endif; ?>
+<?php require __DIR__ . '/../layouts/alerts.php'; ?>
 
 <!-- BẢNG 1: ĐỀ XUẤT TRUYỆN MỚI (BỎ PHIẾU THÔNG QUA) -->
 <div class="card shadow-sm border-0 rounded-3 mb-4">
