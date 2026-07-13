@@ -1108,7 +1108,7 @@ if (wrapper && img) {
         selectionBox.style.height = height + 'px';
     });
 
-    wrapper.addEventListener('mouseup', function(e) {
+    window.addEventListener('mouseup', function(e) {
         if (!isDragging) return;
         isDragging = false;
         
@@ -1118,10 +1118,14 @@ if (wrapper && img) {
         const endX = e.clientX - rect.left;
         const endY = e.clientY - rect.top;
         
-        const x = Math.min(startX, endX);
-        const y = Math.min(startY, endY);
-        const width = Math.abs(startX - endX);
-        const height = Math.abs(startY - endY);
+        // Giới hạn EndX và EndY nằm trong vùng của trang vẽ
+        const clampX = Math.max(0, Math.min(endX, rect.width));
+        const clampY = Math.max(0, Math.min(endY, rect.height));
+        
+        const x = Math.min(startX, clampX);
+        const y = Math.min(startY, clampY);
+        const width = Math.abs(startX - clampX);
+        const height = Math.abs(startY - clampY);
         
         // Don't save tiny clicks
         if (width > 10 && height > 10) {
@@ -1177,21 +1181,26 @@ document.addEventListener("DOMContentLoaded", function() {
         const currentImgUrl = <?= json_encode($resolvedImage) ?>;
         const oldImgUrl = <?= json_encode($oldImageUrl) ?>;
         
+        // Mặc định ẩn ghi chú lỗi của Editor trên bản vẽ mới
+        document.querySelectorAll('.editor-annotation-overlay').forEach(el => el.style.display = 'none');
+        
         btnPageNew.addEventListener('change', function() {
             if (this.checked) {
                 mangaPageImage.src = currentImgUrl;
-                // Khôi phục con trỏ vẽ hoặc phân vùng
-                const overlay = document.getElementById('annoOverlayContainer');
-                if (overlay) overlay.style.pointerEvents = 'auto';
+                isDrawingMode = <?= isset($canDraw) && $canDraw ? 'true' : 'false' ?>;
+                // Hiển thị phân vùng công việc, ẩn ghi chú lỗi cũ
+                document.querySelectorAll('.page-region-overlay').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.editor-annotation-overlay').forEach(el => el.style.display = 'none');
             }
         });
         
         btnPageOld.addEventListener('change', function() {
             if (this.checked) {
                 mangaPageImage.src = oldImgUrl;
-                // Chặn tương tác vẽ trên bản vẽ cũ
-                const overlay = document.getElementById('annoOverlayContainer');
-                if (overlay) overlay.style.pointerEvents = 'none';
+                isDrawingMode = false;
+                // Ẩn phân vùng công việc, hiển thị ghi chú lỗi cũ
+                document.querySelectorAll('.page-region-overlay').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.editor-annotation-overlay').forEach(el => el.style.display = 'block');
             }
         });
     }
