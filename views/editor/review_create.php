@@ -134,9 +134,28 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <p class="fw-bold text-muted mb-2 border-bottom pb-2">File đính kèm:</p>
                         <?php $ext = pathinfo($submission['file_url'], PATHINFO_EXTENSION); ?>
                         <?php if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
-                            <div class="text-center bg-light p-2 rounded border">
-                                <img src="<?= htmlspecialchars((strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/')) ?>" class="img-fluid rounded shadow-sm" alt="Submission file" style="max-height: 500px;">
+                            <div class="text-center bg-light p-3 rounded border d-flex justify-content-center align-items-center">
+                                <?php if (!empty($submission['task_id'])): ?>
+                                    <div id="subAnnoWrapper" class="position-relative d-inline-block text-start shadow-sm" style="border: 1px solid #cbd5e1; user-select: none; max-width: 100%;">
+                                        <img id="subAnnoImage" src="<?= htmlspecialchars((strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/')) ?>" 
+                                             onerror="this.onerror=null; this.src='uploads/submissions/<?= htmlspecialchars(basename($submission['file_url'])) ?>';"
+                                             class="img-fluid rounded" alt="Submission file" style="max-height: 500px; display: block;">
+                                        <!-- Overlay hiển thị ghi chú lỗi -->
+                                        <div id="subAnnoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: none;"></div>
+                                    </div>
+                                <?php else: ?>
+                                    <img src="<?= htmlspecialchars((strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/')) ?>" class="img-fluid rounded shadow-sm" alt="Submission file" style="max-height: 500px;">
+                                <?php endif; ?>
                             </div>
+                            
+                            <?php if (!empty($submission['task_id'])): ?>
+                                <div class="mt-3 text-start">
+                                    <h6 class="fw-bold text-dark mb-2 text-sm"><i class="fas fa-list me-1.5 text-muted"></i>Ghi chú lỗi đã đánh dấu trên bản vẽ:</h6>
+                                    <div id="sub-anno-list" class="list-group list-group-flush border rounded bg-white overflow-hidden" style="max-height: 200px; overflow-y: auto;">
+                                        <!-- Load bằng JS -->
+                                    </div>
+                                </div>
+                            <?php endif; ?>
                         <?php else: ?>
                             <a href="<?= htmlspecialchars((strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/')) ?>" class="btn btn-outline-primary" target="_blank">
                                 <i class="fas fa-download me-2"></i> Tải xuống bản thảo đính kèm
@@ -236,5 +255,83 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         padding-left: 0.2rem;
     }
 </style>
+
+<?php if (!empty($submission['task_id']) && $submission['file_url'] && in_array(strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const STD_WIDTH = 800;
+    const STD_HEIGHT = 1000;
+    
+    const subOverlayContainer = document.getElementById('subAnnoOverlayContainer');
+    const subAnnoList = document.getElementById('sub-anno-list');
+    const submissionId = <?= json_encode($submission['submission_id']) ?>;
+
+    function loadSubAnnotations() {
+        if (!subOverlayContainer) return;
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=get_submission_annotations&submission_id=' + submissionId)
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                renderSubOverlayAnnotations(res.annotations);
+                renderSubListAnnotations(res.annotations);
+            }
+        });
+    }
+
+    function renderSubOverlayAnnotations(annotations) {
+        document.querySelectorAll('.sub-annotation-box').forEach(el => el.remove());
+        
+        const rect = subOverlayContainer.getBoundingClientRect();
+        const scaleX = rect.width / STD_WIDTH;
+        const scaleY = rect.height / STD_HEIGHT;
+        
+        annotations.forEach(ann => {
+            const el = document.createElement('div');
+            el.className = 'sub-annotation-box';
+            el.style.position = 'absolute';
+            el.style.border = '2px dashed #dc3545';
+            el.style.backgroundColor = 'rgba(220, 53, 69, 0.08)';
+            el.style.left = (ann.x * scaleX) + 'px';
+            el.style.top = (ann.y * scaleY) + 'px';
+            el.style.width = (ann.width * scaleX) + 'px';
+            el.style.height = (ann.height * scaleY) + 'px';
+            el.title = ann.comments;
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'help';
+            
+            subOverlayContainer.appendChild(el);
+        });
+    }
+
+    function renderSubListAnnotations(annotations) {
+        if (!subAnnoList) return;
+        subAnnoList.innerHTML = '';
+        if (annotations.length === 0) {
+            subAnnoList.innerHTML = '<p class="text-muted text-xs italic text-center py-3">Chưa có ghi chú sửa đổi nào trên bản vẽ.</p>';
+            return;
+        }
+
+        annotations.forEach(ann => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item px-3 py-2 border-bottom';
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex-grow:1; min-width:0; padding-right:10px;">
+                        <span class="fw-semibold text-danger text-xs d-block"><i class="fas fa-exclamation-triangle me-1"></i>Lỗi tại (${ann.x}, ${ann.y})</span>
+                        <p class="mb-1 text-dark small" style="white-space: pre-wrap; font-size:0.825rem;">${ann.comments}</p>
+                        <small class="text-muted" style="font-size:0.75rem;"><i class="fas fa-user-edit me-1"></i>Tác giả: ${ann.user_name}</small>
+                    </div>
+                </div>
+            `;
+            subAnnoList.appendChild(item);
+        });
+    }
+
+    // Load annotations initially and on resize
+    loadSubAnnotations();
+    window.addEventListener('resize', loadSubAnnotations);
+});
+</script>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
