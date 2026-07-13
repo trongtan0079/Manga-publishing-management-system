@@ -268,15 +268,15 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                     </div>
                 </div>
                 
-                <div class="text-xs text-slate-500 font-semibold mb-1" style="font-size: 0.72rem;"><i class="fas fa-file-alt me-1 text-slate-400"></i>Mục tiêu & Yêu cầu chi tiết:</div>
-                <div id="selectedTaskDescription" class="bg-slate-50 p-2.5 rounded border border-slate-100 text-slate-700 text-start overflow-y-auto mb-2" style="max-height: 180px; line-height: 1.5; font-size: 0.8rem; border-color: #e2e8f0 !important;">
+                <div class="text-xs text-slate-500 font-semibold mb-1.5" style="font-size: 0.72rem;"><i class="fa-solid fa-file-invoice me-1 text-slate-400"></i> Mục tiêu & Yêu cầu chi tiết:</div>
+                <div id="selectedTaskDescription" class="bg-slate-50 p-3 rounded-3 border border-light-subtle text-slate-700 text-start overflow-y-auto mb-2 font-medium" style="max-height: 180px; line-height: 1.6; font-size: 0.82rem; border-color: #e2e8f0 !important; background-color: var(--slate-50) !important;">
                     Mô tả chi tiết...
                 </div>
 
                 <!-- Khối ghi chú lỗi từ Tác giả -->
-                <div id="selectedTaskAnnotationsContainer" class="d-none mt-3 p-2.5 rounded border border-danger-subtle bg-danger bg-opacity-10 text-start" style="border-color: #fca5a5 !important;">
-                    <div class="text-xs fw-bold text-danger mb-1.5"><i class="fas fa-exclamation-triangle me-1"></i>Ý kiến sửa đổi từ Tác giả (Mangaka):</div>
-                    <div id="selectedTaskAnnotationsList" class="list-group list-group-flush border rounded bg-white overflow-hidden" style="max-height: 150px; overflow-y: auto; font-size: 0.78rem;">
+                <div id="selectedTaskAnnotationsContainer" class="d-none mt-3 p-3 rounded-3 border border-danger-subtle bg-danger bg-opacity-10 text-start" style="border-color: #fca5a5 !important;">
+                    <div class="text-xs fw-bold text-danger mb-1.5"><i class="fa-solid fa-circle-exclamation me-1"></i>Ý kiến sửa đổi từ Tác giả (Mangaka):</div>
+                    <div id="selectedTaskAnnotationsList" class="list-group list-group-flush border rounded-3 bg-white overflow-hidden" style="max-height: 150px; overflow-y: auto; font-size: 0.78rem;">
                         <!-- Load bằng JS -->
                     </div>
                 </div>
