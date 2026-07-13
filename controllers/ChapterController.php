@@ -451,6 +451,13 @@ class ChapterController extends BaseController
                 exit;
             }
 
+            $series = $this->seriesModel->findById($chapter['series_id']);
+            if (!$series || in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                $_SESSION['error'] = "Bộ truyện liên quan đã bị khóa, tạm ngưng hoặc đã hoàn thành. Không thể thao tác.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
             if ($chapter['status'] !== 'approved') {
                 $_SESSION['error'] = "Chương truyện chưa được phê duyệt, không thể xuất bản.";
                 header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
@@ -496,6 +503,13 @@ class ChapterController extends BaseController
             $chapter = $this->chapterModel->findById($id);
             if (!$chapter) {
                 $_SESSION['error'] = "Không tìm thấy chapter.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
+            $series = $this->seriesModel->findById($chapter['series_id']);
+            if (!$series || in_array($series['status'], ['suspended', 'canceled', 'completed'])) {
+                $_SESSION['error'] = "Bộ truyện liên quan đã bị khóa, tạm ngưng hoặc đã hoàn thành. Không thể thao tác.";
                 header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
                 exit;
             }
