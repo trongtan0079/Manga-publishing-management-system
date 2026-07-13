@@ -239,13 +239,13 @@ $overallPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100)
         <!-- Dashboard Tiến độ -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="card stat-card border-0 h-100" style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.03); border-radius: 16px;">
+                <div class="card stat-card primary border-0 h-100">
                     <div class="card-body p-4 d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-slate-500 fw-bold text-xs text-uppercase tracking-wider">Tổng số Chapter</span>
-                            <h3 class="fw-extrabold text-slate-800 mt-2 mb-0" style="font-size: 1.8rem;"><?= $totalChapters ?></h3>
+                            <span class="text-xs">Tổng số Chapter</span>
+                            <div class="h3 mb-0 mt-2"><?= $totalChapters ?></div>
                         </div>
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(79, 70, 229, 0.1); color: var(--primary);">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
                             <i class="fa-solid fa-list-ol fs-5"></i>
                         </div>
                     </div>
@@ -253,36 +253,42 @@ $overallPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100)
             </div>
             
             <div class="col-md-4">
-                <div class="card stat-card border-0 h-100" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.03); border-radius: 16px;">
+                <div class="card stat-card success border-0 h-100">
                     <div class="card-body p-4">
                         <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-slate-500 fw-bold text-xs text-uppercase tracking-wider">Tiến độ Studio</span>
-                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background-color: rgba(16, 185, 129, 0.1); color: var(--success);">
+                            <span class="text-xs">Tiến độ Studio</span>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
                                 <i class="fa-solid fa-circle-check fs-5"></i>
                             </div>
                         </div>
-                        <h3 class="fw-extrabold text-slate-800 mb-2" style="font-size: 1.8rem;"><?= $overallPercent ?>%</h3>
-                        <div class="progress" style="height: 6px; background-color: rgba(16, 185, 129, 0.15); border-radius: 3px;">
-                            <div class="progress-bar gradient-progress-bar" role="progressbar" style="width: <?= $overallPercent ?>%; border-radius: 3px;" aria-valuenow="<?= $overallPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                        <div class="h3 mb-2" style="font-size: 1.5rem; font-weight: 800;">
+                            <?php if ($totalTasks > 0): ?>
+                                <?= $overallPercent ?>% <span style="font-size: 0.78rem; font-weight: 600; opacity: 0.85; display: inline-block; margin-left: 4px;">(<?= $completedTasks ?>/<?= $totalTasks ?> việc)</span>
+                            <?php else: ?>
+                                Tự vẽ <span style="font-size: 0.72rem; font-weight: 600; opacity: 0.85; display: inline-block; margin-left: 4px;">(Tác giả tự vẽ)</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="progress" style="height: 6px; background-color: rgba(255, 255, 255, 0.22); border-radius: 3px; border: 0; box-shadow: none;">
+                            <div class="progress-bar" role="progressbar" style="width: <?= $overallPercent ?>%; background-color: #ffffff; border-radius: 3px;" aria-valuenow="<?= $overallPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
                     </div>
                 </div>
             </div>
             
             <div class="col-md-4">
-                <div class="card stat-card border-0 h-100" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.03); border-radius: 16px;">
+                <div class="card stat-card warning border-0 h-100">
                     <div class="card-body p-4 d-flex align-items-center justify-content-between">
                         <div>
-                            <span class="text-slate-500 fw-bold text-xs text-uppercase tracking-wider">Lịch xuất bản</span>
-                            <h3 class="fw-extrabold text-slate-800 mt-2 mb-0" style="font-size: 1.15rem;">
+                            <span class="text-xs">Lịch xuất bản</span>
+                            <div class="h3 mb-0 mt-2" style="font-size: 1.4rem; font-weight: 800;">
                                 <?php if ($series['status'] === 'planning'): ?>
                                     Chờ duyệt
                                 <?php else: ?>
                                     <?= ($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng' ?>
                                 <?php endif; ?>
-                            </h3>
+                            </div>
                         </div>
-                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(255, 255, 255, 0.15); color: #ffffff;">
                             <i class="fa-regular fa-calendar-days fs-5"></i>
                         </div>
                     </div>
