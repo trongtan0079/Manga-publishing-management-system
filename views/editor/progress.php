@@ -628,7 +628,7 @@ if (!function_exists('renderTaskStatusDot')) {
                         <?php endif; ?>
 
                         <!-- 3. Top 5 Deadline công việc sắp tới -->
-                        <h6 class="fw-bold text-dark mb-3"><i class="far fa-calendar-alt me-2 text-warning"></i>Công việc sắp đến hạn hoặc trễ hạn</h6>
+                        <h6 class="fw-bold text-slate-800 mb-3"><i class="fa-regular fa-calendar-check me-2 text-warning"></i>Công việc sắp đến hạn hoặc trễ hạn</h6>
                         <?php if (!empty($data['pending_tasks'])): ?>
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.8rem;">
@@ -636,33 +636,49 @@ if (!function_exists('renderTaskStatusDot')) {
                                         <?php foreach ($data['pending_tasks'] as $task): 
                                             $tDueDate = strtotime($task['due_date']);
                                             $tOverdue = $tDueDate < time();
+                                            $tDaysLeft = ceil(abs($tDueDate - time()) / (60 * 60 * 24));
                                             
-                                            $tBadge = 'bg-light text-dark border';
+                                            $tBadge = 'bg-light text-secondary border';
                                             if ($tOverdue) {
-                                                $tBadge = 'bg-danger text-white';
+                                                $tBadge = 'bg-danger-subtle text-danger border border-danger-subtle';
+                                            } elseif ($tDaysLeft <= 3) {
+                                                $tBadge = 'bg-warning-subtle text-warning border border-warning-subtle';
                                             }
                                         ?>
-                                            <tr>
-                                                <td class="ps-0">
-                                                    <strong><?= htmlspecialchars($task['title']) ?></strong>
-                                                    <span class="text-muted d-block" style="font-size: 0.75rem;">Chapter <?= htmlspecialchars($task['chapter_number']) ?></span>
+                                            <tr style="transition: background-color 0.2s ease;">
+                                                <td class="ps-0 py-2">
+                                                    <strong class="text-slate-800"><?= htmlspecialchars($task['title']) ?></strong>
+                                                    <span class="text-muted d-block text-xs" style="font-size: 0.72rem;">Chương <?= htmlspecialchars($task['chapter_number']) ?></span>
                                                 </td>
-                                                <td>
+                                                <td class="py-2">
                                                     <?php
+                                                    $typeBadgeClass = 'bg-light text-secondary border';
                                                     $typeText = 'Khác';
                                                     switch ($task['task_type']) {
-                                                        case 'background': $typeText = 'Nền'; break;
-                                                        case 'inking': $typeText = 'Nét'; break;
-                                                        case 'coloring': $typeText = 'Màu'; break;
-                                                        case 'effects': $typeText = 'FX'; break;
+                                                        case 'background': 
+                                                            $typeBadgeClass = 'bg-danger-subtle text-danger border border-danger-subtle';
+                                                            $typeText = 'BG: Nền'; 
+                                                            break;
+                                                        case 'inking': 
+                                                            $typeBadgeClass = 'bg-primary-subtle text-primary border border-primary-subtle';
+                                                            $typeText = 'INK: Nét'; 
+                                                            break;
+                                                        case 'coloring': 
+                                                            $typeBadgeClass = 'bg-success-subtle text-success border border-success-subtle';
+                                                            $typeText = 'COL: Màu'; 
+                                                            break;
+                                                        case 'effects': 
+                                                            $typeBadgeClass = 'bg-info-subtle text-info border border-info-subtle';
+                                                            $typeText = 'FX: SFX'; 
+                                                            break;
                                                     }
                                                     ?>
-                                                    <span class="badge bg-light text-secondary border"><?= $typeText ?></span>
+                                                    <span class="badge <?= $typeBadgeClass ?> text-xs font-semibold px-2 py-0.5"><?= $typeText ?></span>
                                                 </td>
-                                                <td class="text-end pe-0">
+                                                <td class="text-end pe-0 py-2">
                                                     <?php if ($task['due_date']): ?>
-                                                        <span class="badge <?= $tBadge ?>">
-                                                            <i class="far fa-clock me-1"></i><?= date('d/m/Y', $tDueDate) ?>
+                                                        <span class="badge <?= $tBadge ?> px-2 py-1 text-xs">
+                                                            <i class="fa-regular fa-clock me-1"></i><?= date('d/m/Y', $tDueDate) ?>
                                                         </span>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
