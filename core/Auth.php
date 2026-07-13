@@ -73,3 +73,28 @@ function requireRole($roleName) {
         exit;
     }
 }
+
+/**
+ * Lấy URL ảnh đại diện (avatar) của người dùng.
+ * Nếu có ảnh tải lên tùy chỉnh (ở uploads/avatars/user_{id}.*), sử dụng ảnh đó.
+ * Nếu không, tự động tạo ảnh avatar theo chữ cái đầu của họ tên bằng UI Avatars API.
+ */
+function getUserAvatarUrl($userId, $fullName) {
+    $base = defined('BASE_PATH') ? BASE_PATH : '';
+    
+    // Đường dẫn vật lý trên server để kiểm tra sự tồn tại của file
+    $avatarDir = __DIR__ . '/../uploads/avatars/';
+    $pattern = $avatarDir . 'user_' . $userId . '.*';
+    $files = glob($pattern);
+    
+    if (!empty($files)) {
+        $filePath = $files[0];
+        $ext = pathinfo($filePath, PATHINFO_EXTENSION);
+        // Thêm ?v=filemtime để ép trình duyệt tải lại ảnh mới khi user cập nhật mà không bị dính cache
+        return $base . '/uploads/avatars/user_' . $userId . '.' . $ext . '?v=' . filemtime($filePath);
+    }
+    
+    // Mặc định tạo avatar tự động bằng UI Avatars
+    return 'https://ui-avatars.com/api/?name=' . urlencode($fullName) . '&background=6366f1&color=fff&size=128&bold=true';
+}
+
