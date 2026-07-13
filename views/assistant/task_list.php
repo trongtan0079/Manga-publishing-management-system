@@ -59,12 +59,20 @@ if (!function_exists('renderTaskTable')) {
                         <?php foreach ($taskList as $task): ?>
                             <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>">
                                 <td class="ps-4" style="width: 200px;">
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text d-block" title="Xem chi tiết phân trang & phân vùng">
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text d-block" title="Xem chi tiết phân trang &amp; phân vùng">
                                         <div class="fw-bold text-slate-800" style="font-size: 0.9rem; line-height: 1.25;"><?= htmlspecialchars($task['series_title']) ?></div>
                                         <small class="text-slate-500 font-medium">Ch. <?= htmlspecialchars($task['chapter_number']) ?> - Tr. <?= htmlspecialchars($task['page_number']) ?></small>
-                                        <?php if (!empty($task['page_region_id'])): ?>
+                                        <?php if (!empty($task['grouped_region_ids'])): ?>
+                                            <?php
+                                            $gidArr = array_filter(array_map('trim', explode(',', $task['grouped_region_ids'])));
+                                            $gidList = implode(', ', array_map(fn($id) => '#'.$id, $gidArr));
+                                            ?>
                                             <div class="mt-1">
-                                                <span class="region-ai-badge"><i class="fas fa-project-diagram me-1" style="font-size: 9px;"></i>Phân vùng #<?= $task['page_region_id'] ?> (AI)</span>
+                                                <span class="region-ai-badge" style="background: rgba(99,102,241,0.1); color: #4338ca; border: 1px solid rgba(99,102,241,0.3);"><i class="fas fa-layer-group me-1" style="font-size: 9px;"></i>Nhóm vùng: <?= $gidList ?></span>
+                                            </div>
+                                        <?php elseif (!empty($task['page_region_id'])): ?>
+                                            <div class="mt-1">
+                                                <span class="region-ai-badge"><i class="fas fa-crop me-1" style="font-size: 9px;"></i>Phân vùng #<?= $task['page_region_id'] ?></span>
                                             </div>
                                         <?php endif; ?>
                                     </a>
