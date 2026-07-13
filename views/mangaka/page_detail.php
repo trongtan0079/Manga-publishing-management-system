@@ -230,16 +230,15 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
     <!-- Cột trái: Ảnh trang truyện tích hợp vẽ Bounding Box của AI -->
     <div class="col-md-7 mb-4">
         <!-- Hộp hiển thị mô tả công việc của phân vùng đang được chọn (nằm riêng bên ngoài) -->
-        <div id="selectedTaskDetailsBox" class="card border-0 shadow-sm mb-3 text-start d-none" style="background-color: #ffffff; border-radius: 12px; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03) !important;">
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-primary fw-bold text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.05em;">
-                        YÊU CẦU CÔNG VIỆC CỦA PHÂN VÙNG
+        <div id="selectedTaskDetailsBox" class="card border-0 shadow-lg mb-3 text-start d-none" style="background-color: #ffffff; border-radius: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-top: 4px solid var(--primary) !important; overflow: hidden; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 5px 15px -5px rgba(15, 23, 42, 0.03) !important;">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 text-uppercase fw-extrabold" style="font-size: 0.65rem; letter-spacing: 0.05em; border-radius: 6px;">
+                        <i class="fa-solid fa-circle-nodes me-1"></i> Yêu cầu công việc phân vùng
                     </span>
                     <button type="button" class="btn-close text-slate-400" style="font-size: 0.72rem; box-shadow: none;" onclick="closeSelectedTaskBox()"></button>
                 </div>
-                <h4 id="selectedTaskTitle" class="fw-bold text-slate-900 mb-3" style="font-size: 1.15rem; line-height: 1.35; letter-spacing: -0.01em;">Tiêu đề công việc</h4>
-                <hr class="my-2 border-slate-200" style="opacity: 0.08;">
+                <h4 id="selectedTaskTitle" class="fw-extrabold text-slate-800 mb-3" style="font-size: 1.25rem; line-height: 1.35; letter-spacing: -0.015em;">Tiêu đề công việc</h4>
                 
                 <div class="d-flex flex-wrap gap-3 mb-2 text-xs" style="font-size: 0.72rem;">
                     <div><i class="fas fa-tag text-slate-400 me-1"></i>Loại: <span id="selectedTaskType" class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 font-semibold">Vẽ nền</span></div>
