@@ -168,6 +168,42 @@ class TaskController extends BaseController
         // Lấy danh sách tất cả Assistant để Mangaka chọn người giao việc
         $assistants = $this->userModel->findByRoleName('assistant');
 
+        $groupedRegionData = [];
+        $groupedRegionIds = isset($_GET['grouped_region_ids']) ? $_GET['grouped_region_ids'] : '';
+        if (!empty($groupedRegionIds)) {
+            $idsArray = array_filter(array_map('trim', explode(',', $groupedRegionIds)));
+            if (!empty($idsArray)) {
+                $oldTasks = $this->taskModel->findByPageRegionIds($pageId, $idsArray);
+                $oldTasksMap = [];
+                foreach ($oldTasks as $ot) {
+                    $oldTasksMap[$ot['page_region_id']] = $ot;
+                }
+                
+                $regionsMap = [];
+                foreach ($regions as $r) {
+                    $regionsMap[$r['region_id']] = $r;
+                }
+
+                foreach ($idsArray as $rId) {
+                    $rIdInt = intval($rId);
+                    $oldTask = isset($oldTasksMap[$rIdInt]) ? $oldTasksMap[$rIdInt] : null;
+                    $desc = $oldTask ? strip_tags(trim($oldTask['description'])) : "";
+                    $title = $oldTask ? $oldTask['title'] : "";
+                    $tType = $oldTask ? $oldTask['task_type'] : "";
+                    
+                    $regionType = isset($regionsMap[$rIdInt]) ? $regionsMap[$rIdInt]['region_type'] : 'other';
+                    
+                    $groupedRegionData[] = [
+                        'region_id' => $rIdInt,
+                        'region_type' => $regionType,
+                        'old_title' => $title,
+                        'old_task_type' => $tType,
+                        'old_description' => $desc
+                    ];
+                }
+            }
+        }
+
         // Nạp view chứa form tạo task
         require __DIR__ . '/../views/mangaka/task_create.php';
     }
@@ -357,9 +393,13 @@ class TaskController extends BaseController
                 require_once __DIR__ . '/../models/PageRegion.php';
                 $pageRegionModel = new \PageRegion();
                 if (!empty($groupedRegionIds)) {
-                    $ids = explode(',', $groupedRegionIds);
-                    foreach ($ids as $id) {
-                        $pageRegionModel->update(intval($id), ['status' => 'in_progress']);
+                    $ids = array_filter(array_map('trim', explode(',', $groupedRegionIds)));
+                    if (!empty($ids)) {
+                        foreach ($ids as $id) {
+                            $pageRegionModel->update(intval($id), ['status' => 'in_progress']);
+                        }
+                        // Xóa các task lẻ (chưa hoàn thành) của các vùng này để tránh trùng lặp
+                        $this->taskModel->deleteActiveTasksByRegionIds($pageId, $ids);
                     }
                 } elseif ($pageRegionId) {
                     $pageRegionModel->update($pageRegionId, ['status' => 'in_progress']);
