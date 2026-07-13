@@ -82,19 +82,91 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                     </a>
                 <?php endif; ?>
             </div>
-            <div class="card-body p-4 bg-light text-center" style="min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                <?php if ($isImage): ?>
-                    <div class="w-100 bg-white p-3 rounded border shadow-sm d-flex flex-column align-items-center justify-content-center">
-                        <div id="subAnnoWrapper" class="position-relative d-inline-block text-start shadow-sm" style="border: 1px solid #cbd5e1; user-select: none; max-width: 100%;">
-                            <img id="subAnnoImage" src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" 
-                                 onerror="this.onerror=null; this.src='uploads/submissions/<?= htmlspecialchars(basename($submission['file_url'])) ?>';"
-                                 alt="Bản thảo" 
-                                 class="img-fluid rounded" 
-                                 style="max-height: 650px; width: auto; object-fit: contain; display: block;">
-                            <!-- Overlay vẽ ghi chú lỗi -->
-                            <div id="subAnnoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: default;"></div>
+            <div class="card-body p-0 bg-light text-center" style="min-height: 400px; display: flex; flex-direction: column;">
+                <?php if (!empty($submissionHistory) && count($submissionHistory) > 1): ?>
+                    <!-- Thanh chuyển đổi & so sánh phiên bản -->
+                    <div class="w-100 bg-white border-bottom py-2.5 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2 text-start shadow-xs">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-xs fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;"><i class="fas fa-history me-1.5 text-secondary"></i>Các bản nộp:</span>
+                            <select id="compare-version-select" class="form-select form-select-sm d-inline-block w-auto" style="font-size: 0.8rem; padding: 2px 24px 2px 8px; border-radius: 6px;">
+                                <?php 
+                                // Đảo ngược lịch sử để bản cũ nhất ở trên, bản mới nhất ở dưới
+                                $sortedHistory = array_reverse($submissionHistory);
+                                foreach ($sortedHistory as $idx => $hist): 
+                                    $verNum = $idx + 1;
+                                    $selected = ($hist['submission_id'] == $submission['submission_id']) ? 'selected' : '';
+                                    $statusText = '';
+                                    if ($hist['status'] === 'approved') $statusText = ' (Đã duyệt)';
+                                    elseif ($hist['status'] === 'rejected') $statusText = ' (Cần sửa)';
+                                    else $statusText = ' (Chờ duyệt)';
+                                    $label = "Bản vẽ #" . $verNum . " - " . date('d/m H:i', strtotime($hist['submitted_at'])) . $statusText;
+                                ?>
+                                    <option value="<?= $hist['submission_id'] ?>" 
+                                            data-url="<?= (strpos((string)($hist['file_url'] ?? ''), 'http') === 0) ? $hist['file_url'] : BASE_PATH . '/' . ltrim((string)($hist['file_url'] ?? ''), '/') ?>" 
+                                            data-notes="<?= htmlspecialchars($hist['notes'] ?? '') ?>"
+                                            data-status="<?= $hist['status'] ?>"
+                                            <?= $selected ?>>
+                                        <?= htmlspecialchars($label) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
+                        
+                        <?php if ($isImage): ?>
+                            <div>
+                                <button type="button" id="btn-toggle-compare" class="btn btn-xs btn-outline-primary fw-bold d-inline-flex align-items-center gap-1.5" style="font-size: 11px; padding: 4px 8px; border-radius: 6px;">
+                                    <i class="fas fa-columns"></i> <span>So sánh song song</span>
+                                </button>
+                            </div>
+                        <?php endif; ?>
                     </div>
+                <?php endif; ?>
+
+                <div class="p-4 flex-grow-1 d-flex flex-column align-items-center justify-content-center w-100">
+                    <?php if ($isImage): ?>
+                        <!-- Panel so sánh song song (Mặc định ẩn) -->
+                        <div id="compareSplitPanel" class="w-100 d-none">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="bg-white p-3 rounded border shadow-sm h-100 d-flex flex-column align-items-center">
+                                        <div class="text-xs fw-bold text-muted mb-2 text-start w-100 border-bottom pb-1.5 d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-history me-1"></i>BẢN VẼ CŨ</span>
+                                            <span id="compareLeftVerLabel" class="badge bg-secondary">Bản vẽ #1</span>
+                                        </div>
+                                        <div class="position-relative d-inline-block text-start" style="max-width: 100%;">
+                                            <img id="compareLeftImage" src="" class="img-fluid rounded" style="max-height: 550px; width: auto; object-fit: contain; display: block;">
+                                            <!-- Overlay hiển thị ghi chú của bản vẽ cũ -->
+                                            <div id="compareLeftOverlay" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: none;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="bg-white p-3 rounded border shadow-sm h-100 d-flex flex-column align-items-center">
+                                        <div class="text-xs fw-bold text-primary mb-2 text-start w-100 border-bottom pb-1.5 d-flex justify-content-between align-items-center">
+                                            <span><i class="fas fa-file-image me-1"></i>BẢN VẼ MỚI (ĐANG CHỌN)</span>
+                                            <span id="compareRightVerLabel" class="badge bg-primary">Bản vẽ #2</span>
+                                        </div>
+                                        <div class="position-relative d-inline-block text-start" style="max-width: 100%;">
+                                            <img id="compareRightImage" src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" class="img-fluid rounded" style="max-height: 550px; width: auto; object-fit: contain; display: block;">
+                                            <div id="compareRightOverlay" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: none;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel xem đơn (Mặc định hiện) -->
+                        <div id="compareSinglePanel" class="w-100 bg-white p-3 rounded border shadow-sm d-flex flex-column align-items-center justify-content-center">
+                            <div id="subAnnoWrapper" class="position-relative d-inline-block text-start shadow-sm" style="border: 1px solid #cbd5e1; user-select: none; max-width: 100%;">
+                                <img id="subAnnoImage" src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" 
+                                     onerror="this.onerror=null; this.src='uploads/submissions/<?= htmlspecialchars(basename($submission['file_url'])) ?>';"
+                                     alt="Bản thảo" 
+                                     class="img-fluid rounded" 
+                                     style="max-height: 650px; width: auto; object-fit: contain; display: block;">
+                                <!-- Overlay vẽ ghi chú lỗi -->
+                                <div id="subAnnoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: default;"></div>
+                            </div>
+                        </div>
                 <?php elseif ($ext === 'pdf'): ?>
                     <div class="text-center py-5 bg-white rounded border shadow-sm w-100">
                         <i class="fas fa-file-pdf text-danger fa-5x mb-3 animate__animated animate__pulse animate__infinite"></i>
@@ -184,7 +256,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                 <h5 class="card-title mb-0"><i class="fas fa-sticky-note me-2 text-primary"></i>Ghi chú kèm theo</h5>
             </div>
             <div class="card-body p-4">
-                <div class="bg-light p-3 rounded text-dark text-sm border border-slate-200" style="white-space: pre-line; line-height: 1.6;">
+                <div id="submissionNotesText" class="bg-light p-3 rounded text-dark text-sm border border-slate-200" style="white-space: pre-line; line-height: 1.6;">
                     <?= !empty($submission['notes']) ? htmlspecialchars((string)($submission['notes'] ?? '')) : '<em>Không có ghi chú nào đi kèm.</em>' ?>
                 </div>
             </div>
@@ -833,27 +905,61 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 <?php endif; ?>
 
-<?php if ($isImage && !empty($submission['task_id'])): ?>
+<?php if ($isImage): ?>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const STD_WIDTH = 800;
     const STD_HEIGHT = 1000;
     
-    const isMangakaReview = <?= json_encode($role === 'mangaka' && $submission['status'] === 'pending') ?>;
+    const originalSubmissionId = <?= json_encode($submission['submission_id']) ?>;
+    const originalStatus = <?= json_encode($submission['status']) ?>;
+    const isMangaka = <?= json_encode($role === 'mangaka') ?>;
+    
+    let activeSubmissionId = originalSubmissionId;
+    let isCompareMode = false;
+    
+    const selectEl = document.getElementById('compare-version-select');
+    const compareBtn = document.getElementById('btn-toggle-compare');
+    const singlePanel = document.getElementById('compareSinglePanel');
+    const splitPanel = document.getElementById('compareSplitPanel');
+    
     const subOverlayContainer = document.getElementById('subAnnoOverlayContainer');
     const subAnnoForm = document.getElementById('subAnnoForm');
     const subNoSelectionWarning = document.getElementById('sub-no-selection-warning');
     const subAnnoList = document.getElementById('sub-anno-list');
-    const submissionId = <?= json_encode($submission['submission_id']) ?>;
-
-    if (isMangakaReview && subOverlayContainer) {
-        subOverlayContainer.style.cursor = 'crosshair';
-        
-        let subIsDrawing = false;
-        let subStartX = 0, subStartY = 0;
-        let subSelectedBox = null;
-        
+    
+    function escapeHtml(text) {
+        if (!text) return '';
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+    
+    // Core drawing logic for Mangaka
+    let subIsDrawing = false;
+    let subStartX = 0, subStartY = 0;
+    let subSelectedBox = null;
+    
+    function enableDrawing() {
+        const canDraw = isMangaka && originalStatus === 'pending' && activeSubmissionId === originalSubmissionId;
+        if (subOverlayContainer) {
+            if (canDraw) {
+                subOverlayContainer.style.cursor = 'crosshair';
+                subOverlayContainer.style.pointerEvents = 'auto';
+            } else {
+                subOverlayContainer.style.cursor = 'default';
+            }
+        }
+    }
+    
+    if (subOverlayContainer) {
         subOverlayContainer.addEventListener('mousedown', function(e) {
+            const canDraw = isMangaka && originalStatus === 'pending' && activeSubmissionId === originalSubmissionId && !isCompareMode;
+            if (!canDraw) return;
+            
             subIsDrawing = true;
             const rect = subOverlayContainer.getBoundingClientRect();
             subStartX = e.clientX - rect.left;
@@ -929,7 +1035,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 b.remove();
             }
         });
-        if (subNoSelectionWarning) subNoSelectionWarning.style.display = 'block';
+        if (subNoSelectionWarning) {
+            const canDraw = isMangaka && originalStatus === 'pending' && activeSubmissionId === originalSubmissionId && !isCompareMode;
+            subNoSelectionWarning.style.display = canDraw ? 'block' : 'none';
+        }
         if (subAnnoForm) subAnnoForm.style.display = 'none';
     }
 
@@ -939,7 +1048,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const commentInput = document.getElementById('sub-anno-comment');
             
             const data = {
-                submission_id: submissionId,
+                submission_id: activeSubmissionId,
                 x: document.getElementById('sub-anno-x').value,
                 y: document.getElementById('sub-anno-y').value,
                 width: document.getElementById('sub-anno-w').value,
@@ -972,21 +1081,69 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function loadSubAnnotations() {
+        if (isCompareMode) {
+            loadCompareMode();
+            return;
+        }
         if (!subOverlayContainer) return;
-        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=get_submission_annotations&submission_id=' + submissionId)
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=get_submission_annotations&submission_id=' + activeSubmissionId)
         .then(response => response.json())
         .then(res => {
             if (res.success) {
-                renderSubOverlayAnnotations(res.annotations);
+                renderSubOverlayAnnotations(res.annotations, subOverlayContainer);
                 renderSubListAnnotations(res.annotations);
             }
         });
     }
 
-    function renderSubOverlayAnnotations(annotations) {
-        document.querySelectorAll('.sub-annotation-box').forEach(el => el.remove());
+    function loadCompareMode() {
+        if (!selectEl) return;
+        const selectedIdx = selectEl.selectedIndex;
+        let leftIdx = selectedIdx - 1;
+        if (leftIdx < 0) {
+            leftIdx = 0;
+        }
+        const leftOption = selectEl.options[leftIdx];
+        const rightOption = selectEl.options[selectedIdx];
         
-        const rect = subOverlayContainer.getBoundingClientRect();
+        document.getElementById('compareLeftImage').src = leftOption.dataset.url;
+        document.getElementById('compareRightImage').src = rightOption.dataset.url;
+        
+        document.getElementById('compareLeftVerLabel').innerText = leftOption.text.split(' - ')[0];
+        document.getElementById('compareRightVerLabel').innerText = rightOption.text.split(' - ')[0];
+        
+        // Load overlays
+        loadOverlayAnnotations(leftOption.value, document.getElementById('compareLeftOverlay'));
+        loadOverlayAnnotations(rightOption.value, document.getElementById('compareRightOverlay'));
+        
+        // Also update annotations list to show both or selected right
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=get_submission_annotations&submission_id=' + rightOption.value)
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                renderSubListAnnotations(res.annotations);
+            }
+        });
+    }
+
+    function loadOverlayAnnotations(subId, overlayContainer) {
+        if (!overlayContainer) return;
+        overlayContainer.innerHTML = '';
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=get_submission_annotations&submission_id=' + subId)
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                renderSubOverlayAnnotations(res.annotations, overlayContainer);
+            }
+        });
+    }
+
+    function renderSubOverlayAnnotations(annotations, container) {
+        container.querySelectorAll('.sub-annotation-box').forEach(el => el.remove());
+        
+        const rect = container.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        
         const scaleX = rect.width / STD_WIDTH;
         const scaleY = rect.height / STD_HEIGHT;
         
@@ -1004,7 +1161,7 @@ document.addEventListener("DOMContentLoaded", function() {
             el.style.pointerEvents = 'auto';
             el.style.cursor = 'help';
             
-            subOverlayContainer.appendChild(el);
+            container.appendChild(el);
         });
     }
 
@@ -1016,6 +1173,8 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
+        const canDelete = isMangaka && originalStatus === 'pending' && activeSubmissionId === originalSubmissionId;
+
         annotations.forEach(ann => {
             const item = document.createElement('div');
             item.className = 'list-group-item px-3 py-2 border-bottom';
@@ -1026,7 +1185,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <p class="mb-1 text-dark small" style="white-space: pre-wrap; font-size:0.825rem;">${ann.comments}</p>
                         <small class="text-muted" style="font-size:0.75rem;"><i class="fas fa-user-edit me-1"></i>Tác giả: ${ann.user_name}</small>
                     </div>
-                    ${isMangakaReview ? `
+                    ${canDelete ? `
                     <button class="btn btn-xs btn-link text-danger p-0" onclick="deleteSubAnnotation(${ann.annotation_id})">
                         <i class="fas fa-trash-alt"></i>
                     </button>
@@ -1057,7 +1216,60 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     };
 
+    // Version switcher listener
+    if (selectEl) {
+        selectEl.addEventListener('change', function() {
+            const selectedOption = selectEl.options[selectEl.selectedIndex];
+            activeSubmissionId = parseInt(selectedOption.value);
+            
+            // Update notes text dynamically
+            const notesTextEl = document.getElementById('submissionNotesText');
+            if (notesTextEl) {
+                notesTextEl.innerHTML = selectedOption.dataset.notes ? escapeHtml(selectedOption.dataset.notes) : '<em>Không có ghi chú nào đi kèm.</em>';
+            }
+            
+            // Switch image in single panel
+            const singleImg = document.getElementById('subAnnoImage');
+            if (singleImg) {
+                singleImg.src = selectedOption.dataset.url;
+            }
+            
+            enableDrawing();
+            resetSubDrawingState();
+            
+            loadSubAnnotations();
+        });
+    }
+    
+    // Toggle Compare mode
+    if (compareBtn) {
+        compareBtn.addEventListener('click', function() {
+            isCompareMode = !isCompareMode;
+            if (isCompareMode) {
+                singlePanel.classList.add('d-none');
+                splitPanel.classList.remove('d-none');
+                compareBtn.innerHTML = '<i class="fas fa-image"></i> <span>Xem bản đơn</span>';
+                compareBtn.classList.remove('btn-outline-primary');
+                compareBtn.classList.add('btn-primary');
+                
+                // Hide drawing instructions if comparison mode is active
+                if (subNoSelectionWarning) subNoSelectionWarning.style.display = 'none';
+                if (subAnnoForm) subAnnoForm.style.display = 'none';
+            } else {
+                singlePanel.classList.remove('d-none');
+                splitPanel.classList.add('d-none');
+                compareBtn.innerHTML = '<i class="fas fa-columns"></i> <span>So sánh song song</span>';
+                compareBtn.classList.remove('btn-primary');
+                compareBtn.classList.add('btn-outline-primary');
+                
+                resetSubDrawingState();
+            }
+            loadSubAnnotations();
+        });
+    }
+
     // Load annotations initially and on resize
+    enableDrawing();
     loadSubAnnotations();
     window.addEventListener('resize', loadSubAnnotations);
 });
