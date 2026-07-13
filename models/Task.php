@@ -22,15 +22,20 @@ class Task extends Model {
      * @return array Danh sách các công việc thuộc về trang đó, sắp xếp mới nhất lên đầu
      */
     public function findByPageId($pageId) {
-        $sql = "SELECT t.*, u.full_name as assistant_name
+        $sql = "SELECT t.*, u.full_name as assistant_name, s_max.latest_submission_id as submission_id
                 FROM {$this->table} t
                 LEFT JOIN users u ON t.assistant_id = u.user_id
+                LEFT JOIN (
+                    SELECT task_id, MAX(submission_id) as latest_submission_id 
+                    FROM submissions 
+                    GROUP BY task_id
+                ) s_max ON t.task_id = s_max.task_id
                 WHERE t.page_id = :page_id 
                 ORDER BY t.created_at DESC";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindParam(':page_id', $pageId);
         $stmt->execute();
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
