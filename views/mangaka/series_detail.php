@@ -70,48 +70,58 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <div class="row">
     <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
+    <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
     <div class="col-md-4 mb-4">
-        <div class="card h-100">
+        <div class="card series-cover-card h-100">
             <?php if (!empty($series['cover_image'])): 
                 $coverUrl = $series['cover_image'];
                 $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
             ?>
-                <img src="<?= htmlspecialchars($resolvedCover) ?>" class="card-img-top object-fit-cover" alt="Cover Image" style="max-height: 400px;">
+                <div class="overflow-hidden" style="position: relative;">
+                    <img src="<?= htmlspecialchars($resolvedCover) ?>" class="series-cover-img" alt="Cover Image">
+                </div>
             <?php else: ?>
-                <div class="card-img-top bg-light d-flex align-items-center justify-content-center text-muted" style="height: 300px;">
-                    Chưa có ảnh bìa
+                <div class="bg-light d-flex flex-column align-items-center justify-content-center text-muted border-bottom" style="height: 300px;">
+                    <i class="fa-solid fa-image fa-3x mb-3 text-slate-300"></i>
+                    <span class="text-xs fw-semibold uppercase tracking-wider text-slate-400">Chưa có ảnh bìa</span>
                 </div>
             <?php endif; ?>
             
-            <div class="card-body">
-                <h5 class="card-title"><?= htmlspecialchars($series['title']) ?></h5>
-                
-                <p class="card-text">
-                    <strong>Trạng thái:</strong> 
-                    <?= $this->getSeriesStatusBadge($series) ?>
-                </p>
-                <p class="card-text">
-                    <strong>Lịch xuất bản:</strong> 
-                    <?php if ($series['status'] === 'planning'): ?>
-                        <span class="badge bg-light text-dark border">Chưa quyết định (Chờ duyệt)</span>
-                    <?php else: ?>
-                        <span class="badge bg-secondary"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
-                    <?php endif; ?>
-                </p>
-                <p class="card-text">
-                    <strong>Ngày tạo:</strong> <br>
-                    <?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?>
-                </p>
-                <p class="card-text">
-                    <strong>Cập nhật lần cuối:</strong> <br>
-                    <?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?>
-                </p>
+            <div class="card-body p-4 d-flex flex-column justify-content-between">
+                <div>
+                    <h5 class="fw-extrabold text-slate-900 mb-4" style="font-size: 1.3rem; letter-spacing: -0.02em; line-height: 1.3;"><?= htmlspecialchars($series['title']) ?></h5>
+                    
+                    <ul class="list-unstyled d-flex flex-column gap-3 text-xs mb-0">
+                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
+                            <span class="text-slate-500 fw-medium"><i class="fa-solid fa-circle-info me-1.5 text-primary"></i>Trạng thái:</span>
+                            <span class="fw-bold"><?= $this->getSeriesStatusBadge($series) ?></span>
+                        </li>
+                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
+                            <span class="text-slate-500 fw-medium"><i class="fa-regular fa-calendar-check me-1.5 text-success"></i>Lịch xuất bản:</span>
+                            <span>
+                                <?php if ($series['status'] === 'planning'): ?>
+                                    <span class="badge bg-light text-dark border">Chờ duyệt</span>
+                                <?php else: ?>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-bold px-2 py-0.5" style="border-radius: 4px;"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                                <?php endif; ?>
+                            </span>
+                        </li>
+                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
+                            <span class="text-slate-500 fw-medium"><i class="fa-regular fa-clock me-1.5 text-info"></i>Ngày tạo:</span>
+                            <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></span>
+                        </li>
+                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
+                            <span class="text-slate-500 fw-medium"><i class="fa-solid fa-arrows-rotate me-1.5 text-warning"></i>Cập nhật:</span>
+                            <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?></span>
+                        </li>
+                    </ul>
+                </div>
                 
                 <?php if (!empty($series['proposal_file'])): ?>
-                <div class="mt-3 border-top pt-3">
-                    <p class="card-text mb-1"><strong>Tài liệu đề xuất:</strong></p>
-                    <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-sm btn-outline-primary w-100" target="_blank">
-                        <i class="fas fa-file-download me-2"></i>Tải bản thảo sơ bộ
+                <div class="mt-4 border-top pt-3">
+                    <p class="card-text mb-2 text-xs text-slate-500 fw-semibold"><i class="fa-solid fa-file-pdf me-1.5 text-danger"></i> Tài liệu đề xuất:</p>
+                    <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-sm btn-outline-primary w-100 d-inline-flex align-items-center justify-content-center gap-1.5" style="border-radius: 10px; font-weight: 600; font-size: 0.78rem;" target="_blank">
+                        <i class="fa-solid fa-cloud-arrow-down"></i>Tải bản thảo sơ bộ
                     </a>
                 </div>
                 <?php endif; ?>
