@@ -200,7 +200,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <?php endif; ?>
 
         <?php 
-        // Chỉ hiển thị danh sách chapter cho tác giả/trợ lý khi truyện đan        <!-- Chapter Management -->
+        // Chỉ hiển thị danh sách chapter cho tác giả/trợ lý khi truyện đang chờ duyệt. Hội đồng/BTV chỉ thấy khi truyện đã duyệt sang ongoing
+        $showChapters = ($series['status'] !== 'planning' || $_SESSION['role_name'] === 'mangaka' || $_SESSION['role_name'] === 'assistant');
+        if ($showChapters): 
+        ?>
+        <!-- Chapter Management -->
         <div class="card detail-card">
             <div class="card-header bg-white py-3 border-bottom border-light d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h5 class="mb-0 fw-extrabold text-slate-800" style="font-size: 1rem;"><i class="fa-solid fa-list-ol me-2 text-primary"></i>Danh sách Chapter</h5>
