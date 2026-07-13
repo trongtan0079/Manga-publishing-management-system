@@ -84,12 +84,16 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
             </div>
             <div class="card-body p-4 bg-light text-center" style="min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <?php if ($isImage): ?>
-                    <div class="w-100 bg-white p-3 rounded border shadow-sm" style="max-height: 700px; overflow: auto; display: flex; justify-content: center; align-items: center;">
-                        <img src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" 
-                             onerror="this.onerror=null; this.src='uploads/submissions/<?= htmlspecialchars(basename($submission['file_url'])) ?>';"
-                             alt="Bản thảo" 
-                             class="img-fluid rounded shadow-xs" 
-                             style="max-height: 650px; width: auto; object-fit: contain; display: block;">
+                    <div class="w-100 bg-white p-3 rounded border shadow-sm d-flex flex-column align-items-center justify-content-center">
+                        <div id="subAnnoWrapper" class="position-relative d-inline-block text-start shadow-sm" style="border: 1px solid #cbd5e1; user-select: none; max-width: 100%;">
+                            <img id="subAnnoImage" src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" 
+                                 onerror="this.onerror=null; this.src='uploads/submissions/<?= htmlspecialchars(basename($submission['file_url'])) ?>';"
+                                 alt="Bản thảo" 
+                                 class="img-fluid rounded" 
+                                 style="max-height: 650px; width: auto; object-fit: contain; display: block;">
+                            <!-- Overlay vẽ ghi chú lỗi -->
+                            <div id="subAnnoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: default;"></div>
+                        </div>
                     </div>
                 <?php elseif ($ext === 'pdf'): ?>
                     <div class="text-center py-5 bg-white rounded border shadow-sm w-100">
@@ -124,6 +128,55 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                 </div>
             </div>
         </div>
+
+        <!-- Card Ghi chú lỗi trực quan trên bản vẽ -->
+        <?php if ($isImage && !empty($submission['task_id'])): ?>
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+                <h5 class="card-title mb-0"><i class="fas fa-draw-polygon me-2 text-danger"></i>Ghi chú lỗi trực quan trên bản vẽ</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row">
+                    <div class="col-md-7 mb-3 mb-md-0">
+                        <p class="text-muted text-xs mb-0">
+                            <?php if ($role === 'mangaka' && $submission['status'] === 'pending'): ?>
+                                <i class="fas fa-info-circle me-1 text-primary"></i><strong>Hướng dẫn:</strong> Nhấn giữ và kéo chuột vẽ khung đỏ trên hình ảnh xem trước bên trên, sau đó nhập nội dung ghi chú ở form bên phải.
+                            <?php else: ?>
+                                <i class="fas fa-info-circle me-1 text-primary"></i>Rê chuột vào các ô khoanh đỏ trên ảnh bản thảo hoặc xem danh sách bên dưới để xem nhận xét của Tác giả.
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                    <div class="col-md-5">
+                        <?php if ($role === 'mangaka' && $submission['status'] === 'pending'): ?>
+                            <div id="sub-no-selection-warning" class="alert alert-warning py-2 px-3 mb-0" style="font-size: 0.8rem; border-radius: 8px;">
+                                <i class="fas fa-mouse-pointer me-1"></i>Vui lòng vẽ một khung lỗi trên ảnh bên trên để nhập ghi chú.
+                            </div>
+                            <form id="subAnnoForm" style="display: none;" class="mb-0">
+                                <input type="hidden" id="sub-anno-x">
+                                <input type="hidden" id="sub-anno-y">
+                                <input type="hidden" id="sub-anno-w">
+                                <input type="hidden" id="sub-anno-h">
+                                
+                                <div class="mb-2">
+                                    <textarea class="form-control form-control-sm" id="sub-anno-comment" rows="2" required placeholder="Nhập ghi chú sửa đổi cho vùng vẽ này..." style="border-radius: 8px; font-size: 0.825rem;"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-xs btn-danger fw-bold py-1.5 w-100" style="border-radius: 6px; font-size: 11px;">
+                                    <i class="fas fa-save me-1"></i>Lưu ghi chú vùng vẽ
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div class="border-top pt-3 mt-3">
+                    <h6 class="fw-bold text-dark mb-2.5 text-sm"><i class="fas fa-list me-1.5 text-muted"></i>Danh sách ghi chú sửa đổi:</h6>
+                    <div id="sub-anno-list" class="list-group list-group-flush border rounded-3 bg-white overflow-hidden">
+                        <!-- Sẽ load bằng JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Card Ghi chú kèm theo -->
         <div class="card shadow-sm border-0 rounded-3 mb-4">
@@ -776,7 +829,237 @@ document.addEventListener("DOMContentLoaded", function() {
                 alert('Lỗi: ' + res.error);
             }
         });
+});
+</script>
+<?php endif; ?>
+
+<?php if ($isImage && !empty($submission['task_id'])): ?>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const STD_WIDTH = 800;
+    const STD_HEIGHT = 1000;
+    
+    const isMangakaReview = <?= json_encode($role === 'mangaka' && $submission['status'] === 'pending') ?>;
+    const subOverlayContainer = document.getElementById('subAnnoOverlayContainer');
+    const subAnnoForm = document.getElementById('subAnnoForm');
+    const subNoSelectionWarning = document.getElementById('sub-no-selection-warning');
+    const subAnnoList = document.getElementById('sub-anno-list');
+    const submissionId = <?= json_encode($submission['submission_id']) ?>;
+
+    if (isMangakaReview && subOverlayContainer) {
+        subOverlayContainer.style.cursor = 'crosshair';
+        
+        let subIsDrawing = false;
+        let subStartX = 0, subStartY = 0;
+        let subSelectedBox = null;
+        
+        subOverlayContainer.addEventListener('mousedown', function(e) {
+            subIsDrawing = true;
+            const rect = subOverlayContainer.getBoundingClientRect();
+            subStartX = e.clientX - rect.left;
+            subStartY = e.clientY - rect.top;
+            
+            if (subSelectedBox && subSelectedBox.parentNode) {
+                subSelectedBox.parentNode.removeChild(subSelectedBox);
+            }
+            
+            subSelectedBox = document.createElement('div');
+            subSelectedBox.style.position = 'absolute';
+            subSelectedBox.style.border = '2px dashed #dc3545';
+            subSelectedBox.style.backgroundColor = 'rgba(220, 53, 69, 0.15)';
+            subSelectedBox.style.pointerEvents = 'none';
+            subSelectedBox.style.left = subStartX + 'px';
+            subSelectedBox.style.top = subStartY + 'px';
+            
+            subOverlayContainer.appendChild(subSelectedBox);
+        });
+
+        subOverlayContainer.addEventListener('mousemove', function(e) {
+            if (!subIsDrawing) return;
+            const rect = subOverlayContainer.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+            
+            const width = currentX - subStartX;
+            const height = currentY - subStartY;
+            
+            subSelectedBox.style.width = Math.abs(width) + 'px';
+            subSelectedBox.style.height = Math.abs(height) + 'px';
+            subSelectedBox.style.left = (width < 0 ? currentX : subStartX) + 'px';
+            subSelectedBox.style.top = (height < 0 ? currentY : subStartY) + 'px';
+        });
+
+        subOverlayContainer.addEventListener('mouseup', function(e) {
+            if (!subIsDrawing) return;
+            subIsDrawing = false;
+            
+            const rect = subOverlayContainer.getBoundingClientRect();
+            const boxWidth = parseFloat(subSelectedBox.style.width) || 0;
+            const boxHeight = parseFloat(subSelectedBox.style.height) || 0;
+            const boxLeft = parseFloat(subSelectedBox.style.left) || 0;
+            const boxTop = parseFloat(subSelectedBox.style.top) || 0;
+            
+            if (boxWidth < 10 || boxHeight < 10) {
+                if (subSelectedBox && subSelectedBox.parentNode) {
+                    subSelectedBox.parentNode.removeChild(subSelectedBox);
+                }
+                subSelectedBox = null;
+                resetSubDrawingState();
+                return;
+            }
+            
+            const scaleX = STD_WIDTH / rect.width;
+            const scaleY = STD_HEIGHT / rect.height;
+            
+            document.getElementById('sub-anno-x').value = Math.round(boxLeft * scaleX);
+            document.getElementById('sub-anno-y').value = Math.round(boxTop * scaleY);
+            document.getElementById('sub-anno-w').value = Math.round(boxWidth * scaleX);
+            document.getElementById('sub-anno-h').value = Math.round(boxHeight * scaleY);
+            
+            if (subNoSelectionWarning) subNoSelectionWarning.style.display = 'none';
+            if (subAnnoForm) subAnnoForm.style.display = 'block';
+            document.getElementById('sub-anno-comment').focus();
+        });
+    }
+
+    function resetSubDrawingState() {
+        const boxes = document.querySelectorAll('#subAnnoOverlayContainer div');
+        boxes.forEach(b => {
+            if (b.style.borderStyle === 'dashed') {
+                b.remove();
+            }
+        });
+        if (subNoSelectionWarning) subNoSelectionWarning.style.display = 'block';
+        if (subAnnoForm) subAnnoForm.style.display = 'none';
+    }
+
+    if (subAnnoForm) {
+        subAnnoForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const commentInput = document.getElementById('sub-anno-comment');
+            
+            const data = {
+                submission_id: submissionId,
+                x: document.getElementById('sub-anno-x').value,
+                y: document.getElementById('sub-anno-y').value,
+                width: document.getElementById('sub-anno-w').value,
+                height: document.getElementById('sub-anno-h').value,
+                comments: commentInput.value
+            };
+
+            fetch('<?= BASE_PATH ?>/index.php?controller=review&action=save_submission_annotation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(res => {
+                if (res.success) {
+                    commentInput.value = '';
+                    resetSubDrawingState();
+                    loadSubAnnotations();
+                } else {
+                    alert('Lỗi: ' + res.error);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Lỗi kết nối máy chủ');
+            });
+        });
+    }
+
+    function loadSubAnnotations() {
+        if (!subOverlayContainer) return;
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=get_submission_annotations&submission_id=' + submissionId)
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                renderSubOverlayAnnotations(res.annotations);
+                renderSubListAnnotations(res.annotations);
+            }
+        });
+    }
+
+    function renderSubOverlayAnnotations(annotations) {
+        document.querySelectorAll('.sub-annotation-box').forEach(el => el.remove());
+        
+        const rect = subOverlayContainer.getBoundingClientRect();
+        const scaleX = rect.width / STD_WIDTH;
+        const scaleY = rect.height / STD_HEIGHT;
+        
+        annotations.forEach(ann => {
+            const el = document.createElement('div');
+            el.className = 'sub-annotation-box';
+            el.style.position = 'absolute';
+            el.style.border = '2px dashed #dc3545';
+            el.style.backgroundColor = 'rgba(220, 53, 69, 0.08)';
+            el.style.left = (ann.x * scaleX) + 'px';
+            el.style.top = (ann.y * scaleY) + 'px';
+            el.style.width = (ann.width * scaleX) + 'px';
+            el.style.height = (ann.height * scaleY) + 'px';
+            el.title = ann.comments;
+            el.style.pointerEvents = 'auto';
+            el.style.cursor = 'help';
+            
+            subOverlayContainer.appendChild(el);
+        });
+    }
+
+    function renderSubListAnnotations(annotations) {
+        if (!subAnnoList) return;
+        subAnnoList.innerHTML = '';
+        if (annotations.length === 0) {
+            subAnnoList.innerHTML = '<p class="text-muted text-xs italic text-center py-3">Chưa có ghi chú sửa đổi nào trên bản vẽ.</p>';
+            return;
+        }
+
+        annotations.forEach(ann => {
+            const item = document.createElement('div');
+            item.className = 'list-group-item px-3 py-2 border-bottom';
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div style="flex-grow:1; min-width:0; padding-right:10px;">
+                        <span class="fw-semibold text-danger text-xs d-block"><i class="fas fa-exclamation-triangle me-1"></i>Lỗi tại (${ann.x}, ${ann.y})</span>
+                        <p class="mb-1 text-dark small" style="white-space: pre-wrap; font-size:0.825rem;">${ann.comments}</p>
+                        <small class="text-muted" style="font-size:0.75rem;"><i class="fas fa-user-edit me-1"></i>Tác giả: ${ann.user_name}</small>
+                    </div>
+                    ${isMangakaReview ? `
+                    <button class="btn btn-xs btn-link text-danger p-0" onclick="deleteSubAnnotation(${ann.annotation_id})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            subAnnoList.appendChild(item);
+        });
+    }
+
+    window.deleteSubAnnotation = function(id) {
+        if (!confirm('Bạn có chắc chắn muốn xóa ghi chú lỗi này?')) return;
+        
+        fetch('<?= BASE_PATH ?>/index.php?controller=review&action=delete_submission_annotation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ annotation_id: id })
+        })
+        .then(response => response.json())
+        .then(res => {
+            if (res.success) {
+                loadSubAnnotations();
+            } else {
+                alert('Lỗi: ' + res.error);
+            }
+        });
     };
+
+    // Load annotations initially and on resize
+    loadSubAnnotations();
+    window.addEventListener('resize', loadSubAnnotations);
 });
 </script>
 <?php endif; ?>

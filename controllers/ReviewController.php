@@ -4,6 +4,7 @@
 require_once __DIR__ . '/../models/Review.php';
 require_once __DIR__ . '/../models/Submission.php';
 require_once __DIR__ . '/../models/Notification.php';
+require_once __DIR__ . '/../models/SubmissionAnnotation.php';
 
 
 /**
@@ -733,6 +734,203 @@ class ReviewController extends BaseController
         $editorAnnotationModel = new EditorAnnotation();
         $annotations = $editorAnnotationModel->findByPageId($pageId);
         
+        echo json_encode(['success' => true, 'annotations' => $annotations]);
+        exit;
+    }
+
+    /**
+     * AJAX: Lưu ghi chú lỗi trực quan của Tác giả (Mangaka) trên bản nộp của Trợ lý
+     */
+    public function save_submission_annotation() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Phương thức không được hỗ trợ']);
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role !== 'mangaka' && $role !== 'admin') {
+            echo json_encode(['success' => false, 'error' => 'Bạn không có quyền thực hiện chức năng này']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $submissionId = isset($input['submission_id']) ? intval($input['submission_id']) : 0;
+        $x = isset($input['x']) ? intval($input['x']) : 0;
+        $y = isset($input['y']) ? intval($input['y']) : 0;
+        $width = isset($input['width']) ? intval($input['width']) : 0;
+        $height = isset($input['height']) ? intval($input['height']) : 0;
+        $comments = isset($input['comments']) ? trim($input['comments']) : '';
+
+        if ($x < 0 || $y < 0 || $width <= 0 || $height <= 0 || ($x + $width) > 800 || ($y + $height) > 1000) {
+            echo json_encode(['success' => false, 'error' => 'Tọa độ vùng đánh dấu không hợp lệ']);
+            exit;
+        }
+
+        if ($submissionId <= 0 || empty($comments)) {
+            echo json_encode(['success' => false, 'error' => 'Thông tin không hợp lệ hoặc thiếu nội dung']);
+            exit;
+        }
+
+        // Kiểm tra xem submission có tồn tại và thuộc nhiệm vụ do Mangaka này giao hay không
+        $submission = $this->submissionModel->findWithMetadataById($submissionId);
+        if (!$submission) {
+            echo json_encode(['success' => false, 'error' => 'Bản thảo nộp không tồn tại']);
+            exit;
+        }
+
+        if ($submission['status'] !== 'pending') {
+            echo json_encode(['success' => false, 'error' => 'Chỉ có thể tạo ghi chú khi bản thảo đang chờ duyệt']);
+            exit;
+        }
+
+        if ($role === 'mangaka') {
+            if (empty($submission['task_id']) || $submission['mangaka_id'] != $_SESSION['user_id']) {
+                echo json_encode(['success' => false, 'error' => 'Bạn không phải tác giả giao nhiệm vụ này. Không thể tạo ghi chú']);
+                exit;
+            }
+        }
+
+        require_once __DIR__ . '/../models/SubmissionAnnotation.php';
+        $subAnnotationModel = new SubmissionAnnotation();
+
+        $data = [
+            'submission_id' => $submissionId,
+            'user_id' => $_SESSION['user_id'],
+            'x' => $x,
+            'y' => $y,
+            'width' => $width,
+            'height' => $height,
+            'comments' => $comments
+        ];
+
+        $insertedId = $subAnnotationModel->insert($data);
+        if ($insertedId) {
+            echo json_encode([
+                'success' => true,
+                'annotation_id' => $insertedId,
+                'user_name' => $_SESSION['full_name']
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Không thể lưu ghi chú vào CSDL']);
+        }
+        exit;
+    }
+
+    /**
+     * AJAX: Xóa ghi chú lỗi của Tác giả trên bản thảo nộp
+     */
+    public function delete_submission_annotation() {
+        header('Content-Type: application/json');
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['success' => false, 'error' => 'Phương thức không được hỗ trợ']);
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        if ($role !== 'mangaka' && $role !== 'admin') {
+            echo json_encode(['success' => false, 'error' => 'Bạn không có quyền thực hiện chức năng này']);
+            exit;
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true);
+        $annotationId = isset($input['annotation_id']) ? intval($input['annotation_id']) : 0;
+
+        if ($annotationId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'ID không hợp lệ']);
+            exit;
+        }
+
+        require_once __DIR__ . '/../models/SubmissionAnnotation.php';
+        $subAnnotationModel = new SubmissionAnnotation();
+
+        $annotation = $subAnnotationModel->findById($annotationId);
+        if (!$annotation) {
+            echo json_encode(['success' => false, 'error' => 'Không tìm thấy ghi chú']);
+            exit;
+        }
+
+        if ($annotation['user_id'] != $_SESSION['user_id'] && $role !== 'admin') {
+            echo json_encode(['success' => false, 'error' => 'Bạn không thể xóa ghi chú của người khác']);
+            exit;
+        }
+
+        // Kiểm tra xem submission có ở trạng thái pending không
+        $submission = $this->submissionModel->findById($annotation['submission_id']);
+        if (!$submission || $submission['status'] !== 'pending') {
+            echo json_encode(['success' => false, 'error' => 'Chỉ có thể xóa ghi chú khi bản thảo đang chờ duyệt']);
+            exit;
+        }
+
+        $result = $subAnnotationModel->delete($annotationId);
+        if ($result) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Không thể xóa ghi chú từ CSDL']);
+        }
+        exit;
+    }
+
+    /**
+     * AJAX: Lấy danh sách ghi chú lỗi trên bản nộp của Trợ lý
+     */
+    public function get_submission_annotations() {
+        header('Content-Type: application/json');
+        $submissionId = isset($_GET['submission_id']) ? intval($_GET['submission_id']) : 0;
+
+        if ($submissionId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'ID không hợp lệ']);
+            exit;
+        }
+
+        // Kiểm tra quyền xem: Phải liên quan đến task của submission
+        $submission = $this->submissionModel->findWithMetadataById($submissionId);
+        if (!$submission) {
+            echo json_encode(['success' => false, 'error' => 'Bản thảo nộp không tồn tại']);
+            exit;
+        }
+
+        $role = $_SESSION['role_name'] ?? '';
+        $userId = $_SESSION['user_id'];
+        $hasAccess = false;
+
+        if ($role === 'admin' || $role === 'board') {
+            $hasAccess = true;
+        } elseif ($role === 'editor') {
+            // Editor xem được nếu thuộc series họ quản lý
+            require_once __DIR__ . '/../models/Chapter.php';
+            require_once __DIR__ . '/../models/Series.php';
+            $chapM = new \Chapter();
+            $serM = new \Series();
+            $ch = $chapM->findById($submission['chapter_id']);
+            if ($ch) {
+                $se = $serM->findById($ch['series_id']);
+                if ($se && $se['editor_id'] == $userId) {
+                    $hasAccess = true;
+                }
+            }
+        } elseif ($role === 'mangaka') {
+            // Mangaka giao việc hoặc mangaka gửi
+            if ($submission['mangaka_id'] == $userId || $submission['user_id'] == $userId) {
+                $hasAccess = true;
+            }
+        } elseif ($role === 'assistant') {
+            // Assistant nộp bài
+            if ($submission['user_id'] == $userId) {
+                $hasAccess = true;
+            }
+        }
+
+        if (!$hasAccess) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'error' => 'Bạn không có quyền truy cập thông tin bản thảo này']);
+            exit;
+        }
+
+        require_once __DIR__ . '/../models/SubmissionAnnotation.php';
+        $subAnnotationModel = new SubmissionAnnotation();
+        $annotations = $subAnnotationModel->findBySubmissionId($submissionId);
+
         echo json_encode(['success' => true, 'annotations' => $annotations]);
         exit;
     }
