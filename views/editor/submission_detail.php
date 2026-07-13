@@ -65,97 +65,148 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
 </div>
 
 <div class="row">
-    <!-- Cột bên trái: Hiển thị Preview File / File info -->
-    <div class="col-lg-7 mb-4">
-        <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+    <!-- Cột bên trái: Hiển thị Preview File / File info, Ghi chú, Phản hồi -->
+    <div class="col-lg-8 mb-4">
+        <!-- Card Xem trước sản phẩm -->
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light d-flex justify-content-between align-items-center">
                 <h5 class="card-title mb-0"><i class="fas fa-file-image me-2 text-primary"></i>Xem trước sản phẩm</h5>
-            </div>
-            <div class="card-body d-flex flex-column align-items-center p-4 bg-light" style="min-height: 400px;">
                 <?php 
                 $fileUrl = (strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/');
                 $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
                 $isImage = in_array($ext, ['png', 'jpg', 'jpeg']);
                 ?>
-
+                <?php if ($isImage || $ext === 'pdf'): ?>
+                    <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" target="_blank" class="btn btn-xs btn-outline-primary py-1 px-2.5" style="border-radius: 6px; font-size: 11px;">
+                        <i class="fas fa-external-link-alt me-1"></i>Mở rộng/Tab mới
+                    </a>
+                <?php endif; ?>
+            </div>
+            <div class="card-body p-4 bg-light text-center" style="min-height: 400px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
                 <?php if ($isImage): ?>
-                    <div class="img-preview-container text-center bg-white p-2 rounded border shadow-sm w-100" style="max-height: 500px; overflow: auto;">
-                        <img src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" alt="Bản thảo" class="img-fluid rounded" style="max-height: 480px; object-fit: contain;">
+                    <div class="w-100 bg-white p-3 rounded border shadow-sm" style="max-height: 700px; overflow: auto; display: flex; justify-content: center; align-items: center;">
+                        <img src="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" 
+                             onerror="this.onerror=null; this.src='uploads/submissions/<?= htmlspecialchars(basename($submission['file_url'])) ?>';"
+                             alt="Bản thảo" 
+                             class="img-fluid rounded shadow-xs" 
+                             style="max-height: 650px; width: auto; object-fit: contain; display: block;">
                     </div>
                 <?php elseif ($ext === 'pdf'): ?>
-                    <div class="text-center py-5">
+                    <div class="text-center py-5 bg-white rounded border shadow-sm w-100">
                         <i class="fas fa-file-pdf text-danger fa-5x mb-3 animate__animated animate__pulse animate__infinite"></i>
-                        <h5>Tài liệu PDF hoàn chỉnh</h5>
-                        <p class="text-muted">Bạn có thể tải về hoặc xem trực tiếp bằng trình đọc PDF của trình duyệt.</p>
-                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" target="_blank" class="btn btn-danger px-4 mt-2">
+                        <h5 class="fw-bold">Tài liệu PDF hoàn chỉnh</h5>
+                        <p class="text-muted text-sm px-3">Bạn có thể tải về hoặc xem trực tiếp bằng trình đọc PDF của trình duyệt.</p>
+                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" target="_blank" class="btn btn-danger px-4 mt-2 shadow-sm fw-bold btn-sm">
                             <i class="fas fa-external-link-alt me-2"></i>Mở trong Tab Mới
                         </a>
                     </div>
                 <?php else: ?>
-                    <div class="text-center py-5">
+                    <div class="text-center py-5 bg-white rounded border shadow-sm w-100">
                         <i class="fas fa-file-archive text-warning fa-5x mb-3"></i>
-                        <h5>Tệp tin nén (ZIP)</h5>
-                        <p class="text-muted">Tệp tin này chứa nhiều trang vẽ hoặc tài liệu được nén lại.</p>
-                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" download class="btn btn-warning text-dark px-4 mt-2 fw-bold">
+                        <h5 class="fw-bold">Tệp tin nén (ZIP)</h5>
+                        <p class="text-muted text-sm px-3">Tệp tin này chứa nhiều trang vẽ hoặc tài liệu được nén lại.</p>
+                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" download class="btn btn-warning text-dark px-4 mt-2 fw-bold btn-sm shadow-sm">
                             <i class="fas fa-download me-2"></i>Tải Tệp ZIP
                         </a>
                     </div>
                 <?php endif; ?>
 
-                <div class="mt-4 pt-3 border-top w-100 d-flex justify-content-between align-items-center">
+                <div class="mt-4 pt-3 border-top w-100 d-flex justify-content-between align-items-center text-start">
                     <div>
-                        <small class="text-muted d-block">Tên file vật lý:</small>
+                        <small class="text-muted d-block text-xs">Tên file vật lý:</small>
                         <strong class="text-dark text-xs"><?= htmlspecialchars(basename($submission['file_url'] ?? '')) ?></strong>
                     </div>
                     <div>
-                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" download class="btn btn-outline-dark btn-sm">
-                            <i class="fas fa-download me-1"></i>Tải xuống bản gốc
+                        <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" download class="btn btn-outline-dark btn-sm shadow-sm py-1.5 px-3" style="font-size: 12px; border-radius: 6px;">
+                            <i class="fas fa-download me-1.5"></i>Tải xuống bản gốc
                         </a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Cột bên phải: Metadata (thông tin người gửi, trạng thái, ghi chú) / Hành động -->
-    <div class="col-lg-5 mb-4">
+        <!-- Card Ghi chú kèm theo -->
         <div class="card shadow-sm border-0 rounded-3 mb-4">
             <div class="card-header bg-white text-dark py-3 border-bottom border-light">
-                <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin chi tiết</h5>
+                <h5 class="card-title mb-0"><i class="fas fa-sticky-note me-2 text-primary"></i>Ghi chú kèm theo</h5>
             </div>
             <div class="card-body p-4">
-                
-                <div class="mb-3">
-                    <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Người thực hiện</small>
+                <div class="bg-light p-3 rounded text-dark text-sm border border-slate-200" style="white-space: pre-line; line-height: 1.6;">
+                    <?= !empty($submission['notes']) ? htmlspecialchars((string)($submission['notes'] ?? '')) : '<em>Không có ghi chú nào đi kèm.</em>' ?>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Phản hồi / Đánh giá -->
+        <?php if (!empty($reviews)): ?>
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+                <h5 class="card-title mb-0"><i class="fas fa-comments me-2 text-primary"></i>Phản hồi / Đánh giá</h5>
+            </div>
+            <div class="card-body p-4">
+                <?php foreach ($reviews as $review): ?>
+                    <div class="border rounded p-3 mb-3 bg-light">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold text-dark"><i class="fas fa-user-edit me-2"></i>Đánh giá từ Biên tập viên/Mangaka</span>
+                            <small class="text-muted"><i class="far fa-clock me-1"></i><?= htmlspecialchars(date('d/m/Y H:i', strtotime($review['created_at']))) ?></small>
+                        </div>
+                        
+                        <div class="mb-2">
+                            <strong class="text-muted text-xs text-uppercase">Nội dung đánh giá:</strong>
+                            <p class="mb-2 mt-1 bg-white p-2 border rounded" style="white-space: pre-line;"><?= htmlspecialchars($review['comments']) ?></p>
+                        </div>
+
+                        <?php if (!empty($review['rating'])): ?>
+                            <div class="mb-0">
+                                <strong class="text-muted text-xs text-uppercase">Chấm điểm:</strong>
+                                <span class="badge bg-primary fs-6"><?= htmlspecialchars($review['rating']) ?> / 10</span>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Cột bên phải: Metadata & Hành động -->
+    <div class="col-lg-4 mb-4">
+        <!-- Card Thông tin nộp bài -->
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+                <h5 class="card-title mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Thông tin nộp bài</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="mb-4">
+                    <small class="text-muted d-block text-uppercase text-xs fw-bold mb-2">Người thực hiện</small>
                     <div class="d-flex align-items-center">
-                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 36px; height: 36px; font-weight: bold;">
+                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2.5 shadow-sm" style="width: 38px; height: 38px; font-weight: bold; font-size: 15px;">
                             <?= strtoupper(substr($submission['sender_name'] ?? 'U', 0, 1)) ?>
                         </div>
                         <div>
-                            <span class="d-block fw-bold text-dark"><?= htmlspecialchars((string)($submission['sender_name'] ?? 'Không rõ')) ?></span>
+                            <span class="d-block fw-bold text-dark" style="font-size: 14.5px;"><?= htmlspecialchars((string)($submission['sender_name'] ?? 'Không rõ')) ?></span>
+                            <span class="text-muted text-xs d-block"><?= htmlspecialchars($role === 'assistant' ? 'Trợ lý (Assistant)' : 'Tác giả (Mangaka)') ?></span>
                         </div>
                     </div>
                 </div>
 
-                <hr class="my-3">
-
-                <div class="row">
-                    <div class="col-6 mb-3">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
                         <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Loại nộp bài</small>
                         <?php if (!empty($submission['task_id'])): ?>
-                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1">Task Drawing</span>
+                            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1.5 text-xs w-100 text-center">Nhiệm vụ vẽ</span>
                         <?php else: ?>
                             <?php if (isset($submission['chapter_status']) && ($submission['chapter_status'] === 'reviewing_final' || $submission['chapter_status'] === 'reviewing')): ?>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">Bản vẽ hoàn thiện (Manuscript)</span>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1.5 text-xs w-100 text-center">Bản hoàn thiện</span>
                             <?php elseif (isset($submission['chapter_status']) && $submission['chapter_status'] === 'reviewing_draft'): ?>
-                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">Kịch bản thô (Storyboard)</span>
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1.5 text-xs w-100 text-center">Kịch bản thô</span>
                             <?php else: ?>
-                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1">Chương truyện</span>
+                                <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1.5 text-xs w-100 text-center">Chương truyện</span>
                             <?php endif; ?>
                         <?php endif; ?>
                     </div>
-                    <div class="col-6 mb-3">
-                        <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Trạng thái hiện tại</small>
+                    <div class="col-6">
+                        <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Trạng thái</small>
                         <?php 
                         $statusClass = 'bg-secondary';
                         $statusLabel = 'Chờ duyệt';
@@ -173,102 +224,97 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                             $statusLabel = 'Chờ duyệt';
                         }
                         ?>
-                        <span class="badge <?= $statusClass ?> px-2 py-1"><?= $statusLabel ?></span>
+                        <span class="badge <?= $statusClass ?> px-2 py-1.5 text-xs w-100 text-center"><?= $statusLabel ?></span>
                     </div>
                 </div>
 
-                <div class="mb-3">
+                <div class="mb-3 pt-2 border-top">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Series tác phẩm</small>
-                    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($submission['series_id']) ?>" class="fw-bold text-primary text-decoration-none hover-underline">
-                        <i class="fas fa-book text-muted me-1"></i><?= htmlspecialchars((string)($submission['series_title'] ?? 'Không xác định')) ?>
+                    <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($submission['series_id']) ?>" class="fw-bold text-primary text-decoration-none hover-underline text-sm">
+                        <i class="fas fa-book text-muted me-1.5"></i><?= htmlspecialchars((string)($submission['series_title'] ?? 'Không xác định')) ?>
                     </a>
                 </div>
 
                 <div class="mb-3">
                     <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Chương hoặc Task cụ thể</small>
-                    <span class="text-dark">
+                    <span class="text-dark text-sm">
                         <?php if (!empty($submission['task_id'])): ?>
-                            <i class="fas fa-tasks text-muted me-1"></i><?= htmlspecialchars((string)($submission['task_title'] ?? '')) ?>
+                            <i class="fas fa-tasks text-muted me-1.5"></i><?= htmlspecialchars((string)($submission['task_title'] ?? '')) ?>
                         <?php else: ?>
                             <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= htmlspecialchars($submission['chapter_id']) ?>" class="fw-bold text-primary text-decoration-none hover-underline">
-                                <i class="fas fa-layer-group me-1"></i>Chương <?= htmlspecialchars((string)($submission['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($submission['chapter_title'] ?? 'Chưa đặt tên')) ?>
+                                <i class="fas fa-layer-group me-1.5"></i>Chương <?= htmlspecialchars((string)($submission['chapter_number'] ?? '')) ?> - <?= htmlspecialchars((string)($submission['chapter_title'] ?? 'Chưa đặt tên')) ?>
                             </a>
                         <?php endif; ?>
                     </span>
                 </div>
 
-                <?php if (!empty($submission['task_id'])): ?>
-                <div class="mb-3 bg-slate-50 p-3 rounded border border-slate-200">
-                    <small class="text-muted d-block text-uppercase text-xs fw-bold mb-2 text-primary"><i class="fas fa-clipboard-list me-1"></i>Yêu cầu công việc ban đầu</small>
-                    
-                    <div class="mb-2">
-                        <small class="text-muted d-inline-block" style="width: 80px;">Loại việc:</small>
-                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1"><?= htmlspecialchars((string)($submission['task_type'] ?? 'Không rõ')) ?></span>
+                <div class="mb-0 pt-2 border-top">
+                    <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Thời gian nộp</small>
+                    <span class="text-dark text-sm"><i class="far fa-calendar-alt text-muted me-1.5"></i><?= htmlspecialchars(date('d/m/Y H:i:s', strtotime($submission['submitted_at'] ?? 'now'))) ?></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Yêu cầu công việc ban đầu -->
+        <?php if (!empty($submission['task_id'])): ?>
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-header bg-white text-dark py-3 border-bottom border-light">
+                <h5 class="card-title mb-0"><i class="fas fa-clipboard-list me-2 text-primary"></i>Yêu cầu công việc</h5>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <small class="text-muted d-block text-xs mb-1">Loại việc:</small>
+                        <span class="badge bg-secondary-subtle text-secondary px-2.5 py-1.5 text-xs w-100 text-center"><?= htmlspecialchars((string)($submission['task_type'] ?? 'Không rõ')) ?></span>
                     </div>
-                    
-                    <div class="mb-2">
-                        <small class="text-muted d-inline-block" style="width: 80px;">Độ ưu tiên:</small>
+                    <div class="col-6">
+                        <small class="text-muted d-block text-xs mb-1">Độ ưu tiên:</small>
                         <?php 
                         $priClass = 'secondary';
                         $priLabel = 'Bình thường';
                         if ($submission['task_priority'] == 'high') { $priClass = 'danger'; $priLabel = 'Cao'; }
                         elseif ($submission['task_priority'] == 'low') { $priClass = 'info'; $priLabel = 'Thấp'; }
                         ?>
-                        <span class="badge bg-<?= $priClass ?>-subtle text-<?= $priClass ?> px-2 py-1"><?= $priLabel ?></span>
+                        <span class="badge bg-<?= $priClass ?>-subtle text-<?= $priClass ?> px-2.5 py-1.5 text-xs w-100 text-center"><?= $priLabel ?></span>
                     </div>
-                    
-                    <div class="mb-2">
-                        <small class="text-muted d-inline-block" style="width: 80px;">Hạn chót:</small>
-                        <span class="text-dark text-sm"><?= !empty($submission['task_due_date']) ? date('d/m/Y H:i', strtotime($submission['task_due_date'])) : 'Không có' ?></span>
-                    </div>
-                    
-                    <div class="mt-3 pt-2 border-top border-slate-200">
-                        <small class="text-muted d-block text-xs fw-bold mb-1">Mô tả / Yêu cầu chi tiết:</small>
-                        <div class="text-dark text-sm bg-white p-3 rounded border border-slate-100 quill-content-render" style="max-height: 250px; overflow-y: auto;">
-                            <?= !empty($submission['task_description']) ? $submission['task_description'] : '<em>Không có mô tả chi tiết.</em>' ?>
-                        </div>
-                    </div>
+                </div>
 
-                    <?php if (!empty($submission['page_image_url']) && isset($submission['region_x'])): ?>
-                    <div class="mt-3 pt-3 border-top border-slate-200">
-                        <small class="text-muted d-block text-xs fw-bold mb-2">Vị trí phân vùng trên bản nháp gốc:</small>
-                        <?php 
-                            $imageUrl = $submission['page_image_url'];
-                            $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
-                            $l = ($submission['region_x'] / 800) * 100;
-                            $t = ($submission['region_y'] / 1000) * 100;
-                            $w = ($submission['region_width'] / 800) * 100;
-                            $h = ($submission['region_height'] / 1000) * 100;
-                        ?>
-                        <div class="text-center bg-white p-2 rounded border border-slate-100 overflow-hidden">
-                            <div class="position-relative d-inline-block shadow-sm" style="max-width: 100%; border: 1px solid #ddd;">
-                                <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 350px; display: block;" alt="Page Reference">
-                                <div style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #0d6efd; background-color: rgba(13, 110, 253, 0.2); pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);"></div>
-                            </div>
+                <div class="mb-3">
+                    <small class="text-muted d-block text-xs mb-1">Hạn chót:</small>
+                    <span class="text-dark text-sm fw-bold"><i class="far fa-clock me-1.5 text-muted"></i><?= !empty($submission['task_due_date']) ? date('d/m/Y H:i', strtotime($submission['task_due_date'])) : 'Không có' ?></span>
+                </div>
+
+                <div class="mb-3 pt-2 border-top">
+                    <small class="text-muted d-block text-xs fw-bold mb-2">Mô tả / Yêu cầu chi tiết:</small>
+                    <div class="text-dark text-sm bg-white p-3 rounded border border-slate-200 quill-content-render" style="max-height: 250px; overflow-y: auto; line-height: 1.6; word-break: break-word; overflow-wrap: break-word;">
+                        <?= !empty($submission['task_description']) ? $submission['task_description'] : '<em>Không có mô tả chi tiết.</em>' ?>
+                    </div>
+                </div>
+
+                <?php if (!empty($submission['page_image_url']) && isset($submission['region_x'])): ?>
+                <div class="mb-0 pt-2 border-top">
+                    <small class="text-muted d-block text-xs fw-bold mb-2">Vị trí phân vùng trên bản nháp gốc:</small>
+                    <?php 
+                        $imageUrl = $submission['page_image_url'];
+                        $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                        $l = ($submission['region_x'] / 800) * 100;
+                        $t = ($submission['region_y'] / 1000) * 100;
+                        $w = ($submission['region_width'] / 800) * 100;
+                        $h = ($submission['region_height'] / 1000) * 100;
+                    ?>
+                    <div class="text-center bg-white p-2 rounded border border-slate-200 overflow-hidden">
+                        <div class="position-relative d-inline-block shadow-sm" style="max-width: 100%; border: 1px solid #ddd;">
+                            <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 350px; display: block;" alt="Page Reference">
+                            <div style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #0d6efd; background-color: rgba(13, 110, 253, 0.2); pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.4);"></div>
                         </div>
                     </div>
-                    <?php endif; ?>
                 </div>
                 <?php endif; ?>
-
-                <div class="mb-3">
-                    <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Ngày nộp</small>
-                    <span class="text-dark"><i class="far fa-calendar-alt text-muted me-1"></i><?= htmlspecialchars(date('d/m/Y H:i:s', strtotime($submission['submitted_at'] ?? 'now'))) ?></span>
-                </div>
-
-                <hr class="my-3">
-
-                <div class="mb-3">
-                    <small class="text-muted d-block text-uppercase text-xs fw-bold mb-1">Ghi chú kèm theo</small>
-                    <div class="bg-light p-3 rounded text-dark text-sm border border-slate-200" style="white-space: pre-line;">
-                        <?= !empty($submission['notes']) ? htmlspecialchars((string)($submission['notes'] ?? '')) : '<em>Không có ghi chú nào đi kèm.</em>' ?>
-                    </div>
-                </div>
-
             </div>
         </div>
+        <?php endif; ?>
 
-        <!-- Khung hành động (Chuyển sang review hoặc Xóa bản thảo/sản phẩm) -->
+        <!-- Card Hành động khả dụng -->
         <div class="card shadow-sm border-0 rounded-3">
             <div class="card-header bg-white text-dark py-3 border-bottom border-light">
                 <h5 class="card-title mb-0"><i class="fas fa-cogs me-2 text-primary"></i>Hành động khả dụng</h5>
@@ -298,36 +344,6 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
         </div>
     </div>
 </div>
-
-<?php if (!empty($reviews)): ?>
-<div class="card shadow-sm border-0 rounded-3 mb-4">
-    <div class="card-header bg-white text-dark py-3 border-bottom border-light">
-        <h5 class="card-title mb-0"><i class="fas fa-comments me-2 text-primary"></i>Phản hồi / Đánh giá</h5>
-    </div>
-    <div class="card-body p-4">
-        <?php foreach ($reviews as $review): ?>
-            <div class="border rounded p-3 mb-3 bg-light">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="fw-bold text-dark"><i class="fas fa-user-edit me-2"></i>Đánh giá từ Biên tập viên/Mangaka</span>
-                    <small class="text-muted"><i class="far fa-clock me-1"></i><?= htmlspecialchars(date('d/m/Y H:i', strtotime($review['created_at']))) ?></small>
-                </div>
-                
-                <div class="mb-2">
-                    <strong class="text-muted text-xs text-uppercase">Nội dung đánh giá:</strong>
-                    <p class="mb-2 mt-1 bg-white p-2 border rounded" style="white-space: pre-line;"><?= htmlspecialchars($review['comments']) ?></p>
-                </div>
-
-                <?php if (!empty($review['rating'])): ?>
-                    <div class="mb-0">
-                        <strong class="text-muted text-xs text-uppercase">Chấm điểm:</strong>
-                        <span class="badge bg-primary fs-6"><?= htmlspecialchars($review['rating']) ?> / 10</span>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endforeach; ?>
-    </div>
-</div>
-<?php endif; ?>
 
 <?php if (!empty($pages)): 
     $isDraftReview = (isset($submission['chapter_status']) && $submission['chapter_status'] === 'reviewing_draft');
