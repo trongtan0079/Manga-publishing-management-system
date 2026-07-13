@@ -89,12 +89,20 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
             return $t['assistant_id'] == $_SESSION['user_id'];
         });
         
-        // Collect assigned region IDs from those tasks
+        // Collect assigned region IDs from those tasks (single and grouped)
         foreach ($tasks as $t) {
             if (!empty($t['page_region_id'])) {
                 $assignedRegionIds[] = $t['page_region_id'];
             }
+            // Also collect IDs from grouped tasks
+            if (!empty($t['grouped_region_ids'])) {
+                $gids = array_filter(array_map('intval', explode(',', $t['grouped_region_ids'])));
+                foreach ($gids as $gid) {
+                    $assignedRegionIds[] = $gid;
+                }
+            }
         }
+        $assignedRegionIds = array_unique($assignedRegionIds);
     }
     
     // Filter regions list to only include those assigned
@@ -448,14 +456,21 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                     </p>
                                     
                                     <!-- Hiển thị công việc đã giao cho phân vùng này -->
-                                    <?php 
+                                    <?php
+                                    // Khớp cả task đơn lẻ và task nhóm có chứa phân vùng này
                                     $regionTasks = array_filter($tasks, function($t) use ($region) {
-                                        return !empty($t['page_region_id']) && $t['page_region_id'] == $region['region_id'];
+                                        if (!empty($t['page_region_id']) && $t['page_region_id'] == $region['region_id']) return true;
+                                        if (!empty($t['grouped_region_ids'])) {
+                                            $gids = array_map('trim', explode(',', $t['grouped_region_ids']));
+                                            if (in_array((string)$region['region_id'], $gids)) return true;
+                                        }
+                                        return false;
                                     });
-                                    if (!empty($regionTasks)): 
+                                    $hasRegionTask = !empty($regionTasks);
+                                    if ($hasRegionTask):
                                     ?>
                                         <div class="mt-2 mb-2 p-2 rounded border" style="font-size: 0.78rem; background-color: #f8fafc; border-color: #e2e8f0 !important;">
-                                            <?php foreach ($regionTasks as $rt): 
+                                            <?php foreach ($regionTasks as $rt):
                                                 $rtColor = 'secondary';
                                                 $rtLabel = $rt['status'];
                                                 if ($rt['status'] == 'completed') { $rtColor = 'success'; $rtLabel = 'Hoàn thành'; }
@@ -463,25 +478,30 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                                 elseif ($rt['status'] == 'rejected') { $rtColor = 'danger'; $rtLabel = 'Yêu cầu sửa'; }
                                                 elseif ($rt['status'] == 'in_progress') { $rtColor = 'primary'; $rtLabel = 'Đang làm'; }
                                                 else { $rtColor = 'warning text-dark'; $rtLabel = 'Chờ xử lý'; }
+                                                $isGroupTask = !empty($rt['grouped_region_ids']);
                                             ?>
                                                  <div class="d-flex align-items-center justify-content-between mb-1">
-                                                     <span class="fw-semibold text-slate-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;" title="<?= htmlspecialchars($rt['title']) ?>">
-                                                         <i class="fas fa-tasks me-1 text-indigo-500"></i><?= htmlspecialchars($rt['title']) ?>
+                                                     <span class="fw-semibold text-slate-800" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;" title="<?= htmlspecialchars($rt['title']) ?>">
+                                                         <i class="fas <?= $isGroupTask ? 'fa-layer-group' : 'fa-tasks' ?> me-1 text-indigo-500"></i><?= htmlspecialchars($rt['title']) ?>
                                                      </span>
-                                                     <div>
+                                                     <div class="d-flex align-items-center gap-1">
                                                          <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant' && $rt['status'] !== 'completed'): ?>
-                                                             <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&task_id=<?= $rt['task_id'] ?>" class="text-success text-decoration-none me-2 fw-bold" onclick="event.stopPropagation();" style="font-size: 10px;">
-                                                                 Nộp bài
-                                                             </a>
+                                                             <a href="<?= BASE_PATH ?>/index.php?controller=submission&action=create&task_id=<?= $rt['task_id'] ?>" class="text-success text-decoration-none fw-bold" onclick="event.stopPropagation();" style="font-size: 10px;">Nộp bài</a>
+                                                         <?php endif; ?>
+                                                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+                                                             <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $rt['task_id'] ?>" class="text-warning text-decoration-none fw-bold" onclick="event.stopPropagation();" style="font-size: 10px;" title="Chỉnh sửa công việc">Sửa</a>
                                                          <?php endif; ?>
                                                          <?php if (!empty($rt['description'])): ?>
-                                                             <button class="btn btn-link btn-xs p-0 text-decoration-none text-primary me-2" type="button" data-bs-toggle="collapse" data-bs-target="#region-task-desc-<?= $rt['task_id'] ?>" onclick="event.stopPropagation();" aria-expanded="false" aria-controls="region-task-desc-<?= $rt['task_id'] ?>" title="Xem yêu cầu" style="font-size: 10px; font-weight: 500; box-shadow: none;">
-                                                                 Chi tiết
-                                                             </button>
+                                                             <button class="btn btn-link btn-xs p-0 text-decoration-none text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#region-task-desc-<?= $rt['task_id'] ?>" onclick="event.stopPropagation();" aria-expanded="false" aria-controls="region-task-desc-<?= $rt['task_id'] ?>" title="Xem yêu cầu" style="font-size: 10px; font-weight: 500; box-shadow: none;">Chi tiết</button>
                                                          <?php endif; ?>
                                                          <span class="badge bg-<?= $rtColor ?> rounded-pill py-0.5 px-1.5" style="font-size: 8px;"><?= $rtLabel ?></span>
                                                      </div>
                                                  </div>
+                                                 <?php if ($isGroupTask): ?>
+                                                     <div class="text-slate-400 mb-1" style="font-size: 0.68rem; padding-left: 14px;">
+                                                         <i class="fas fa-layer-group me-1"></i>Nhóm vùng: #<?= implode(', #', array_filter(array_map('trim', explode(',', $rt['grouped_region_ids'])))) ?>
+                                                     </div>
+                                                 <?php endif; ?>
                                                  <?php if (!empty($rt['description'])): ?>
                                                      <div class="collapse mt-1 mb-2" id="region-task-desc-<?= $rt['task_id'] ?>" onclick="event.stopPropagation();">
                                                          <div class="card card-body bg-light p-2 border-light text-slate-600 text-start" style="font-size: 0.72rem; line-height: 1.4; border-radius: 6px; max-height: 120px; overflow-y: auto;">
@@ -501,9 +521,19 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                         <span class="badge bg-light text-dark border">Vẽ tay</span>
                                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                                         <div class="btn-group" onclick="event.stopPropagation();">
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
-                                                <i class="fas fa-plus me-1"></i>Giao việc
-                                            </a>
+                                            <?php if ($hasRegionTask): ?>
+                                                <?php $firstTask = reset($regionTasks); ?>
+                                                <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $firstTask['task_id'] ?>" class="btn btn-xs btn-outline-warning py-0 px-2" style="font-size: 11px;" title="Chỉnh sửa công việc đã giao">
+                                                    <i class="fas fa-edit me-1"></i>Sửa việc
+                                                </a>
+                                                <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;" title="Thêm một công việc khác cho phân vùng này">
+                                                    <i class="fas fa-plus"></i>
+                                                </a>
+                                            <?php else: ?>
+                                                <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
+                                                    <i class="fas fa-plus me-1"></i>Giao việc
+                                                </a>
+                                            <?php endif; ?>
                                             <form action="<?= BASE_PATH ?>/index.php?controller=pageregion&action=delete&id=<?= $region['region_id'] ?>&page_id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa phân vùng này?');">
                                                 <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
                                                 <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2" style="font-size: 11px; margin-left: 2px;">
@@ -647,6 +677,7 @@ if (!empty($tasks)) {
         $jsTasks[] = [
             'task_id' => $t['task_id'],
             'page_region_id' => $t['page_region_id'],
+            'grouped_region_ids' => $t['grouped_region_ids'] ?? null,
             'title' => $t['title'],
             'description' => renderMarkdown($t['description']),
             'task_type' => $t['task_type'],
@@ -710,7 +741,15 @@ function updateSelectedTaskBox(regionId) {
         activeOverlay.classList.add('selected-overlay');
     }
 
-    const matchedTasks = pageTasksData.filter(t => t.page_region_id == regionId);
+    // Match both single-region tasks and group tasks that contain this region
+    const matchedTasks = pageTasksData.filter(t => {
+        if (t.page_region_id == regionId) return true;
+        if (t.grouped_region_ids) {
+            const gids = t.grouped_region_ids.split(',').map(s => s.trim());
+            if (gids.includes(String(regionId))) return true;
+        }
+        return false;
+    });
     const infoBox = document.getElementById('selectedTaskDetailsBox');
     if (matchedTasks.length > 0) {
         const task = matchedTasks[0];
@@ -853,31 +892,43 @@ function highlightCanvasOverlay(regionId) {
     }
 }
 
-function highlightTableRecord(regionId) {
-    updateSelectedTaskBox(regionId);
+function highlightTableRecord(regionIdOrList) {
+    // Support both single regionId (number) and comma-separated string (group)
+    const ids = String(regionIdOrList).split(',').map(s => s.trim()).filter(Boolean);
+    if (ids.length === 0) return;
 
-    const listItem = document.getElementById('list-region-' + regionId);
-    if (listItem) {
-        listItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        
-        // Tự động mở rộng các collapse mô tả bên trong
-        const collapses = listItem.querySelectorAll('.collapse');
-        collapses.forEach(c => {
-            const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
-            bsCollapse.show();
-        });
-        
-        // Tạo hiệu ứng nhấp nháy
-        let count = 0;
-        const interval = setInterval(() => {
-            listItem.style.opacity = listItem.style.opacity === '0.5' ? '1' : '0.5';
-            count++;
-            if (count > 5) {
-                clearInterval(interval);
-                listItem.style.opacity = '1';
-            }
-        }, 150);
-    }
+    // Use the first ID for task box selection
+    updateSelectedTaskBox(ids[0]);
+
+    ids.forEach(regionId => {
+        const listItem = document.getElementById('list-region-' + regionId);
+        if (listItem) {
+            listItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            // Tự động mở rộng các collapse mô tả bên trong
+            const collapses = listItem.querySelectorAll('.collapse');
+            collapses.forEach(c => {
+                const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
+                bsCollapse.show();
+            });
+
+            // Tạo hiệu ứng nhấp nháy
+            let count = 0;
+            const interval = setInterval(() => {
+                listItem.style.opacity = listItem.style.opacity === '0.5' ? '1' : '0.5';
+                count++;
+                if (count > 5) {
+                    clearInterval(interval);
+                    listItem.style.opacity = '1';
+                }
+            }, 150);
+        }
+    });
+}
+
+function hoverGroupedOverlays(idsStr, isHover) {
+    const ids = String(idsStr).split(',').map(s => s.trim()).filter(Boolean);
+    ids.forEach(id => hoverOverlay(id, isHover));
 }
 
 // Xử lý vẽ phân vùng thủ công bằng cách nhấn giữ và kéo chuột
@@ -1104,9 +1155,12 @@ function assignGroupedRegions() {
                     </thead>
                     <tbody>
                         <!-- Duyệt qua các task thuộc trang này -->
-                        <?php foreach ($tasks as $task): 
+                        <?php foreach ($tasks as $task):
                             $hoverAttr = '';
-                            if (!empty($task['page_region_id'])) {
+                            if (!empty($task['grouped_region_ids'])) {
+                                $escapedIds = htmlspecialchars($task['grouped_region_ids'], ENT_QUOTES);
+                                $hoverAttr = ' onmouseenter="hoverGroupedOverlays(\'' . $escapedIds . '\', true)" onmouseleave="hoverGroupedOverlays(\'' . $escapedIds . '\', false)"';
+                            } elseif (!empty($task['page_region_id'])) {
                                 $hoverAttr = ' onmouseenter="hoverOverlay(' . $task['page_region_id'] . ', true)" onmouseleave="hoverOverlay(' . $task['page_region_id'] . ', false)"';
                             }
                         ?>
@@ -1139,7 +1193,7 @@ function assignGroupedRegions() {
                                     <?php
                                     $typeLabel = htmlspecialchars($task['task_type'] ?? 'Khác');
                                     $typeBadge = 'bg-secondary';
-                                    if (strpos($task['title'], '(Nhóm:') !== false) {
+                                    if (!empty($task['grouped_region_ids']) || strpos($task['title'], '(Nhóm:') !== false) {
                                         $typeLabel = 'Tổ hợp (Group)';
                                         $typeBadge = 'bg-primary';
                                     } else {
@@ -1156,7 +1210,16 @@ function assignGroupedRegions() {
                                 </td>
                                 <!-- Phân vùng -->
                                 <td>
-                                    <?php if (!empty($task['page_region_id'])): ?>
+                                    <?php if (!empty($task['grouped_region_ids'])): ?>
+                                        <?php
+                                        $gidArr = array_filter(array_map('trim', explode(',', $task['grouped_region_ids'])));
+                                        $gidList = implode(', ', array_map(fn($id) => '#'.$id, $gidArr));
+                                        $gidStr = htmlspecialchars($task['grouped_region_ids']);
+                                        ?>
+                                        <span class="badge bg-primary text-white" style="cursor: pointer;" onclick="highlightTableRecord('<?= $gidStr ?>')" title="Click để highlight nhóm vùng này">
+                                            <i class="fas fa-layer-group me-1" style="font-size: 9px;"></i>Nhóm: <?= $gidList ?>
+                                        </span>
+                                    <?php elseif (!empty($task['page_region_id'])): ?>
                                         <span class="badge bg-light text-dark border border-secondary" style="cursor: pointer;" onclick="highlightTableRecord(<?= $task['page_region_id'] ?>)">
                                             Vùng #<?= $task['page_region_id'] ?>
                                         </span>
