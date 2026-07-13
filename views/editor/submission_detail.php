@@ -103,13 +103,14 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                                 elseif ($hist['status'] === 'rejected') $statusText = ' (Có lỗi)';
                                 else $statusText = ' (Chờ duyệt)';
                                 
+                                $term = $isImage ? "Bản vẽ" : "Bản nộp";
                                 if ($isLatest) {
-                                    $label = "Bản vẽ mới" . $statusText;
+                                    $label = $term . " mới" . $statusText;
                                 } else {
                                     if ($totalSubmissions === 2) {
-                                        $label = "Bản vẽ cũ" . $statusText;
+                                        $label = $term . " cũ" . $statusText;
                                     } else {
-                                        $label = "Bản vẽ cũ #" . ($idx + 1) . $statusText;
+                                        $label = $term . " cũ #" . ($idx + 1) . $statusText;
                                     }
                                 }
                                 
