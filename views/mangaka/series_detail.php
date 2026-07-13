@@ -35,7 +35,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
     }
     .series-cover-img {
-        height: 280px;
+        aspect-ratio: 2 / 3;
+        height: auto;
         object-fit: cover;
         width: 100%;
         border-bottom: 1px solid rgba(226, 232, 240, 0.8);
@@ -138,7 +139,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <div class="row">
     <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
-    <div class="col-md-4 mb-4">
+    <div class="col-md-3 mb-4">
         <div class="card series-cover-card">
             <?php if (!empty($series['cover_image'])): 
                 $coverUrl = $series['cover_image'];
@@ -189,7 +190,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 
     <!-- Cột phải: Mô tả và Danh sách Chapters -->
-    <div class="col-md-8 mb-4">
+    <div class="col-md-9 mb-4">
         <div class="card detail-card mb-4">
             <div class="card-header bg-white py-3 border-bottom border-light">
                 <h5 class="mb-0 fw-extrabold text-slate-800" style="font-size: 1rem;"><i class="fa-solid fa-file-lines me-2 text-primary"></i>Mô tả / Tóm tắt</h5>
