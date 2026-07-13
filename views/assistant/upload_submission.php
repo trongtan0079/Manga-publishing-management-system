@@ -53,6 +53,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <?php foreach ($tasks as $t): 
                                     $selected = ($t['task_id'] == $selectedTaskId) ? 'selected' : '';
                                     $resolvedImage = (strpos($t['image_url'], 'http') === 0) ? $t['image_url'] : BASE_PATH . '/' . ltrim($t['image_url'], '/');
+                                    $isGroupTask = !empty($t['grouped_region_ids']);
+                                    $groupedRegionsJson = '';
+                                    if ($isGroupTask && !empty($t['grouped_regions_data'])) {
+                                        $groupedRegionsJson = htmlspecialchars(json_encode($t['grouped_regions_data']), ENT_QUOTES);
+                                    }
+                                    $labelSuffix = $isGroupTask ? ' — Nhóm vùng' : '';
                                 ?>
                                     <option value="<?= $t['task_id'] ?>" 
                                             <?= $selected ?>
@@ -61,8 +67,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                             data-y="<?= htmlspecialchars($t['region_y'] ?? '') ?>"
                                             data-w="<?= htmlspecialchars($t['region_width'] ?? '') ?>"
                                             data-h="<?= htmlspecialchars($t['region_height'] ?? '') ?>"
-                                            data-type="<?= htmlspecialchars($t['region_type'] ?? '') ?>">
-                                        <?= htmlspecialchars($t['series_title']) ?> - Ch.<?= htmlspecialchars($t['chapter_number']) ?> (<?= htmlspecialchars($t['title']) ?>)
+                                            data-type="<?= htmlspecialchars($t['region_type'] ?? '') ?>"
+                                            data-is-group="<?= $isGroupTask ? '1' : '0' ?>"
+                                            data-grouped-regions="<?= $groupedRegionsJson ?>">
+                                        <?= htmlspecialchars($t['series_title']) ?> - Ch.<?= htmlspecialchars($t['chapter_number']) ?> (<?= htmlspecialchars($t['title']) ?>)<?= $labelSuffix ?>
                                     </option>
                                 <?php endforeach; ?>
                             <?php else: ?>
@@ -105,25 +113,37 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
     <!-- Cột phải: Xem phân vùng được giao -->
     <div class="col-lg-5 mb-4">
+        <!-- Banner thông báo công việc nhóm -->
+        <div class="alert alert-primary py-2 px-3 mb-3 d-flex align-items-start" id="groupTaskBanner" style="display: none; font-size: 0.85rem; border-radius: 10px; border: 1px solid rgba(99,102,241,0.3); background: rgba(99,102,241,0.06);">
+            <i class="fas fa-layer-group me-2 mt-1 text-primary"></i>
+            <div>
+                <strong class="text-primary">Đây là công việc nhóm.</strong><br>
+                <span class="text-slate-600">Bạn chỉ cần nộp bài <strong>1 lần duy nhất</strong> cho tất cả các vùng được đánh dấu bên dưới.</span>
+                <div id="groupRegionList" class="mt-1"></div>
+            </div>
+        </div>
+
         <div class="card shadow-sm border-0 rounded-3" id="regionPreviewCard" style="display: none;">
             <div class="card-header bg-white text-dark py-3 border-bottom border-light">
-                <h5 class="card-title mb-0"><i class="fas fa-eye me-2 text-primary"></i>Phân vùng nhiệm vụ</h5>
+                <h5 class="card-title mb-0" id="previewCardTitle"><i class="fas fa-eye me-2 text-primary"></i>Phân vùng nhiệm vụ</h5>
             </div>
             <div class="card-body p-3 text-center bg-light">
                 <div id="previewWrapper" class="position-relative d-inline-block text-start shadow-sm" style="max-width: 100%; border: 1px solid #ccc; background-color: #eee;">
                     <img id="previewImage" src="" alt="Page Preview" class="img-fluid" style="display: block; max-width: 100%;">
-                    <!-- Shadow Overlay to dim other regions -->
+                    <!-- Shadow Overlay to dim other regions (single mode only) -->
                     <div id="previewDimmerTop" style="position: absolute; left: 0; top: 0; right: 0; background: rgba(0,0,0,0.5); pointer-events: none; transition: all 0.2s;"></div>
                     <div id="previewDimmerLeft" style="position: absolute; left: 0; background: rgba(0,0,0,0.5); pointer-events: none; transition: all 0.2s;"></div>
                     <div id="previewDimmerRight" style="position: absolute; right: 0; background: rgba(0,0,0,0.5); pointer-events: none; transition: all 0.2s;"></div>
                     <div id="previewDimmerBottom" style="position: absolute; left: 0; bottom: 0; right: 0; background: rgba(0,0,0,0.5); pointer-events: none; transition: all 0.2s;"></div>
                     
-                    <!-- Highlighted region boundary -->
+                    <!-- Highlighted region boundary (single mode) -->
                     <div id="previewOverlay" style="position: absolute; border: 2.5px dashed #dc3545; box-shadow: 0 0 10px rgba(255,255,255,0.8); pointer-events: none; transition: all 0.2s;"></div>
+                    <!-- Container for multi-overlay (group mode) -->
+                    <div id="multiOverlayContainer"></div>
                 </div>
                 <div class="mt-3 text-start small">
                     <p class="mb-1"><strong>Loại phân vùng được giao:</strong> <span id="previewType" class="badge bg-secondary">-</span></p>
-                    <p class="mb-0 text-muted"><strong>Lưu ý:</strong> Vùng sáng là khu vực được phân công cho bạn. Xung quanh đã được làm mờ để dễ nhận diện.</p>
+                    <p class="mb-0 text-muted" id="previewNote"><strong>Lưu ý:</strong> Vùng sáng là khu vực được phân công cho bạn. Xung quanh đã được làm mờ để dễ nhận diện.</p>
                 </div>
             </div>
         </div>
@@ -137,99 +157,154 @@ document.addEventListener("DOMContentLoaded", function() {
     const previewImage = document.getElementById("previewImage");
     const previewOverlay = document.getElementById("previewOverlay");
     const previewType = document.getElementById("previewType");
+    const previewNote = document.getElementById("previewNote");
+    const previewCardTitle = document.getElementById("previewCardTitle");
+    const groupTaskBanner = document.getElementById("groupTaskBanner");
+    const groupRegionList = document.getElementById("groupRegionList");
+    const multiOverlayContainer = document.getElementById("multiOverlayContainer");
     
-    // Dimmer divs
+    // Dimmer divs (single mode only)
     const topD = document.getElementById("previewDimmerTop");
     const leftD = document.getElementById("previewDimmerLeft");
     const rightD = document.getElementById("previewDimmerRight");
     const bottomD = document.getElementById("previewDimmerBottom");
 
+    // Color palette for multi-overlay borders
+    const overlayColors = ['#dc3545', '#0d6efd', '#198754', '#fd7e14', '#6f42c1', '#20c997'];
+
+    function getRegionTypeLabel(type) {
+        const map = {
+            'panel': 'Khung truyện', 'bubble': 'Bong bóng thoại', 'character': 'Nhân vật',
+            'background': 'Bối cảnh/Nền', 'sfx': 'Hiệu ứng SFX'
+        };
+        return map[type] || 'Khung truyện';
+    }
+
+    function hideDimmers() {
+        [topD, leftD, rightD, bottomD].forEach(d => d.style.display = 'none');
+    }
+
+    function clearMultiOverlays() {
+        multiOverlayContainer.innerHTML = '';
+    }
+
     function updatePreview() {
         const selectedOption = taskSelect.options[taskSelect.selectedIndex];
         if (!selectedOption || !selectedOption.value) {
             previewCard.style.display = "none";
+            groupTaskBanner.style.display = "none";
             return;
         }
 
         const image = selectedOption.getAttribute("data-image");
+        const isGroup = selectedOption.getAttribute("data-is-group") === '1';
+        const groupedRegionsRaw = selectedOption.getAttribute("data-grouped-regions");
+
+        // Reset state
+        clearMultiOverlays();
+        previewOverlay.style.display = 'none';
+        hideDimmers();
+
+        if (!image) {
+            previewCard.style.display = "none";
+            groupTaskBanner.style.display = "none";
+            return;
+        }
+
+        previewImage.src = image;
+        previewCard.style.display = "block";
+
+        // === GROUP TASK MODE ===
+        if (isGroup && groupedRegionsRaw) {
+            let regions = [];
+            try { regions = JSON.parse(groupedRegionsRaw); } catch(e) { regions = []; }
+
+            if (regions.length > 0) {
+                // Update card title
+                previewCardTitle.innerHTML = '<i class="fas fa-layer-group me-2 text-primary"></i>Các vùng cần thực hiện (' + regions.length + ' vùng)';
+
+                // Show group banner
+                groupTaskBanner.style.display = 'flex';
+                let badgesHtml = '';
+                regions.forEach((r, i) => {
+                    const color = overlayColors[i % overlayColors.length];
+                    const typeLabel = getRegionTypeLabel(r.region_type);
+                    badgesHtml += '<span class="badge me-1 mb-1" style="background:' + color + '; font-size: 0.72rem; padding: 3px 8px; border-radius: 6px;">#' + r.region_id + ' ' + typeLabel + '</span>';
+
+                    // Create overlay for each region
+                    const lPct = (parseInt(r.x) / 800) * 100;
+                    const tPct = (parseInt(r.y) / 1000) * 100;
+                    const wPct = (parseInt(r.width) / 800) * 100;
+                    const hPct = (parseInt(r.height) / 1000) * 100;
+
+                    const overlay = document.createElement('div');
+                    overlay.style.cssText = 'position:absolute; border:2.5px dashed ' + color + '; box-shadow:0 0 8px rgba(255,255,255,0.6); pointer-events:none; transition:all 0.2s; z-index:10;';
+                    overlay.style.left = lPct + '%';
+                    overlay.style.top = tPct + '%';
+                    overlay.style.width = wPct + '%';
+                    overlay.style.height = hPct + '%';
+
+                    // Add label inside overlay
+                    const label = document.createElement('span');
+                    label.style.cssText = 'position:absolute; top:2px; left:2px; background:' + color + '; color:#fff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:3px; line-height:1.3;';
+                    label.textContent = '#' + r.region_id;
+                    overlay.appendChild(label);
+
+                    multiOverlayContainer.appendChild(overlay);
+                });
+                groupRegionList.innerHTML = badgesHtml;
+
+                // Show type as group
+                previewType.textContent = 'Nhóm vùng (' + regions.length + ')';
+                previewType.className = 'badge bg-primary';
+                previewNote.innerHTML = '<strong>Lưu ý:</strong> Tất cả các vùng viền nét đứt là khu vực bạn cần thực hiện. Chỉ cần nộp bài <strong>1 lần</strong> cho cả nhóm.';
+            }
+            return;
+        }
+
+        // === SINGLE REGION MODE (original behavior) ===
+        groupTaskBanner.style.display = 'none';
+        previewCardTitle.innerHTML = '<i class="fas fa-eye me-2 text-primary"></i>Phân vùng nhiệm vụ';
+        previewNote.innerHTML = '<strong>Lưu ý:</strong> Vùng sáng là khu vực được phân công cho bạn. Xung quanh đã được làm mờ để dễ nhận diện.';
+
         const x = selectedOption.getAttribute("data-x");
         const y = selectedOption.getAttribute("data-y");
         const w = selectedOption.getAttribute("data-w");
         const h = selectedOption.getAttribute("data-h");
         const type = selectedOption.getAttribute("data-type");
 
-        if (image) {
-            previewImage.src = image;
-            previewCard.style.display = "block";
+        if (x && y && w && h) {
+            const lPct = (parseInt(x) / 800) * 100;
+            const tPct = (parseInt(y) / 1000) * 100;
+            const wPct = (parseInt(w) / 800) * 100;
+            const hPct = (parseInt(h) / 1000) * 100;
 
-            if (x && y && w && h) {
-                // Map percentages from standard 800 x 1000 grid
-                const lPct = (parseInt(x) / 800) * 100;
-                const tPct = (parseInt(y) / 1000) * 100;
-                const wPct = (parseInt(w) / 800) * 100;
-                const hPct = (parseInt(h) / 1000) * 100;
+            previewOverlay.style.left = lPct + "%";
+            previewOverlay.style.top = tPct + "%";
+            previewOverlay.style.width = wPct + "%";
+            previewOverlay.style.height = hPct + "%";
+            previewOverlay.style.display = "block";
 
-                previewOverlay.style.left = lPct + "%";
-                previewOverlay.style.top = tPct + "%";
-                previewOverlay.style.width = wPct + "%";
-                previewOverlay.style.height = hPct + "%";
-                previewOverlay.style.display = "block";
+            topD.style.height = tPct + "%";
+            leftD.style.top = tPct + "%"; leftD.style.height = hPct + "%"; leftD.style.width = lPct + "%";
+            rightD.style.top = tPct + "%"; rightD.style.height = hPct + "%"; rightD.style.width = (100 - lPct - wPct) + "%";
+            bottomD.style.top = (tPct + hPct) + "%"; bottomD.style.height = (100 - tPct - hPct) + "%";
+            [topD, leftD, rightD, bottomD].forEach(d => d.style.display = 'block');
 
-                // Update dimmers to gray out non-selected regions
-                topD.style.height = tPct + "%";
-                
-                leftD.style.top = tPct + "%";
-                leftD.style.height = hPct + "%";
-                leftD.style.width = lPct + "%";
-                
-                rightD.style.top = tPct + "%";
-                rightD.style.height = hPct + "%";
-                rightD.style.width = (100 - lPct - wPct) + "%";
-                
-                bottomD.style.top = (tPct + hPct) + "%";
-                bottomD.style.height = (100 - tPct - hPct) + "%";
-
-                topD.style.display = "block";
-                leftD.style.display = "block";
-                rightD.style.display = "block";
-                bottomD.style.display = "block";
-
-                // Translate region type to Vietnamese
-                let typeText = "Khung truyện";
-                let badgeClass = "bg-danger";
-                if (type === "bubble") {
-                    typeText = "Bong bóng thoại";
-                    badgeClass = "bg-primary";
-                    previewOverlay.style.borderColor = "#0d6efd";
-                } else if (type === "character") {
-                    typeText = "Nhân vật";
-                    badgeClass = "bg-success";
-                    previewOverlay.style.borderColor = "#198754";
-                } else if (type === "background") {
-                    typeText = "Bối cảnh/Nền";
-                    badgeClass = "bg-dark";
-                    previewOverlay.style.borderColor = "#343a40";
-                } else if (type === "sfx") {
-                    typeText = "Hiệu ứng SFX";
-                    badgeClass = "bg-warning text-dark";
-                    previewOverlay.style.borderColor = "#fd7e14";
-                } else {
-                    previewOverlay.style.borderColor = "#dc3545";
-                }
-
-                previewType.textContent = typeText;
-                previewType.className = "badge " + badgeClass;
-            } else {
-                previewOverlay.style.display = "none";
-                topD.style.display = "none";
-                leftD.style.display = "none";
-                rightD.style.display = "none";
-                bottomD.style.display = "none";
-                previewType.textContent = "Toàn bộ trang";
-                previewType.className = "badge bg-secondary";
-            }
+            let typeText = "Khung truyện";
+            let badgeClass = "bg-danger";
+            if (type === "bubble") { typeText = "Bong bóng thoại"; badgeClass = "bg-primary"; previewOverlay.style.borderColor = "#0d6efd"; }
+            else if (type === "character") { typeText = "Nhân vật"; badgeClass = "bg-success"; previewOverlay.style.borderColor = "#198754"; }
+            else if (type === "background") { typeText = "Bối cảnh/Nền"; badgeClass = "bg-dark"; previewOverlay.style.borderColor = "#343a40"; }
+            else if (type === "sfx") { typeText = "Hiệu ứng SFX"; badgeClass = "bg-warning text-dark"; previewOverlay.style.borderColor = "#fd7e14"; }
+            else { previewOverlay.style.borderColor = "#dc3545"; }
+            previewType.textContent = typeText;
+            previewType.className = "badge " + badgeClass;
         } else {
-            previewCard.style.display = "none";
+            previewOverlay.style.display = "none";
+            hideDimmers();
+            previewType.textContent = "Toàn bộ trang";
+            previewType.className = "badge bg-secondary";
         }
     }
 
