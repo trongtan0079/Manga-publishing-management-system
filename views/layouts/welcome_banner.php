@@ -135,8 +135,8 @@ switch ($role) {
 
     <!-- Decorative background patterns -->
     <!-- Soft, glowing background color blobs -->
-    <div style="position: absolute; width: 350px; height: 350px; background: rgba(99, 102, 241, 0.12); filter: blur(85px); top: -100px; right: -50px; border-radius: 50%; pointer-events: none;"></div>
-    <div style="position: absolute; width: 300px; height: 300px; background: rgba(236, 72, 153, 0.1); filter: blur(75px); bottom: -80px; left: -50px; border-radius: 50%; pointer-events: none;"></div>
+    <div class="ambient-blob-1" style="position: absolute; width: 350px; height: 350px; background: rgba(99, 102, 241, 0.12); filter: blur(85px); top: -100px; right: -50px; border-radius: 50%; pointer-events: none;"></div>
+    <div class="ambient-blob-2" style="position: absolute; width: 300px; height: 300px; background: rgba(236, 72, 153, 0.1); filter: blur(75px); bottom: -80px; left: -50px; border-radius: 50%; pointer-events: none;"></div>
 
     <div class="card-body p-0 position-relative" style="z-index: 1;">
         <div class="row align-items-center g-0" style="min-height: 255px;">
