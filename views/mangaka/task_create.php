@@ -33,9 +33,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <!-- page_id được truyền ngầm để Controller biết task này thuộc về trang nào -->
             <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
             <?php if (!empty($groupedRegionIds)): ?>
-                <div class="alert alert-info py-2 px-3 mb-3 d-flex align-items-center" style="font-size: 0.85rem; border-radius: 8px;">
-                    <i class="fas fa-info-circle me-2 text-info"></i>
-                    <span>Bạn đang giao việc nhóm cho các phân vùng: <strong>#<?= htmlspecialchars($groupedRegionIds) ?></strong>. Trợ lý chỉ cần nộp bài một lần cho cả nhóm vùng này.</span>
+                <div class="alert alert-warning py-2 px-3 mb-3 d-flex align-items-center shadow-sm" style="font-size: 0.85rem; border-radius: 8px;">
+                    <i class="fas fa-exclamation-triangle me-2 text-warning fs-5"></i>
+                    <div>
+                        <strong>Lưu ý quan trọng:</strong> Khi tạo Công việc Nhóm này cho các phân vùng <strong>#<?= htmlspecialchars($groupedRegionIds) ?></strong>, nếu có các công việc riêng lẻ cũ (chưa hoàn thành) đang được giao trên các phân vùng này, hệ thống sẽ tự động gộp/xóa chúng để tránh trùng lặp cho Trợ lý.
+                    </div>
                 </div>
                 <input type="hidden" name="grouped_region_ids" value="<?= htmlspecialchars($groupedRegionIds) ?>">
             <?php endif; ?>
@@ -57,24 +59,76 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <!-- Hidden textarea to store the HTML content for backend submission -->
                 <textarea id="description" name="description" style="display: none;"></textarea>
                 
-                <!-- Quill container -->
-                <div id="quill-editor"></div>
+                <?php if (!empty($groupedRegionData)): ?>
+                    <div id="grouped-regions-inputs" class="d-flex flex-column gap-3">
+                        <?php foreach($groupedRegionData as $gData): 
+                            $rId = $gData['region_id'];
+                            $rType = $gData['region_type'];
+                            $oldTitle = $gData['old_title'];
+                            $oldTaskType = $gData['old_task_type'];
+                            $oldDesc = $gData['old_description'];
+                            
+                            $typeLabel = 'Khác';
+                            $badgeColor = '#6c757d'; // secondary
+                            $bgColor = '#f8f9fa';
+                            switch ($rType) {
+                                case 'panel': $typeLabel = 'Khung truyện'; $badgeColor = '#dc3545'; $bgColor = '#fdf1f2'; break;
+                                case 'bubble': $typeLabel = 'Bong bóng thoại'; $badgeColor = '#0d6efd'; $bgColor = '#f0f5ff'; break;
+                                case 'character': $typeLabel = 'Nhân vật'; $badgeColor = '#198754'; $bgColor = '#f0f9f4'; break;
+                                case 'background': $typeLabel = 'Bối cảnh/Nền'; $badgeColor = '#212529'; $bgColor = '#f8f9fa'; break;
+                                case 'sfx': $typeLabel = 'Hiệu ứng SFX'; $badgeColor = '#ffc107'; $bgColor = '#fffdf0'; break;
+                            }
+                        ?>
+                        <div class="card shadow-sm border-0" style="border: 1px solid <?= $badgeColor ?> !important; border-radius: 8px; overflow: hidden; background-color: <?= $bgColor ?>;">
+                            <div class="card-header border-bottom-0 py-2 d-flex align-items-center justify-content-between" style="background-color: transparent;">
+                                <div>
+                                    <span class="badge" style="background-color: <?= $badgeColor ?>; font-size: 0.75rem; padding: 0.4em 0.6em; border-radius: 4px;"><?= htmlspecialchars($typeLabel) ?></span>
+                                </div>
+                                <span class="fw-bold" style="font-size: 0.9rem; color: #475569;">Phân vùng #<?= $rId ?></span>
+                            </div>
+                            <div class="card-body pt-0 pb-3 px-3">
+                                <div class="mb-2">
+                                    <input type="text" class="form-control form-control-sm region-specific-title border-0" data-region-id="<?= $rId ?>" placeholder="Tiêu đề công việc cho vùng này (Tùy chọn)..." value="<?= htmlspecialchars($oldTitle) ?>" style="font-weight: 600; font-size: 0.95rem; box-shadow: none; background-color: #ffffff99;">
+                                </div>
+                                <div class="mb-2">
+                                    <select class="form-select form-select-sm region-specific-type border-0" data-region-id="<?= $rId ?>" style="font-size: 0.85rem; box-shadow: none; background-color: #ffffff99; color: #475569;">
+                                        <option value="" <?= $oldTaskType == '' ? 'selected' : '' ?>>-- Chọn loại công việc chi tiết --</option>
+                                        <option value="background" <?= $oldTaskType == 'background' ? 'selected' : '' ?>>Vẽ nền (Background)</option>
+                                        <option value="inking" <?= $oldTaskType == 'inking' ? 'selected' : '' ?>>Đi nét (Inking)</option>
+                                        <option value="coloring" <?= $oldTaskType == 'coloring' ? 'selected' : '' ?>>Lên màu (Coloring)</option>
+                                        <option value="effects" <?= $oldTaskType == 'effects' ? 'selected' : '' ?>>Hiệu ứng (Effects)</option>
+                                        <option value="other" <?= $oldTaskType == 'other' ? 'selected' : '' ?>>Khác</option>
+                                    </select>
+                                </div>
+                                <textarea class="form-control region-specific-desc border-0" data-region-id="<?= $rId ?>" data-badge-color="<?= $badgeColor ?>" data-bg-color="<?= $bgColor ?>" data-type-label="<?= htmlspecialchars($typeLabel) ?>" rows="2" placeholder="Nhập ghi chú chi tiết mô tả công việc..." style="font-size: 0.9rem; resize: vertical; box-shadow: none; background-color: #ffffff99;"><?= htmlspecialchars($oldDesc) ?></textarea>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <!-- Quill container for single task -->
+                    <div id="quill-editor"></div>
+                <?php endif; ?>
             </div>
 
             <script>
             document.addEventListener('DOMContentLoaded', function() {
-                // Initialize Quill Editor
-                const quill = new Quill('#quill-editor', {
-                    theme: 'snow',
-                    placeholder: 'Mô tả cụ thể yêu cầu của bạn cho assistant...',
-                    modules: {
-                        toolbar: [
-                            ['bold', 'italic', 'underline', 'strike'],        // text styling
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],     // lists
-                            ['clean']                                         // clear formatting
-                        ]
-                    }
-                });
+                // Initialize Quill Editor ONLY if the container exists
+                let quill = null;
+                const quillContainer = document.getElementById('quill-editor');
+                if (quillContainer) {
+                    quill = new Quill('#quill-editor', {
+                        theme: 'snow',
+                        placeholder: 'Mô tả cụ thể yêu cầu của bạn cho assistant...',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline', 'strike'],        // text styling
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],     // lists
+                                ['clean']                                         // clear formatting
+                            ]
+                        }
+                    });
+                }
 
                 // Xử lý loại công việc tự chọn (Single)
                 const taskTypeSelect = document.getElementById('task_type');
@@ -149,10 +203,60 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         }
 
                         const descriptionTextarea = document.getElementById('description');
-                        if (quill.getText().trim().length > 0) {
-                            descriptionTextarea.value = quill.root.innerHTML;
-                        } else {
-                            descriptionTextarea.value = '';
+                        const groupedInputs = document.querySelectorAll('.region-specific-desc');
+                        
+                        if (groupedInputs.length > 0) {
+                            // Cấu trúc lại HTML đẹp mắt cho các thẻ vùng
+                            let combinedHtml = '<div class="grouped-task-instructions" style="display: flex; flex-direction: column; gap: 12px;">';
+                            groupedInputs.forEach(input => {
+                                const rId = input.getAttribute('data-region-id');
+                                
+                                // Lấy các input phụ
+                                const titleInput = document.querySelector(`.region-specific-title[data-region-id="${rId}"]`);
+                                const typeSelect = document.querySelector(`.region-specific-type[data-region-id="${rId}"]`);
+                                
+                                const val = input.value.trim();
+                                const rTitle = titleInput ? titleInput.value.trim() : '';
+                                const rType = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : '';
+                                const hasType = typeSelect && typeSelect.value !== '';
+                                
+                                // Nếu có bất kỳ nội dung nào được nhập ở thẻ này
+                                if (val || rTitle || hasType) {
+                                    const bColor = input.getAttribute('data-badge-color');
+                                    const bgColor = input.getAttribute('data-bg-color') || '#f8fafc';
+                                    const tLabel = input.getAttribute('data-type-label');
+                                    
+                                    // Tạo HTML an toàn
+                                    const safeVal = val.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
+                                    const safeTitle = rTitle.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                                    
+                                    let contentHtml = '';
+                                    if (safeTitle) contentHtml += `<h6 style="color: #0f172a; font-weight: 700; font-size: 14.5px; margin-bottom: 4px;">${safeTitle}</h6>`;
+                                    if (hasType) contentHtml += `<p style="color: #64748b; font-size: 12px; margin-bottom: 6px; font-weight: 600;"><i class="fas fa-tag me-1"></i> Loại việc: ${rType}</p>`;
+                                    if (safeVal) contentHtml += `<div class="region-desc-content" style="font-size: 13.5px; color: #334155; line-height: 1.5; padding-top: 4px;">${safeVal}</div>`;
+                                    
+                                    combinedHtml += `
+                                    <div class="region-instruction-card" style="border: 1px solid ${bColor}; padding: 12px; border-radius: 6px; background-color: ${bgColor};">
+                                        <div style="margin-bottom: 8px; border-bottom: 1px solid ${bColor}40; padding-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                                            <span style="background-color: ${bColor}; color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold;">${tLabel}</span>
+                                            <span style="font-size: 13px; font-weight: bold; color: #475569;">Phân vùng #${rId}</span>
+                                        </div>
+                                        ${contentHtml}
+                                    </div>`;
+                                }
+                            });
+                            combinedHtml += '</div>';
+                            
+                            // Nếu không có vùng nào được nhập, để trống
+                            descriptionTextarea.value = (combinedHtml === '<div class="grouped-task-instructions" style="display: flex; flex-direction: column; gap: 12px;"></div>') ? '' : combinedHtml;
+                            
+                        } else if (quill) {
+                            // Dùng Quill như bình thường
+                            if (quill.getText().trim().length > 0) {
+                                descriptionTextarea.value = quill.root.innerHTML;
+                            } else {
+                                descriptionTextarea.value = '';
+                            }
                         }
                     });
                 }
