@@ -132,7 +132,7 @@ class Chapter extends Model {
                 FROM {$this->table} c
                 JOIN series s ON c.series_id = s.series_id
                 JOIN users u ON s.mangaka_id = u.user_id
-                WHERE c.status = 'approved'
+                WHERE c.status = 'approved' AND s.status IN ('ongoing', 'planning')
                 ORDER BY s.title ASC, c.chapter_number ASC";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute();
