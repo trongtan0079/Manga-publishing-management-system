@@ -28,9 +28,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         overflow: hidden;
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
         position: sticky;
-        top: 24px;
+        top: 94px; /* Sửa lỗi đè menu bằng cách đẩy khoảng cách trượt xuống 94px (70px navbar + 24px gap) */
         transition: all 0.3s ease;
-        max-width: 320px;
     }
     .series-cover-card:hover {
         box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
@@ -52,13 +51,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
         overflow: hidden;
         background: #ffffff;
+        transition: all 0.3s ease;
+    }
+    .detail-card:hover {
+        box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.02) !important;
     }
     .clickable-row {
         cursor: pointer;
         transition: all 0.2s ease;
     }
     .clickable-row:hover {
-        background-color: #f8fafc !important;
+        background-color: rgba(79, 70, 229, 0.04) !important; /* Thay đổi màu hover nhẹ nhàng */
     }
     .gradient-progress-bar {
         background: linear-gradient(90deg, #4f46e5 0%, #818cf8 100%) !important;
@@ -70,16 +73,39 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         padding: 5px 12px !important;
         transition: all 0.2s ease;
     }
-    .metadata-item {
-        background: #ffffff;
-        border: 1px solid rgba(226, 232, 240, 0.6) !important;
-        border-radius: 12px !important;
-        transition: all 0.2s ease;
+    .metadata-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
-    .metadata-item:hover {
-        background-color: #f8fafc !important;
-        border-color: rgba(79, 70, 229, 0.25) !important;
-        transform: translateY(-1px);
+    .metadata-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px dashed rgba(226, 232, 240, 0.8);
+    }
+    .metadata-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .metadata-label {
+        color: var(--slate-500);
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    .metadata-value {
+        color: var(--slate-800);
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
     }
 </style>
 
