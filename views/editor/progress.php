@@ -518,7 +518,7 @@ if (!function_exists('renderTaskStatusDot')) {
                                 </table>
                             </div>
                         <?php else: ?>
-                            <p class="text-muted small mb-0">Không có công việc (Task) nào của trợ lý đang trễ hạn.</p>
+                            <p class="text-muted small mb-0"><i class="fa-regular fa-circle-check text-success me-1"></i>Không có công việc (Task) nào của trợ lý đang trễ hạn.</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -536,5 +536,49 @@ if (!function_exists('renderTaskStatusDot')) {
         </div>
     <?php endif; ?>
 </div>
+
+<!-- Modal xem ảnh lớn -->
+<div class="modal fade" id="imagePreviewModal" tabindex="-1" aria-labelledby="imagePreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 overflow-hidden shadow-lg">
+            <div class="modal-header py-3 border-bottom">
+                <h5 class="modal-title fw-bold" id="imagePreviewModalLabel">Chi tiết Bản vẽ</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0 text-center bg-dark d-flex align-items-center justify-content-center" style="min-height: 400px; max-height: 80vh;">
+                <img id="modalPreviewImage" src="" class="img-fluid" style="max-height: 80vh; object-fit: contain;" alt="Xem trước bản vẽ">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Khởi tạo tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // Xử lý phóng to ảnh trong modal
+        var zoomButtons = document.querySelectorAll(".btn-zoom-preview");
+        var modalImage = document.getElementById("modalPreviewImage");
+        var modalTitle = document.getElementById("imagePreviewModalLabel");
+        
+        zoomButtons.forEach(function(btn) {
+            btn.addEventListener("click", function(e) {
+                e.stopPropagation(); // Ngăn chặn sự kiện click lan ra ngoài thẻ card
+                var imgUrl = this.getAttribute("data-img-url");
+                var pageNum = this.getAttribute("data-page-num");
+                if (modalImage && imgUrl) {
+                    modalImage.src = imgUrl;
+                    if (modalTitle) {
+                        modalTitle.textContent = "Bản vẽ Trang " + pageNum;
+                    }
+                }
+            });
+        });
+    });
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
