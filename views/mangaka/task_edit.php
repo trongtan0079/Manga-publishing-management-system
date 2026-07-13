@@ -125,18 +125,34 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <label for="page_region_id" class="form-label">Phân vùng ảnh</label>
-                    <select class="form-select" id="page_region_id" name="page_region_id">
-                        <option value="">-- Toàn bộ trang truyện --</option>
-                        <?php if (!empty($regions)): ?>
-                            <?php foreach ($regions as $region): 
-                                $lbl = ucfirst($region['region_type']) . " #" . $region['region_id'] . " (" . $region['width'] . "x" . $region['height'] . ")";
-                                $selected = ($region['region_id'] == ($task['page_region_id'] ?? 0)) ? 'selected' : '';
-                            ?>
-                                <option value="<?= $region['region_id'] ?>" <?= $selected ?>><?= htmlspecialchars($lbl) ?></option>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </select>
+                    <?php if (!empty($task['grouped_region_ids'])): ?>
+                        <?php
+                        $gidArr = array_filter(array_map('trim', explode(',', $task['grouped_region_ids'])));
+                        $gidList = implode(', ', array_map(fn($id) => '#'.$id, $gidArr));
+                        ?>
+                        <label class="form-label">Phân vùng được giao (Nhóm)</label>
+                        <div class="form-control bg-light d-flex align-items-center gap-2" style="min-height: 38px;">
+                            <i class="fas fa-layer-group text-primary"></i>
+                            <span class="fw-semibold text-primary">Nhóm vùng: <?= $gidList ?></span>
+                            <span class="badge bg-primary ms-1" style="font-size: 0.7rem;">Nhóm</span>
+                        </div>
+                        <div class="form-text">Công việc nhóm — không thể thay đổi phân vùng khi chỉnh sửa.</div>
+                        <!-- Giữ lại grouped_region_ids khi submit -->
+                        <input type="hidden" name="grouped_region_ids" value="<?= htmlspecialchars($task['grouped_region_ids']) ?>">
+                    <?php else: ?>
+                        <label for="page_region_id" class="form-label">Phân vùng ảnh</label>
+                        <select class="form-select" id="page_region_id" name="page_region_id">
+                            <option value="">-- Toàn bộ trang truyện --</option>
+                            <?php if (!empty($regions)): ?>
+                                <?php foreach ($regions as $region):
+                                    $lbl = ucfirst($region['region_type']) . " #" . $region['region_id'] . " (" . $region['width'] . "x" . $region['height'] . ")";
+                                    $selected = ($region['region_id'] == ($task['page_region_id'] ?? 0)) ? 'selected' : '';
+                                ?>
+                                    <option value="<?= $region['region_id'] ?>" <?= $selected ?>><?= htmlspecialchars($lbl) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    <?php endif; ?>
                 </div>
             </div>
 
