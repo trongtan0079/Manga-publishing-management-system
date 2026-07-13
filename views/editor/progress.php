@@ -20,6 +20,265 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<style>
+    /* Premium scoped progress dashboard styles */
+    .progress-series-card {
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid var(--border-color) !important;
+        background: #ffffff;
+    }
+    .progress-series-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md) !important;
+        border-color: rgba(79, 70, 229, 0.25) !important;
+    }
+    .series-cover-mini {
+        width: 44px;
+        height: 58px;
+        object-fit: cover;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--slate-200);
+        box-shadow: var(--shadow-sm);
+    }
+    .series-cover-placeholder {
+        width: 44px;
+        height: 58px;
+        background: var(--slate-100);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--slate-400);
+        border: 1px solid var(--slate-200);
+    }
+    .legend-indicator-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        box-shadow: 0 0 4px rgba(0,0,0,0.15);
+    }
+    .legend-abbr-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: var(--slate-50);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.72rem;
+        color: var(--slate-700);
+        border: 1px solid var(--slate-200);
+        transition: all 0.2s ease;
+    }
+    .legend-abbr-pill:hover {
+        background-color: var(--slate-100);
+        transform: translateY(-1px);
+    }
+    .legend-abbr-pill i {
+        font-size: 0.8rem;
+    }
+    .chapter-card-box {
+        background-color: var(--slate-50);
+        border: 1px solid var(--slate-200);
+        border-radius: var(--radius);
+        transition: all 0.2s ease;
+    }
+    .chapter-card-box:hover {
+        background-color: #ffffff;
+        border-color: rgba(79, 70, 229, 0.2);
+        box-shadow: var(--shadow-sm);
+    }
+    
+    /* Page Matrix Cards */
+    .page-matrix-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+        margin-top: 5px;
+    }
+    .page-item-card {
+        background: #ffffff;
+        border: 1px solid var(--slate-200);
+        border-radius: var(--radius);
+        padding: 8px;
+        transition: all 0.2s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        box-shadow: var(--shadow-sm);
+        height: 175px;
+    }
+    .page-item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow);
+        border-color: var(--primary);
+    }
+    .page-preview-box {
+        position: relative;
+        height: 85px;
+        border-radius: var(--radius-sm);
+        background: var(--slate-100);
+        overflow: hidden;
+        border: 1px solid var(--slate-200);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--slate-400);
+        margin-top: 4px;
+    }
+    .page-preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .page-item-card:hover .page-preview-box img {
+        transform: scale(1.08);
+    }
+    .page-number-tag {
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: var(--slate-800);
+    }
+    
+    /* Task Status Icons */
+    .task-status-dot-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 4px;
+        margin-top: 6px;
+    }
+    .task-status-dot {
+        flex: 1;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        cursor: help;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+    }
+    .task-status-dot:hover {
+        transform: translateY(-1.5px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    
+    /* Soft colors for task statuses */
+    .task-status-completed {
+        background-color: var(--success-soft) !important;
+        color: var(--success) !important;
+        border-color: var(--success-border) !important;
+    }
+    .task-status-in_progress {
+        background-color: var(--primary-soft) !important;
+        color: var(--primary) !important;
+        border-color: rgba(79, 70, 229, 0.2) !important;
+    }
+    .task-status-pending {
+        background-color: var(--warning-soft) !important;
+        color: #b45309 !important;
+        border-color: var(--warning-border) !important;
+    }
+    .task-status-null {
+        background-color: var(--slate-50) !important;
+        color: var(--slate-400) !important;
+        border-color: var(--slate-200) !important;
+        opacity: 0.65;
+    }
+    
+    /* Zoom Modal Trigger button */
+    .btn-zoom-preview {
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+        width: 22px;
+        height: 22px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--slate-700);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        border: 1px solid var(--slate-200);
+        transition: all 0.15s ease;
+        opacity: 0;
+    }
+    .page-item-card:hover .btn-zoom-preview {
+        opacity: 1;
+    }
+    .btn-zoom-preview:hover {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: var(--primary);
+    }
+</style>
+
+<?php
+// Helper render status dot cho từng công việc vẽ
+if (!function_exists('renderTaskStatusDot')) {
+    function renderTaskStatusDot($type, $status) {
+        $icon = '';
+        $typeLabel = '';
+        switch ($type) {
+            case 'background':
+                $icon = 'fa-mountain';
+                $typeLabel = 'BG: Vẽ nền';
+                break;
+            case 'inking':
+                $icon = 'fa-pen-nib';
+                $typeLabel = 'INK: Đi nét';
+                break;
+            case 'coloring':
+                $icon = 'fa-palette';
+                $typeLabel = 'COL: Lên màu';
+                break;
+            case 'effects':
+                $icon = 'fa-wand-magic-sparkles';
+                $typeLabel = 'FX: Hiệu ứng SFX';
+                break;
+        }
+        
+        $statusClass = 'task-status-null';
+        $statusLabel = 'Tác giả tự vẽ (Không phân công)';
+        
+        if ($status === 'completed') {
+            $statusClass = 'task-status-completed';
+            $statusLabel = 'Đã hoàn thành';
+        } elseif ($status === 'in_progress') {
+            $statusClass = 'task-status-in_progress';
+            $statusLabel = 'Trợ lý đang vẽ';
+        } elseif ($status === 'pending' || $status === 'submitted' || $status === 'rejected') {
+            $statusClass = 'task-status-pending';
+            if ($status === 'submitted') {
+                $statusLabel = 'Đã nộp, chờ duyệt';
+            } elseif ($status === 'rejected') {
+                $statusLabel = 'Bản vẽ lỗi, vẽ lại';
+            } else {
+                $statusLabel = 'Chờ phân công/xử lý';
+            }
+        }
+        
+        $abbr = '';
+        switch ($type) {
+            case 'background': $abbr = 'BG'; break;
+            case 'inking': $abbr = 'INK'; break;
+            case 'coloring': $abbr = 'COL'; break;
+            case 'effects': $abbr = 'FX'; break;
+        }
+        
+        return '<span class="task-status-dot ' . $statusClass . '" data-bs-toggle="tooltip" data-bs-placement="top" title="' . $typeLabel . ': ' . $statusLabel . '">'
+             . '<i class="fa-solid ' . $icon . ' me-1" style="font-size: 0.65rem;"></i>' . $abbr
+             . '</span>';
+    }
+}
+?>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="h3 mb-1">Giám sát Tiến độ & Deadline Studio</h2>
