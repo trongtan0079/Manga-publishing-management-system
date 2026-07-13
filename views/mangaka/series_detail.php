@@ -139,7 +139,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <div class="row">
     <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
-    <div class="col-md-3 mb-4">
+    <div class="col-md-4 mb-4">
         <div class="card series-cover-card">
             <?php if (!empty($series['cover_image'])): 
                 $coverUrl = $series['cover_image'];
@@ -190,7 +190,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 
     <!-- Cột phải: Mô tả và Danh sách Chapters -->
-    <div class="col-md-9 mb-4">
+    <div class="col-md-8 mb-4">
         <div class="card detail-card mb-4">
             <div class="card-header bg-white py-3 border-bottom border-light">
                 <h5 class="mb-0 fw-extrabold text-slate-800" style="font-size: 1rem;"><i class="fa-solid fa-file-lines me-2 text-primary"></i>Mô tả / Tóm tắt</h5>
