@@ -37,7 +37,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <?php endif; ?>
 
 <!-- Thanh điều hướng cơ bản -->
-<div class="mb-4 d-flex justify-content-between align-items-center">
+<div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
     <?php
     $backUrl = BASE_PATH . '/index.php?controller=series&action=index';
     if (isset($_SESSION['role_name'])) {
@@ -48,20 +48,20 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         }
     }
     ?>
-    <a href="<?= $backUrl ?>" class="btn btn-outline-secondary shadow-sm"><i class="fas fa-arrow-left me-2"></i>Quay lại</a>
+    <a href="<?= $backUrl ?>" class="btn btn-outline-secondary px-3.5 py-2 shadow-xs d-inline-flex align-items-center" style="border-radius: 10px; font-weight: 600; font-size: 0.85rem;"><i class="fa-solid fa-arrow-left me-2"></i>Quay lại</a>
     
     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
     <div class="d-flex gap-2">
         <?php if ($series['status'] === 'planning' && ($series['publish_type'] ?? '') === 'draft'): ?>
         <form action="<?= BASE_PATH ?>/index.php?controller=series&action=submit&id=<?= $series['series_id'] ?>" method="POST" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn nộp đề xuất bộ truyện này đến Ban Biên tập?');">
-            <button type="submit" class="btn btn-success shadow-sm">
-                <i class="fas fa-paper-plane me-2"></i>Nộp Đề Xuất
+            <button type="submit" class="btn btn-success px-3.5 py-2 shadow-xs d-inline-flex align-items-center" style="border-radius: 10px; font-weight: 600; font-size: 0.85rem;">
+                <i class="fa-solid fa-paper-plane me-2"></i>Nộp Đề Xuất
             </button>
         </form>
         <?php endif; ?>
         <?php if (!$this->isSeriesLocked($series)): ?>
-        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning shadow-sm text-dark">
-            <i class="fas fa-edit me-2"></i>Sửa Truyện
+        <a href="<?= BASE_PATH ?>/index.php?controller=series&action=edit&id=<?= $series['series_id'] ?>" class="btn btn-warning px-3.5 py-2 shadow-xs d-inline-flex align-items-center text-slate-800" style="border-radius: 10px; font-weight: 600; font-size: 0.85rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: 0; color: #ffffff !important; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.15) !important;">
+            <i class="fa-solid fa-pen-to-square me-2"></i>Sửa Truyện
         </a>
         <?php endif; ?>
     </div>
