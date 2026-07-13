@@ -28,9 +28,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         overflow: hidden;
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
         position: sticky;
-        top: 24px;
+        top: 94px; /* Sửa lỗi đè menu bằng cách đẩy khoảng cách trượt xuống 94px (70px navbar + 24px gap) */
         transition: all 0.3s ease;
-        max-width: 320px;
     }
     .series-cover-card:hover {
         box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
@@ -52,13 +51,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
         overflow: hidden;
         background: #ffffff;
+        transition: all 0.3s ease;
+    }
+    .detail-card:hover {
+        box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.02) !important;
     }
     .clickable-row {
         cursor: pointer;
         transition: all 0.2s ease;
     }
     .clickable-row:hover {
-        background-color: #f8fafc !important;
+        background-color: rgba(79, 70, 229, 0.04) !important; /* Thay đổi màu hover nhẹ nhàng */
     }
     .gradient-progress-bar {
         background: linear-gradient(90deg, #4f46e5 0%, #818cf8 100%) !important;
@@ -70,16 +73,39 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         padding: 5px 12px !important;
         transition: all 0.2s ease;
     }
-    .metadata-item {
-        background: #ffffff;
-        border: 1px solid rgba(226, 232, 240, 0.6) !important;
-        border-radius: 12px !important;
-        transition: all 0.2s ease;
+    .metadata-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
-    .metadata-item:hover {
-        background-color: #f8fafc !important;
-        border-color: rgba(79, 70, 229, 0.25) !important;
-        transform: translateY(-1px);
+    .metadata-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px dashed rgba(226, 232, 240, 0.8);
+    }
+    .metadata-row:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .metadata-label {
+        color: var(--slate-500);
+        font-weight: 700;
+        font-size: 0.85rem;
+        display: inline-flex;
+        align-items: center;
+    }
+    .metadata-value {
+        color: var(--slate-800);
+        font-weight: 700;
+        font-size: 0.85rem;
+    }
+    .stat-card {
+        transition: all 0.3s ease;
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
     }
 </style>
 
@@ -142,9 +168,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <p class="text-slate-500 text-sm mt-1 mb-0">Thông tin chi tiết và tiến độ triển khai tác phẩm</p>
 </div>
 
+
+
 <div class="row">
     <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
-    <div class="col-md-4 mb-4">
+    <div class="col-md-4 col-lg-3 mb-4">
         <div class="card series-cover-card">
             <?php if (!empty($series['cover_image'])): 
                 $coverUrl = $series['cover_image'];
@@ -161,31 +189,31 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <?php endif; ?>
             
             <div class="card-body p-4">
-                <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
-                    <li class="metadata-item d-flex align-items-center justify-content-between p-3 rounded-3 bg-slate-50 border border-light-subtle">
-                        <span class="text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-regular fa-calendar-check me-2 text-success" style="font-size: 0.95rem;"></i>Lịch xuất bản:</span>
-                        <span>
+                <div class="metadata-list">
+                    <div class="metadata-row">
+                        <span class="metadata-label"><i class="fa-regular fa-calendar-check me-2 text-success" style="font-size: 0.95rem;"></i>Lịch xuất bản:</span>
+                        <span class="metadata-value">
                             <?php if ($series['status'] === 'planning'): ?>
                                 <span class="badge bg-light text-dark border">Chờ duyệt</span>
                             <?php else: ?>
                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-bold px-2.5 py-1" style="border-radius: 6px; font-size: 0.72rem;"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
                             <?php endif; ?>
                         </span>
-                    </li>
-                    <li class="metadata-item d-flex align-items-center justify-content-between p-3 rounded-3 bg-slate-50 border border-light-subtle">
-                        <span class="text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-regular fa-clock me-2 text-info" style="font-size: 0.95rem;"></i>Ngày tạo:</span>
-                        <span class="text-slate-700 fw-bold" style="font-size: 0.78rem;"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></span>
-                    </li>
-                    <li class="metadata-item d-flex align-items-center justify-content-between p-3 rounded-3 bg-slate-50 border border-light-subtle">
-                        <span class="text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-solid fa-arrows-rotate me-2 text-warning" style="font-size: 0.95rem;"></i>Cập nhật:</span>
-                        <span class="text-slate-700 fw-bold" style="font-size: 0.78rem;"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?></span>
-                    </li>
-                </ul>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label"><i class="fa-regular fa-clock me-2 text-info" style="font-size: 0.95rem;"></i>Ngày tạo:</span>
+                        <span class="metadata-value text-slate-700 font-extrabold" style="font-size: 0.78rem;"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></span>
+                    </div>
+                    <div class="metadata-row">
+                        <span class="metadata-label"><i class="fa-solid fa-arrows-rotate me-2 text-warning" style="font-size: 0.95rem;"></i>Cập nhật:</span>
+                        <span class="metadata-value text-slate-700 font-extrabold" style="font-size: 0.78rem;"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?></span>
+                    </div>
+                </div>
                 
                 <?php if (!empty($series['proposal_file'])): ?>
-                <div class="mt-4 border-top pt-3.5">
+                <div class="mt-4 border-top pt-3">
                     <p class="card-text mb-2.5 text-xs text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-solid fa-file-pdf me-2 text-danger" style="font-size: 0.95rem;"></i> Tài liệu đề xuất:</p>
-                    <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2" style="border-radius: 12px; font-weight: 700; font-size: 0.8rem; background-color: rgba(79, 70, 229, 0.06); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.12); transition: all 0.25s ease;" target="_blank">
+                    <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2.5" style="border-radius: 12px; font-weight: 700; font-size: 0.8rem; background-color: rgba(79, 70, 229, 0.06); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.12); transition: all 0.25s ease;" target="_blank">
                         <i class="fa-solid fa-download"></i> Tải bản thảo sơ bộ
                     </a>
                 </div>
@@ -195,7 +223,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
 
     <!-- Cột phải: Mô tả và Danh sách Chapters -->
-    <div class="col-md-8 mb-4">
+    <div class="col-md-8 col-lg-9 mb-4">
+
         <div class="card detail-card mb-4">
             <div class="card-header bg-white py-3 border-bottom border-light">
                 <h5 class="mb-0 fw-extrabold text-slate-800" style="font-size: 1rem;"><i class="fa-solid fa-file-lines me-2 text-primary"></i>Mô tả / Tóm tắt</h5>
