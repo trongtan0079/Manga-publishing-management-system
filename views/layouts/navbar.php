@@ -90,7 +90,7 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                 <div class="vr mx-2 d-none d-lg-block" style="height: 30px; align-self: center;"></div>
                 <li class="nav-item dropdown ms-2">
                     <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://ui-avatars.com/api/?name=<?php echo urlencode((isset($_SESSION) && isset($_SESSION['full_name'])) ? $_SESSION['full_name'] : ((isset($_SESSION) && isset($_SESSION['username'])) ? $_SESSION['username'] : 'G')); ?>&background=6366f1&color=fff" alt="User" class="rounded-circle me-2" width="32" height="32">
+                        <img src="<?= getUserAvatarUrl($_SESSION['user_id'], (isset($_SESSION['full_name']) ? $_SESSION['full_name'] : (isset($_SESSION['username']) ? $_SESSION['username'] : 'U'))) ?>" alt="User" class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
                         <div class="d-none d-md-block text-start lh-1 me-1">
                             <div class="fw-bold text-dark"><?php echo htmlspecialchars((isset($_SESSION) && isset($_SESSION['full_name'])) ? $_SESSION['full_name'] : ((isset($_SESSION) && isset($_SESSION['username'])) ? $_SESSION['username'] : 'Khách')); ?></div>
                             <small class="text-muted" style="font-size: 0.75rem;"><?php echo (isset($_SESSION) && isset($_SESSION['role_name'])) ? ucfirst(htmlspecialchars($_SESSION['role_name'])) : ''; ?></small>
