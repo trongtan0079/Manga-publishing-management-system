@@ -194,9 +194,18 @@ h3, .h3 { font-size: 1.25rem; font-weight: 700; }
     display: flex;
     flex-direction: column;
     max-height: 100vh;
-    --bs-offcanvas-bg: var(--sidebar-gradient-start);
+    --bs-offcanvas-bg: rgba(15, 23, 42, 0.95);
     --bs-offcanvas-width: var(--sidebar-width);
     --bs-offcanvas-border-color: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 991.98px) {
+    .sidebar-custom.offcanvas-start,
+    .sidebar-custom.offcanvas-lg {
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.95) 100%) !important;
+    }
 }
 
 @media (min-width: 992px) {
@@ -246,6 +255,8 @@ h3, .h3 { font-size: 1.25rem; font-weight: 700; }
     transition: all var(--transition);
     display: flex;
     align-items: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .sidebar-custom .nav-link i {
@@ -272,6 +283,18 @@ h3, .h3 { font-size: 1.25rem; font-weight: 700; }
     color: #ffffff;
     background-color: var(--primary);
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+}
+
+.sidebar-custom .nav-link.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 25%;
+    height: 50%;
+    width: 4px;
+    background-color: #a5b4fc;
+    border-radius: 0 4px 4px 0;
+    box-shadow: 0 0 8px #a5b4fc;
 }
 
 .sidebar-custom .nav-link.active i {
@@ -410,10 +433,27 @@ main > .container-fluid {
     border-radius: var(--radius-md) !important;
     color: #ffffff !important;
     transition: all var(--transition) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 60%);
+    pointer-events: none;
+    transition: opacity var(--transition-slow);
+    opacity: 0.8;
 }
 
 .stat-card:hover {
     transform: translateY(-3px);
+}
+
+.stat-card:hover::after {
+    opacity: 1;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0) 50%);
 }
 
 .stat-card .text-xs {
@@ -514,11 +554,15 @@ main > .container-fluid {
     color: var(--slate-700);
     font-weight: 500;
     vertical-align: middle;
-    transition: background-color var(--transition-fast);
+    transition: background-color var(--transition), transform var(--transition);
 }
 
-.table tbody tr:last-child td {
-    border-bottom: none;
+.table tbody tr {
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.table-hover tbody tr:hover {
+    transform: translateX(3px);
 }
 
 .table-hover tbody tr:hover td {
@@ -963,6 +1007,27 @@ a {
 .clickable-row {
     cursor: pointer;
     transition: background-color var(--transition) !important;
+}
+
+/* Float Animations for Ambient Blobs in Welcome Banner */
+@keyframes float-blob-1 {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(30px, -20px) scale(1.1); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes float-blob-2 {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-25px, 25px) scale(0.92); }
+    100% { transform: translate(0, 0) scale(1); }
+}
+
+.ambient-blob-1 {
+    animation: float-blob-1 12s infinite ease-in-out;
+}
+
+.ambient-blob-2 {
+    animation: float-blob-2 15s infinite ease-in-out;
 }
 
 
