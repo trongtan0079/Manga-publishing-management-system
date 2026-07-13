@@ -378,11 +378,11 @@ if (!function_exists('renderTaskStatusDot')) {
                                 $deadlineText = 'Còn ' . $daysLeft . ' ngày';
                             }
                         ?>
-                            <div class="border rounded p-3 mb-4 bg-white shadow-xs">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="border rounded-3 p-3 mb-4 bg-white shadow-xs chapter-card-box">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                                     <div>
                                         <strong class="text-slate-800 fs-6">Chương <?= htmlspecialchars($actChap['chapter_number']) ?>: <?= htmlspecialchars($actChap['title'] ?? 'Chưa đặt tên') ?></strong>
-                                        <span class="badge bg-primary text-xs ms-2"><?= $actChap['status'] === 'drawing' ? 'Đang vẽ' : (in_array($actChap['status'], ['reviewing', 'reviewing_draft', 'reviewing_final']) ? 'Đang chờ duyệt' : 'Bản thảo') ?></span>
+                                        <span class="ms-2"><?= $this->getStatusBadge($actChap['status']) ?></span>
                                     </div>
                                     <div>
                                         <span class="text-muted text-xs me-2">Hạn bản in:</span>
@@ -390,15 +390,22 @@ if (!function_exists('renderTaskStatusDot')) {
                                     </div>
                                 </div>
 
-                                <!-- Thanh tiến độ công việc trong chapter -->
+                                <!-- Thanh tiến độ công việc trong chapter (Đã sửa lỗi hiển thị khi 0 công việc) -->
                                 <div class="mb-3">
-                                    <div class="d-flex justify-content-between text-xs mb-1">
-                                        <span class="text-muted">Hoàn thiện nét vẽ studio:</span>
-                                        <strong class="text-dark"><?= $actStats['completed_tasks'] ?> / <?= $actStats['total_tasks'] ?> công việc hoàn thành (<?= $actStats['completion_rate'] ?>%)</strong>
-                                    </div>
-                                    <div class="progress" style="height: 6px; border-radius: 3px;">
-                                        <div class="progress-bar bg-primary" role="progressbar" style="width: <?= $actStats['completion_rate'] ?>%; border-radius: 3px;" aria-valuenow="<?= $actStats['completion_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                                    </div>
+                                    <?php if ($actStats['total_tasks'] > 0): ?>
+                                        <div class="d-flex justify-content-between text-xs mb-1">
+                                            <span class="text-muted">Hoàn thiện nét vẽ studio (Trợ lý):</span>
+                                            <strong class="text-dark"><?= $actStats['completed_tasks'] ?> / <?= $actStats['total_tasks'] ?> công việc hoàn thành (<?= $actStats['completion_rate'] ?>%)</strong>
+                                        </div>
+                                        <div class="progress" style="height: 6px; border-radius: 3px;">
+                                            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?= $actStats['completion_rate'] ?>%; border-radius: 3px;" aria-valuenow="<?= $actStats['completion_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="d-flex align-items-center bg-light p-2 rounded-2 border border-light-subtle text-muted text-xs">
+                                            <i class="fa-solid fa-user-pen text-primary me-2"></i>
+                                            <span>Chương này do tác giả tự hoàn thiện bản vẽ (Không giao việc cho trợ lý).</span>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <!-- Ma trận tiến độ trang vẽ (Real-time Grid) -->
