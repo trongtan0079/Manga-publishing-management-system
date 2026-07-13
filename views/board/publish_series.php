@@ -402,6 +402,9 @@ if (!empty($seriesList)) {
                                             <i class="fas fa-paper-plane"></i> Xuất bản ngay
                                         </button>
                                     </form>
+                                    <button type="button" class="btn btn-sm btn-outline-danger px-3 rounded-pill shadow-sm d-inline-flex align-items-center gap-1.5 fw-semibold ms-1" style="font-size: 0.8rem;" data-bs-toggle="modal" data-bs-target="#rejectPublishModal" data-chapter-id="<?= $chap['chapter_id'] ?>" data-chapter-number="<?= $chap['chapter_number'] ?>" data-series-title="<?= htmlspecialchars($chap['series_title']) ?>">
+                                        <i class="fas fa-times-circle"></i> Từ chối
+                                    </button>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -943,6 +946,54 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             
             form.parentNode.appendChild(badge);
+        });
+    }
+});
+</script>
+
+<!-- Modal từ chối xuất bản -->
+<div class="modal fade" id="rejectPublishModal" tabindex="-1" aria-labelledby="rejectPublishModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="rejectPublishForm" action="" method="POST">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold text-danger" id="rejectPublishModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Từ chối xuất bản Chapter</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start">
+                    <div class="alert alert-warning py-2 px-3 mb-3 text-xs" style="font-size: 0.8rem;">
+                        <i class="fas fa-info-circle me-1"></i>Trạng thái của chương và toàn bộ trang sẽ được hoàn trả về <strong>Đang vẽ (Drawing)</strong> để Tác giả sửa lại.
+                    </div>
+                    <p class="text-xs text-muted mb-2" id="rejectPublishPrompt">Lý do từ chối xuất bản chương này:</p>
+                    <div class="mb-3">
+                        <label for="reject_reason" class="form-label text-xs fw-bold text-uppercase">Lý do từ chối <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="reject_reason" name="reject_reason" rows="4" required placeholder="Nhập lý do cụ thể gửi đến Tác giả và Editor..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-sm btn-danger fw-bold"><i class="fas fa-times-circle me-1"></i>Từ chối & Trả về</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const rejectPublishModal = document.getElementById('rejectPublishModal');
+    if (rejectPublishModal) {
+        rejectPublishModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const chapterId = button.getAttribute('data-chapter-id');
+            const chapterNumber = button.getAttribute('data-chapter-number');
+            const seriesTitle = button.getAttribute('data-series-title');
+            
+            const form = document.getElementById('rejectPublishForm');
+            form.action = `<?= BASE_PATH ?>/index.php?controller=chapter&action=rejectPublish&id=` + chapterId;
+            
+            const prompt = document.getElementById('rejectPublishPrompt');
+            prompt.innerHTML = `Bạn đang thực hiện từ chối xuất bản <strong>Chương ${chapterNumber}</strong> của bộ truyện <strong>${seriesTitle}</strong>. Vui lòng nêu rõ lý do để Tác giả và Editor nắm bắt thông tin sửa đổi:`;
         });
     }
 });
