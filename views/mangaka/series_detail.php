@@ -235,7 +235,61 @@ $overallPercent = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100)
     </div>
 
     <!-- Cột phải: Mô tả và Danh sách Chapters -->
-    <div class="col-md-8 mb-4">
+    <div class="col-md-8 col-lg-9 mb-4">
+        <!-- Dashboard Tiến độ -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card stat-card border-0 h-100" style="background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%); box-shadow: 0 4px 15px rgba(79, 70, 229, 0.03); border-radius: 16px;">
+                    <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-slate-500 fw-bold text-xs text-uppercase tracking-wider">Tổng số Chapter</span>
+                            <h3 class="fw-extrabold text-slate-800 mt-2 mb-0" style="font-size: 1.8rem;"><?= $totalChapters ?></h3>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(79, 70, 229, 0.1); color: var(--primary);">
+                            <i class="fa-solid fa-list-ol fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card stat-card border-0 h-100" style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.03); border-radius: 16px;">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="text-slate-500 fw-bold text-xs text-uppercase tracking-wider">Tiến độ Studio</span>
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background-color: rgba(16, 185, 129, 0.1); color: var(--success);">
+                                <i class="fa-solid fa-circle-check fs-5"></i>
+                            </div>
+                        </div>
+                        <h3 class="fw-extrabold text-slate-800 mb-2" style="font-size: 1.8rem;"><?= $overallPercent ?>%</h3>
+                        <div class="progress" style="height: 6px; background-color: rgba(16, 185, 129, 0.15); border-radius: 3px;">
+                            <div class="progress-bar gradient-progress-bar" role="progressbar" style="width: <?= $overallPercent ?>%; border-radius: 3px;" aria-valuenow="<?= $overallPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card stat-card border-0 h-100" style="background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); box-shadow: 0 4px 15px rgba(245, 158, 11, 0.03); border-radius: 16px;">
+                    <div class="card-body p-4 d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-slate-500 fw-bold text-xs text-uppercase tracking-wider">Lịch xuất bản</span>
+                            <h3 class="fw-extrabold text-slate-800 mt-2 mb-0" style="font-size: 1.15rem;">
+                                <?php if ($series['status'] === 'planning'): ?>
+                                    Chờ duyệt
+                                <?php else: ?>
+                                    <?= ($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng' ?>
+                                <?php endif; ?>
+                            </h3>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(245, 158, 11, 0.1); color: var(--warning);">
+                            <i class="fa-regular fa-calendar-days fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card detail-card mb-4">
             <div class="card-header bg-white py-3 border-bottom border-light">
                 <h5 class="mb-0 fw-extrabold text-slate-800" style="font-size: 1rem;"><i class="fa-solid fa-file-lines me-2 text-primary"></i>Mô tả / Tóm tắt</h5>
