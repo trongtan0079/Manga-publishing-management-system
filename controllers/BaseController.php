@@ -96,6 +96,12 @@ class BaseController
                     if ($chapterStatus === 'approved' || $chapterStatus === 'published') {
                         $badgeClass = 'bg-info text-dark';
                         $statusLabel = 'Đã duyệt phát hành';
+                    } elseif ($chapterStatus === 'drawing') {
+                        $badgeClass = 'bg-success text-white';
+                        $statusLabel = 'Hoàn thành (Chờ gửi Editor)';
+                    } elseif ($chapterStatus === 'reviewing_final' || $chapterStatus === 'reviewing') {
+                        $badgeClass = 'bg-warning text-dark';
+                        $statusLabel = 'Đã gửi (Chờ Editor duyệt)';
                     } else {
                         $badgeClass = 'bg-success text-white';
                         $statusLabel = 'Bản vẽ hoàn thiện';
