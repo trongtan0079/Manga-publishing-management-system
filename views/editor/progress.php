@@ -408,44 +408,57 @@ if (!function_exists('renderTaskStatusDot')) {
                                     <?php endif; ?>
                                 </div>
 
-                                <!-- Ma trận tiến độ trang vẽ (Real-time Grid) -->
-                                <div class="studio-progress-grid bg-light p-3 rounded" style="max-height: 250px; overflow-y: auto;">
-                                    <?php if (!empty($data['active_chapter_pages'])): 
-                                        // Helper to get status badge classes
-                                        if (!function_exists('getTaskBadge')) {
-                                            function getTaskBadge($status) {
-                                                if ($status === null) return 'badge bg-light text-muted border'; // không giao
-                                                if ($status === 'completed') return 'badge bg-success text-white';
-                                                if ($status === 'in_progress') return 'badge bg-primary text-white';
-                                                return 'badge bg-warning text-dark'; // pending
-                                            }
-                                        }
-                                    ?>
-                                        <div class="row g-2">
+                                <!-- Ma trận tiến độ trang vẽ (Real-time Grid dạng thẻ ảnh xem trước) -->
+                                <div class="studio-progress-grid-wrapper bg-light p-3 rounded-3" style="max-height: 400px; overflow-y: auto;">
+                                    <?php if (!empty($data['active_chapter_pages'])): ?>
+                                        <div class="page-matrix-container">
                                             <?php foreach ($data['active_chapter_pages'] as $pageData): 
                                                 $pg = $pageData['page'];
                                                 $tStatus = $pageData['tasks'];
+                                                $resolvedImgUrl = $this->resolvePageImageUrl($pg['image_url']);
                                             ?>
-                                                <div class="col-6 col-sm-4 col-md-3 col-xl-auto" style="flex: 1 1 120px; max-width: 160px;">
-                                                    <div class="bg-white border rounded p-2 text-center shadow-xs h-100">
-                                                        <span class="fw-bold text-xs text-dark d-block mb-2 border-bottom pb-1">Trang <?= htmlspecialchars($pg['page_number']) ?></span>
-                                                        <div class="d-flex flex-wrap justify-content-center gap-1" style="font-size: 0.65rem; line-height: 1;">
-                                                            <!-- BG Task -->
-                                                            <span class="<?= getTaskBadge($tStatus['background']) ?> px-1 py-1" title="Vẽ nền: <?= $tStatus['background'] ?: 'Không phân công' ?>">BG</span>
-                                                            <!-- INK Task -->
-                                                            <span class="<?= getTaskBadge($tStatus['inking']) ?> px-1 py-1" title="Đi nét: <?= $tStatus['inking'] ?: 'Không phân công' ?>">INK</span>
-                                                            <!-- COL Task -->
-                                                            <span class="<?= getTaskBadge($tStatus['coloring']) ?> px-1 py-1" title="Tô màu: <?= $tStatus['coloring'] ?: 'Không phân công' ?>">COL</span>
-                                                            <!-- FX Task -->
-                                                            <span class="<?= getTaskBadge($tStatus['effects']) ?> px-1 py-1" title="Hiệu ứng: <?= $tStatus['effects'] ?: 'Không phân công' ?>">FX</span>
+                                                <div class="page-item-card">
+                                                    <div>
+                                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                                            <span class="page-number-tag">Trang <?= htmlspecialchars($pg['page_number']) ?></span>
+                                                            <div style="transform: scale(0.85); transform-origin: right center;">
+                                                                <?= $this->getPageStatusBadge($pg['status'], $actChap['status']) ?>
+                                                            </div>
                                                         </div>
+                                                        
+                                                        <div class="page-preview-box">
+                                                            <?php if (!empty($resolvedImgUrl) && $resolvedImgUrl !== 'no_genko'): ?>
+                                                                <img src="<?= htmlspecialchars($resolvedImgUrl) ?>" alt="Bản vẽ Trang <?= htmlspecialchars($pg['page_number']) ?>">
+                                                                <button type="button" class="btn-zoom-preview" 
+                                                                        data-bs-toggle="modal" 
+                                                                        data-bs-target="#imagePreviewModal" 
+                                                                        data-img-url="<?= htmlspecialchars($resolvedImgUrl) ?>"
+                                                                        data-page-num="<?= htmlspecialchars($pg['page_number']) ?>"
+                                                                        title="Xem ảnh lớn">
+                                                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                                                </button>
+                                                            <?php else: ?>
+                                                                <div class="text-center">
+                                                                    <i class="fa-regular fa-image fa-lg mb-1 d-block opacity-40"></i>
+                                                                    <span style="font-size: 0.65rem;">Chưa tải lên</span>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="task-status-dot-container">
+                                                        <?= renderTaskStatusDot('background', $tStatus['background']) ?>
+                                                        <?= renderTaskStatusDot('inking', $tStatus['inking']) ?>
+                                                        <?= renderTaskStatusDot('coloring', $tStatus['coloring']) ?>
+                                                        <?= renderTaskStatusDot('effects', $tStatus['effects']) ?>
                                                     </div>
                                                 </div>
                                             <?php endforeach; ?>
                                         </div>
                                     <?php else: ?>
-                                        <div class="text-center py-3 text-muted text-xs">
-                                            Chương truyện chưa được đăng tải trang vẽ nào lên hệ thống.
+                                        <div class="text-center py-4 text-muted text-xs bg-white rounded border border-light-subtle">
+                                            <i class="fa-regular fa-folder-open fa-2x mb-2 d-block opacity-30 text-secondary"></i>
+                                            Chương truyện chưa được tải trang vẽ nào lên hệ thống.
                                         </div>
                                     <?php endif; ?>
                                 </div>
