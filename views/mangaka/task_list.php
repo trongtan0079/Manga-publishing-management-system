@@ -83,16 +83,33 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         ?>
                             <tr>
                                 <td class="ps-4">
-                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text" title="Xem chi tiết phân trang & phân vùng">
+                                    <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= $task['page_id'] ?>&highlight_region=<?= !empty($task['grouped_region_ids']) ? htmlspecialchars($task['grouped_region_ids']) : $task['page_region_id'] ?>" class="text-decoration-none text-dark hover-primary-text" title="Xem chi tiết phân trang &amp; phân vùng">
                                         <strong><?= htmlspecialchars($task['series_title']) ?></strong><br>
                                         <small class="text-muted">Chương <?= htmlspecialchars($task['chapter_number']) ?> - Trang <?= htmlspecialchars($task['page_number']) ?></small>
                                     </a>
+                                    <?php if (!empty($task['grouped_region_ids'])): ?>
+                                        <?php
+                                        $gidArr = array_filter(array_map('trim', explode(',', $task['grouped_region_ids'])));
+                                        $gidList = implode(', ', array_map(fn($id) => '#'.$id, $gidArr));
+                                        ?>
+                                        <div class="mt-1">
+                                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.68rem; padding: 2px 6px; border-radius: 6px;">
+                                                <i class="fas fa-layer-group me-1" style="font-size: 9px;"></i>Nhóm vùng: <?= $gidList ?>
+                                            </span>
+                                        </div>
+                                    <?php elseif (!empty($task['page_region_id'])): ?>
+                                        <div class="mt-1">
+                                            <span class="badge bg-light text-muted border" style="font-size: 0.68rem; padding: 2px 6px; border-radius: 6px;">
+                                                <i class="fas fa-crop me-1" style="font-size: 9px;"></i>Phân vùng #<?= $task['page_region_id'] ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <?php
                                      $typeLabel = htmlspecialchars($task['task_type'] ?? 'Khác');
                                      $typeBadge = 'bg-secondary';
-                                     if (strpos($task['title'], '(Nhóm:') !== false) {
+                                     if (!empty($task['grouped_region_ids']) || strpos($task['title'], '(Nhóm:') !== false) {
                                          $typeLabel = 'Tổ hợp (Group)';
                                          $typeBadge = 'bg-primary';
                                      } else {
