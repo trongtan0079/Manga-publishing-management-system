@@ -23,6 +23,7 @@ entity users {
   email : varchar
   password_hash : varchar
   status : enum
+  is_head_board : tinyint
   created_at : timestamp
   updated_at : timestamp
 }

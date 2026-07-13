@@ -26,4 +26,7 @@ INSERT IGNORE INTO users (username, full_name, email, password_hash, role_id) VA
 ('mangaka_user', 'Mangaka Author', 'mangaka@example.com', '$2y$10$v87ChVYIS3A5xiBaHjA7JuIFU2VN2gr.eVZO7KaHWvnjM48JJo5OG', @mangaka_role),
 ('assistant_user', 'Assistant One', 'assistant@example.com', '$2y$10$v87ChVYIS3A5xiBaHjA7JuIFU2VN2gr.eVZO7KaHWvnjM48JJo5OG', @assistant_role),
 ('editor_user', 'Editor One', 'editor@example.com', '$2y$10$v87ChVYIS3A5xiBaHjA7JuIFU2VN2gr.eVZO7KaHWvnjM48JJo5OG', @editor_role),
-('board_user', 'Board Member', 'board@example.com', '$2y$10$v87ChVYIS3A5xiBaHjA7JuIFU2VN2gr.eVZO7KaHWvnjM48JJo5OG', @board_role);
+('board_user', 'Board Member (Head)', 'board@example.com', '$2y$10$v87ChVYIS3A5xiBaHjA7JuIFU2VN2gr.eVZO7KaHWvnjM48JJo5OG', @board_role);
+
+-- Thiết lập mặc định board_user là Trưởng ban Hội đồng
+UPDATE users SET is_head_board = 1 WHERE username = 'board_user';

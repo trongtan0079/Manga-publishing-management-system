@@ -96,6 +96,16 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 </div>
             </div>
 
+            <div class="row mb-3" id="head_board_container" style="display: none;">
+                <div class="col-md-12">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="is_head_board" name="is_head_board" value="1" <?= ($user['is_head_board'] ?? 0) == 1 ? 'checked' : '' ?>>
+                        <label class="form-check-label fw-semibold text-danger" for="is_head_board"><i class="fas fa-crown me-1"></i>Đặt làm Trưởng ban Hội đồng Biên tập (Head of Board)</label>
+                    </div>
+                    <div class="form-text text-muted">Lưu ý: Chỉ được chọn tối đa một Trưởng ban trong hệ thống. Việc đặt tài khoản này làm Trưởng ban sẽ tự động hạ chức Trưởng ban của các tài khoản khác.</div>
+                </div>
+            </div>
+
             <hr class="my-3">
             <div class="d-flex gap-2">
                 <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Lưu thay đổi</button>
@@ -105,5 +115,30 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const roleSelect = document.getElementById('role_id');
+    const headBoardContainer = document.getElementById('head_board_container');
+    const isHeadBoardCheckbox = document.getElementById('is_head_board');
+    
+    function toggleHeadBoard() {
+        if (!roleSelect.value) {
+            headBoardContainer.style.display = 'none';
+            return;
+        }
+        const selectedOptionText = roleSelect.options[roleSelect.selectedIndex].text.toLowerCase();
+        if (selectedOptionText.includes('board') || selectedOptionText.includes('giám đốc') || selectedOptionText.includes('hội đồng')) {
+            headBoardContainer.style.display = 'block';
+        } else {
+            headBoardContainer.style.display = 'none';
+            isHeadBoardCheckbox.checked = false;
+        }
+    }
+    
+    roleSelect.addEventListener('change', toggleHeadBoard);
+    toggleHeadBoard();
+});
+</script>
 
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>

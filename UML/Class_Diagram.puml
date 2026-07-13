@@ -19,6 +19,7 @@ class User {
   +email : string
   +password_hash : string
   +status : string
+  +is_head_board : int
   +getRoleStatistics() : array
 }
 

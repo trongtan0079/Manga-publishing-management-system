@@ -933,6 +933,32 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     });
+
+    // Khống chế các form thay đổi trạng thái nếu không phải là Trưởng ban Hội đồng
+    const isHeadBoard = <?= json_encode((!empty($_SESSION['is_head_board']) && $_SESSION['is_head_board'] == 1)) ?>;
+    if (!isHeadBoard) {
+        document.querySelectorAll('form[action*="action=updateStatus"]').forEach(form => {
+            form.style.setProperty('display', 'none', 'important');
+            
+            const badge = document.createElement('span');
+            
+            const cardHeader = form.closest('.card').querySelector('.card-title');
+            const isPendingTable = cardHeader && cardHeader.textContent.includes('Đề xuất');
+            if (isPendingTable) {
+                badge.className = 'd-inline-flex align-items-center gap-2 py-1.5 px-3 border rounded-pill shadow-sm bg-light text-slate-500';
+                badge.style.fontSize = '0.75rem';
+                badge.style.fontWeight = '600';
+                badge.style.whiteSpace = 'nowrap';
+                badge.title = 'Quyết định cuối cùng thuộc về Trưởng ban Hội đồng.';
+                badge.innerHTML = '<i class="fas fa-lock text-slate-400 me-1"></i>Chờ Trưởng ban chốt duyệt';
+            } else {
+                badge.className = 'text-muted text-xs d-inline-flex align-items-center gap-1';
+                badge.innerHTML = '<i class="fas fa-lock me-1"></i>Chỉ Trưởng ban được điều chỉnh';
+            }
+            
+            form.parentNode.appendChild(badge);
+        });
+    }
 });
 </script>
 

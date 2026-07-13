@@ -88,6 +88,7 @@ class AuthController extends BaseController {
                 $_SESSION['full_name'] = $user['full_name'];
                 $_SESSION['role_id'] = $user['role_id'];
                 $_SESSION['role_name'] = $roleName;
+                $_SESSION['is_head_board'] = (int)($user['is_head_board'] ?? 0);
 
                 // Chuyển hướng
                 $this->redirectBasedOnRole($roleName);

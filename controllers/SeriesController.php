@@ -583,6 +583,14 @@ class SeriesController extends BaseController
      */
     public function updateStatus($id) {
         requireRole('board');
+        
+        // Ràng buộc: Chỉ Trưởng ban Hội đồng mới có quyền chốt duyệt / đổi trạng thái bộ truyện
+        if (empty($_SESSION['is_head_board']) || $_SESSION['is_head_board'] != 1) {
+            $_SESSION['error'] = "Quyền hạn không hợp lệ. Chỉ Trưởng ban Hội đồng Biên tập mới có quyền chốt quyết định phê duyệt bộ truyện.";
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+            exit;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $series = $this->seriesModel->findById($id);
             if (!$series) {

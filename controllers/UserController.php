@@ -98,13 +98,15 @@ class UserController extends BaseController
                 exit;
             }
 
+            $isHeadBoard = isset($_POST['is_head_board']) ? 1 : 0;
             // Thu thập dữ liệu từ form gửi lên
             $data = [
                 'username'  => $username,
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'email'     => $email,
                 'role_id'   => $role_id,
-                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive', 'banned']) ? $_POST['status'] : 'active'
+                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive', 'banned']) ? $_POST['status'] : 'active',
+                'is_head_board' => $isHeadBoard
             ];
             
             // Xử lý mật khẩu: nếu có nhập thì kiểm tra độ dài và băm (hash), nếu không thì dùng mật khẩu mặc định
@@ -121,7 +123,11 @@ class UserController extends BaseController
 
             try {
                 // Thực hiện thêm mới vào DB
-                $this->userModel->insert($data);
+                $newUserId = $this->userModel->insert($data);
+                
+                if ($newUserId && $isHeadBoard == 1) {
+                    $this->userModel->demoteOtherHeads($newUserId);
+                }
                 
                 // Ghi nhật ký hoạt động
                 SystemLog::logAction($_SESSION['user_id'], 'Tạo người dùng', "Đã tạo thành công tài khoản '{$username}' (Họ tên: '{$data['full_name']}', Email: '{$data['email']}')");
@@ -220,13 +226,15 @@ class UserController extends BaseController
                 }
             }
 
+            $isHeadBoard = isset($_POST['is_head_board']) ? 1 : 0;
             // Thu thập dữ liệu từ form
             $data = [
                 'username'  => $username,
                 'full_name' => trim($_POST['full_name'] ?? ''),
                 'email'     => $email,
                 'role_id'   => $role_id,
-                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive', 'banned']) ? $_POST['status'] : 'active'
+                'status'    => in_array($_POST['status'] ?? '', ['active', 'inactive', 'banned']) ? $_POST['status'] : 'active',
+                'is_head_board' => $isHeadBoard
             ];
             
             // Nếu admin có nhập mật khẩu mới thì mới cập nhật password_hash
@@ -242,6 +250,10 @@ class UserController extends BaseController
             try {
                 // Thực hiện update trong DB
                 $this->userModel->update($id, $data);
+                
+                if ($isHeadBoard == 1) {
+                    $this->userModel->demoteOtherHeads($id);
+                }
                 
                 // Ghi nhật ký hoạt động
                 SystemLog::logAction($_SESSION['user_id'], 'Cập nhật người dùng', "Đã cập nhật thông tin tài khoản '{$username}' (ID: {$id}, Trạng thái: '{$data['status']}')");

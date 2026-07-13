@@ -129,4 +129,14 @@ class User extends Model {
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Hạ chức các Trưởng ban khác để đảm bảo chỉ có tối đa 1 Trưởng ban duy nhất
+     */
+    public function demoteOtherHeads($excludeUserId) {
+        $sql = "UPDATE {$this->table} SET is_head_board = 0 WHERE user_id != :exclude_id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':exclude_id', $excludeUserId, PDO::PARAM_INT);
+        return $stmt->execute();
+    }
 }
