@@ -53,13 +53,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     </div>
 
                     <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label for="rank_position" class="form-label fw-bold">Hạng (Rank Position) <span class="text-danger">*</span></label>
+                        <div class="col-md-4">
+                            <label for="rank_position" class="form-label fw-bold">Hạng <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="rank_position" name="rank_position" min="1" value="<?= htmlspecialchars($ranking['rank_position']) ?>" required>
                         </div>
-                        <div class="col-md-6">
-                            <label for="score" class="form-label fw-bold">Điểm số (Score) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" class="form-control" id="score" name="score" min="0" value="<?= htmlspecialchars($ranking['score']) ?>" required>
+                        <div class="col-md-4">
+                            <label for="score" class="form-label fw-bold">Điểm số <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" class="form-control" id="score" name="score" min="0" max="100" value="<?= htmlspecialchars($ranking['score']) ?>" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="votes" class="form-label fw-bold">Số phiếu bầu <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="votes" name="votes" min="0" value="<?= htmlspecialchars($ranking['votes'] ?? 0) ?>" required>
                         </div>
                     </div>
 

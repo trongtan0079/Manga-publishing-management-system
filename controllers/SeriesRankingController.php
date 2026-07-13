@@ -191,6 +191,7 @@ class SeriesRankingController extends BaseController
                         'board_member_id' => $_SESSION['user_id'],
                         'rank_position' => $rank,
                         'score' => $score,
+                        'votes' => $votesVal,
                         'period_start_date' => $periodStartDateFormatted
                     ];
                     $this->rankingModel->insert($insertData);
@@ -286,9 +287,10 @@ class SeriesRankingController extends BaseController
             $seriesId = (int)($_POST['series_id'] ?? 0);
             $rankPosition = (int)($_POST['rank_position'] ?? 0);
             $score = (float)($_POST['score'] ?? -1);
+            $votes = isset($_POST['votes']) ? (int)$_POST['votes'] : -1;
             $periodStartDate = trim($_POST['period_start_date'] ?? '');
 
-            if (!$seriesId || !$rankPosition || $score < 0 || !$periodStartDate) {
+            if (!$seriesId || !$rankPosition || $score < 0 || $votes < 0 || !$periodStartDate) {
                 $_SESSION['error'] = 'Vui lòng nhập đầy đủ thông tin.';
                 header('Location: ' . BASE_PATH . '/index.php?controller=seriesRanking&action=edit&id=' . $id);
                 exit;
@@ -341,6 +343,7 @@ class SeriesRankingController extends BaseController
                 'series_id' => $seriesId,
                 'rank_position' => $rankPosition,
                 'score' => $score,
+                'votes' => $votes,
                 'period_start_date' => $periodStartDateFormatted
             ];
 

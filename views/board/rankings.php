@@ -53,6 +53,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <th>Series</th>
                         <th>Mangaka</th>
                         <th>Người Chấm</th>
+                        <th>Số Phiếu</th>
                         <th>Điểm Số (Quy Chuẩn)</th>
                         <th>Ngày Tạo</th>
                         <th class="text-end pe-4">Hành động</th>
@@ -73,6 +74,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                                 <td><?= htmlspecialchars($ranking['mangaka_name'] ?? '') ?></td>
                                 <td><?= htmlspecialchars($ranking['board_member_name'] ?? '') ?></td>
+                                <td>
+                                    <strong><?= htmlspecialchars($ranking['votes'] ?? 0) ?></strong> phiếu
+                                </td>
                                 <td>
                                     <span class="badge bg-success"><?= htmlspecialchars($ranking['score']) ?> / 100</span>
                                 </td>

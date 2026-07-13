@@ -128,6 +128,7 @@ class SeriesRanking {
   +board_member_id : int
   +rank_position : int
   +score : decimal
+  +votes : int
   +period_start_date : date
 }
 

@@ -167,6 +167,7 @@ CREATE TABLE series_rankings (
     board_member_id INT NOT NULL,
     rank_position INT NOT NULL,
     score DECIMAL(5,2),
+    votes INT DEFAULT 0,
     period_start_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_rankings_series FOREIGN KEY (series_id) REFERENCES series(series_id) ON DELETE CASCADE,

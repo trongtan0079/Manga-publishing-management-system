@@ -28,6 +28,7 @@ $rankingModel = new SeriesRanking();
                         <th class="ps-4">Kỳ Đánh Giá</th>
                         <th>Series</th>
                         <th>Thứ hạng</th>
+                        <th>Số Phiếu</th>
                         <th>Điểm Số</th>
                         <th>Biến Động</th>
                         <th class="text-end pe-4">Chi tiết</th>
@@ -61,6 +62,9 @@ $rankingModel = new SeriesRanking();
                                 </td>
                                 <td>
                                     <div class="fw-bold text-primary fs-5">#<?= htmlspecialchars($ranking['rank_position']) ?></div>
+                                </td>
+                                <td>
+                                    <strong><?= htmlspecialchars($ranking['votes'] ?? 0) ?></strong> phiếu
                                 </td>
                                 <td>
                                     <span class="badge bg-success"><?= htmlspecialchars($ranking['score']) ?> / 100</span>

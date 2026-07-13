@@ -130,6 +130,7 @@ entity series_rankings {
   board_member_id : int <<FK>>
   rank_position : int
   score : decimal
+  votes : int
   period_start_date : date
   created_at : timestamp
 }
