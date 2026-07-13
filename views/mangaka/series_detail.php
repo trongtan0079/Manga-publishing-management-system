@@ -156,32 +156,32 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <?php endif; ?>
             
             <div class="card-body p-4">
-                <ul class="list-unstyled d-flex flex-column gap-3.5 text-xs mb-0">
-                    <li class="metadata-item d-flex align-items-center justify-content-between p-2.5 rounded bg-slate-50 border border-light-subtle">
-                        <span class="text-slate-500 fw-medium"><i class="fa-regular fa-calendar-check me-1.5 text-success"></i>Lịch xuất bản:</span>
+                <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
+                    <li class="metadata-item d-flex align-items-center justify-content-between p-3 rounded-3 bg-slate-50 border border-light-subtle">
+                        <span class="text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-regular fa-calendar-check me-2 text-success" style="font-size: 0.95rem;"></i>Lịch xuất bản:</span>
                         <span>
                             <?php if ($series['status'] === 'planning'): ?>
                                 <span class="badge bg-light text-dark border">Chờ duyệt</span>
                             <?php else: ?>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-bold px-2 py-0.5" style="border-radius: 4px;"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-bold px-2.5 py-1" style="border-radius: 6px; font-size: 0.72rem;"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
                             <?php endif; ?>
                         </span>
                     </li>
-                    <li class="metadata-item d-flex align-items-center justify-content-between p-2.5 rounded bg-slate-50 border border-light-subtle">
-                        <span class="text-slate-500 fw-medium"><i class="fa-regular fa-clock me-1.5 text-info"></i>Ngày tạo:</span>
-                        <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></span>
+                    <li class="metadata-item d-flex align-items-center justify-content-between p-3 rounded-3 bg-slate-50 border border-light-subtle">
+                        <span class="text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-regular fa-clock me-2 text-info" style="font-size: 0.95rem;"></i>Ngày tạo:</span>
+                        <span class="text-slate-700 fw-bold" style="font-size: 0.78rem;"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></span>
                     </li>
-                    <li class="metadata-item d-flex align-items-center justify-content-between p-2.5 rounded bg-slate-50 border border-light-subtle">
-                        <span class="text-slate-500 fw-medium"><i class="fa-solid fa-arrows-rotate me-1.5 text-warning"></i>Cập nhật:</span>
-                        <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?></span>
+                    <li class="metadata-item d-flex align-items-center justify-content-between p-3 rounded-3 bg-slate-50 border border-light-subtle">
+                        <span class="text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-solid fa-arrows-rotate me-2 text-warning" style="font-size: 0.95rem;"></i>Cập nhật:</span>
+                        <span class="text-slate-700 fw-bold" style="font-size: 0.78rem;"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?></span>
                     </li>
                 </ul>
                 
                 <?php if (!empty($series['proposal_file'])): ?>
-                <div class="mt-4 border-top pt-3">
-                    <p class="card-text mb-2 text-xs text-slate-500 fw-semibold"><i class="fa-solid fa-file-pdf me-1.5 text-danger"></i> Tài liệu đề xuất:</p>
-                    <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-sm btn-outline-primary w-100 d-inline-flex align-items-center justify-content-center gap-1.5" style="border-radius: 10px; font-weight: 600; font-size: 0.78rem;" target="_blank">
-                        <i class="fa-solid fa-cloud-arrow-down"></i>Tải bản thảo sơ bộ
+                <div class="mt-4 border-top pt-3.5">
+                    <p class="card-text mb-2.5 text-xs text-slate-500 fw-bold d-inline-flex align-items-center"><i class="fa-solid fa-file-pdf me-2 text-danger" style="font-size: 0.95rem;"></i> Tài liệu đề xuất:</p>
+                    <a href="<?= BASE_PATH . htmlspecialchars($series['proposal_file']) ?>" class="btn btn-sm w-100 d-inline-flex align-items-center justify-content-center gap-2 py-2" style="border-radius: 12px; font-weight: 700; font-size: 0.8rem; background-color: rgba(79, 70, 229, 0.06); color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.12); transition: all 0.25s ease;" target="_blank">
+                        <i class="fa-solid fa-download"></i> Tải bản thảo sơ bộ
                     </a>
                 </div>
                 <?php endif; ?>
