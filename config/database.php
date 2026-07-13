@@ -4,7 +4,7 @@ class Database
 {
     // Thông tin kết nối cơ sở dữ liệu
     private $host = 'localhost';
-    private $port = '3307';
+    private $port = '3306';
     private $dbname = 'manga_workflow';
     private $username = 'root'; // Sửa lại nếu bạn có cấu hình username khác
     private $password = '';     // Sửa lại nếu bạn có cài đặt password cho MySQL
