@@ -484,4 +484,74 @@ class ChapterController extends BaseController
             exit;
         }
     }
+
+    /**
+     * Từ chối xuất bản Chapter (Dành cho Editorial Board)
+     * 
+     * @param int $id ID của Chapter bị từ chối xuất bản
+     */
+    public function rejectPublish($id) {
+        requireRole('board');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $chapter = $this->chapterModel->findById($id);
+            if (!$chapter) {
+                $_SESSION['error'] = "Không tìm thấy chapter.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
+            if ($chapter['status'] !== 'approved') {
+                $_SESSION['error'] = "Chương truyện không ở trạng thái chờ xuất bản.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
+            $reason = trim($_POST['reject_reason'] ?? '');
+            if (empty($reason)) {
+                $_SESSION['error'] = "Vui lòng nhập lý do từ chối xuất bản.";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+                exit;
+            }
+
+            try {
+                // Chuyển trạng thái Chapter về 'drawing' để Tác giả và Editor kiểm tra sửa lại
+                $this->chapterModel->update($id, ['status' => 'drawing']);
+                $this->pageModel->updateStatusByChapterId($id, 'drawing');
+                
+                // Gửi thông báo đến Mangaka & Editor phụ trách
+                $series = $this->seriesModel->findById($chapter['series_id']);
+                $mangakaId = $series ? $series['mangaka_id'] : null;
+                $editorId = $series ? $series['editor_id'] : null;
+                
+                require_once __DIR__ . '/../models/Notification.php';
+                $notificationModel = new \Notification();
+                
+                $message = "Hội đồng biên tập đã TỪ CHỐI xuất bản Chương {$chapter['chapter_number']} thuộc bộ truyện '{$series['title']}'. Lý do: " . mb_substr($reason, 0, 80) . "...";
+                
+                if ($mangakaId) {
+                    $notificationModel->createNotification(
+                        $mangakaId,
+                        'chapter_rejected_by_board',
+                        $message,
+                        $id
+                    );
+                }
+                if ($editorId) {
+                    $notificationModel->createNotification(
+                        $editorId,
+                        'chapter_rejected_by_board',
+                        $message,
+                        $id
+                    );
+                }
+
+                $_SESSION['success'] = "Đã từ chối xuất bản và gửi trả lại chương {$chapter['chapter_number']} thành công!";
+            } catch (PDOException $e) {
+                $_SESSION['error'] = "Lỗi hệ thống khi từ chối xuất bản: " . $e->getMessage();
+            }
+
+            header('Location: ' . BASE_PATH . '/index.php?controller=series&action=publish');
+            exit;
+        }
+    }
 }
