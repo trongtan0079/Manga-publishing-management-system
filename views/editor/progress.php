@@ -510,7 +510,7 @@ if (!function_exists('renderTaskStatusDot')) {
                         </div>
 
                         <!-- 2. Giám sát thời gian thực chương đang vẽ (Active Chapter) -->
-                        <h6 class="fw-bold text-dark mb-3"><i class="fas fa-hourglass-half text-danger me-2"></i>Chương đang thực hiện (Active Chapter)</h6>
+                        <h6 class="fw-bold text-slate-800 mb-3"><i class="fas fa-hourglass-half text-danger me-2"></i>Chương đang thực hiện (Active Chapter)</h6>
                         
                         <?php if (!empty($data['active_chapter'])): 
                             $actChap = $data['active_chapter'];
@@ -524,39 +524,40 @@ if (!function_exists('renderTaskStatusDot')) {
                             $deadlineBadge = 'bg-light text-dark border';
                             $deadlineText = $daysLeft . ' ngày nữa';
                             if ($isOverdue) {
-                                $deadlineBadge = 'bg-danger text-white';
+                                $deadlineBadge = 'bg-danger text-white border-0';
                                 $deadlineText = 'Trễ ' . $daysLeft . ' ngày';
                             } elseif ($daysLeft <= 3) {
-                                $deadlineBadge = 'bg-warning text-dark';
+                                $deadlineBadge = 'bg-warning text-dark border-0';
                                 $deadlineText = 'Còn ' . $daysLeft . ' ngày';
                             }
                         ?>
-                            <div class="border rounded-3 p-3 mb-4 bg-white shadow-xs chapter-card-box">
-                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div class="border rounded-4 p-4 mb-4 bg-white shadow-xs chapter-card-box">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
                                     <div>
-                                        <strong class="text-slate-800 fs-6">Chương <?= htmlspecialchars($actChap['chapter_number']) ?>: <?= htmlspecialchars($actChap['title'] ?? 'Chưa đặt tên') ?></strong>
+                                        <span class="text-muted text-xs d-block mb-1 text-uppercase fw-bold"><i class="fa-solid fa-folder-open me-1"></i> Đang biên tập</span>
+                                        <strong class="text-slate-900 fs-6">Chương <?= htmlspecialchars($actChap['chapter_number']) ?>: <?= htmlspecialchars($actChap['title'] ?? 'Chưa đặt tên') ?></strong>
                                         <span class="ms-2"><?= $this->getStatusBadge($actChap['status']) ?></span>
                                     </div>
-                                    <div>
-                                        <span class="text-muted text-xs me-2">Hạn bản in:</span>
-                                        <span class="badge <?= $deadlineBadge ?>"><?= $deadlineText ?></span>
+                                    <div class="bg-light p-2 px-3 rounded-3 border border-light-subtle d-flex align-items-center gap-2">
+                                        <span class="text-slate-500 text-xs"><i class="fa-regular fa-calendar me-1"></i> Hạn bản in:</span>
+                                        <span class="badge <?= $deadlineBadge ?> rounded-pill px-2.5 py-1 text-xs fw-extrabold shadow-sm"><i class="fa-regular fa-clock me-1"></i><?= $deadlineText ?></span>
                                     </div>
                                 </div>
 
-                                <!-- Thanh tiến độ công việc trong chapter (Đã sửa lỗi hiển thị khi 0 công việc) -->
-                                <div class="mb-3">
+                                <!-- Thanh tiến độ công việc trong chapter -->
+                                <div class="mb-4">
                                     <?php if ($actStats['total_tasks'] > 0): ?>
-                                        <div class="d-flex justify-content-between text-xs mb-1">
-                                            <span class="text-muted">Hoàn thiện nét vẽ studio (Trợ lý):</span>
-                                            <strong class="text-dark"><?= $actStats['completed_tasks'] ?> / <?= $actStats['total_tasks'] ?> công việc hoàn thành (<?= $actStats['completion_rate'] ?>%)</strong>
+                                        <div class="d-flex justify-content-between text-xs mb-1.5 align-items-center">
+                                            <span class="text-slate-600 fw-bold"><i class="fa-solid fa-list-check me-1 text-primary"></i> Tiến độ vẽ (Trợ lý):</span>
+                                            <span class="text-slate-800 fw-extrabold bg-light p-1 px-2 rounded"><?= $actStats['completed_tasks'] ?> / <?= $actStats['total_tasks'] ?> công việc (<?= $actStats['completion_rate'] ?>%)</span>
                                         </div>
-                                        <div class="progress" style="height: 6px; border-radius: 3px;">
-                                            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?= $actStats['completion_rate'] ?>%; border-radius: 3px;" aria-valuenow="<?= $actStats['completion_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress" style="height: 6px; border-radius: 4px; background-color: var(--slate-100); box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                                            <div class="progress-bar gradient-task-progress-bar" role="progressbar" style="width: <?= $actStats['completion_rate'] ?>%; border-radius: 4px;" aria-valuenow="<?= $actStats['completion_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     <?php else: ?>
-                                        <div class="d-flex align-items-center bg-light p-2 rounded-2 border border-light-subtle text-muted text-xs">
-                                            <i class="fa-solid fa-user-pen text-primary me-2"></i>
-                                            <span>Chương này do tác giả tự hoàn thiện bản vẽ (Không giao việc cho trợ lý).</span>
+                                        <div class="d-flex align-items-center bg-light p-3 rounded-3 border border-light-subtle text-muted text-xs">
+                                            <i class="fa-solid fa-user-pen text-primary me-2 fa-lg"></i>
+                                            <span class="fw-semibold">Chương này do tác giả tự vẽ và hoàn thiện (Không phân công trợ lý).</span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
