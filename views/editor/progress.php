@@ -434,35 +434,31 @@ if (!function_exists('renderTaskStatusDot')) {
 }
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-4">
     <div>
-        <h2 class="h3 mb-1">Giám sát Tiến độ & Deadline Studio</h2>
+        <h2 class="h3 mb-1 fw-extrabold tracking-tight" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><i class="fa-solid fa-chart-line text-primary me-2"></i>Giám sát Tiến độ & Deadline Studio</h2>
         <p class="text-muted text-xs mb-0">Theo dõi tiến độ hoàn thành bản vẽ của nhóm tác giả (studio) theo thời gian thực để đảm bảo kịp deadline giao bản in.</p>
     </div>
 </div>
 
-<!-- Chú giải ký hiệu trạng thái vẽ (Legend) -->
-<div class="card shadow-sm border-0 rounded-3 mb-4">
-    <div class="card-body py-3">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-3 mb-lg-0 border-lg-end border-light-subtle">
-                <h6 class="fw-bold mb-2 text-xs text-uppercase text-muted"><i class="fas fa-info-circle me-1 text-primary"></i>Trạng thái công việc của Trợ lý</h6>
-                <div class="d-flex flex-wrap gap-3 text-xs">
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--success);"></span> Đã hoàn thành</div>
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--primary);"></span> Trợ lý đang vẽ</div>
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--warning);"></span> Chờ phân công/xử lý</div>
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--slate-200); border: 1px solid var(--slate-300);"></span> Không phân công (Tác giả tự vẽ)</div>
-                </div>
-            </div>
-            <div class="col-lg-6 ps-lg-4">
-                <h6 class="fw-bold mb-2 text-xs text-uppercase text-muted"><i class="fas fa-tasks me-1 text-secondary"></i>Các công đoạn chính trên mỗi trang</h6>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Background: Vẽ và dựng bối cảnh/nền của trang"><i class="fa-solid fa-mountain text-danger"></i> BG: Vẽ nền</span>
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Inking: Đi nét chi tiết cho nhân vật và tiền cảnh"><i class="fa-solid fa-pen-nib text-secondary"></i> INK: Đi nét</span>
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Coloring: Lên màu/Đổ bóng cho trang truyện"><i class="fa-solid fa-palette text-success"></i> COL: Lên màu</span>
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Effects: Thêm hiệu ứng âm thanh SFX, thoại đặc biệt"><i class="fa-solid fa-wand-magic-sparkles text-info"></i> FX: Hiệu ứng</span>
-                </div>
-            </div>
+<!-- Premium Legend Card -->
+<div class="legend-container-card d-flex align-items-center gap-4 flex-wrap text-xs mb-4">
+    <div class="pe-4 border-end border-slate-200" style="flex: 1; min-width: 300px;">
+        <div class="legend-title"><i class="fa-solid fa-circle-nodes text-primary me-1"></i> Trạng thái vẽ của trợ lý</div>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-success"></span> Đã hoàn thành</span>
+            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-primary"></span> Trợ lý đang vẽ</span>
+            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-warning"></span> Chờ phân công/xử lý</span>
+            <span class="d-flex align-items-center gap-1.5 text-muted fw-semibold"><span class="status-dot-pulse bg-secondary"></span> Tác giả tự vẽ</span>
+        </div>
+    </div>
+    <div style="flex: 1; min-width: 300px;">
+        <div class="legend-title"><i class="fa-solid fa-layer-group text-primary me-1"></i> Công đoạn chính trên mỗi trang</div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-mountain me-1"></i>BG: Vẽ nền</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-pen-nib me-1"></i>INK: Đi nét</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-palette me-1"></i>COL: Lên màu</span>
+            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>FX: Hiệu ứng</span>
         </div>
     </div>
 </div>
