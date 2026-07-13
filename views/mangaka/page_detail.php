@@ -216,6 +216,14 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                     Mô tả chi tiết...
                 </div>
 
+                <!-- Khối ghi chú lỗi từ Tác giả -->
+                <div id="selectedTaskAnnotationsContainer" class="d-none mt-3 p-2.5 rounded border border-danger-subtle bg-danger bg-opacity-10 text-start" style="border-color: #fca5a5 !important;">
+                    <div class="text-xs fw-bold text-danger mb-1.5"><i class="fas fa-exclamation-triangle me-1"></i>Ý kiến sửa đổi từ Tác giả (Mangaka):</div>
+                    <div id="selectedTaskAnnotationsList" class="list-group list-group-flush border rounded bg-white overflow-hidden" style="max-height: 150px; overflow-y: auto; font-size: 0.78rem;">
+                        <!-- Load bằng JS -->
+                    </div>
+                </div>
+
                 <!-- Nút nộp bài dành cho Trợ lý -->
                 <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant'): ?>
                     <div class="mt-3 pt-2 text-end border-top" id="submissionButtonContainer" style="border-top-color: #f1f5f9 !important;">
@@ -696,6 +704,16 @@ if (!empty($tasks)) {
 const BASE_PATH = '<?= BASE_PATH ?>';
 const pageTasksData = <?= json_encode($jsTasks) ?>;
 
+function escapeHtml(text) {
+    if (!text) return '';
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 function closeSelectedTaskBox() {
     document.getElementById('selectedTaskDetailsBox').classList.add('d-none');
     
@@ -822,6 +840,28 @@ function updateSelectedTaskBox(regionId) {
                     <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-success py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500; background-color: #10b981; border-color: #10b981; transition: all 0.2s;">
                         <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
                     </a>`;
+        }
+
+        const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
+        const annoList = document.getElementById('selectedTaskAnnotationsList');
+        if (annoContainer && annoList) {
+            annoContainer.classList.add('d-none');
+            annoList.innerHTML = '';
+            
+            if (task.submission_id && (task.status === 'rejected' || task.status === 'submitted' || task.status === 'completed')) {
+                fetch(BASE_PATH + '/index.php?controller=review&action=get_submission_annotations&submission_id=' + task.submission_id)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.success && res.annotations && res.annotations.length > 0) {
+                        res.annotations.forEach((ann, idx) => {
+                            const item = document.createElement('div');
+                            item.className = 'list-group-item px-2 py-1.5 border-bottom text-xs';
+                            item.innerHTML = `<strong>Lỗi #${idx + 1} tại (${ann.x}, ${ann.y}):</strong> <span class="text-slate-700">${escapeHtml(ann.comments)}</span>`;
+                            annoList.appendChild(item);
+                        });
+                        annoContainer.classList.remove('d-none');
+                    }
+                });
             }
         }
 
