@@ -93,14 +93,25 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                             <?php 
                             // Sắp xếp bản nộp từ cũ đến mới (Bản #1, Bản #2, ...)
                             $sortedHistory = array_reverse($submissionHistory);
+                            $totalSubmissions = count($sortedHistory);
                             foreach ($sortedHistory as $idx => $hist): 
-                                $verNum = $idx + 1;
+                                $isLatest = ($idx === $totalSubmissions - 1);
                                 $isCurrent = ($hist['submission_id'] == $submission['submission_id']);
                                 
                                 $statusText = '';
                                 if ($hist['status'] === 'approved') $statusText = ' (Đã duyệt)';
-                                elseif ($hist['status'] === 'rejected') $statusText = ' (Cần sửa)';
+                                elseif ($hist['status'] === 'rejected') $statusText = ' (Có lỗi)';
                                 else $statusText = ' (Chờ duyệt)';
+                                
+                                if ($isLatest) {
+                                    $label = "Bản vẽ mới" . $statusText;
+                                } else {
+                                    if ($totalSubmissions === 2) {
+                                        $label = "Bản vẽ cũ" . $statusText;
+                                    } else {
+                                        $label = "Bản vẽ cũ #" . ($idx + 1) . $statusText;
+                                    }
+                                }
                                 
                                 $btnClass = $isCurrent ? 'btn-outline-primary' : 'btn-outline-secondary';
                             ?>
@@ -114,7 +125,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                                        <?= $isCurrent ? 'checked' : '' ?>>
                                 <label class="btn <?= $btnClass ?>" for="btn-version-<?= $hist['submission_id'] ?>">
                                     <i class="fas <?= $isCurrent ? 'fa-image' : 'fa-history' ?> me-1"></i>
-                                    Bản vẽ #<?= $verNum ?><?= $statusText ?>
+                                    <?= htmlspecialchars($label) ?>
                                 </label>
                             <?php endforeach; ?>
                         </div>
