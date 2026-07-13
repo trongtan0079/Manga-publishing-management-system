@@ -289,13 +289,25 @@ if (!function_exists('renderTaskStatusDot')) {
 <!-- Chú giải ký hiệu trạng thái vẽ (Legend) -->
 <div class="card shadow-sm border-0 rounded-3 mb-4">
     <div class="card-body py-3">
-        <h6 class="fw-bold mb-2 text-xs text-uppercase text-muted"><i class="fas fa-info-circle me-1"></i>Chú giải ký hiệu trạng thái vẽ của các trang</h6>
-        <div class="d-flex flex-wrap gap-3 text-xs">
-            <div class="d-flex align-items-center"><span class="badge bg-success me-1" style="width:12px; height:12px; display:inline-block; padding:0;"></span> Đã hoàn thành</div>
-            <div class="d-flex align-items-center"><span class="badge bg-primary me-1" style="width:12px; height:12px; display:inline-block; padding:0;"></span> Trợ lý đang vẽ</div>
-            <div class="d-flex align-items-center"><span class="badge bg-warning text-dark me-1" style="width:12px; height:12px; display:inline-block; padding:0;"></span> Chờ phân công/xử lý</div>
-            <div class="d-flex align-items-center"><span class="badge bg-light border text-muted me-1" style="width:12px; height:12px; display:inline-block; padding:0;"></span> Không phân công (Tác giả tự vẽ)</div>
-            <div class="ms-auto fw-bold text-dark"><span class="text-danger">BG</span>: Vẽ nền | <span class="text-secondary">INK</span>: Đi nét | <span class="text-success">COL</span>: Lên màu | <span class="text-info">FX</span>: Hiệu ứng SFX</div>
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-3 mb-lg-0 border-lg-end border-light-subtle">
+                <h6 class="fw-bold mb-2 text-xs text-uppercase text-muted"><i class="fas fa-info-circle me-1 text-primary"></i>Trạng thái công việc của Trợ lý</h6>
+                <div class="d-flex flex-wrap gap-3 text-xs">
+                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--success);"></span> Đã hoàn thành</div>
+                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--primary);"></span> Trợ lý đang vẽ</div>
+                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--warning);"></span> Chờ phân công/xử lý</div>
+                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--slate-200); border: 1px solid var(--slate-300);"></span> Không phân công (Tác giả tự vẽ)</div>
+                </div>
+            </div>
+            <div class="col-lg-6 ps-lg-4">
+                <h6 class="fw-bold mb-2 text-xs text-uppercase text-muted"><i class="fas fa-tasks me-1 text-secondary"></i>Các công đoạn chính trên mỗi trang</h6>
+                <div class="d-flex flex-wrap gap-2">
+                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Background: Vẽ và dựng bối cảnh/nền của trang"><i class="fa-solid fa-mountain text-danger"></i> BG: Vẽ nền</span>
+                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Inking: Đi nét chi tiết cho nhân vật và tiền cảnh"><i class="fa-solid fa-pen-nib text-secondary"></i> INK: Đi nét</span>
+                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Coloring: Lên màu/Đổ bóng cho trang truyện"><i class="fa-solid fa-palette text-success"></i> COL: Lên màu</span>
+                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Effects: Thêm hiệu ứng âm thanh SFX, thoại đặc biệt"><i class="fa-solid fa-wand-magic-sparkles text-info"></i> FX: Hiệu ứng</span>
+                </div>
+            </div>
         </div>
     </div>
 </div>
