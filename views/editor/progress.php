@@ -617,11 +617,13 @@ if (!function_exists('renderTaskStatusDot')) {
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        <?php else: ?>
-                            <div class="border rounded p-3 mb-4 bg-light text-center py-4">
-                                <i class="fas fa-check-circle text-success fa-2x mb-2" style="opacity: 0.7;"></i>
-                                <div class="text-dark fw-bold small">Không có chương truyện đang vẽ</div>
-                                <p class="text-muted text-xs mb-0">Tất cả các chương đã nộp duyệt thành công hoặc tác giả chưa tạo chương nháp mới.</p>
+                            <!-- Styled Premium Empty State -->
+                            <div class="premium-empty-state mb-4 shadow-sm">
+                                <div class="empty-state-icon-wrapper text-success bg-success-subtle bg-opacity-25">
+                                    <i class="fa-solid fa-circle-check text-success"></i>
+                                </div>
+                                <div class="text-slate-800 fw-extrabold text-xs mb-1">Không có chương đang vẽ (No Active Chapter)</div>
+                                <p class="text-muted text-xs mb-0 px-3">Tất cả các chương đã nộp duyệt thành công hoặc tác giả chưa khởi tạo chương nháp mới.</p>
                             </div>
                         <?php endif; ?>
 
@@ -671,8 +673,10 @@ if (!function_exists('renderTaskStatusDot')) {
                                     </tbody>
                                 </table>
                             </div>
-                        <?php else: ?>
-                            <p class="text-muted small mb-0"><i class="fa-regular fa-circle-check text-success me-1"></i>Không có công việc (Task) nào của trợ lý đang trễ hạn.</p>
+                            <div class="d-flex align-items-center bg-success-subtle bg-opacity-10 border border-success-subtle p-3 rounded-3 text-success text-xs">
+                                <i class="fa-solid fa-circle-check me-2 fa-lg"></i>
+                                <span class="fw-bold">Tất cả công việc (Tasks) của trợ lý đều đang đúng hạn!</span>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -680,12 +684,12 @@ if (!function_exists('renderTaskStatusDot')) {
         <?php endforeach; ?>
     <?php else: ?>
         <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-body py-5 text-center text-muted">
-                    <i class="fas fa-folder-open fa-3x mb-3 text-secondary" style="opacity: 0.35;"></i>
-                    <h5 class="fw-bold text-dark mb-2">Không có dự án hoạt động</h5>
-                    <p class="text-muted mb-0 small">Hiện không có dự án truyện tranh nào được gán chuyên trách cho bạn.</p>
+            <div class="premium-empty-state py-5 shadow-sm">
+                <div class="empty-state-icon-wrapper text-primary bg-primary-subtle bg-opacity-25 mb-3">
+                    <i class="fa-solid fa-book-open"></i>
                 </div>
+                <h5 class="fw-extrabold text-slate-800 mb-2 text-sm">Không có dự án hoạt động</h5>
+                <p class="text-muted mb-0 small px-3">Hiện tại chưa có dự án truyện tranh nào được phân công biên tập chuyên trách cho tài khoản của bạn.</p>
             </div>
         </div>
     <?php endif; ?>
