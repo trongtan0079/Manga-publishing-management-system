@@ -240,14 +240,33 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                 </div>
                 <h4 id="selectedTaskTitle" class="fw-extrabold text-slate-800 mb-3" style="font-size: 1.25rem; line-height: 1.35; letter-spacing: -0.015em;">Tiêu đề công việc</h4>
                 
-                <div class="d-flex flex-wrap gap-3 mb-2 text-xs" style="font-size: 0.72rem;">
-                    <div><i class="fas fa-tag text-slate-400 me-1"></i>Loại: <span id="selectedTaskType" class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-0.5 font-semibold">Vẽ nền</span></div>
-                    <div><i class="fas fa-user-circle text-slate-400 me-1"></i>Trợ lý: <strong id="selectedTaskAssistant" class="text-slate-700">Assistant One</strong></div>
-                    <div><i class="fas fa-exclamation-triangle text-slate-400 me-1"></i>Độ ưu tiên: <span id="selectedTaskPriority" class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-0.5">Trung bình</span></div>
-                    <div><i class="far fa-calendar-alt text-slate-400 me-1"></i>Hạn chót: <strong id="selectedTaskDueDate" class="text-slate-700">09/07/2026</strong></div>
+                <!-- Metadata card grid -->
+                <div class="row g-2 mb-3 text-xs">
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border border-light-subtle bg-slate-50 d-flex flex-column gap-1">
+                            <span class="text-slate-400 text-xs fw-semibold"><i class="fa-solid fa-tag me-1 text-primary"></i> Loại việc</span>
+                            <span id="selectedTaskType" class="badge bg-primary-subtle text-primary border border-primary-subtle py-1 text-truncate font-bold text-xs text-start d-inline-block w-fit" style="border-radius: 4px;">Vẽ nền</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border border-light-subtle bg-slate-50 d-flex flex-column gap-1">
+                            <span class="text-slate-400 text-xs fw-semibold"><i class="fa-solid fa-user me-1 text-success"></i> Trợ lý</span>
+                            <strong id="selectedTaskAssistant" class="text-slate-700 text-xs text-truncate">Assistant One</strong>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border border-light-subtle bg-slate-50 d-flex flex-column gap-1">
+                            <span class="text-slate-400 text-xs fw-semibold"><i class="fa-solid fa-circle-exclamation me-1 text-warning"></i> Độ ưu tiên</span>
+                            <span id="selectedTaskPriority" class="badge bg-warning-subtle text-warning border border-warning-subtle py-1 text-truncate font-bold text-xs text-start d-inline-block w-fit" style="border-radius: 4px;">Trung bình</span>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="p-2 rounded-3 border border-light-subtle bg-slate-50 d-flex flex-column gap-1">
+                            <span class="text-slate-400 text-xs fw-semibold"><i class="fa-regular fa-calendar-check me-1 text-info"></i> Hạn chót</span>
+                            <strong id="selectedTaskDueDate" class="text-slate-700 text-xs text-truncate">09/07/2026</strong>
+                        </div>
+                    </div>
                 </div>
-                
-                <hr class="my-2 border-slate-200" style="opacity: 0.08;">
                 
                 <div class="text-xs text-slate-500 font-semibold mb-1" style="font-size: 0.72rem;"><i class="fas fa-file-alt me-1 text-slate-400"></i>Mục tiêu & Yêu cầu chi tiết:</div>
                 <div id="selectedTaskDescription" class="bg-slate-50 p-2.5 rounded border border-slate-100 text-slate-700 text-start overflow-y-auto mb-2" style="max-height: 180px; line-height: 1.5; font-size: 0.8rem; border-color: #e2e8f0 !important;">
