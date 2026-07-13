@@ -132,6 +132,45 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
     <?php unset($_SESSION['error']); ?>
 <?php endif; ?>
 
+<!-- Khối thông báo hướng dẫn tác giả nộp bài duyệt cho Editor -->
+<?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
+    <?php if ($page['status'] === 'approved'): ?>
+        <?php if ($chapter['status'] === 'drawing'): ?>
+            <div class="alert alert-success d-flex justify-content-between align-items-center mb-4 py-3 border border-success-subtle shadow-sm bg-success bg-opacity-10 text-success" style="border-color: #a7f3d0 !important;">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-check-circle fa-2x me-3 text-success"></i>
+                    <div class="text-start">
+                        <h6 class="fw-bold mb-1" style="color: #065f46;">Trang truyện đã hoàn tất vẽ!</h6>
+                        <p class="mb-0 text-xs text-dark" style="font-size: 0.8rem;">Tất cả trợ lý đã hoàn thành phần việc vẽ của họ. Tác giả hãy quay lại chương truyện để tiến hành <strong>Nộp duyệt Bản hoàn chỉnh</strong> cho Editor.</p>
+                    </div>
+                </div>
+                <div>
+                    <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-success btn-sm fw-bold px-3 py-1.5 shadow-xs" style="font-size: 0.8rem; background-color: #059669; border-color: #059669;">
+                        <i class="fas fa-paper-plane me-1.5"></i>Nộp duyệt chương truyện
+                    </a>
+                </div>
+            </div>
+        <?php elseif ($chapter['status'] === 'reviewing_final' || $chapter['status'] === 'reviewing'): ?>
+            <div class="alert alert-info d-flex align-items-center mb-4 py-3 border border-info-subtle bg-info bg-opacity-10 text-info" style="border-color: #93c5fd !important;">
+                <i class="fas fa-info-circle fa-2x me-3 text-info"></i>
+                <div class="text-start">
+                    <h6 class="fw-bold mb-1" style="color: #1e3a8a;">Bản thảo chương truyện đang chờ duyệt</h6>
+                    <p class="mb-0 text-xs text-dark" style="font-size: 0.8rem;">Bạn đã nộp duyệt chương truyện thành công. Hiện tại trang truyện này đang được Editor kiểm duyệt định kỳ.</p>
+                </div>
+            </div>
+        <?php elseif ($chapter['status'] === 'approved' || $chapter['status'] === 'published'): ?>
+            <div class="alert alert-primary d-flex align-items-center mb-4 py-3 border border-primary-subtle bg-primary bg-opacity-10 text-primary" style="border-color: #bfdbfe !important;">
+                <i class="fas fa-check-double fa-2x me-3 text-primary"></i>
+                <div class="text-start">
+                    <h6 class="fw-bold mb-1" style="color: #1e40af;">Trang truyện đã được duyệt & phát hành</h6>
+                    <p class="mb-0 text-xs text-dark" style="font-size: 0.8rem;">Editor đã phê duyệt hoàn tất chương truyện này để đưa vào xuất bản.</p>
+                </div>
+            </div>
+        <?php endif; ?>
+    <?php endif; ?>
+<?php endif; ?>
+
+
 <!-- Khối thanh điều hướng và nút hành động -->
 <div class="mb-3 d-flex justify-content-between align-items-center">
     <!-- Nút quay lại danh sách trang của chapter -->
