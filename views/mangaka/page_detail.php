@@ -339,7 +339,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         if ($canDraw) $wrapperClasses .= ' drawing-active';
                     ?>
                     <div id="mangaPageWrapper" class="<?= $wrapperClasses ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden; user-select: none;">
-                        <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%; -webkit-user-drag: none;" draggable="false">
+                        <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%; -webkit-user-drag: none; pointer-events: <?= $canDraw ? 'none' : 'auto' ?>;" draggable="false">
                         
                         <?php if (!empty($regions)): ?>
                             <?php foreach ($regions as $region): 
