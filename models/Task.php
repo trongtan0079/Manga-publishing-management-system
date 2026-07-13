@@ -178,4 +178,37 @@ class Task extends Model {
         $stmt->execute(['assistant_id' => $assistantId]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Lấy danh sách các task cũ (chưa hoàn thành) nằm trên danh sách các vùng được chỉ định
+     */
+    public function findByPageRegionIds($pageId, $regionIdsArray) {
+        if (empty($regionIdsArray)) return [];
+        $inQuery = implode(',', array_fill(0, count($regionIdsArray), '?'));
+        $sql = "SELECT * FROM {$this->table} 
+                WHERE page_id = ? AND status != 'completed' AND page_region_id IN ($inQuery)";
+        $params = array_merge([$pageId], $regionIdsArray);
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Xóa các task riêng lẻ (chưa hoàn thành) thuộc về các vùng được chỉ định
+     * Thường dùng khi gộp chúng vào một Group Task mới để tránh trùng lặp
+     */
+    public function deleteActiveTasksByRegionIds($pageId, $regionIdsArray) {
+        if (empty($regionIdsArray)) return 0;
+        $inQuery = implode(',', array_fill(0, count($regionIdsArray), '?'));
+        // Xóa task có page_region_id nằm trong danh sách (đây là các task lẻ)
+        $sql = "DELETE FROM {$this->table} 
+                WHERE page_id = ? AND status != 'completed' AND page_region_id IN ($inQuery)";
+        $params = array_merge([$pageId], $regionIdsArray);
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->rowCount();
+    }
 }
+
