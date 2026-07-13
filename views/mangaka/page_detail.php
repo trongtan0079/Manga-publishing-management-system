@@ -53,6 +53,20 @@ $isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published'
     z-index: 100 !important;
     box-shadow: 0 0 25px currentColor !important;
 }
+
+/* Kiểu dáng cho hộp chọn khi vẽ phân vùng mới */
+.selection-box {
+    position: absolute;
+    border: 2px dashed #0d6efd;
+    background-color: rgba(13, 110, 253, 0.2);
+    pointer-events: none;
+    z-index: 1000;
+}
+
+/* Con trỏ chuột khi ở chế độ vẽ */
+.drawing-active {
+    cursor: crosshair !important;
+}
 </style>
 <?php
 
