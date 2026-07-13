@@ -59,6 +59,11 @@ $rankingModel = new SeriesRanking();
                                 </td>
                                 <td>
                                     <strong><?= htmlspecialchars($ranking['series_title']) ?></strong>
+                                    <?php if (!empty($ranking['latest_chapter_number'])): ?>
+                                        <div class="text-muted text-xs mt-1" style="font-size: 0.75rem;"><i class="fas fa-book-open me-1"></i>Chương mới nhất: <?= htmlspecialchars($ranking['latest_chapter_number']) ?></div>
+                                    <?php else: ?>
+                                        <div class="text-muted text-xs mt-1" style="font-size: 0.75rem;"><i class="fas fa-book-open me-1"></i>Chưa có chương xuất bản</div>
+                                    <?php endif; ?>
                                 </td>
                                 <td>
                                     <div class="fw-bold text-primary fs-5">#<?= htmlspecialchars($ranking['rank_position']) ?></div>

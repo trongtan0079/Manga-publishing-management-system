@@ -71,6 +71,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </td>
                                 <td>
                                     <strong><?= htmlspecialchars($ranking['series_title']) ?></strong>
+                                    <?php if (!empty($ranking['latest_chapter_number'])): ?>
+                                        <div class="text-muted text-xs mt-1" style="font-size: 0.75rem;"><i class="fas fa-book-open me-1"></i>Chương mới nhất: <?= htmlspecialchars($ranking['latest_chapter_number']) ?></div>
+                                    <?php else: ?>
+                                        <div class="text-muted text-xs mt-1" style="font-size: 0.75rem;"><i class="fas fa-book-open me-1"></i>Chưa có chương xuất bản</div>
+                                    <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($ranking['mangaka_name'] ?? '') ?></td>
                                 <td><?= htmlspecialchars($ranking['board_member_name'] ?? '') ?></td>
