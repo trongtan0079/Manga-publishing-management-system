@@ -217,4 +217,3 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS is_head_board TINYINT DEFAULT 0 AFTER
 ALTER TABLE pages ADD COLUMN IF NOT EXISTS old_image_url VARCHAR(255) DEFAULT NULL AFTER image_url;
 ALTER TABLE chapters MODIFY COLUMN status ENUM('drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published') DEFAULT 'drafting';
 ALTER TABLE pages MODIFY COLUMN status ENUM('drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published') DEFAULT 'drafting';
-
