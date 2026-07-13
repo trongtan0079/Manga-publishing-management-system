@@ -30,6 +30,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         position: sticky;
         top: 24px;
         transition: all 0.3s ease;
+        max-width: 320px;
     }
     .series-cover-card:hover {
         box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
@@ -70,11 +71,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         transition: all 0.2s ease;
     }
     .metadata-item {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.6) !important;
+        border-radius: 12px !important;
         transition: all 0.2s ease;
     }
     .metadata-item:hover {
-        background-color: #f1f5f9 !important;
-        transform: translateX(2px);
+        background-color: #f8fafc !important;
+        border-color: rgba(79, 70, 229, 0.25) !important;
+        transform: translateY(-1px);
     }
 </style>
 
