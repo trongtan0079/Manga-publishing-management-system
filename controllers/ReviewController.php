@@ -520,6 +520,11 @@ class ReviewController extends BaseController
         $height = isset($input['height']) ? intval($input['height']) : 0;
         $comments = isset($input['comments']) ? trim($input['comments']) : '';
 
+        $x = max(0, min($x, 800));
+        $y = max(0, min($y, 1000));
+        $width = max(1, min($width, 800 - $x));
+        $height = max(1, min($height, 1000 - $y));
+
         if ($x < 0 || $y < 0 || $width <= 0 || $height <= 0 || ($x + $width) > 800 || ($y + $height) > 1000) {
             echo json_encode(['success' => false, 'error' => 'Tọa độ vùng đánh dấu không hợp lệ']);
             exit;
@@ -761,6 +766,11 @@ class ReviewController extends BaseController
         $width = isset($input['width']) ? intval($input['width']) : 0;
         $height = isset($input['height']) ? intval($input['height']) : 0;
         $comments = isset($input['comments']) ? trim($input['comments']) : '';
+
+        $x = max(0, min($x, 800));
+        $y = max(0, min($y, 1000));
+        $width = max(1, min($width, 800 - $x));
+        $height = max(1, min($height, 1000 - $y));
 
         if ($x < 0 || $y < 0 || $width <= 0 || $height <= 0 || ($x + $width) > 800 || ($y + $height) > 1000) {
             echo json_encode(['success' => false, 'error' => 'Tọa độ vùng đánh dấu không hợp lệ']);
