@@ -29,7 +29,7 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
             </button>
         </div>
 
-        <a class="navbar-brand d-flex align-items-center" style="margin-left: 68px !important;" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=<?= (isset($_SESSION) && isset($_SESSION['role_name'])) ? htmlspecialchars($_SESSION['role_name']) : '' ?>">
+        <a class="navbar-brand d-flex align-items-center" href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=dashboard&action=<?= (isset($_SESSION) && isset($_SESSION['role_name'])) ? htmlspecialchars($_SESSION['role_name']) : '' ?>">
             <i class="fas fa-book-open me-2 fs-3" style="color: var(--primary);"></i>
             <span class="fw-bold" style="color: var(--slate-800); font-size: 1.45rem; letter-spacing: -0.5px;">Manga<span style="color: var(--primary);">PMS</span></span>
         </a>
