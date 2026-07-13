@@ -159,6 +159,12 @@ h3, .h3 { font-size: 1.25rem; font-weight: 700; }
     align-items: center;
 }
 
+@media (min-width: 992px) {
+    .navbar-brand {
+        margin-left: 68px !important;
+    }
+}
+
 /* Sidebar collapsed adjustments for Navbar toggle */
 #desktopSidebarToggle {
     border-radius: 50%;
@@ -188,6 +194,9 @@ h3, .h3 { font-size: 1.25rem; font-weight: 700; }
     display: flex;
     flex-direction: column;
     max-height: 100vh;
+    --bs-offcanvas-bg: var(--sidebar-gradient-start);
+    --bs-offcanvas-width: var(--sidebar-width);
+    --bs-offcanvas-border-color: rgba(255, 255, 255, 0.05);
 }
 
 @media (min-width: 992px) {
