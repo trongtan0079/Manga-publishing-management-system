@@ -316,27 +316,43 @@ if (!function_exists('renderTaskStatusDot')) {
     <?php if (!empty($progressData)): ?>
         <?php foreach ($progressData as $data): ?>
             <div class="col-xl-6 col-md-12 mb-4">
-                <div class="card shadow-sm border-0 rounded-3 h-100">
+                <div class="card shadow-sm border-0 rounded-3 h-100 progress-series-card">
+                    <!-- Header bộ truyện được cải tiến -->
                     <div class="card-header bg-white py-3 border-bottom border-light">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="card-title mb-0 fw-bold text-dark">
-                                <i class="fas fa-book me-2 text-primary"></i><?= htmlspecialchars($data['series']['title']) ?>
-                            </h5>
-                            <?= $this->getSeriesStatusBadge($data['series']['status']) ?>
+                        <div class="d-flex align-items-center gap-3 w-100">
+                            <?php if (!empty($data['series']['cover_image'])): ?>
+                                <img src="<?= BASE_PATH . $data['series']['cover_image'] ?>" class="series-cover-mini" alt="<?= htmlspecialchars($data['series']['title']) ?>">
+                            <?php else: ?>
+                                <div class="series-cover-placeholder">
+                                    <i class="fa-solid fa-book text-muted"></i>
+                                </div>
+                            <?php endif; ?>
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1 fw-bold text-dark text-truncate" style="max-width: 250px;">
+                                    <?= htmlspecialchars($data['series']['title']) ?>
+                                </h5>
+                                <div class="text-xs text-muted">
+                                    <i class="fa-regular fa-folder me-1"></i> ID bộ truyện: #<?= $data['series']['series_id'] ?>
+                                </div>
+                            </div>
+                            <div>
+                                <?= $this->getSeriesStatusBadge($data['series']['status']) ?>
+                            </div>
                         </div>
                     </div>
+                    
                     <div class="card-body p-4">
                         <!-- 1. Tiến độ xuất bản tổng thể -->
-                        <div class="mb-4 bg-light p-3 rounded" style="border-left: 4px solid #198754;">
-                            <div class="d-flex justify-content-between mb-1">
+                        <div class="mb-4 bg-light p-3 rounded-3" style="border-left: 4px solid var(--success);">
+                            <div class="d-flex justify-content-between mb-1 align-items-center">
                                 <span class="text-muted text-xs text-uppercase fw-bold"><i class="fas fa-layer-group me-1"></i>Tiến độ xuất bản tổng thể</span>
-                                <span class="text-dark fw-bold"><?= $data['completed_chapters'] ?> / <?= $data['total_chapters'] ?> chương đã duyệt</span>
+                                <span class="text-dark fw-bold text-xs bg-white px-2 py-1 rounded shadow-sm"><?= $data['completed_chapters'] ?> / <?= $data['total_chapters'] ?> chương đã duyệt</span>
                             </div>
                             <?php 
                             $percent = $data['total_chapters'] > 0 ? round(($data['completed_chapters'] / $data['total_chapters']) * 100) : 0; 
                             ?>
-                            <div class="progress" style="height: 8px; border-radius: 4px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: <?= $percent ?>%; border-radius: 4px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress mt-2" style="height: 8px; border-radius: 4px;">
+                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?= $percent ?>%; border-radius: 4px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
 
