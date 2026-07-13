@@ -592,6 +592,13 @@ class SubmissionController extends BaseController
         $reviewModel = new \Review();
         $reviews = $reviewModel->findBySubmissionId($id);
 
+        $submissionHistory = [];
+        if (!empty($submission['task_id'])) {
+            $submissionHistory = $this->submissionModel->findByTaskId($submission['task_id']);
+        } elseif (!empty($submission['chapter_id'])) {
+            $submissionHistory = $this->submissionModel->findByChapterId($submission['chapter_id']);
+        }
+
         $pages = [];
         if (!empty($submission['chapter_id'])) {
             require_once __DIR__ . '/../models/Page.php';
