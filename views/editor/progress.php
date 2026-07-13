@@ -21,112 +21,175 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <style>
-    /* Premium scoped progress dashboard styles */
+    /* Elite SaaS styling for progress tracking */
     .progress-series-card {
-        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid var(--border-color) !important;
         background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+    .progress-series-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
     .progress-series-card:hover {
         transform: translateY(-4px);
-        box-shadow: var(--shadow-md) !important;
-        border-color: rgba(79, 70, 229, 0.25) !important;
+        box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04) !important;
+        border-color: rgba(99, 102, 241, 0.3) !important;
+    }
+    .progress-series-card:hover::before {
+        opacity: 1;
     }
     .series-cover-mini {
-        width: 44px;
-        height: 58px;
+        width: 52px;
+        height: 70px;
         object-fit: cover;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--slate-200);
-        box-shadow: var(--shadow-sm);
+        border-radius: 10px;
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        transition: transform 0.3s ease;
+    }
+    .progress-series-card:hover .series-cover-mini {
+        transform: scale(1.08) rotate(1deg);
     }
     .series-cover-placeholder {
-        width: 44px;
-        height: 58px;
-        background: var(--slate-100);
-        border-radius: var(--radius-sm);
+        width: 52px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--slate-100) 0%, var(--slate-200) 100%);
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: var(--slate-400);
-        border: 1px solid var(--slate-200);
+        border: 1px dashed var(--slate-300);
     }
-    .legend-indicator-dot {
-        width: 10px;
-        height: 10px;
+    
+    /* Pulsating statuses */
+    .status-dot-pulse {
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         display: inline-block;
-        box-shadow: 0 0 4px rgba(0,0,0,0.15);
+        margin-right: 6px;
+        position: relative;
     }
-    .legend-abbr-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background-color: var(--slate-50);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-weight: 700;
+    .status-dot-pulse::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        animation: pulse-ring 2s infinite ease-in-out;
+        opacity: 0.7;
+    }
+    .status-dot-pulse.bg-success::after { background-color: var(--success); }
+    .status-dot-pulse.bg-primary::after { background-color: var(--primary); }
+    .status-dot-pulse.bg-warning::after { background-color: var(--warning); }
+    .status-dot-pulse.bg-secondary::after { background-color: var(--secondary); }
+    
+    @keyframes pulse-ring {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        100% { transform: scale(2.8); opacity: 0; }
+    }
+    
+    /* Interactive legends */
+    .legend-container-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        padding: 14px 20px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01);
+    }
+    .legend-title {
         font-size: 0.72rem;
-        color: var(--slate-700);
-        border: 1px solid var(--slate-200);
-        transition: all 0.2s ease;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--slate-400);
+        margin-bottom: 8px;
     }
-    .legend-abbr-pill:hover {
-        background-color: var(--slate-100);
-        transform: translateY(-1px);
+    .legend-indicator-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
     }
-    .legend-abbr-pill i {
-        font-size: 0.8rem;
-    }
+    
+    /* Progress and Chapter Card Box */
     .chapter-card-box {
-        background-color: var(--slate-50);
-        border: 1px solid var(--slate-200);
-        border-radius: var(--radius);
-        transition: all 0.2s ease;
+        background: #ffffff;
+        border: 1px solid var(--slate-100) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01), 0 2px 4px -1px rgba(15, 23, 42, 0.01) !important;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .chapter-card-box::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--primary);
     }
     .chapter-card-box:hover {
-        background-color: #ffffff;
-        border-color: rgba(79, 70, 229, 0.2);
-        box-shadow: var(--shadow-sm);
+        border-color: rgba(99, 102, 241, 0.2) !important;
+        box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04) !important;
     }
     
     /* Page Matrix Cards */
     .page-matrix-container {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 10px;
+        gap: 12px;
         margin-top: 5px;
     }
     .page-item-card {
         background: #ffffff;
         border: 1px solid var(--slate-200);
-        border-radius: var(--radius);
-        padding: 8px;
-        transition: all 0.2s ease-in-out;
+        border-radius: 14px;
+        padding: 12px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         position: relative;
-        box-shadow: var(--shadow-sm);
-        height: 175px;
+        height: 200px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }
     .page-item-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.15);
         border-color: var(--primary);
     }
     .page-preview-box {
         position: relative;
-        height: 85px;
-        border-radius: var(--radius-sm);
-        background: var(--slate-100);
+        height: 100px;
+        border-radius: 10px;
+        background: var(--slate-50);
         overflow: hidden;
-        border: 1px solid var(--slate-200);
+        border: 1px solid var(--slate-100);
         display: flex;
         align-items: center;
         justify-content: center;
         color: var(--slate-400);
-        margin-top: 4px;
+        margin-top: 6px;
     }
     .page-preview-box img {
         width: 100%;
@@ -138,17 +201,36 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         transform: scale(1.08);
     }
     .page-number-tag {
-        font-size: 0.72rem;
+        font-size: 0.78rem;
         font-weight: 800;
         color: var(--slate-800);
     }
     
-    /* Task Status Icons */
+    /* Custom Sleek Badges for Page Cards */
+    .page-item-card .badge {
+        font-size: 0.6rem !important;
+        font-weight: 700;
+        padding: 3px 6px !important;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    
+    /* Custom Badges for Card Header */
+    .progress-series-card .card-header .badge {
+        font-size: 0.68rem !important;
+        font-weight: 700;
+        padding: 4px 8px !important;
+        border-radius: 6px;
+        letter-spacing: -0.01em;
+    }
+    
+    /* Elegant Task Status Badges instead of simple blocks */
     .task-status-dot-container {
         display: flex;
         justify-content: space-between;
         gap: 4px;
-        margin-top: 6px;
+        margin-top: 10px;
     }
     .task-status-dot {
         flex: 1;
@@ -157,57 +239,78 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         align-items: center;
         justify-content: center;
         border-radius: 6px;
-        font-size: 0.7rem;
-        font-weight: 700;
+        font-size: 0.62rem;
+        font-weight: 800;
         cursor: help;
         transition: all 0.2s ease;
         border: 1px solid transparent;
+        text-transform: uppercase;
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .task-status-dot:hover {
-        transform: translateY(-1.5px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        transform: translateY(-1px);
     }
     
-    /* Soft colors for task statuses */
+    /* Modern Colors for Task States (glowing style) */
     .task-status-completed {
-        background-color: var(--success-soft) !important;
-        color: var(--success) !important;
-        border-color: var(--success-border) !important;
+        background-color: rgba(16, 185, 129, 0.06) !important;
+        color: #059669 !important;
+        border-color: rgba(16, 185, 129, 0.2) !important;
+    }
+    .task-status-completed:hover {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
     .task-status-in_progress {
-        background-color: var(--primary-soft) !important;
-        color: var(--primary) !important;
-        border-color: rgba(79, 70, 229, 0.2) !important;
+        background-color: rgba(59, 130, 246, 0.06) !important;
+        color: #2563eb !important;
+        border-color: rgba(59, 130, 246, 0.2) !important;
+        animation: pulse-border 2s infinite ease-in-out;
+    }
+    .task-status-in_progress:hover {
+        background-color: rgba(59, 130, 246, 0.12) !important;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
     }
     .task-status-pending {
-        background-color: var(--warning-soft) !important;
-        color: #b45309 !important;
-        border-color: var(--warning-border) !important;
+        background-color: rgba(245, 158, 11, 0.06) !important;
+        color: #d97706 !important;
+        border-color: rgba(245, 158, 11, 0.2) !important;
+    }
+    .task-status-pending:hover {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
     }
     .task-status-null {
         background-color: var(--slate-50) !important;
         color: var(--slate-400) !important;
         border-color: var(--slate-200) !important;
-        opacity: 0.65;
+        opacity: 0.6;
     }
     
-    /* Zoom Modal Trigger button */
+    @keyframes pulse-border {
+        0% { border-color: rgba(59, 130, 246, 0.2); }
+        50% { border-color: rgba(59, 130, 246, 0.6); }
+        100% { border-color: rgba(59, 130, 246, 0.2); }
+    }
+    
+    /* Zoom Preview Button */
     .btn-zoom-preview {
         position: absolute;
-        right: 4px;
-        bottom: 4px;
-        width: 22px;
-        height: 22px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.9);
+        right: 6px;
+        bottom: 6px;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.95);
         color: var(--slate-700);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         border: 1px solid var(--slate-200);
-        transition: all 0.15s ease;
+        transition: all 0.2s ease;
         opacity: 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .page-item-card:hover .btn-zoom-preview {
         opacity: 1;
@@ -216,6 +319,58 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         background: var(--primary);
         color: #ffffff;
         border-color: var(--primary);
+        transform: scale(1.1);
+    }
+
+    /* Premium Empty State */
+    .premium-empty-state {
+        background: #ffffff;
+        border: 1px dashed var(--slate-200);
+        border-radius: 16px;
+        padding: 40px 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+    }
+    .premium-empty-state:hover {
+        border-color: var(--primary-soft);
+    }
+    .empty-state-icon-wrapper {
+        width: 64px;
+        height: 64px;
+        background: rgba(79, 70, 229, 0.05);
+        color: var(--primary);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+        position: relative;
+    }
+    .empty-state-icon-wrapper::after {
+        content: '';
+        position: absolute;
+        top: -4px; left: -4px; right: -4px; bottom: -4px;
+        border: 2px solid rgba(79, 70, 229, 0.1);
+        border-radius: 50%;
+        animation: pulse-ring 2s infinite ease-in-out;
+    }
+    
+    /* Clean Overall Progress Block */
+    .overall-progress-box {
+        background: linear-gradient(135deg, var(--slate-50) 0%, #ffffff 100%);
+        border: 1px solid var(--slate-200) !important;
+        border-radius: 12px;
+        padding: 16px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+    }
+    .gradient-progress-bar {
+        background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
+    }
+    .gradient-task-progress-bar {
+        background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%) !important;
     }
 </style>
 
@@ -279,35 +434,31 @@ if (!function_exists('renderTaskStatusDot')) {
 }
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-4">
     <div>
-        <h2 class="h3 mb-1">Giám sát Tiến độ & Deadline Studio</h2>
+        <h2 class="h3 mb-1 fw-extrabold tracking-tight" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><i class="fa-solid fa-chart-line text-primary me-2"></i>Giám sát Tiến độ & Deadline Studio</h2>
         <p class="text-muted text-xs mb-0">Theo dõi tiến độ hoàn thành bản vẽ của nhóm tác giả (studio) theo thời gian thực để đảm bảo kịp deadline giao bản in.</p>
     </div>
 </div>
 
-<!-- Chú giải ký hiệu trạng thái vẽ (Legend) -->
-<div class="card shadow-sm border-0 rounded-3 mb-4">
-    <div class="card-body py-3">
-        <div class="row align-items-center">
-            <div class="col-lg-6 mb-3 mb-lg-0 border-lg-end border-light-subtle">
-                <h6 class="fw-bold mb-2 text-xs text-uppercase text-muted"><i class="fas fa-info-circle me-1 text-primary"></i>Trạng thái công việc của Trợ lý</h6>
-                <div class="d-flex flex-wrap gap-3 text-xs">
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--success);"></span> Đã hoàn thành</div>
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--primary);"></span> Trợ lý đang vẽ</div>
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--warning);"></span> Chờ phân công/xử lý</div>
-                    <div class="d-flex align-items-center"><span class="legend-indicator-dot me-1" style="background-color: var(--slate-200); border: 1px solid var(--slate-300);"></span> Không phân công (Tác giả tự vẽ)</div>
-                </div>
-            </div>
-            <div class="col-lg-6 ps-lg-4">
-                <h6 class="fw-bold mb-2 text-xs text-uppercase text-muted"><i class="fas fa-tasks me-1 text-secondary"></i>Các công đoạn chính trên mỗi trang</h6>
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Background: Vẽ và dựng bối cảnh/nền của trang"><i class="fa-solid fa-mountain text-danger"></i> BG: Vẽ nền</span>
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Inking: Đi nét chi tiết cho nhân vật và tiền cảnh"><i class="fa-solid fa-pen-nib text-secondary"></i> INK: Đi nét</span>
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Coloring: Lên màu/Đổ bóng cho trang truyện"><i class="fa-solid fa-palette text-success"></i> COL: Lên màu</span>
-                    <span class="legend-abbr-pill" data-bs-toggle="tooltip" title="Effects: Thêm hiệu ứng âm thanh SFX, thoại đặc biệt"><i class="fa-solid fa-wand-magic-sparkles text-info"></i> FX: Hiệu ứng</span>
-                </div>
-            </div>
+<!-- Premium Legend Card -->
+<div class="legend-container-card d-flex align-items-center gap-4 flex-wrap text-xs mb-4">
+    <div class="pe-4 border-end border-slate-200" style="flex: 1; min-width: 300px;">
+        <div class="legend-title"><i class="fa-solid fa-circle-nodes text-primary me-1"></i> Trạng thái vẽ của trợ lý</div>
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-success"></span> Đã hoàn thành</span>
+            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-primary"></span> Trợ lý đang vẽ</span>
+            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-warning"></span> Chờ phân công/xử lý</span>
+            <span class="d-flex align-items-center gap-1.5 text-muted fw-semibold"><span class="status-dot-pulse bg-secondary"></span> Tác giả tự vẽ</span>
+        </div>
+    </div>
+    <div style="flex: 1; min-width: 300px;">
+        <div class="legend-title"><i class="fa-solid fa-layer-group text-primary me-1"></i> Công đoạn chính trên mỗi trang</div>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-mountain me-1"></i>BG: Vẽ nền</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-pen-nib me-1"></i>INK: Đi nét</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-palette me-1"></i>COL: Lên màu</span>
+            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>FX: Hiệu ứng</span>
         </div>
     </div>
 </div>
@@ -328,11 +479,11 @@ if (!function_exists('renderTaskStatusDot')) {
                                 </div>
                             <?php endif; ?>
                             <div class="flex-grow-1">
-                                <h5 class="card-title mb-1 fw-bold text-dark text-truncate" style="max-width: 250px;">
+                                <h5 class="card-title mb-1 fw-extrabold text-slate-800 text-truncate" style="max-width: 250px;">
                                     <?= htmlspecialchars($data['series']['title']) ?>
                                 </h5>
                                 <div class="text-xs text-muted">
-                                    <i class="fa-regular fa-folder me-1"></i> ID bộ truyện: #<?= $data['series']['series_id'] ?>
+                                    <i class="fa-regular fa-folder-open me-1"></i> ID bộ truyện: #<?= $data['series']['series_id'] ?>
                                 </div>
                             </div>
                             <div>
@@ -342,22 +493,24 @@ if (!function_exists('renderTaskStatusDot')) {
                     </div>
                     
                     <div class="card-body p-4">
+                        <?php 
+                        $percent = $data['total_chapters'] > 0 ? round(($data['completed_chapters'] / $data['total_chapters']) * 100) : 0; 
+                        ?>
                         <!-- 1. Tiến độ xuất bản tổng thể -->
-                        <div class="mb-4 bg-light p-3 rounded-3" style="border-left: 4px solid var(--success);">
-                            <div class="d-flex justify-content-between mb-1 align-items-center">
-                                <span class="text-muted text-xs text-uppercase fw-bold"><i class="fas fa-layer-group me-1"></i>Tiến độ xuất bản tổng thể</span>
-                                <span class="text-dark fw-bold text-xs bg-white px-2 py-1 rounded shadow-sm"><?= $data['completed_chapters'] ?> / <?= $data['total_chapters'] ?> chương đã duyệt</span>
+                        <div class="mb-4 p-3 overall-progress-box">
+                            <div class="d-flex justify-content-between mb-2 align-items-center">
+                                <span class="text-slate-600 text-xs text-uppercase fw-bold"><i class="fa-solid fa-square-poll-horizontal me-1 text-success"></i> Tiến độ xuất bản tổng thể</span>
+                                <span class="text-slate-700 fw-extrabold text-xs bg-white px-2.5 py-1 rounded-2 border border-light-subtle shadow-xs">
+                                    <?= $data['completed_chapters'] ?> / <?= $data['total_chapters'] ?> chương (<?= $percent ?>%)
+                                </span>
                             </div>
-                            <?php 
-                            $percent = $data['total_chapters'] > 0 ? round(($data['completed_chapters'] / $data['total_chapters']) * 100) : 0; 
-                            ?>
-                            <div class="progress mt-2" style="height: 8px; border-radius: 4px;">
-                                <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?= $percent ?>%; border-radius: 4px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                            <div class="progress mt-2" style="height: 6px; border-radius: 4px; background-color: var(--slate-200); box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                                <div class="progress-bar gradient-progress-bar" role="progressbar" style="width: <?= $percent ?>%; border-radius: 4px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
 
                         <!-- 2. Giám sát thời gian thực chương đang vẽ (Active Chapter) -->
-                        <h6 class="fw-bold text-dark mb-3"><i class="fas fa-hourglass-half text-danger me-2"></i>Chương đang thực hiện (Active Chapter)</h6>
+                        <h6 class="fw-bold text-slate-800 mb-3"><i class="fas fa-hourglass-half text-danger me-2"></i>Chương đang thực hiện (Active Chapter)</h6>
                         
                         <?php if (!empty($data['active_chapter'])): 
                             $actChap = $data['active_chapter'];
@@ -371,45 +524,46 @@ if (!function_exists('renderTaskStatusDot')) {
                             $deadlineBadge = 'bg-light text-dark border';
                             $deadlineText = $daysLeft . ' ngày nữa';
                             if ($isOverdue) {
-                                $deadlineBadge = 'bg-danger text-white';
+                                $deadlineBadge = 'bg-danger text-white border-0';
                                 $deadlineText = 'Trễ ' . $daysLeft . ' ngày';
                             } elseif ($daysLeft <= 3) {
-                                $deadlineBadge = 'bg-warning text-dark';
+                                $deadlineBadge = 'bg-warning text-dark border-0';
                                 $deadlineText = 'Còn ' . $daysLeft . ' ngày';
                             }
                         ?>
-                            <div class="border rounded-3 p-3 mb-4 bg-white shadow-xs chapter-card-box">
-                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <div class="border rounded-4 p-4 mb-4 bg-white shadow-xs chapter-card-box">
+                                <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
                                     <div>
-                                        <strong class="text-slate-800 fs-6">Chương <?= htmlspecialchars($actChap['chapter_number']) ?>: <?= htmlspecialchars($actChap['title'] ?? 'Chưa đặt tên') ?></strong>
+                                        <span class="text-muted text-xs d-block mb-1 text-uppercase fw-bold"><i class="fa-solid fa-folder-open me-1"></i> Đang biên tập</span>
+                                        <strong class="text-slate-900 fs-6">Chương <?= htmlspecialchars($actChap['chapter_number']) ?>: <?= htmlspecialchars($actChap['title'] ?? 'Chưa đặt tên') ?></strong>
                                         <span class="ms-2"><?= $this->getStatusBadge($actChap['status']) ?></span>
                                     </div>
-                                    <div>
-                                        <span class="text-muted text-xs me-2">Hạn bản in:</span>
-                                        <span class="badge <?= $deadlineBadge ?>"><?= $deadlineText ?></span>
+                                    <div class="bg-light p-2 px-3 rounded-3 border border-light-subtle d-flex align-items-center gap-2">
+                                        <span class="text-slate-500 text-xs"><i class="fa-regular fa-calendar me-1"></i> Hạn bản in:</span>
+                                        <span class="badge <?= $deadlineBadge ?> rounded-pill px-2.5 py-1 text-xs fw-extrabold shadow-sm"><i class="fa-regular fa-clock me-1"></i><?= $deadlineText ?></span>
                                     </div>
                                 </div>
 
-                                <!-- Thanh tiến độ công việc trong chapter (Đã sửa lỗi hiển thị khi 0 công việc) -->
-                                <div class="mb-3">
+                                <!-- Thanh tiến độ công việc trong chapter -->
+                                <div class="mb-4">
                                     <?php if ($actStats['total_tasks'] > 0): ?>
-                                        <div class="d-flex justify-content-between text-xs mb-1">
-                                            <span class="text-muted">Hoàn thiện nét vẽ studio (Trợ lý):</span>
-                                            <strong class="text-dark"><?= $actStats['completed_tasks'] ?> / <?= $actStats['total_tasks'] ?> công việc hoàn thành (<?= $actStats['completion_rate'] ?>%)</strong>
+                                        <div class="d-flex justify-content-between text-xs mb-1.5 align-items-center">
+                                            <span class="text-slate-600 fw-bold"><i class="fa-solid fa-list-check me-1 text-primary"></i> Tiến độ vẽ (Trợ lý):</span>
+                                            <span class="text-slate-800 fw-extrabold bg-light p-1 px-2 rounded"><?= $actStats['completed_tasks'] ?> / <?= $actStats['total_tasks'] ?> công việc (<?= $actStats['completion_rate'] ?>%)</span>
                                         </div>
-                                        <div class="progress" style="height: 6px; border-radius: 3px;">
-                                            <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated" role="progressbar" style="width: <?= $actStats['completion_rate'] ?>%; border-radius: 3px;" aria-valuenow="<?= $actStats['completion_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                        <div class="progress" style="height: 6px; border-radius: 4px; background-color: var(--slate-100); box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                                            <div class="progress-bar gradient-task-progress-bar" role="progressbar" style="width: <?= $actStats['completion_rate'] ?>%; border-radius: 4px;" aria-valuenow="<?= $actStats['completion_rate'] ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     <?php else: ?>
-                                        <div class="d-flex align-items-center bg-light p-2 rounded-2 border border-light-subtle text-muted text-xs">
-                                            <i class="fa-solid fa-user-pen text-primary me-2"></i>
-                                            <span>Chương này do tác giả tự hoàn thiện bản vẽ (Không giao việc cho trợ lý).</span>
+                                        <div class="d-flex align-items-center bg-light p-3 rounded-3 border border-light-subtle text-muted text-xs">
+                                            <i class="fa-solid fa-user-pen text-primary me-2 fa-lg"></i>
+                                            <span class="fw-semibold">Chương này do tác giả tự vẽ và hoàn thiện (Không phân công trợ lý).</span>
                                         </div>
                                     <?php endif; ?>
                                 </div>
 
                                 <!-- Ma trận tiến độ trang vẽ (Real-time Grid dạng thẻ ảnh xem trước) -->
-                                <div class="studio-progress-grid-wrapper bg-light p-3 rounded-3" style="max-height: 400px; overflow-y: auto;">
+                                <div class="studio-progress-grid-wrapper p-3 rounded-4 border border-light-subtle shadow-inner" style="background-color: var(--slate-100); max-height: 420px; overflow-y: auto;">
                                     <?php if (!empty($data['active_chapter_pages'])): ?>
                                         <div class="page-matrix-container">
                                             <?php foreach ($data['active_chapter_pages'] as $pageData): 
@@ -463,16 +617,18 @@ if (!function_exists('renderTaskStatusDot')) {
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        <?php else: ?>
-                            <div class="border rounded p-3 mb-4 bg-light text-center py-4">
-                                <i class="fas fa-check-circle text-success fa-2x mb-2" style="opacity: 0.7;"></i>
-                                <div class="text-dark fw-bold small">Không có chương truyện đang vẽ</div>
-                                <p class="text-muted text-xs mb-0">Tất cả các chương đã nộp duyệt thành công hoặc tác giả chưa tạo chương nháp mới.</p>
+                            <!-- Styled Premium Empty State -->
+                            <div class="premium-empty-state mb-4 shadow-sm">
+                                <div class="empty-state-icon-wrapper text-success bg-success-subtle bg-opacity-25">
+                                    <i class="fa-solid fa-circle-check text-success"></i>
+                                </div>
+                                <div class="text-slate-800 fw-extrabold text-xs mb-1">Không có chương đang vẽ (No Active Chapter)</div>
+                                <p class="text-muted text-xs mb-0 px-3">Tất cả các chương đã nộp duyệt thành công hoặc tác giả chưa khởi tạo chương nháp mới.</p>
                             </div>
                         <?php endif; ?>
 
                         <!-- 3. Top 5 Deadline công việc sắp tới -->
-                        <h6 class="fw-bold text-dark mb-3"><i class="far fa-calendar-alt me-2 text-warning"></i>Công việc sắp đến hạn hoặc trễ hạn</h6>
+                        <h6 class="fw-bold text-slate-800 mb-3"><i class="fa-regular fa-calendar-check me-2 text-warning"></i>Công việc sắp đến hạn hoặc trễ hạn</h6>
                         <?php if (!empty($data['pending_tasks'])): ?>
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.8rem;">
@@ -480,33 +636,49 @@ if (!function_exists('renderTaskStatusDot')) {
                                         <?php foreach ($data['pending_tasks'] as $task): 
                                             $tDueDate = strtotime($task['due_date']);
                                             $tOverdue = $tDueDate < time();
+                                            $tDaysLeft = ceil(abs($tDueDate - time()) / (60 * 60 * 24));
                                             
-                                            $tBadge = 'bg-light text-dark border';
+                                            $tBadge = 'bg-light text-secondary border';
                                             if ($tOverdue) {
-                                                $tBadge = 'bg-danger text-white';
+                                                $tBadge = 'bg-danger-subtle text-danger border border-danger-subtle';
+                                            } elseif ($tDaysLeft <= 3) {
+                                                $tBadge = 'bg-warning-subtle text-warning border border-warning-subtle';
                                             }
                                         ?>
-                                            <tr>
-                                                <td class="ps-0">
-                                                    <strong><?= htmlspecialchars($task['title']) ?></strong>
-                                                    <span class="text-muted d-block" style="font-size: 0.75rem;">Chapter <?= htmlspecialchars($task['chapter_number']) ?></span>
+                                            <tr style="transition: background-color 0.2s ease;">
+                                                <td class="ps-0 py-2">
+                                                    <strong class="text-slate-800"><?= htmlspecialchars($task['title']) ?></strong>
+                                                    <span class="text-muted d-block text-xs" style="font-size: 0.72rem;">Chương <?= htmlspecialchars($task['chapter_number']) ?></span>
                                                 </td>
-                                                <td>
+                                                <td class="py-2">
                                                     <?php
+                                                    $typeBadgeClass = 'bg-light text-secondary border';
                                                     $typeText = 'Khác';
                                                     switch ($task['task_type']) {
-                                                        case 'background': $typeText = 'Nền'; break;
-                                                        case 'inking': $typeText = 'Nét'; break;
-                                                        case 'coloring': $typeText = 'Màu'; break;
-                                                        case 'effects': $typeText = 'FX'; break;
+                                                        case 'background': 
+                                                            $typeBadgeClass = 'bg-danger-subtle text-danger border border-danger-subtle';
+                                                            $typeText = 'BG: Nền'; 
+                                                            break;
+                                                        case 'inking': 
+                                                            $typeBadgeClass = 'bg-primary-subtle text-primary border border-primary-subtle';
+                                                            $typeText = 'INK: Nét'; 
+                                                            break;
+                                                        case 'coloring': 
+                                                            $typeBadgeClass = 'bg-success-subtle text-success border border-success-subtle';
+                                                            $typeText = 'COL: Màu'; 
+                                                            break;
+                                                        case 'effects': 
+                                                            $typeBadgeClass = 'bg-info-subtle text-info border border-info-subtle';
+                                                            $typeText = 'FX: SFX'; 
+                                                            break;
                                                     }
                                                     ?>
-                                                    <span class="badge bg-light text-secondary border"><?= $typeText ?></span>
+                                                    <span class="badge <?= $typeBadgeClass ?> text-xs font-semibold px-2 py-0.5"><?= $typeText ?></span>
                                                 </td>
-                                                <td class="text-end pe-0">
+                                                <td class="text-end pe-0 py-2">
                                                     <?php if ($task['due_date']): ?>
-                                                        <span class="badge <?= $tBadge ?>">
-                                                            <i class="far fa-clock me-1"></i><?= date('d/m/Y', $tDueDate) ?>
+                                                        <span class="badge <?= $tBadge ?> px-2 py-1 text-xs">
+                                                            <i class="fa-regular fa-clock me-1"></i><?= date('d/m/Y', $tDueDate) ?>
                                                         </span>
                                                     <?php else: ?>
                                                         <span class="text-muted">-</span>
@@ -517,8 +689,10 @@ if (!function_exists('renderTaskStatusDot')) {
                                     </tbody>
                                 </table>
                             </div>
-                        <?php else: ?>
-                            <p class="text-muted small mb-0"><i class="fa-regular fa-circle-check text-success me-1"></i>Không có công việc (Task) nào của trợ lý đang trễ hạn.</p>
+                            <div class="d-flex align-items-center bg-success-subtle bg-opacity-10 border border-success-subtle p-3 rounded-3 text-success text-xs">
+                                <i class="fa-solid fa-circle-check me-2 fa-lg"></i>
+                                <span class="fw-bold">Tất cả công việc (Tasks) của trợ lý đều đang đúng hạn!</span>
+                            </div>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -526,12 +700,12 @@ if (!function_exists('renderTaskStatusDot')) {
         <?php endforeach; ?>
     <?php else: ?>
         <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-body py-5 text-center text-muted">
-                    <i class="fas fa-folder-open fa-3x mb-3 text-secondary" style="opacity: 0.35;"></i>
-                    <h5 class="fw-bold text-dark mb-2">Không có dự án hoạt động</h5>
-                    <p class="text-muted mb-0 small">Hiện không có dự án truyện tranh nào được gán chuyên trách cho bạn.</p>
+            <div class="premium-empty-state py-5 shadow-sm">
+                <div class="empty-state-icon-wrapper text-primary bg-primary-subtle bg-opacity-25 mb-3">
+                    <i class="fa-solid fa-book-open"></i>
                 </div>
+                <h5 class="fw-extrabold text-slate-800 mb-2 text-sm">Không có dự án hoạt động</h5>
+                <p class="text-muted mb-0 small px-3">Hiện tại chưa có dự án truyện tranh nào được phân công biên tập chuyên trách cho tài khoản của bạn.</p>
             </div>
         </div>
     <?php endif; ?>
