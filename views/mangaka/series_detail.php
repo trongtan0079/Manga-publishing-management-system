@@ -27,16 +27,22 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         border-radius: 16px !important;
         overflow: hidden;
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
+        position: sticky;
+        top: 24px;
+        transition: all 0.3s ease;
+    }
+    .series-cover-card:hover {
+        box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05), 0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
     }
     .series-cover-img {
-        max-height: 420px;
+        height: 280px;
         object-fit: cover;
         width: 100%;
-        border-bottom: 1px solid var(--slate-200);
-        transition: transform 0.3s ease;
+        border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+        transition: transform 0.5s ease;
     }
     .series-cover-card:hover .series-cover-img {
-        transform: scale(1.03);
+        transform: scale(1.04);
     }
     .detail-card {
         border: 1px solid rgba(226, 232, 240, 0.8) !important;
@@ -47,20 +53,27 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     }
     .clickable-row {
         cursor: pointer;
-        transition: background-color 0.2s ease;
+        transition: all 0.2s ease;
     }
     .clickable-row:hover {
-        background-color: var(--slate-50) !important;
+        background-color: #f8fafc !important;
     }
     .gradient-progress-bar {
-        background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%) !important;
+        background: linear-gradient(90deg, #4f46e5 0%, #818cf8 100%) !important;
     }
     .action-btn-pill {
-        border-radius: 6px !important;
-        font-size: 0.72rem !important;
-        font-weight: 700 !important;
-        padding: 4px 10px !important;
+        border-radius: 20px !important;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        padding: 5px 12px !important;
         transition: all 0.2s ease;
+    }
+    .metadata-item {
+        transition: all 0.2s ease;
+    }
+    .metadata-item:hover {
+        background-color: #f1f5f9 !important;
+        transform: translateX(2px);
     }
 </style>
 
@@ -112,11 +125,21 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <?php endif; ?>
 </div>
 
+<!-- Tiêu đề trang Premium -->
+<div class="mb-4">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+        <h1 class="fw-extrabold text-slate-900 mb-0" style="font-size: 2.2rem; letter-spacing: -0.03em;"><?= htmlspecialchars($series['title']) ?></h1>
+        <div style="transform: scale(0.9); transform-origin: left center;">
+            <?= $this->getSeriesStatusBadge($series) ?>
+        </div>
+    </div>
+    <p class="text-slate-500 text-sm mt-1 mb-0">Thông tin chi tiết và tiến độ triển khai tác phẩm</p>
+</div>
+
 <div class="row">
     <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
-    <!-- Cột trái: Ảnh bìa và Thông tin cơ bản -->
     <div class="col-md-4 mb-4">
-        <div class="card series-cover-card h-100">
+        <div class="card series-cover-card">
             <?php if (!empty($series['cover_image'])): 
                 $coverUrl = $series['cover_image'];
                 $resolvedCover = (strpos($coverUrl, 'http') === 0) ? $coverUrl : BASE_PATH . '/' . ltrim($coverUrl, '/');
@@ -125,41 +148,33 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <img src="<?= htmlspecialchars($resolvedCover) ?>" class="series-cover-img" alt="Cover Image">
                 </div>
             <?php else: ?>
-                <div class="bg-light d-flex flex-column align-items-center justify-content-center text-muted border-bottom" style="height: 300px;">
+                <div class="bg-light d-flex flex-column align-items-center justify-content-center text-muted border-bottom" style="height: 250px;">
                     <i class="fa-solid fa-image fa-3x mb-3 text-slate-300"></i>
                     <span class="text-xs fw-semibold uppercase tracking-wider text-slate-400">Chưa có ảnh bìa</span>
                 </div>
             <?php endif; ?>
             
-            <div class="card-body p-4 d-flex flex-column justify-content-between">
-                <div>
-                    <h5 class="fw-extrabold text-slate-900 mb-4" style="font-size: 1.3rem; letter-spacing: -0.02em; line-height: 1.3;"><?= htmlspecialchars($series['title']) ?></h5>
-                    
-                    <ul class="list-unstyled d-flex flex-column gap-3 text-xs mb-0">
-                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
-                            <span class="text-slate-500 fw-medium"><i class="fa-solid fa-circle-info me-1.5 text-primary"></i>Trạng thái:</span>
-                            <span class="fw-bold"><?= $this->getSeriesStatusBadge($series) ?></span>
-                        </li>
-                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
-                            <span class="text-slate-500 fw-medium"><i class="fa-regular fa-calendar-check me-1.5 text-success"></i>Lịch xuất bản:</span>
-                            <span>
-                                <?php if ($series['status'] === 'planning'): ?>
-                                    <span class="badge bg-light text-dark border">Chờ duyệt</span>
-                                <?php else: ?>
-                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-bold px-2 py-0.5" style="border-radius: 4px;"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
-                                <?php endif; ?>
-                            </span>
-                        </li>
-                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
-                            <span class="text-slate-500 fw-medium"><i class="fa-regular fa-clock me-1.5 text-info"></i>Ngày tạo:</span>
-                            <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></span>
-                        </li>
-                        <li class="d-flex align-items-center justify-content-between p-2 rounded bg-slate-50 border border-light-subtle">
-                            <span class="text-slate-500 fw-medium"><i class="fa-solid fa-arrows-rotate me-1.5 text-warning"></i>Cập nhật:</span>
-                            <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?></span>
-                        </li>
-                    </ul>
-                </div>
+            <div class="card-body p-4">
+                <ul class="list-unstyled d-flex flex-column gap-3.5 text-xs mb-0">
+                    <li class="metadata-item d-flex align-items-center justify-content-between p-2.5 rounded bg-slate-50 border border-light-subtle">
+                        <span class="text-slate-500 fw-medium"><i class="fa-regular fa-calendar-check me-1.5 text-success"></i>Lịch xuất bản:</span>
+                        <span>
+                            <?php if ($series['status'] === 'planning'): ?>
+                                <span class="badge bg-light text-dark border">Chờ duyệt</span>
+                            <?php else: ?>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-bold px-2 py-0.5" style="border-radius: 4px;"><?= htmlspecialchars(($series['publish_type'] ?? 'weekly') === 'weekly' ? 'Hàng tuần' : 'Hàng tháng') ?></span>
+                            <?php endif; ?>
+                        </span>
+                    </li>
+                    <li class="metadata-item d-flex align-items-center justify-content-between p-2.5 rounded bg-slate-50 border border-light-subtle">
+                        <span class="text-slate-500 fw-medium"><i class="fa-regular fa-clock me-1.5 text-info"></i>Ngày tạo:</span>
+                        <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['created_at']))) ?></span>
+                    </li>
+                    <li class="metadata-item d-flex align-items-center justify-content-between p-2.5 rounded bg-slate-50 border border-light-subtle">
+                        <span class="text-slate-500 fw-medium"><i class="fa-solid fa-arrows-rotate me-1.5 text-warning"></i>Cập nhật:</span>
+                        <span class="text-slate-700 fw-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($series['updated_at']))) ?></span>
+                    </li>
+                </ul>
                 
                 <?php if (!empty($series['proposal_file'])): ?>
                 <div class="mt-4 border-top pt-3">
