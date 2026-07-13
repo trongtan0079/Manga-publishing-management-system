@@ -203,7 +203,7 @@ class Task extends Model {
         $inQuery = implode(',', array_fill(0, count($regionIdsArray), '?'));
         // Xóa task có page_region_id nằm trong danh sách (đây là các task lẻ)
         $sql = "DELETE FROM {$this->table} 
-                WHERE page_id = ? AND status != 'completed' AND page_region_id IN ($inQuery)";
+                WHERE page_id = ? AND status != 'completed' AND page_region_id IN ($inQuery) AND (grouped_region_ids IS NULL OR grouped_region_ids = '')";
         $params = array_merge([$pageId], $regionIdsArray);
         
         $stmt = $this->conn->prepare($sql);
