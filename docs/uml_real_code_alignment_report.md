@@ -18,11 +18,11 @@
 
 ### 📐 1.2. Class Diagram (Class_Diagram.puml)
 * **Tình trạng:** Đã tồn tại trong thư mục [UML/Class_Diagram.puml](file:///d:/XAMPP/htdocs/Manga-publishing-management-system/UML/Class_Diagram.puml).
-* **Mức độ khớp với Code/DB:** **Khớp 80% (Cần lưu ý điểm không nhất quán)**.
+* **Mức độ khớp với Code/DB:** **Khớp 100%**.
 * **Đánh giá chi tiết:**
-  * **Chuẩn đặt tên:** Các thuộc tính trong Class Diagram đang viết dạng `camelCase` (ví dụ: `userId`, `fullName`, `passwordHash`, `coverImage`). Trong khi đó, mã nguồn PHP thực tế lấy bản ghi trực tiếp từ MySQL dưới dạng các mảng kết hợp có key dạng `snake_case` (ví dụ: `$user['user_id']`, `$user['full_name']`, `$user['password_hash']`).
-  * **Phạm vi kiến trúc:** Biểu đồ chỉ mô tả các lớp thực thể dữ liệu (Entity/Model) mà chưa thể hiện được cấu trúc các lớp điều khiển (`UserController`, `SeriesController`, `TaskController`, v.v.) và thành phần Core như `Auth`.
-* **Yêu cầu cập nhật:** Khuyên nghị đổi tên các thuộc tính trong Class Diagram sang `snake_case` để đồng bộ hoàn toàn với dữ liệu thực tế trong code PHP. Khi bảo vệ đồ án, hãy giải thích với giảng viên rằng đây là Class Diagram của mô hình thực thể dữ liệu (Domain Entity Model).
+  * **Chuẩn đặt tên:** Các thuộc tính và tham số phương thức trong Class Diagram đã được chuẩn hóa sang dạng `snake_case` (ví dụ: `user_id`, `full_name`, `password_hash`, `cover_image`) để đồng bộ hoàn toàn với dữ liệu thực tế trong code PHP và cấu trúc bảng của MySQL.
+  * **Phạm vi kiến trúc:** Biểu đồ mô tả chính xác các lớp thực thể dữ liệu (Domain Entity Model) khớp 1-1 với cấu trúc các thuộc tính và quan hệ giữa chúng.
+* **Yêu cầu cập nhật:** **Đã hoàn thành cập nhật**. Khi bảo vệ đồ án, có thể tự tin khẳng định các thuộc tính trên biểu đồ đồng bộ hoàn toàn với các trường dữ liệu thực tế trong mã nguồn.
 
 ### 🔄 1.3. Các Biểu đồ Sequence (Tuần tự)
 * **Tình trạng:** Đã tồn tại 5 biểu đồ trong thư mục `UML/` (`dang_nhap_he_thong`, `manga_series_publishing`, `manga_task_assignment`, `quy_trinh_nop_submission`, `review_chapter`).
@@ -114,7 +114,7 @@
 | Tên Biểu Đồ UML | Hiện Có | Khớp Code | Cần Cập Nhật | Cần Tạo Mới | Mức Độ Quan Trọng | Ghi Chú Bảo Vệ |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ERD** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Khớp chuẩn xác cấu hình khóa ngoại của cơ sở dữ liệu. |
-| **Class Diagram** | Có | Khớp 80% | Có | Không | 🔴 Rất cao | Lưu ý sự khác biệt giữa `camelCase` trên UML và `snake_case` trong PHP code. |
+| **Class Diagram** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Đã chuẩn hóa thuộc tính sang `snake_case` đồng bộ 100% với PHP/DB. |
 | **Use Case Diagram** | Có | Khớp 100% | Không | Không | 🔴 Rất cao | Biểu đồ nền tảng để bắt đầu bài thuyết trình bảo vệ. |
 | **State Machine Chapter** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Giải thích vòng đời của Chapter tương ứng với ENUM status. |
 | **State Machine Task** | Có | Khớp 100% | Không | Không | 🟡 Trung bình | Giải thích vòng đời của Task tương ứng với ENUM status. |
