@@ -79,6 +79,20 @@ class SubmissionController extends BaseController
         if ($role === 'assistant') {
             // Chỉ hiển thị task được giao cho assistant và chưa hoàn thành
             $tasks = $this->taskModel->findActiveByAssistantId($userId);
+
+            // Với các task nhóm (grouped_region_ids), fetch tọa độ tất cả vùng để hiển thị preview
+            require_once __DIR__ . '/../models/PageRegion.php';
+            $pageRegionModel = new \PageRegion();
+            foreach ($tasks as &$t) {
+                if (!empty($t['grouped_region_ids'])) {
+                    $gids = array_filter(array_map('intval', explode(',', $t['grouped_region_ids'])));
+                    if (!empty($gids)) {
+                        $t['grouped_regions_data'] = $pageRegionModel->findByIds($gids);
+                    }
+                }
+            }
+            unset($t); // Giải phóng reference
+
             require_once __DIR__ . '/../views/assistant/upload_submission.php';
         } elseif ($role === 'mangaka') {
             $type = $_GET['type'] ?? '';
