@@ -82,4 +82,21 @@ class Series extends Model {
         $stmt->execute();
         return (int)$stmt->fetchColumn();
     }
+
+    /**
+     * Kiểm tra xem Tiêu đề bộ truyện đã tồn tại chưa (không phân biệt hoa thường)
+     */
+    public function isTitleExists($title, $excludeId = null) {
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE LOWER(title) = LOWER(:title)";
+        if ($excludeId !== null) {
+            $sql .= " AND series_id != :exclude_id";
+        }
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindParam(':title', $title);
+        if ($excludeId !== null) {
+            $stmt->bindParam(':exclude_id', $excludeId, PDO::PARAM_INT);
+        }
+        $stmt->execute();
+        return $stmt->fetchColumn() > 0;
+    }
 }

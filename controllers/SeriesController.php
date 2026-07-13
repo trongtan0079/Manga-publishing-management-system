@@ -178,6 +178,13 @@ class SeriesController extends BaseController
                 exit;
             }
 
+            // Kiểm tra trùng lặp tiêu đề bộ truyện
+            if ($this->seriesModel->isTitleExists($title)) {
+                $_SESSION['error'] = "Tiêu đề bộ truyện '{$title}' đã tồn tại trong hệ thống. Vui lòng chọn tiêu đề khác!";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=create');
+                exit;
+            }
+
             $coverImage = '';
             // Kiểm tra có tải file lên không
             if (isset($_FILES['cover_file']) && $_FILES['cover_file']['error'] === UPLOAD_ERR_OK) {
@@ -351,6 +358,13 @@ class SeriesController extends BaseController
 
             if (mb_strlen($title) > 255) {
                 $_SESSION['error'] = "Tiêu đề truyện không được vượt quá 255 ký tự!";
+                header('Location: ' . BASE_PATH . '/index.php?controller=series&action=edit&id=' . $id);
+                exit;
+            }
+
+            // Kiểm tra trùng lặp tiêu đề bộ truyện (loại trừ chính bộ truyện đang sửa)
+            if ($this->seriesModel->isTitleExists($title, $id)) {
+                $_SESSION['error'] = "Tiêu đề bộ truyện '{$title}' đã được sử dụng bởi bộ truyện khác. Vui lòng chọn tiêu đề khác!";
                 header('Location: ' . BASE_PATH . '/index.php?controller=series&action=edit&id=' . $id);
                 exit;
             }
