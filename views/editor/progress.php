@@ -21,112 +21,175 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
 <style>
-    /* Premium scoped progress dashboard styles */
+    /* Elite SaaS styling for progress tracking */
     .progress-series-card {
-        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid var(--border-color) !important;
         background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+    .progress-series-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
     .progress-series-card:hover {
         transform: translateY(-4px);
-        box-shadow: var(--shadow-md) !important;
-        border-color: rgba(79, 70, 229, 0.25) !important;
+        box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04) !important;
+        border-color: rgba(99, 102, 241, 0.3) !important;
+    }
+    .progress-series-card:hover::before {
+        opacity: 1;
     }
     .series-cover-mini {
-        width: 44px;
-        height: 58px;
+        width: 52px;
+        height: 70px;
         object-fit: cover;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--slate-200);
-        box-shadow: var(--shadow-sm);
+        border-radius: 10px;
+        border: 2px solid #ffffff;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        transition: transform 0.3s ease;
+    }
+    .progress-series-card:hover .series-cover-mini {
+        transform: scale(1.08) rotate(1deg);
     }
     .series-cover-placeholder {
-        width: 44px;
-        height: 58px;
-        background: var(--slate-100);
-        border-radius: var(--radius-sm);
+        width: 52px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--slate-100) 0%, var(--slate-200) 100%);
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: var(--slate-400);
-        border: 1px solid var(--slate-200);
+        border: 1px dashed var(--slate-300);
     }
-    .legend-indicator-dot {
-        width: 10px;
-        height: 10px;
+    
+    /* Pulsating statuses */
+    .status-dot-pulse {
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         display: inline-block;
-        box-shadow: 0 0 4px rgba(0,0,0,0.15);
+        margin-right: 6px;
+        position: relative;
     }
-    .legend-abbr-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        background-color: var(--slate-50);
-        padding: 5px 12px;
-        border-radius: 20px;
-        font-weight: 700;
+    .status-dot-pulse::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        animation: pulse-ring 2s infinite ease-in-out;
+        opacity: 0.7;
+    }
+    .status-dot-pulse.bg-success::after { background-color: var(--success); }
+    .status-dot-pulse.bg-primary::after { background-color: var(--primary); }
+    .status-dot-pulse.bg-warning::after { background-color: var(--warning); }
+    .status-dot-pulse.bg-secondary::after { background-color: var(--secondary); }
+    
+    @keyframes pulse-ring {
+        0% { transform: scale(0.95); opacity: 0.8; }
+        100% { transform: scale(2.8); opacity: 0; }
+    }
+    
+    /* Interactive legends */
+    .legend-container-card {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: 16px;
+        padding: 14px 20px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01);
+    }
+    .legend-title {
         font-size: 0.72rem;
-        color: var(--slate-700);
-        border: 1px solid var(--slate-200);
-        transition: all 0.2s ease;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--slate-400);
+        margin-bottom: 8px;
     }
-    .legend-abbr-pill:hover {
-        background-color: var(--slate-100);
-        transform: translateY(-1px);
+    .legend-indicator-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
     }
-    .legend-abbr-pill i {
-        font-size: 0.8rem;
-    }
+    
+    /* Progress and Chapter Card Box */
     .chapter-card-box {
-        background-color: var(--slate-50);
-        border: 1px solid var(--slate-200);
-        border-radius: var(--radius);
-        transition: all 0.2s ease;
+        background: #ffffff;
+        border: 1px solid var(--slate-100) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01), 0 2px 4px -1px rgba(15, 23, 42, 0.01) !important;
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .chapter-card-box::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--primary);
     }
     .chapter-card-box:hover {
-        background-color: #ffffff;
-        border-color: rgba(79, 70, 229, 0.2);
-        box-shadow: var(--shadow-sm);
+        border-color: rgba(99, 102, 241, 0.2) !important;
+        box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04) !important;
     }
     
     /* Page Matrix Cards */
     .page-matrix-container {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 10px;
+        gap: 12px;
         margin-top: 5px;
     }
     .page-item-card {
         background: #ffffff;
         border: 1px solid var(--slate-200);
-        border-radius: var(--radius);
-        padding: 8px;
-        transition: all 0.2s ease-in-out;
+        border-radius: 14px;
+        padding: 12px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         position: relative;
-        box-shadow: var(--shadow-sm);
-        height: 175px;
+        height: 200px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }
     .page-item-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.15);
         border-color: var(--primary);
     }
     .page-preview-box {
         position: relative;
-        height: 85px;
-        border-radius: var(--radius-sm);
-        background: var(--slate-100);
+        height: 100px;
+        border-radius: 10px;
+        background: var(--slate-50);
         overflow: hidden;
-        border: 1px solid var(--slate-200);
+        border: 1px solid var(--slate-100);
         display: flex;
         align-items: center;
         justify-content: center;
         color: var(--slate-400);
-        margin-top: 4px;
+        margin-top: 6px;
     }
     .page-preview-box img {
         width: 100%;
@@ -138,17 +201,36 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         transform: scale(1.08);
     }
     .page-number-tag {
-        font-size: 0.72rem;
+        font-size: 0.78rem;
         font-weight: 800;
         color: var(--slate-800);
     }
     
-    /* Task Status Icons */
+    /* Custom Sleek Badges for Page Cards */
+    .page-item-card .badge {
+        font-size: 0.6rem !important;
+        font-weight: 700;
+        padding: 3px 6px !important;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+    
+    /* Custom Badges for Card Header */
+    .progress-series-card .card-header .badge {
+        font-size: 0.68rem !important;
+        font-weight: 700;
+        padding: 4px 8px !important;
+        border-radius: 6px;
+        letter-spacing: -0.01em;
+    }
+    
+    /* Elegant Task Status Badges instead of simple blocks */
     .task-status-dot-container {
         display: flex;
         justify-content: space-between;
         gap: 4px;
-        margin-top: 6px;
+        margin-top: 10px;
     }
     .task-status-dot {
         flex: 1;
@@ -157,57 +239,78 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         align-items: center;
         justify-content: center;
         border-radius: 6px;
-        font-size: 0.7rem;
-        font-weight: 700;
+        font-size: 0.62rem;
+        font-weight: 800;
         cursor: help;
         transition: all 0.2s ease;
         border: 1px solid transparent;
+        text-transform: uppercase;
+        font-family: 'Plus Jakarta Sans', sans-serif;
     }
     .task-status-dot:hover {
-        transform: translateY(-1.5px);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+        transform: translateY(-1px);
     }
     
-    /* Soft colors for task statuses */
+    /* Modern Colors for Task States (glowing style) */
     .task-status-completed {
-        background-color: var(--success-soft) !important;
-        color: var(--success) !important;
-        border-color: var(--success-border) !important;
+        background-color: rgba(16, 185, 129, 0.06) !important;
+        color: #059669 !important;
+        border-color: rgba(16, 185, 129, 0.2) !important;
+    }
+    .task-status-completed:hover {
+        background-color: rgba(16, 185, 129, 0.12) !important;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
     .task-status-in_progress {
-        background-color: var(--primary-soft) !important;
-        color: var(--primary) !important;
-        border-color: rgba(79, 70, 229, 0.2) !important;
+        background-color: rgba(59, 130, 246, 0.06) !important;
+        color: #2563eb !important;
+        border-color: rgba(59, 130, 246, 0.2) !important;
+        animation: pulse-border 2s infinite ease-in-out;
+    }
+    .task-status-in_progress:hover {
+        background-color: rgba(59, 130, 246, 0.12) !important;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
     }
     .task-status-pending {
-        background-color: var(--warning-soft) !important;
-        color: #b45309 !important;
-        border-color: var(--warning-border) !important;
+        background-color: rgba(245, 158, 11, 0.06) !important;
+        color: #d97706 !important;
+        border-color: rgba(245, 158, 11, 0.2) !important;
+    }
+    .task-status-pending:hover {
+        background-color: rgba(245, 158, 11, 0.12) !important;
+        box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
     }
     .task-status-null {
         background-color: var(--slate-50) !important;
         color: var(--slate-400) !important;
         border-color: var(--slate-200) !important;
-        opacity: 0.65;
+        opacity: 0.6;
     }
     
-    /* Zoom Modal Trigger button */
+    @keyframes pulse-border {
+        0% { border-color: rgba(59, 130, 246, 0.2); }
+        50% { border-color: rgba(59, 130, 246, 0.6); }
+        100% { border-color: rgba(59, 130, 246, 0.2); }
+    }
+    
+    /* Zoom Preview Button */
     .btn-zoom-preview {
         position: absolute;
-        right: 4px;
-        bottom: 4px;
-        width: 22px;
-        height: 22px;
-        border-radius: 4px;
-        background: rgba(255, 255, 255, 0.9);
+        right: 6px;
+        bottom: 6px;
+        width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        background: rgba(255, 255, 255, 0.95);
         color: var(--slate-700);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
         border: 1px solid var(--slate-200);
-        transition: all 0.15s ease;
+        transition: all 0.2s ease;
         opacity: 0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
     .page-item-card:hover .btn-zoom-preview {
         opacity: 1;
@@ -216,6 +319,58 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         background: var(--primary);
         color: #ffffff;
         border-color: var(--primary);
+        transform: scale(1.1);
+    }
+
+    /* Premium Empty State */
+    .premium-empty-state {
+        background: #ffffff;
+        border: 1px dashed var(--slate-200);
+        border-radius: 16px;
+        padding: 40px 24px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: border-color 0.3s ease;
+    }
+    .premium-empty-state:hover {
+        border-color: var(--primary-soft);
+    }
+    .empty-state-icon-wrapper {
+        width: 64px;
+        height: 64px;
+        background: rgba(79, 70, 229, 0.05);
+        color: var(--primary);
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+        position: relative;
+    }
+    .empty-state-icon-wrapper::after {
+        content: '';
+        position: absolute;
+        top: -4px; left: -4px; right: -4px; bottom: -4px;
+        border: 2px solid rgba(79, 70, 229, 0.1);
+        border-radius: 50%;
+        animation: pulse-ring 2s infinite ease-in-out;
+    }
+    
+    /* Clean Overall Progress Block */
+    .overall-progress-box {
+        background: linear-gradient(135deg, var(--slate-50) 0%, #ffffff 100%);
+        border: 1px solid var(--slate-200) !important;
+        border-radius: 12px;
+        padding: 16px !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+    }
+    .gradient-progress-bar {
+        background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
+    }
+    .gradient-task-progress-bar {
+        background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%) !important;
     }
 </style>
 
