@@ -142,7 +142,8 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                                      onerror="this.onerror=null; this.src='uploads/submissions/<?= htmlspecialchars(basename($submission['file_url'])) ?>';"
                                      alt="Bản thảo" 
                                      class="img-fluid rounded" 
-                                     style="max-height: 650px; width: auto; object-fit: contain; display: block;">
+                                     style="max-height: 650px; width: auto; object-fit: contain; display: block; -webkit-user-drag: none;"
+                                     draggable="false">
                                 <!-- Overlay vẽ ghi chú lỗi -->
                                 <div id="subAnnoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: default;"></div>
                             </div>
@@ -554,7 +555,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                         </div>
                         
                         <div id="annoImageWrapper" class="position-relative d-inline-block text-start shadow" style="border: 1px solid #cbd5e1; user-select: none;">
-                            <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 60vh; pointer-events: none;">
+                            <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 60vh; pointer-events: none; -webkit-user-drag: none;" draggable="false">
                             <!-- Overlay vẽ -->
                             <div id="annoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: default;"></div>
                         </div>
@@ -708,15 +709,22 @@ document.addEventListener("DOMContentLoaded", function() {
             selectedBox.style.top = (height < 0 ? currentY : startY) + 'px';
         });
 
-        overlayContainer.addEventListener('mouseup', function(e) {
+        window.addEventListener('mouseup', function(e) {
             if (!isDrawing) return;
             isDrawing = false;
             
             const rect = overlayContainer.getBoundingClientRect();
-            const boxWidth = parseFloat(selectedBox.style.width) || 0;
-            const boxHeight = parseFloat(selectedBox.style.height) || 0;
-            const boxLeft = parseFloat(selectedBox.style.left) || 0;
-            const boxTop = parseFloat(selectedBox.style.top) || 0;
+            const endX = e.clientX - rect.left;
+            const endY = e.clientY - rect.top;
+            
+            // Giới hạn EndX và EndY nằm trong vùng của trang vẽ
+            const clampX = Math.max(0, Math.min(endX, rect.width));
+            const clampY = Math.max(0, Math.min(endY, rect.height));
+            
+            const boxLeft = Math.min(startX, clampX);
+            const boxTop = Math.min(startY, clampY);
+            const boxWidth = Math.abs(startX - clampX);
+            const boxHeight = Math.abs(startY - clampY);
             
             if (boxWidth < 10 || boxHeight < 10) {
                 if (selectedBox && selectedBox.parentNode) {
@@ -972,15 +980,22 @@ document.addEventListener("DOMContentLoaded", function() {
             subSelectedBox.style.top = (height < 0 ? currentY : subStartY) + 'px';
         });
 
-        subOverlayContainer.addEventListener('mouseup', function(e) {
+        window.addEventListener('mouseup', function(e) {
             if (!subIsDrawing) return;
             subIsDrawing = false;
             
             const rect = subOverlayContainer.getBoundingClientRect();
-            const boxWidth = parseFloat(subSelectedBox.style.width) || 0;
-            const boxHeight = parseFloat(subSelectedBox.style.height) || 0;
-            const boxLeft = parseFloat(subSelectedBox.style.left) || 0;
-            const boxTop = parseFloat(subSelectedBox.style.top) || 0;
+            const endX = e.clientX - rect.left;
+            const endY = e.clientY - rect.top;
+            
+            // Giới hạn EndX và EndY nằm trong vùng của trang vẽ
+            const clampX = Math.max(0, Math.min(endX, rect.width));
+            const clampY = Math.max(0, Math.min(endY, rect.height));
+            
+            const boxLeft = Math.min(subStartX, clampX);
+            const boxTop = Math.min(subStartY, clampY);
+            const boxWidth = Math.abs(subStartX - clampX);
+            const boxHeight = Math.abs(subStartY - clampY);
             
             if (boxWidth < 10 || boxHeight < 10) {
                 if (subSelectedBox && subSelectedBox.parentNode) {
@@ -1006,12 +1021,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function resetSubDrawingState() {
-        const boxes = document.querySelectorAll('#subAnnoOverlayContainer div');
-        boxes.forEach(b => {
-            if (b.style.borderStyle === 'dashed') {
-                b.remove();
-            }
-        });
+        if (subSelectedBox && subSelectedBox.parentNode) {
+            subSelectedBox.parentNode.removeChild(subSelectedBox);
+        }
+        subSelectedBox = null;
         if (subNoSelectionWarning) {
             const canDraw = isMangaka && originalStatus === 'pending' && activeSubmissionId === originalSubmissionId;
             subNoSelectionWarning.style.display = canDraw ? 'block' : 'none';
