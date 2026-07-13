@@ -794,6 +794,12 @@ document.addEventListener("DOMContentLoaded", function() {
         selectedBox = null;
         if (noSelectionWarning) noSelectionWarning.style.display = 'block';
         if (annoForm) annoForm.style.display = 'none';
+        
+        // Khôi phục con trỏ vẽ của Editor khi reset hoặc chuyển trang
+        if (isEditor && overlayContainer) {
+            overlayContainer.style.pointerEvents = 'auto';
+            overlayContainer.style.cursor = 'crosshair';
+        }
     }
 
     function loadAnnotations() {
