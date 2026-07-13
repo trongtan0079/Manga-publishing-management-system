@@ -62,8 +62,8 @@ $roleName = strtolower($user['role_name'] ?? '');
             <div class="card-body py-5">
                 <!-- Avatar -->
                 <div class="mb-3">
-                    <img src="https://ui-avatars.com/api/?name=<?= urlencode($user['full_name']) ?>&background=6366f1&color=fff&size=128&font-size=0.4&bold=true"
-                        alt="Avatar" class="rounded-circle shadow" width="100" height="100">
+                    <img src="<?= getUserAvatarUrl($user['user_id'], $user['full_name']) ?>"
+                        alt="Avatar" class="rounded-circle shadow" width="100" height="100" style="object-fit: cover;">
                 </div>
                 <h5 class="fw-bold mb-1"><?= htmlspecialchars($user['full_name']) ?></h5>
                 <p class="text-muted mb-2" style="font-size: 0.9rem;">@<?= htmlspecialchars($user['username']) ?></p>
@@ -119,7 +119,7 @@ $roleName = strtolower($user['role_name'] ?? '');
                 <h6 class="m-0 fw-bold"><i class="fas fa-user-edit text-primary me-2"></i>Chỉnh sửa thông tin</h6>
             </div>
             <div class="card-body p-4">
-                <form action="<?= BASE_PATH ?>/index.php?controller=auth&action=updateProfile" method="POST">
+                <form action="<?= BASE_PATH ?>/index.php?controller=auth&action=updateProfile" method="POST" enctype="multipart/form-data">
                     <!-- Username (Read-only) -->
                     <div class="mb-3">
                         <label for="username" class="form-label fw-semibold">Tên đăng nhập</label>
@@ -141,13 +141,23 @@ $roleName = strtolower($user['role_name'] ?? '');
                     </div>
 
                     <!-- Email -->
-                    <div class="mb-4">
+                    <div class="mb-3">
                         <label for="email" class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
                         <div class="input-group">
                             <span class="input-group-text bg-light"><i class="fas fa-envelope text-muted"></i></span>
                             <input type="email" class="form-control" id="email" name="email"
                                 value="<?= htmlspecialchars($user['email']) ?>" required maxlength="100" placeholder="Nhập email">
                         </div>
+                    </div>
+
+                    <!-- Ảnh đại diện (Avatar) -->
+                    <div class="mb-4">
+                        <label for="avatar_file" class="form-label fw-semibold">Ảnh đại diện (Avatar)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fas fa-image text-muted"></i></span>
+                            <input type="file" class="form-control" id="avatar_file" name="avatar_file" accept="image/jpeg,image/png,image/webp">
+                        </div>
+                        <div class="form-text"><i class="fas fa-info-circle me-1" style="font-size: 0.7rem;"></i>Hỗ trợ các định dạng: JPG, JPEG, PNG, WEBP. Dung lượng tối đa 2MB.</div>
                     </div>
 
                     <hr class="my-4">
