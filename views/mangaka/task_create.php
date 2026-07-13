@@ -265,6 +265,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
             <!-- Loại công việc và Phân vùng (New) -->
             <div class="row mb-3">
+                <?php if (empty($groupedRegionIds)): ?>
                 <div class="col-md-6">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <label class="form-label fw-bold mb-0">Loại công việc <span class="text-danger">*</span></label>
@@ -316,8 +317,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <div class="form-text text-danger d-none" id="cb_error_msg" style="font-size: 0.75rem;">Vui lòng chọn ít nhất một loại công việc.</div>
                     </div>
                 </div>
+                <?php else: ?>
+                    <input type="hidden" name="task_type" value="other">
+                <?php endif; ?>
                 
-                <div class="col-md-6">
+                <div class="<?= empty($groupedRegionIds) ? 'col-md-6' : 'col-md-12' ?>">
                     <label for="page_region_id" class="form-label fw-bold">Phân vùng ảnh</label>
                     <?php if (!empty($groupedRegionIds)): 
                         $firstRegionId = explode(',', $groupedRegionIds)[0];
