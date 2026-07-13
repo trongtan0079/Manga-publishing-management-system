@@ -145,15 +145,15 @@ switch ($role) {
                 <span class="mb-3 d-inline-block" style="<?= $badgeStyle ?> font-weight: 700; font-size: 0.7rem; letter-spacing: 0.8px; text-transform: uppercase;">
                     <i class="fas <?= $badgeIcon ?> me-1"></i> <?= $badgeLabel ?>
                 </span>
-                <h3 class="fw-bold text-white mb-2" style="font-size: 1.85rem; letter-spacing: -0.5px; white-space: nowrap; font-family: 'Inter', sans-serif;">
-                    Xin chào, <span style="background: linear-gradient(to right, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;"><?= $greetingName ?></span>!</span>
+                <h3 class="fw-bold text-white mb-2" style="font-size: 1.85rem; letter-spacing: -0.5px; font-family: 'Inter', sans-serif;">
+                    Xin chào, <span style="background: linear-gradient(to right, #818cf8, #c084fc, #f472b6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;"><?= $greetingName ?></span>!
                 </h3>
                 <p class="mb-0" style="font-size: 0.95rem; font-weight: 500; line-height: 1.6; color: #94a3b8 !important;"><?= $subtitle ?></p>
             </div>
 
             <!-- Center Side: Slideshow (Stacked Drawing Papers Effect) -->
             <div class="col-lg-4 text-center py-3 py-lg-0 d-flex justify-content-center align-items-center">
-                <div style="position: relative; width: 380px; height: 215px; margin: 15px 0;">
+                <div class="welcome-banner-manuscript-container">
                     <!-- Bottom sketch paper sheet (light warm white paper) -->
                     <div class="sheet-bottom" style="position: absolute; top: 8px; left: 10px; width: 100%; height: 100%; background-color: #f3f4f6; border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 4px 12px rgba(0,0,0,0.15); border-radius: 12px; transform: rotate(5deg); z-index: 1; pointer-events: none;">
                         <!-- Crop marks style for authenticity -->
@@ -198,7 +198,7 @@ switch ($role) {
             </div>
 
             <!-- Right Side: Quote -->
-            <div class="col-lg-3 p-4 p-md-5 d-flex justify-content-lg-end position-relative">
+            <div class="col-lg-3 p-4 p-md-5 d-none d-lg-flex justify-content-lg-end position-relative">
                 <div class="position-relative p-4" style="max-width: 320px; z-index: 1;">
                     <!-- Large artistic quote symbol in background -->
                     <span style="position: absolute; top: -15px; left: -10px; font-size: 5rem; color: rgba(129, 140, 248, 0.15); font-family: Georgia, serif; line-height: 1; pointer-events: none; user-select: none;">“</span>
