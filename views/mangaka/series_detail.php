@@ -156,69 +156,66 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <?php endif; ?>
 
         <?php 
-        // Chỉ hiển thị danh sách chapter cho tác giả/trợ lý khi truyện đang chờ duyệt. Hội đồng/BTV chỉ thấy khi truyện đã duyệt sang ongoing
-        $showChapters = ($series['status'] !== 'planning' || $_SESSION['role_name'] === 'mangaka' || $_SESSION['role_name'] === 'assistant');
-        if ($showChapters): 
-        ?>
-        <!-- Chapter Management -->
-        <div class="card border-primary">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Danh sách Chapter</h5>
+        // Chỉ hiển thị danh sách chapter cho tác giả/trợ lý khi truyện đan        <!-- Chapter Management -->
+        <div class="card detail-card">
+            <div class="card-header bg-white py-3 border-bottom border-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0 fw-extrabold text-slate-800" style="font-size: 1rem;"><i class="fa-solid fa-list-ol me-2 text-primary"></i>Danh sách Chapter</h5>
                 <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && $series['status'] === 'ongoing'): ?>
-                <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-light">+ Tạo Chapter mới</a>
+                <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=create&series_id=<?= $series['series_id'] ?>" class="btn btn-sm btn-primary action-btn-pill d-inline-flex align-items-center gap-1.5" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border: 0; box-shadow: 0 4px 10px rgba(79, 70, 229, 0.15); color: #ffffff !important;"><i class="fa-solid fa-circle-plus"></i>Tạo Chapter mới</a>
                 <?php endif; ?>
             </div>
             <div class="card-body p-0">
                 <?php if (!empty($chapters)): ?>
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-light">
+                        <table class="table table-hover align-middle mb-0" style="font-size: 0.82rem;">
+                            <thead class="table-light text-slate-500 font-extrabold text-uppercase" style="font-size: 0.72rem;">
                                 <tr>
-                                    <th>#</th>
+                                    <th class="ps-4">#</th>
                                     <th>Tên Chapter</th>
                                     <th>Tiến độ Studio</th>
                                     <th>Trạng thái</th>
                                     <th>Cập nhật lần cuối</th>
-                                    <th class="text-end">Thao tác</th>
+                                    <th class="text-end pe-4">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($chapters as $chapter): ?>
                                     <tr class="clickable-row" data-href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>">
-                                        <td><?= htmlspecialchars($chapter['chapter_number']) ?></td>
+                                        <td class="ps-4 fw-extrabold text-slate-400">#<?= htmlspecialchars($chapter['chapter_number']) ?></td>
                                         <td>
-                                            <?= htmlspecialchars($chapter['title'] ?? '') ?>
+                                            <strong class="text-slate-800"><?= htmlspecialchars($chapter['title'] ?? '') ?></strong>
                                             <?php if (!empty($chapter['is_final'])): ?>
-                                                <span class="badge bg-danger text-white text-xs ms-1"><i class="fas fa-flag me-1"></i>Chương cuối</span>
+                                                <span class="badge bg-danger-subtle text-danger border border-danger-subtle text-xs ms-1.5" style="border-radius: 4px; font-size: 0.6rem !important;"><i class="fa-solid fa-flag me-1"></i>Chương cuối</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
                                             <?php if ($chapter['total_tasks'] > 0): 
                                                 $percent = round(($chapter['completed_tasks'] / $chapter['total_tasks']) * 100);
-                                                $barClass = $percent === 100 ? 'bg-success' : 'bg-primary';
                                             ?>
                                                 <div style="min-width: 120px; max-width: 160px;">
-                                                    <div class="progress" style="height: 6px; background-color: #e9ecef; border-radius: 3px; margin-bottom: 2px;">
-                                                        <div class="progress-bar <?= $barClass ?>" role="progressbar" style="width: <?= $percent ?>%; border-radius: 3px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                                                    <div class="progress" style="height: 5px; background-color: var(--slate-100); border-radius: 3px; margin-bottom: 3px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);">
+                                                        <div class="progress-bar gradient-progress-bar" role="progressbar" style="width: <?= $percent ?>%; border-radius: 3px;" aria-valuenow="<?= $percent ?>" aria-valuemin="0" aria-valuemax="100"></div>
                                                     </div>
-                                                    <small class="text-muted" style="font-size: 0.72rem; font-weight: 500;"><?= $chapter['completed_tasks'] ?>/<?= $chapter['total_tasks'] ?> việc (<?= $percent ?>%)</small>
+                                                    <small class="text-slate-500 font-bold" style="font-size: 0.68rem;"><?= $chapter['completed_tasks'] ?>/<?= $chapter['total_tasks'] ?> việc (<?= $percent ?>%)</small>
                                                 </div>
                                             <?php else: ?>
-                                                <span class="badge bg-light text-secondary border text-xs" style="font-weight: 500;">Tác giả tự vẽ</span>
+                                                <span class="badge bg-light text-secondary border text-xs" style="font-weight: 600; border-radius: 4px; font-size: 0.6rem !important;">Tác giả tự vẽ</span>
                                             <?php endif; ?>
                                         </td>
                                         <td>
                                             <?= $this->getStatusBadge($chapter['status']) ?>
                                         </td>
-                                        <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></td>
-                                        <td class="text-end">
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-info text-white">Xem</a>
-                                            <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$this->isSeriesLocked($series) && !$this->isChapterLocked($chapter)): ?>
-                                            <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
-                                            <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
-                                                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
-                                            </form>
-                                            <?php endif; ?>
+                                        <td class="text-slate-600 font-semibold"><?= htmlspecialchars(date('d/m/Y H:i', strtotime($chapter['updated_at']))) ?></td>
+                                        <td class="text-end pe-4">
+                                            <div class="d-inline-flex gap-1.5">
+                                                <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=show&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-outline-primary action-btn-pill">Xem</a>
+                                                <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$this->isSeriesLocked($series) && !$this->isChapterLocked($chapter)): ?>
+                                                    <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-outline-warning action-btn-pill">Sửa</a>
+                                                    <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline m-0" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger action-btn-pill">Xóa</button>
+                                                    </form>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
