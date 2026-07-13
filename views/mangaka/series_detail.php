@@ -19,6 +19,50 @@ require_once __DIR__ . '/../layouts/header.php';
 require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
+<style>
+    /* Premium style system for Series Detail */
+    .series-cover-card {
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        border-radius: 16px !important;
+        overflow: hidden;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
+    }
+    .series-cover-img {
+        max-height: 420px;
+        object-fit: cover;
+        width: 100%;
+        border-bottom: 1px solid var(--slate-200);
+        transition: transform 0.3s ease;
+    }
+    .series-cover-card:hover .series-cover-img {
+        transform: scale(1.03);
+    }
+    .detail-card {
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        border-radius: 16px !important;
+        box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
+        overflow: hidden;
+        background: #ffffff;
+    }
+    .clickable-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    .clickable-row:hover {
+        background-color: var(--slate-50) !important;
+    }
+    .gradient-progress-bar {
+        background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%) !important;
+    }
+    .action-btn-pill {
+        border-radius: 6px !important;
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        padding: 4px 10px !important;
+        transition: all 0.2s ease;
+    }
+</style>
 
 <?php if (isset($_SESSION['success'])): ?>
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
