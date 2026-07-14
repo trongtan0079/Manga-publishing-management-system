@@ -533,8 +533,8 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                     $typeLabel = 'Bối cảnh/Nền';
                                     $borderColor = '#64748b'; // Xám Background
                                     $badgeStyle = 'background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;';
-                                    $boxBg = '#f8fafc';
-                                    $boxBorder = '#e2e8f0';
+                                    $boxBg = '#f1f5f9';
+                                    $boxBorder = '#cbd5e1';
                                 } elseif ($region['region_type'] === 'sfx') {
                                     $typeLabel = 'Hiệu ứng SFX';
                                     $borderColor = '#f59e0b'; // Cam SFX
@@ -658,12 +658,26 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         </div>
                         
                         <!-- Bảng hướng dẫn giao việc -->
-                        <div class="alert alert-info py-2 px-3 mt-3 mb-0 border-0 shadow-sm" style="background-color: #f0fdfa; border-left: 4px solid #0f766e !important; border-radius: 8px;">
-                            <div class="fw-bold text-teal-900 mb-1" style="font-size: 0.825rem;"><i class="fas fa-info-circle me-1.5 text-teal-600"></i>Hướng dẫn giao việc (Task):</div>
-                            <ul class="ps-3 mb-0 text-slate-700 text-xs" style="line-height: 1.5; font-size: 0.76rem;">
-                                <li class="mb-1"><strong>Giao việc riêng lẻ:</strong> Nhấn nút <span class="badge bg-light text-primary border border-primary-subtle py-0.5 px-1.5"><i class="fas fa-plus me-1"></i>Giao việc</span> trên thẻ phân vùng để giao một việc cụ thể cho phân vùng đó.</li>
-                                <li><strong>Giao việc nhóm:</strong> Tích chọn <input type="checkbox" checked disabled style="transform: scale(0.8); vertical-align: middle; pointer-events: none;"> vào nhiều phân vùng. Nút <span class="badge bg-indigo text-white py-0.5 px-1.5" style="background-color: #6366f1;"><i class="fas fa-layer-group me-1"></i>Giao việc nhóm</span> sẽ xuất hiện ở góc trên để giao một công việc chung cho nhóm phân vùng này.</li>
-                            </ul>
+                        <div class="card border-0 mt-3 shadow-sm" style="background-color: #f8fafc; border: 1px solid #e2e8f0 !important; border-radius: 12px;">
+                            <div class="card-body p-3">
+                                <h6 class="fw-bold text-slate-800 mb-2.5 d-flex align-items-center gap-2" style="font-size: 0.825rem; color: #1e293b;">
+                                    <i class="fas fa-info-circle text-primary"></i> Hướng dẫn giao việc (Task)
+                                </h6>
+                                <div class="row g-2 text-slate-600" style="font-size: 0.76rem; line-height: 1.5;">
+                                    <div class="col-12 d-flex gap-2 align-items-start">
+                                        <span class="text-primary mt-0.5"><i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i></span>
+                                        <div>
+                                            <strong>Giao việc riêng lẻ:</strong> Nhấn nút <span class="badge bg-light text-primary border border-primary-subtle py-0.5 px-1.5"><i class="fas fa-plus me-1"></i>Giao việc</span> trực tiếp trên thẻ phân vùng để tạo công việc cho phân vùng đó.
+                                        </div>
+                                    </div>
+                                    <div class="col-12 d-flex gap-2 align-items-start mt-2">
+                                        <span class="text-primary mt-0.5"><i class="fas fa-chevron-right" style="font-size: 0.65rem;"></i></span>
+                                        <div>
+                                            <strong>Giao việc nhóm:</strong> Tích chọn các ô checkbox trên nhiều thẻ. Nút <span class="badge text-white py-0.5 px-1.5" style="background-color: #6366f1;"><i class="fas fa-layer-group me-1"></i>Giao việc nhóm</span> ở góc trên sẽ xuất hiện để giao một việc chung cho tất cả các vùng được chọn.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 <?php endif; ?>
