@@ -24,8 +24,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     /* Elite SaaS styling for progress tracking */
     .progress-series-card {
         background: #ffffff;
-        border: 1px solid rgba(226, 232, 240, 0.8) !important;
-        border-radius: 20px !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 24px !important;
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
@@ -37,36 +37,33 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary, #6366f1) 0%, var(--secondary, #4f46e5) 100%);
+        opacity: 0.8;
+        transition: height 0.3s ease;
     }
     .progress-series-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04) !important;
-        border-color: rgba(99, 102, 241, 0.3) !important;
-    }
-    .progress-series-card:hover::before {
-        opacity: 1;
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.08), 0 10px 10px -5px rgba(99, 102, 241, 0.04) !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
     }
     .series-cover-mini {
-        width: 52px;
-        height: 70px;
+        width: 56px;
+        height: 76px;
         object-fit: cover;
-        border-radius: 10px;
+        border-radius: 12px;
         border: 2px solid #ffffff;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         transition: transform 0.3s ease;
     }
     .progress-series-card:hover .series-cover-mini {
-        transform: scale(1.08) rotate(1deg);
+        transform: scale(1.06) rotate(2deg);
     }
     .series-cover-placeholder {
-        width: 52px;
-        height: 70px;
+        width: 56px;
+        height: 76px;
         background: linear-gradient(135deg, var(--slate-100) 0%, var(--slate-200) 100%);
-        border-radius: 10px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -94,10 +91,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         animation: pulse-ring 2s infinite ease-in-out;
         opacity: 0.7;
     }
-    .status-dot-pulse.bg-success::after { background-color: var(--success); }
-    .status-dot-pulse.bg-primary::after { background-color: var(--primary); }
-    .status-dot-pulse.bg-warning::after { background-color: var(--warning); }
-    .status-dot-pulse.bg-secondary::after { background-color: var(--secondary); }
+    .status-dot-pulse.bg-success::after { background-color: var(--success, #10b981); }
+    .status-dot-pulse.bg-primary::after { background-color: var(--primary, #6366f1); }
+    .status-dot-pulse.bg-warning::after { background-color: var(--warning, #f59e0b); }
+    .status-dot-pulse.bg-secondary::after { background-color: var(--secondary, #6b7280); }
     
     @keyframes pulse-ring {
         0% { transform: scale(0.95); opacity: 0.8; }
@@ -106,35 +103,28 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     
     /* Interactive legends */
     .legend-container-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        border-radius: 16px;
-        padding: 14px 20px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01);
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 18px 24px;
+        box-shadow: 0 4px 18px -4px rgba(15, 23, 42, 0.04) !important;
+        margin-bottom: 24px;
     }
     .legend-title {
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--slate-400);
-        margin-bottom: 8px;
-    }
-    .legend-indicator-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        display: inline-block;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 12px;
     }
     
     /* Progress and Chapter Card Box */
     .chapter-card-box {
-        background: #ffffff;
-        border: 1px solid var(--slate-100) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01), 0 2px 4px -1px rgba(15, 23, 42, 0.01) !important;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01) !important;
         transition: all 0.25s ease;
         position: relative;
         overflow: hidden;
@@ -145,50 +135,51 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         left: 0;
         top: 0;
         bottom: 0;
-        width: 4px;
-        background: var(--primary);
+        width: 5px;
+        background: linear-gradient(180deg, var(--primary, #6366f1), #3b82f6);
     }
     .chapter-card-box:hover {
-        border-color: rgba(99, 102, 241, 0.2) !important;
-        box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04) !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
+        box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.05) !important;
+        background: #ffffff;
     }
     
     /* Page Matrix Cards */
     .page-matrix-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+        gap: 14px;
         margin-top: 5px;
     }
     .page-item-card {
         background: #ffffff;
-        border: 1px solid var(--slate-200);
-        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
         padding: 12px;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         position: relative;
-        height: 200px;
+        height: 210px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }
     .page-item-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.25) !important;
-        border-color: var(--primary) !important;
+        border-color: var(--primary, #6366f1) !important;
     }
     .page-preview-box {
         position: relative;
-        height: 100px;
-        border-radius: 10px;
-        background: var(--slate-50);
+        height: 110px;
+        border-radius: 12px;
+        background: #f1f5f9;
         overflow: hidden;
-        border: 1px solid var(--slate-100);
+        border: 1px solid #e2e8f0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--slate-400);
+        color: #94a3b8;
         margin-top: 6px;
     }
     .page-preview-box img {
@@ -198,30 +189,30 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         transition: transform 0.3s ease;
     }
     .page-item-card:hover .page-preview-box img {
-        transform: scale(1.08);
+        transform: scale(1.06);
     }
     .page-number-tag {
-        font-size: 0.78rem;
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--slate-800);
+        color: #0f172a;
     }
     
     /* Custom Sleek Badges for Page Cards */
     .page-item-card .badge {
-        font-size: 0.6rem !important;
+        font-size: 0.62rem !important;
         font-weight: 700;
-        padding: 3px 6px !important;
-        border-radius: 4px;
+        padding: 3px 7px !important;
+        border-radius: 6px;
         text-transform: uppercase;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.03em;
     }
     
     /* Custom Badges for Card Header */
     .progress-series-card .card-header .badge {
         font-size: 0.68rem !important;
         font-weight: 700;
-        padding: 4px 8px !important;
-        border-radius: 6px;
+        padding: 4px 10px !important;
+        border-radius: 8px;
         letter-spacing: -0.01em;
     }
     
@@ -238,14 +229,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 0.62rem;
         font-weight: 800;
         cursor: help;
         transition: all 0.2s ease;
         border: 1px solid transparent;
         text-transform: uppercase;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: inherit;
     }
     .task-status-dot:hover {
         transform: translateY(-1px);
@@ -253,37 +244,37 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     
     /* Modern Colors for Task States (glowing style) */
     .task-status-completed {
-        background-color: rgba(16, 185, 129, 0.06) !important;
-        color: #059669 !important;
+        background-color: rgba(16, 185, 129, 0.08) !important;
+        color: #10b981 !important;
         border-color: rgba(16, 185, 129, 0.2) !important;
     }
     .task-status-completed:hover {
-        background-color: rgba(16, 185, 129, 0.12) !important;
+        background-color: rgba(16, 185, 129, 0.15) !important;
         box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
     .task-status-in_progress {
-        background-color: rgba(59, 130, 246, 0.06) !important;
-        color: #2563eb !important;
+        background-color: rgba(59, 130, 246, 0.08) !important;
+        color: #3b82f6 !important;
         border-color: rgba(59, 130, 246, 0.2) !important;
         animation: pulse-border 2s infinite ease-in-out;
     }
     .task-status-in_progress:hover {
-        background-color: rgba(59, 130, 246, 0.12) !important;
+        background-color: rgba(59, 130, 246, 0.15) !important;
         box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
     }
     .task-status-pending {
-        background-color: rgba(245, 158, 11, 0.06) !important;
-        color: #d97706 !important;
+        background-color: rgba(245, 158, 11, 0.08) !important;
+        color: #f59e0b !important;
         border-color: rgba(245, 158, 11, 0.2) !important;
     }
     .task-status-pending:hover {
-        background-color: rgba(245, 158, 11, 0.12) !important;
+        background-color: rgba(245, 158, 11, 0.15) !important;
         box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
     }
     .task-status-null {
-        background-color: var(--slate-50) !important;
-        color: var(--slate-400) !important;
-        border-color: var(--slate-200) !important;
+        background-color: #f8fafc !important;
+        color: #94a3b8 !important;
+        border-color: #e2e8f0 !important;
         opacity: 0.6;
     }
     
@@ -316,9 +307,9 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         opacity: 1;
     }
     .btn-zoom-preview:hover {
-        background: var(--primary);
+        background: var(--primary, #6366f1);
         color: #ffffff;
-        border-color: var(--primary);
+        border-color: var(--primary, #6366f1);
         transform: scale(1.1);
     }
 
@@ -326,7 +317,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     .premium-empty-state {
         background: #ffffff;
         border: 1px dashed var(--slate-200);
-        border-radius: 16px;
+        border-radius: 20px;
         padding: 40px 24px;
         text-align: center;
         position: relative;
@@ -340,7 +331,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         width: 64px;
         height: 64px;
         background: rgba(79, 70, 229, 0.05);
-        color: var(--primary);
+        color: var(--primary, #6366f1);
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
@@ -362,7 +353,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     .overall-progress-box {
         background: linear-gradient(135deg, var(--slate-50) 0%, #ffffff 100%);
         border: 1px solid var(--slate-200) !important;
-        border-radius: 12px;
+        border-radius: 16px;
         padding: 16px !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }
@@ -370,7 +361,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
     }
     .gradient-task-progress-bar {
-        background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%) !important;
+        background: linear-gradient(90deg, var(--primary, #6366f1) 0%, #818cf8 100%) !important;
     }
 </style>
 
@@ -434,31 +425,34 @@ if (!function_exists('renderTaskStatusDot')) {
 }
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-4">
-    <div>
-        <h2 class="h3 mb-1 fw-extrabold tracking-tight" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><i class="fa-solid fa-chart-line text-primary me-2"></i>Giám sát Tiến độ & Deadline Studio</h2>
-        <p class="text-muted text-xs mb-0">Theo dõi tiến độ hoàn thành bản vẽ của nhóm tác giả (studio) theo thời gian thực để đảm bảo kịp deadline giao bản in.</p>
+<div class="p-4 mb-4 rounded-4 text-white shadow-sm border-0 d-flex justify-content-between align-items-center flex-wrap gap-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+    <div class="position-absolute rounded-circle" style="width: 150px; height: 150px; background: rgba(99, 102, 241, 0.2); filter: blur(50px); top: -50px; right: -20px;"></div>
+    <div class="position-absolute rounded-circle" style="width: 120px; height: 120px; background: rgba(236, 72, 153, 0.15); filter: blur(40px); bottom: -30px; left: 10%;"></div>
+    
+    <div class="position-relative z-1">
+        <h2 class="h4 mb-1.5 fw-extrabold text-white d-flex align-items-center"><i class="fa-solid fa-chart-line text-indigo-400 me-2.5"></i>Giám sát Tiến độ & Deadline Studio</h2>
+        <p class="mb-0 text-slate-300 text-xs fw-semibold opacity-90">Theo dõi tiến độ hoàn thành bản vẽ của nhóm tác giả (studio) theo thời gian thực để đảm bảo kịp deadline giao bản in.</p>
     </div>
 </div>
 
 <!-- Premium Legend Card -->
 <div class="legend-container-card d-flex align-items-center gap-4 flex-wrap text-xs mb-4">
     <div class="pe-4 border-end border-slate-200" style="flex: 1; min-width: 300px;">
-        <div class="legend-title"><i class="fa-solid fa-circle-nodes text-primary me-1"></i> Trạng thái vẽ của trợ lý</div>
-        <div class="d-flex align-items-center gap-3 flex-wrap">
-            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-success"></span> Đã hoàn thành</span>
-            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-primary"></span> Trợ lý đang vẽ</span>
-            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-warning"></span> Chờ phân công/xử lý</span>
-            <span class="d-flex align-items-center gap-1.5 text-muted fw-semibold"><span class="status-dot-pulse bg-secondary"></span> Tác giả tự vẽ</span>
+        <div class="legend-title"><i class="fa-solid fa-circle-nodes text-primary me-1.5"></i> Trạng thái vẽ của trợ lý</div>
+        <div class="d-flex align-items-center gap-3.5 flex-wrap">
+            <span class="d-flex align-items-center gap-2 text-slate-700 fw-bold"><span class="status-dot-pulse bg-success"></span> Đã hoàn thành</span>
+            <span class="d-flex align-items-center gap-2 text-slate-700 fw-bold"><span class="status-dot-pulse bg-primary"></span> Trợ lý đang vẽ</span>
+            <span class="d-flex align-items-center gap-2 text-slate-700 fw-bold"><span class="status-dot-pulse bg-warning"></span> Chờ phân công/xử lý</span>
+            <span class="d-flex align-items-center gap-2 text-muted fw-bold"><span class="status-dot-pulse bg-secondary"></span> Tác giả tự vẽ</span>
         </div>
     </div>
     <div style="flex: 1; min-width: 300px;">
-        <div class="legend-title"><i class="fa-solid fa-layer-group text-primary me-1"></i> Công đoạn chính trên mỗi trang</div>
-        <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-mountain me-1"></i>BG: Vẽ nền</span>
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-pen-nib me-1"></i>INK: Đi nét</span>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-palette me-1"></i>COL: Lên màu</span>
-            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>FX: Hiệu ứng</span>
+        <div class="legend-title"><i class="fa-solid fa-layer-group text-primary me-1.5"></i> Công đoạn chính trên mỗi trang</div>
+        <div class="d-flex align-items-center gap-2.5 flex-wrap">
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1.5 text-uppercase fw-bold" style="font-size: 0.65rem;"><i class="fa-solid fa-mountain me-1"></i>BG: Vẽ nền</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 text-uppercase fw-bold" style="font-size: 0.65rem;"><i class="fa-solid fa-pen-nib me-1"></i>INK: Đi nét</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 text-uppercase fw-bold" style="font-size: 0.65rem;"><i class="fa-solid fa-palette me-1"></i>COL: Lên màu</span>
+            <span class="badge bg-info-subtle text-info border border-info-subtle px-2.5 py-1.5 text-uppercase fw-bold" style="font-size: 0.65rem;"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>FX: Hiệu ứng</span>
         </div>
     </div>
 </div>
@@ -563,7 +557,7 @@ if (!function_exists('renderTaskStatusDot')) {
                                 </div>
 
                                 <!-- Ma trận tiến độ trang vẽ (Real-time Grid dạng thẻ ảnh xem trước) -->
-                                <div class="studio-progress-grid-wrapper p-3 rounded-4 border border-light-subtle shadow-inner" style="background-color: var(--slate-100); max-height: 420px; overflow-y: auto;">
+                                <div class="studio-progress-grid-wrapper p-3 rounded-4 border border-light-subtle shadow-inner" style="background-color: #f1f5f9; max-height: 420px; overflow-y: auto;">
                                     <?php if (!empty($data['active_chapter_pages'])): ?>
                                         <div class="page-matrix-container">
                                             <?php foreach ($data['active_chapter_pages'] as $pageData): 
