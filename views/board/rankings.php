@@ -28,6 +28,31 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 
 <?php require __DIR__ . '/../layouts/alerts.php'; ?>
 
+<!-- Collapsible Formula Guide -->
+<div class="mb-4">
+    <button class="btn btn-xs btn-outline-secondary d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="collapse" data-bs-target="#formulaGuide" aria-expanded="false" aria-controls="formulaGuide" style="border-radius: 6px; font-size: 0.78rem; padding: 4px 10px;">
+        <i class="fas fa-calculator text-primary"></i> Xem cách tính điểm quy chuẩn
+    </button>
+    <div class="collapse mt-2" id="formulaGuide">
+        <div class="card card-body border-0 shadow-sm bg-light p-4 rounded-3">
+            <h6 class="fw-bold text-dark mb-2"><i class="fas fa-info-circle text-primary me-2"></i>Công thức quy chuẩn hóa điểm số</h6>
+            <p class="text-muted text-sm mb-3">
+                Điểm quy chuẩn của từng bộ truyện được tính dựa trên tỷ lệ phiếu bầu của bộ truyện đó so với bộ truyện nhận được nhiều phiếu bầu nhất trong cùng kỳ:
+            </p>
+            <div class="bg-white py-3 px-3 rounded-2 text-center mb-3 font-monospace fw-bold text-primary shadow-sm border border-light" style="font-size: 1rem;">
+                Điểm Quy Chuẩn = ( Số Phiếu Của Bộ Truyện / Số Phiếu Cao Nhất Trong Kỳ ) x 100
+            </div>
+            <div class="text-muted text-xs">
+                <ul class="mb-0 ps-3">
+                    <li class="mb-1"><strong>Số phiếu của bộ truyện:</strong> Tổng số phiếu bình chọn của độc giả cho bộ truyện đó trong kỳ đánh giá.</li>
+                    <li class="mb-1"><strong>Số phiếu cao nhất trong kỳ:</strong> Số phiếu lớn nhất đạt được của bộ truyện dẫn đầu trong kỳ đó.</li>
+                    <li><strong>Làm tròn:</strong> Điểm số cuối cùng được làm tròn tới 2 chữ số thập phân (ví dụ: 85.71).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card shadow-sm border-0">
     <div class="card-body p-0">
         <div class="table-responsive">
