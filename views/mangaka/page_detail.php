@@ -895,102 +895,127 @@ function updateSelectedTaskBox(regionId) {
         return false;
     });
     const infoBox = document.getElementById('selectedTaskDetailsBox');
-    if (matchedTasks.length > 0) {
-        const task = matchedTasks[0];
-        
-        document.getElementById('selectedTaskTitle').innerText = task.title;
-        
-        let typeLabel = task.task_type;
-        if (task.title.indexOf('(Nhóm:') !== -1) typeLabel = 'Tổ hợp (Group)';
-        else if (task.task_type === 'background') typeLabel = 'Vẽ nền (Background)';
-        else if (task.task_type === 'inking') typeLabel = 'Đi nét (Inking)';
-        else if (task.task_type === 'coloring') typeLabel = 'Lên màu (Coloring)';
-        else if (task.task_type === 'effects') typeLabel = 'Hiệu ứng (Effects)';
-        else typeLabel = task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1);
-        
-        document.getElementById('selectedTaskType').innerText = typeLabel;
-        document.getElementById('selectedTaskAssistant').innerText = task.assistant_name;
-        
-        const priorityEl = document.getElementById('selectedTaskPriority');
-        priorityEl.innerText = task.priority === 'high' ? 'Cao' : (task.priority === 'medium' ? 'Trung bình' : (task.priority === 'low' ? 'Thấp' : 'Thường'));
-        priorityEl.className = 'badge px-2 py-0.5 border ' + 
-            (task.priority === 'high' ? 'bg-danger-subtle text-danger border-danger-subtle' : 
-            (task.priority === 'medium' ? 'bg-warning-subtle text-warning border-warning-subtle' : 'bg-info-subtle text-info border-info-subtle'));
+    if (infoBox) {
+        if (matchedTasks.length > 0) {
+            const task = matchedTasks[0];
             
-        document.getElementById('selectedTaskDueDate').innerText = task.due_date;
-        document.getElementById('selectedTaskDescription').innerHTML = task.description || '<em class="text-muted">Không có mô tả chi tiết.</em>';
-        
-        // Cập nhật nút nộp bài cho trợ lý
-        const submissionContainer = document.getElementById('submissionButtonContainer');
-        if (submissionContainer) {
-            let viewBtnHtml = '';
-            if (task.submission_id) {
-                viewBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-info py-1.5 px-3 me-2" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
-                    <i class="fas fa-eye me-1.5"></i>Xem bài nộp
-                </a>`;
-            }
+            document.getElementById('selectedTaskTitle').innerText = task.title;
             
-            if (task.status === 'completed') {
-                submissionContainer.innerHTML = viewBtnHtml + `
-                    <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
-                        <i class="fas fa-check-circle me-1.5 text-success"></i>Công việc đã hoàn thành
-                    </span>`;
-            } else if (task.status === 'submitted') {
-                submissionContainer.innerHTML = viewBtnHtml + `
-                    <span class="badge bg-info-subtle text-info border border-info-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
-                        <i class="fas fa-spinner fa-spin me-1.5 text-info"></i>Đang chờ duyệt bài
-                    </span>
-                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-outline-success py-1.5 px-3" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
-                        Nộp lại bản thảo mới
-                    </a>`;
-            } else if (task.status === 'rejected') {
-                let errorBtnHtml = '';
+            let typeLabel = task.task_type;
+            if (task.title.indexOf('(Nhóm:') !== -1) typeLabel = 'Tổ hợp (Group)';
+            else if (task.task_type === 'background') typeLabel = 'Vẽ nền (Background)';
+            else if (task.task_type === 'inking') typeLabel = 'Đi nét (Inking)';
+            else if (task.task_type === 'coloring') typeLabel = 'Lên màu (Coloring)';
+            else if (task.task_type === 'effects') typeLabel = 'Hiệu ứng (Effects)';
+            else typeLabel = task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1);
+            
+            document.getElementById('selectedTaskType').innerText = typeLabel;
+            document.getElementById('selectedTaskAssistant').innerText = task.assistant_name;
+            
+            const priorityEl = document.getElementById('selectedTaskPriority');
+            priorityEl.innerText = task.priority === 'high' ? 'Cao' : (task.priority === 'medium' ? 'Trung bình' : (task.priority === 'low' ? 'Thấp' : 'Thường'));
+            priorityEl.className = 'badge px-2 py-0.5 border ' + 
+                (task.priority === 'high' ? 'bg-danger-subtle text-danger border-danger-subtle' : 
+                (task.priority === 'medium' ? 'bg-warning-subtle text-warning border-warning-subtle' : 'bg-info-subtle text-info border-info-subtle'));
+                
+            document.getElementById('selectedTaskDueDate').innerText = task.due_date;
+            document.getElementById('selectedTaskDescription').innerHTML = task.description || '<em class="text-muted">Không có mô tả chi tiết.</em>';
+            
+            // Hiện hàng metadata
+            const metaRow = infoBox.querySelector('.row');
+            if (metaRow) metaRow.classList.remove('d-none');
+            
+            // Hiện tiêu đề metadata "Mục tiêu & Yêu cầu chi tiết:"
+            const descHeader = infoBox.querySelector('.text-xs.text-slate-500.font-semibold');
+            if (descHeader) descHeader.classList.remove('d-none');
+            
+            // Cập nhật nút nộp bài cho trợ lý
+            const submissionContainer = document.getElementById('submissionButtonContainer');
+            if (submissionContainer) {
+                let viewBtnHtml = '';
                 if (task.submission_id) {
-                    errorBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-danger py-1.5 px-3 me-2 fw-bold" style="border-radius: 8px; font-size: 0.75rem;">
-                        <i class="fas fa-exclamation-triangle me-1.5"></i>Xem ghi chú lỗi
+                    viewBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-info py-1.5 px-3 me-2" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
+                        <i class="fas fa-eye me-1.5"></i>Xem bài nộp
                     </a>`;
                 }
-                submissionContainer.innerHTML = errorBtnHtml + `
-                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
-                        Yêu cầu sửa lại
-                    </span>
-                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
-                        <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
-                    </a>`;
-            } else {
-                submissionContainer.innerHTML = `
-                    <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
-                        <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
-                    </a>`;
-            }
-        }
-
-        const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
-        const annoList = document.getElementById('selectedTaskAnnotationsList');
-        if (annoContainer && annoList) {
-            annoContainer.classList.add('d-none');
-            annoList.innerHTML = '';
-            
-            if (task.submission_id && (task.status === 'rejected' || task.status === 'submitted' || task.status === 'completed')) {
-                fetch(BASE_PATH + '/index.php?controller=review&action=get_submission_annotations&submission_id=' + task.submission_id)
-                .then(response => response.json())
-                .then(res => {
-                    if (res.success && res.annotations && res.annotations.length > 0) {
-                        res.annotations.forEach((ann, idx) => {
-                            const item = document.createElement('div');
-                            item.className = 'list-group-item px-2 py-1.5 border-bottom text-xs';
-                            item.innerHTML = `<strong>Lỗi #${idx + 1} tại (${ann.x}, ${ann.y}):</strong> <span class="text-slate-700">${escapeHtml(ann.comments)}</span>`;
-                            annoList.appendChild(item);
-                        });
-                        annoContainer.classList.remove('d-none');
+                
+                if (task.status === 'completed') {
+                    submissionContainer.innerHTML = viewBtnHtml + `
+                        <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
+                            <i class="fas fa-check-circle me-1.5 text-success"></i>Công việc đã hoàn thành
+                        </span>`;
+                } else if (task.status === 'submitted') {
+                    submissionContainer.innerHTML = viewBtnHtml + `
+                        <span class="badge bg-info-subtle text-info border border-info-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
+                            <i class="fas fa-spinner fa-spin me-1.5 text-info"></i>Đang chờ duyệt bài
+                        </span>
+                        <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-outline-success py-1.5 px-3" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
+                            Nộp lại bản thảo mới
+                        </a>`;
+                } else if (task.status === 'rejected') {
+                    let errorBtnHtml = '';
+                    if (task.submission_id) {
+                        errorBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-danger py-1.5 px-3 me-2 fw-bold" style="border-radius: 8px; font-size: 0.75rem;">
+                            <i class="fas fa-exclamation-triangle me-1.5"></i>Xem ghi chú lỗi
+                        </a>`;
                     }
-                });
+                    submissionContainer.innerHTML = errorBtnHtml + `
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
+                            Yêu cầu sửa lại
+                        </span>
+                        <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
+                            <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
+                        </a>`;
+                } else {
+                    submissionContainer.innerHTML = `
+                        <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
+                            <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
+                        </a>`;
+                }
             }
-        }
 
+            const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
+            const annoList = document.getElementById('selectedTaskAnnotationsList');
+            if (annoContainer && annoList) {
+                annoContainer.classList.add('d-none');
+                annoList.innerHTML = '';
+                
+                if (task.submission_id && (task.status === 'rejected' || task.status === 'submitted' || task.status === 'completed')) {
+                    fetch(BASE_PATH + '/index.php?controller=review&action=get_submission_annotations&submission_id=' + task.submission_id)
+                    .then(response => response.json())
+                    .then(res => {
+                        if (res.success && res.annotations && res.annotations.length > 0) {
+                            res.annotations.forEach((ann, idx) => {
+                                const item = document.createElement('div');
+                                item.className = 'list-group-item px-2 py-1.5 border-bottom text-xs';
+                                item.innerHTML = `<strong>Lỗi #${idx + 1} tại (${ann.x}, ${ann.y}):</strong> <span class="text-slate-700">${escapeHtml(ann.comments)}</span>`;
+                                annoList.appendChild(item);
+                            });
+                            annoContainer.classList.remove('d-none');
+                        }
+                    });
+                }
+            }
+        } else {
+            // Trường hợp phân vùng chưa có task được giao
+            document.getElementById('selectedTaskTitle').innerText = 'Chi tiết phân vùng ID #' + regionId;
+            document.getElementById('selectedTaskDescription').innerHTML = '<div class="alert alert-warning mb-0 border-0 text-slate-800 text-xs py-2 px-3" style="background-color: #fffbeb; border-radius: 6px;"><i class="fas fa-exclamation-triangle text-amber-500 me-1.5"></i>Phân vùng này chưa được phân công công việc. Bạn có thể nhấn nút <strong class="text-primary"><i class="fas fa-plus me-1"></i>Giao việc</strong> trên thẻ phân vùng bên phải để giao nhiệm vụ mới cho Trợ lý.</div>';
+            
+            // Ẩn hàng metadata
+            const metaRow = infoBox.querySelector('.row');
+            if (metaRow) metaRow.classList.add('d-none');
+            
+            // Ẩn tiêu đề metadata "Mục tiêu & Yêu cầu chi tiết:"
+            const descHeader = infoBox.querySelector('.text-xs.text-slate-500.font-semibold');
+            if (descHeader) descHeader.classList.add('d-none');
+            
+            const submissionContainer = document.getElementById('submissionButtonContainer');
+            if (submissionContainer) submissionContainer.innerHTML = '';
+            
+            const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
+            if (annoContainer) annoContainer.classList.add('d-none');
+        }
         infoBox.classList.remove('d-none');
-    } else {
-        infoBox.classList.add('d-none');
     }
 }
 
@@ -1028,14 +1053,18 @@ function hoverOverlay(regionId, isHover) {
 }
 
 function highlightCanvasOverlay(regionId) {
+    const card = document.getElementById('list-region-' + regionId);
+    if (card && card.classList.contains('selected-card')) {
+        closeSelectedTaskBox();
+        return;
+    }
     updateSelectedTaskBox(regionId);
 
-    const card = document.getElementById('list-region-' + regionId);
     if (card) {
         const collapses = card.querySelectorAll('.collapse');
         collapses.forEach(c => {
             const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c);
-            bsCollapse.toggle();
+            bsCollapse.show();
         });
     }
 
@@ -1076,6 +1105,13 @@ function highlightTableRecord(regionIdOrList) {
     // Support both single regionId (number) and comma-separated string (group)
     const ids = String(regionIdOrList).split(',').map(s => s.trim()).filter(Boolean);
     if (ids.length === 0) return;
+
+    // Use the first ID to check if it's already selected to toggle deselect
+    const firstCard = document.getElementById('list-region-' + ids[0]);
+    if (firstCard && firstCard.classList.contains('selected-card')) {
+        closeSelectedTaskBox();
+        return;
+    }
 
     // Use the first ID for task box selection
     updateSelectedTaskBox(ids[0]);
