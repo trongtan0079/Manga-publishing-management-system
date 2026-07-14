@@ -79,36 +79,47 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 case 'sfx': $typeLabel = 'Hiệu ứng SFX'; $badgeColor = '#ffc107'; $bgColor = '#fffdf0'; break;
                             }
                         ?>
-                        <div class="card shadow-sm border-0" style="border: 1px solid <?= $badgeColor ?> !important; border-radius: 8px; overflow: hidden; background-color: <?= $bgColor ?>;">
-                            <div class="card-header border-bottom-0 py-2 d-flex align-items-center justify-content-between" style="background-color: transparent;">
-                                <div>
-                                    <span class="badge" style="background-color: <?= $badgeColor ?>; font-size: 0.75rem; padding: 0.4em 0.6em; border-radius: 4px;"><?= htmlspecialchars($typeLabel) ?></span>
+                        <div class="card shadow-sm border-0 mb-3" style="border-left: 5px solid <?= $badgeColor ?> !important; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; background: linear-gradient(145deg, #ffffff, #f8fafc);">
+                            <div class="card-header border-bottom-0 py-2.5 px-3 d-flex align-items-center justify-content-between" style="background-color: transparent;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge" style="background-color: <?= $badgeColor ?>; font-size: 0.75rem; padding: 0.4em 0.7em; border-radius: 4px; font-weight: 600; box-shadow: 0 2px 4px <?= $badgeColor ?>33;"><?= htmlspecialchars($typeLabel) ?></span>
                                 </div>
-                                <span class="fw-bold" style="font-size: 0.9rem; color: #475569;">Phân vùng #<?= $rId ?></span>
+                                <span class="fw-bold text-slate-500" style="font-size: 0.82rem; letter-spacing: 0.5px;">PHÂN VÙNG #<?= $rId ?></span>
                             </div>
-                            <div class="card-body pt-0 pb-3 px-3">
-                                <div class="mb-2">
-                                    <input type="text" class="form-control form-control-sm region-specific-title border-0" data-region-id="<?= $rId ?>" placeholder="Tiêu đề công việc cho vùng này (Tùy chọn)..." value="<?= htmlspecialchars($oldTitle) ?>" style="font-weight: 600; font-size: 0.95rem; box-shadow: none; background-color: #ffffff99;">
+                            <div class="card-body pt-1 pb-3 px-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                            <i class="fas fa-edit me-1 text-slate-400"></i>Tiêu đề công việc (Tùy chọn)
+                                        </label>
+                                        <input type="text" class="form-control form-control-sm region-specific-title border-light-subtle" data-region-id="<?= $rId ?>" placeholder="Tiêu đề cho vùng này..." value="<?= htmlspecialchars($oldTitle) ?>" style="font-weight: 500; font-size: 0.85rem; border-radius: 6px; background-color: #fff; box-shadow: none; border: 1px solid #cbd5e1;">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                            <i class="fas fa-tasks me-1 text-slate-400"></i>Loại công việc chi tiết
+                                        </label>
+                                        <select class="form-select form-select-sm region-specific-type border-light-subtle" data-region-id="<?= $rId ?>" style="font-size: 0.85rem; border-radius: 6px; background-color: #fff; color: #475569; font-weight: 500; box-shadow: none; border: 1px solid #cbd5e1;">
+                                            <option value="" <?= $selectedType == '' ? 'selected' : '' ?>>-- Chọn loại công việc chi tiết --</option>
+                                            <option value="background" <?= $selectedType == 'background' ? 'selected' : '' ?>>Vẽ nền (Background)</option>
+                                            <option value="inking" <?= $selectedType == 'inking' ? 'selected' : '' ?>>Đi nét (Inking)</option>
+                                            <option value="coloring" <?= $selectedType == 'coloring' ? 'selected' : '' ?>>Lên màu (Coloring)</option>
+                                            <option value="effects" <?= $selectedType == 'effects' ? 'selected' : '' ?>>Hiệu ứng (Effects)</option>
+                                            <option value="other" <?= $selectedType == 'other' ? 'selected' : '' ?>>Khác</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <?php
-                                    $isStandardType = in_array($oldTaskType, ['background', 'inking', 'coloring', 'effects', '']);
-                                    $selectedType = $isStandardType ? $oldTaskType : 'other';
-                                    $oldCustomType = !$isStandardType ? $oldTaskType : '';
-                                ?>
-                                <div class="mb-2">
-                                    <select class="form-select form-select-sm region-specific-type border-0" data-region-id="<?= $rId ?>" style="font-size: 0.85rem; box-shadow: none; background-color: #ffffff99; color: #475569;">
-                                        <option value="" <?= $selectedType == '' ? 'selected' : '' ?>>-- Chọn loại công việc chi tiết --</option>
-                                        <option value="background" <?= $selectedType == 'background' ? 'selected' : '' ?>>Vẽ nền (Background)</option>
-                                        <option value="inking" <?= $selectedType == 'inking' ? 'selected' : '' ?>>Đi nét (Inking)</option>
-                                        <option value="coloring" <?= $selectedType == 'coloring' ? 'selected' : '' ?>>Lên màu (Coloring)</option>
-                                        <option value="effects" <?= $selectedType == 'effects' ? 'selected' : '' ?>>Hiệu ứng (Effects)</option>
-                                        <option value="other" <?= $selectedType == 'other' ? 'selected' : '' ?>>Khác</option>
-                                    </select>
+                                <div class="mb-3 region-custom-type-container <?= $selectedType === 'other' ? '' : 'd-none' ?>" data-region-id="<?= $rId ?>">
+                                    <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        <i class="fas fa-keyboard me-1 text-slate-400"></i>Nhập loại công việc khác <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control form-control-sm region-specific-custom-type border-light-subtle" data-region-id="<?= $rId ?>" placeholder="Ví dụ: Đổ tone, Dán decal..." value="<?= htmlspecialchars($oldCustomType) ?>" style="font-size: 0.85rem; border-radius: 6px; background-color: #fff; box-shadow: none; border: 1px solid #cbd5e1;">
                                 </div>
-                                <div class="mb-2 region-custom-type-container <?= $selectedType === 'other' ? '' : 'd-none' ?>" data-region-id="<?= $rId ?>">
-                                    <input type="text" class="form-control form-control-sm region-specific-custom-type border-0" data-region-id="<?= $rId ?>" placeholder="Nhập loại công việc khác..." value="<?= htmlspecialchars($oldCustomType) ?>" style="font-size: 0.85rem; box-shadow: none; background-color: #ffffff99; color: #475569;">
+                                <div>
+                                    <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        <i class="fas fa-align-left me-1 text-slate-400"></i>Ghi chú mô tả chi tiết công việc
+                                    </label>
+                                    <textarea class="form-control region-specific-desc border-light-subtle" data-region-id="<?= $rId ?>" data-badge-color="<?= $badgeColor ?>" data-bg-color="<?= $bgColor ?>" data-type-label="<?= htmlspecialchars($typeLabel) ?>" rows="3" placeholder="Nhập ghi chú chi tiết mô tả công việc cần xử lý trong vùng này..." style="font-size: 0.85rem; resize: vertical; border-radius: 6px; background-color: #fff; box-shadow: none; border: 1px solid #cbd5e1;"><?= htmlspecialchars($oldDesc) ?></textarea>
                                 </div>
-                                <textarea class="form-control region-specific-desc border-0" data-region-id="<?= $rId ?>" data-badge-color="<?= $badgeColor ?>" data-bg-color="<?= $bgColor ?>" data-type-label="<?= htmlspecialchars($typeLabel) ?>" rows="2" placeholder="Nhập ghi chú chi tiết mô tả công việc..." style="font-size: 0.9rem; resize: vertical; box-shadow: none; background-color: #ffffff99;"><?= htmlspecialchars($oldDesc) ?></textarea>
                             </div>
                         </div>
                         <?php endforeach; ?>
