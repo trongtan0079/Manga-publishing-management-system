@@ -438,21 +438,21 @@ if (!function_exists('renderTaskStatusDot')) {
 <!-- Premium Legend Card -->
 <div class="legend-container-card d-flex align-items-center gap-4 flex-wrap text-xs mb-4">
     <div class="pe-4 border-end border-slate-200" style="flex: 1; min-width: 300px;">
-        <div class="legend-title"><i class="fa-solid fa-circle-nodes text-primary me-1"></i> Trạng thái vẽ của trợ lý</div>
+        <div class="legend-title"><i class="fa-solid fa-circle-nodes text-primary me-2"></i>Trạng thái vẽ của trợ lý</div>
         <div class="d-flex align-items-center gap-3 flex-wrap">
-            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-success"></span> Đã hoàn thành</span>
-            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-primary"></span> Trợ lý đang vẽ</span>
-            <span class="d-flex align-items-center gap-1.5 text-slate-700 fw-semibold"><span class="status-dot-pulse bg-warning"></span> Chờ phân công/xử lý</span>
-            <span class="d-flex align-items-center gap-1.5 text-muted fw-semibold"><span class="status-dot-pulse bg-secondary"></span> Tác giả tự vẽ</span>
+            <span class="d-flex align-items-center gap-2 fw-bold" style="color: #374151;"><span class="status-dot-pulse bg-success"></span> Đã hoàn thành</span>
+            <span class="d-flex align-items-center gap-2 fw-bold" style="color: #374151;"><span class="status-dot-pulse bg-primary"></span> Trợ lý đang vẽ</span>
+            <span class="d-flex align-items-center gap-2 fw-bold" style="color: #374151;"><span class="status-dot-pulse bg-warning"></span> Chờ phân công/xử lý</span>
+            <span class="d-flex align-items-center gap-2 fw-bold text-muted"><span class="status-dot-pulse bg-secondary"></span> Tác giả tự vẽ</span>
         </div>
     </div>
     <div style="flex: 1; min-width: 300px;">
-        <div class="legend-title"><i class="fa-solid fa-layer-group text-primary me-1"></i> Công đoạn chính trên mỗi trang</div>
+        <div class="legend-title"><i class="fa-solid fa-layer-group text-primary me-2"></i>Công đoạn chính trên mỗi trang</div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-mountain me-1"></i>BG: Vẽ nền</span>
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-pen-nib me-1"></i>INK: Đi nét</span>
-            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-palette me-1"></i>COL: Lên màu</span>
-            <span class="badge bg-info-subtle text-info border border-info-subtle px-2 py-1 text-uppercase"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>FX: Hiệu ứng</span>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle fw-bold text-uppercase" style="padding: 5px 10px; font-size: 0.65rem;"><i class="fa-solid fa-mountain me-1"></i>BG: Vẽ nền</span>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold text-uppercase" style="padding: 5px 10px; font-size: 0.65rem;"><i class="fa-solid fa-pen-nib me-1"></i>INK: Đi nét</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle fw-bold text-uppercase" style="padding: 5px 10px; font-size: 0.65rem;"><i class="fa-solid fa-palette me-1"></i>COL: Lên màu</span>
+            <span class="badge bg-info-subtle text-info border border-info-subtle fw-bold text-uppercase" style="padding: 5px 10px; font-size: 0.65rem;"><i class="fa-solid fa-wand-magic-sparkles me-1"></i>FX: Hiệu ứng</span>
         </div>
     </div>
 </div>
