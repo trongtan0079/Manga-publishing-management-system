@@ -682,12 +682,8 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                          <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
                                          <div class="d-flex gap-2" onclick="event.stopPropagation();">
                                              <?php if ($hasRegionTask): ?>
-                                                 <?php $firstTask = reset($regionTasks); ?>
-                                                 <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $firstTask['task_id'] ?>" class="btn btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5 border border-warning-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #fffbeb; color: #d97706; text-decoration: none;" title="Chỉnh sửa công việc đã giao">
-                                                     <i class="fas fa-edit"></i> Sửa việc
-                                                 </a>
-                                                 <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-sm d-inline-flex align-items-center justify-content-center border border-light-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #f8fafc; color: #4f46e5; text-decoration: none; width: 28px; height: 28px;" title="Thêm một công việc khác cho phân vùng này">
-                                                     <i class="fas fa-plus"></i>
+                                                 <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5 border border-primary-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #eff6ff; color: #2563eb; text-decoration: none;">
+                                                     <i class="fas fa-plus"></i> Giao thêm việc
                                                  </a>
                                              <?php else: ?>
                                                  <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5 border border-primary-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #eff6ff; color: #2563eb; text-decoration: none;">
