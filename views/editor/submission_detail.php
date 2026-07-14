@@ -555,7 +555,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                         </div>
                         
                         <div id="annoImageWrapper" class="position-relative d-inline-block text-start shadow" style="border: 1px solid #cbd5e1; user-select: none;">
-                            <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 60vh; pointer-events: none; -webkit-user-drag: none;" draggable="false">
+                            <img id="annoImage" src="" alt="Page for Annotating" class="img-fluid" style="display: block; max-height: 60vh; -webkit-user-drag: none;" draggable="false">
                             <!-- Overlay vẽ -->
                             <div id="annoOverlayContainer" class="position-absolute top-0 start-0 w-100 h-100" style="pointer-events: auto; cursor: default;"></div>
                         </div>
@@ -674,6 +674,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     if (isEditor && overlayContainer) {
         overlayContainer.addEventListener('mousedown', function(e) {
+            e.preventDefault(); // Prevent native image drag
             isDrawing = true;
             const rect = overlayContainer.getBoundingClientRect();
             startX = e.clientX - rect.left;
@@ -951,6 +952,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const canDraw = isMangaka && originalStatus === 'pending' && activeSubmissionId === originalSubmissionId;
             if (!canDraw) return;
             
+            e.preventDefault(); // Prevent native image drag
             subIsDrawing = true;
             const rect = subOverlayContainer.getBoundingClientRect();
             subStartX = e.clientX - rect.left;
