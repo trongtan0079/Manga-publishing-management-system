@@ -667,7 +667,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                                      <div class="collapse mt-1 mb-2" id="region-task-desc-<?= $rt['task_id'] ?>-<?= $region['region_id'] ?>" onclick="event.stopPropagation();">
                                                          <div class="card card-body bg-light p-2 border-light text-slate-600 text-start" style="font-size: 0.72rem; line-height: 1.4; border-radius: 6px; max-height: 120px; overflow-y: auto;">
                                                              <strong>Yêu cầu:</strong><br>
-                                                             <?= renderMarkdown($displayDesc) ?>
+                                                             <?= !empty($displayDesc) ? renderMarkdown($displayDesc) : '<em class="text-muted">Không có yêu cầu chi tiết cho phân vùng này.</em>' ?>
                                                          </div>
                                                      </div>
                                                  <?php endif; ?>
@@ -933,7 +933,8 @@ function extractRegionDescriptionJS(fullHtml, regionId) {
         }
     }
     
-    return fullHtml;
+    // Nếu không tìm thấy card cho region này, trả về chuỗi rỗng
+    return '';
 }
 
 function closeSelectedTaskBox() {
