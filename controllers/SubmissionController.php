@@ -12,9 +12,13 @@ require_once __DIR__ . '/../models/Page.php';
 
 class SubmissionController extends BaseController
 {
+    /** @var Submission */
     private $submissionModel;
+    /** @var Task */
     private $taskModel;
+    /** @var Chapter */
     private $chapterModel;
+    /** @var Series */
     private $seriesModel;
 
     public function __construct() {
@@ -532,6 +536,9 @@ class SubmissionController extends BaseController
     /**
      * Xem chi tiết Submission
      */
+    /**
+     * @param int|string $id
+     */
     public function show($id) {
         $id = intval($id);
         if ($id <= 0) {
@@ -611,6 +618,9 @@ class SubmissionController extends BaseController
 
     /**
      * Xóa Submission chưa được review (chỉ ở trạng thái pending)
+     */
+    /**
+     * @param int|string $id
      */
     public function delete($id) {
         $id = intval($id);

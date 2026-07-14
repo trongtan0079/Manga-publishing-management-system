@@ -10,9 +10,13 @@ require_once __DIR__ . '/../models/Task.php';
 
 class PageController extends BaseController
 {
+    /** @var Page */
     private $pageModel;
+    /** @var Chapter */
     private $chapterModel;
+    /** @var Series */
     private $seriesModel;
+    /** @var Task */
     private $taskModel;
     
     // Giới hạn file ảnh 10MB
@@ -50,6 +54,9 @@ class PageController extends BaseController
     /**
      * Hàm kiểm tra quyền sở hữu chapter
      * Đảm bảo mangaka chỉ có thể thao tác trên chapter thuộc series của họ
+     */
+    /**
+     * @param int|string $chapterId
      */
     private function checkChapterOwnership($chapterId) {
         $chapter = $this->chapterModel->findById($chapterId);
@@ -295,6 +302,9 @@ class PageController extends BaseController
     /**
      * Hiển thị chi tiết một trang
      */
+    /**
+     * @param int|string $id
+     */
     public function show($id) {
         $page = $this->pageModel->findById($id);
         if (!$page) {
@@ -338,6 +348,9 @@ class PageController extends BaseController
     /**
      * Hiển thị form sửa trang
      */
+    /**
+     * @param int|string $id
+     */
     public function edit($id) {
         $page = $this->pageModel->findById($id);
         if (!$page) {
@@ -366,6 +379,9 @@ class PageController extends BaseController
 
     /**
      * Cập nhật thông tin trang
+     */
+    /**
+     * @param int|string $id
      */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -484,6 +500,9 @@ class PageController extends BaseController
 
     /**
      * Xóa một trang
+     */
+    /**
+     * @param int|string $id
      */
     public function delete($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {

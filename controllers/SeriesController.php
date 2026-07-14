@@ -9,6 +9,7 @@ require_once __DIR__ . '/../models/SystemLog.php';
 
 class SeriesController extends BaseController
 {
+    /** @var Series */
     private $seriesModel;
     private $allowedStatuses = ['planning', 'ongoing', 'completed', 'canceled', 'suspended'];
 
@@ -234,6 +235,9 @@ class SeriesController extends BaseController
     /**
      * Nộp đề xuất bộ truyện lên Ban Biên Tập (Từ Nháp sang Chờ duyệt)
      */
+    /**
+     * @param int|string $id
+     */
     public function submit($id) {
         requireRole('mangaka');
         $id = (int)$id;
@@ -291,6 +295,10 @@ class SeriesController extends BaseController
     /**
      * Kiểm tra quyền sở hữu truyện của Mangaka
      */
+    /**
+     * @param array $series
+     * @param int|string $id
+     */
     private function checkOwnership($series, $id) {
         if (!$series) {
             $_SESSION['error'] = "Không tìm thấy bộ truyện (ID: {$id}).";
@@ -329,6 +337,9 @@ class SeriesController extends BaseController
     /**
      * Hiển thị form chỉnh sửa bộ truyện
      */
+    /**
+     * @param int|string $id
+     */
     public function edit($id) {
         requireRole('mangaka');
         $series = $this->seriesModel->findById($id);
@@ -339,6 +350,9 @@ class SeriesController extends BaseController
 
     /**
      * Cập nhật thông tin bộ truyện
+     */
+    /**
+     * @param int|string $id
      */
     public function update($id) {
         requireRole('mangaka');
@@ -431,6 +445,9 @@ class SeriesController extends BaseController
     /**
      * Xem chi tiết bộ truyện
      */
+    /**
+     * @param int|string $id
+     */
     public function show($id) {
         $series = $this->seriesModel->findById($id);
         $this->checkOwnership($series, $id);
@@ -443,6 +460,9 @@ class SeriesController extends BaseController
 
     /**
      * Xóa bộ truyện
+     */
+    /**
+     * @param int|string $id
      */
     public function delete($id) {
         requireRole('mangaka');
@@ -579,6 +599,9 @@ class SeriesController extends BaseController
 
     /**
      * Cập nhật trạng thái Series (Dành cho Editorial Board duyệt xuất bản)
+     */
+    /**
+     * @param int|string $id
      */
     public function updateStatus($id) {
         requireRole('board');
