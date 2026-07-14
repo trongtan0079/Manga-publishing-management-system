@@ -584,7 +584,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                     <div class="d-flex w-100 justify-content-between align-items-center mb-2">
                                         <h6 class="mb-0 fw-bold text-dark d-flex align-items-center">
                                             <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
-                                                <input type="checkbox" class="form-check-input region-select-cb me-2" value="<?= $region['region_id'] ?>" onclick="updateGroupButton();" style="width: 18px; height: 18px; cursor: pointer; margin-top: 0; border-radius: 4px; border-color: #cbd5e1;">
+                                                <input type="checkbox" class="form-check-input region-select-cb me-2" value="<?= $region['region_id'] ?>" onclick="event.stopPropagation(); updateGroupButton();" style="width: 18px; height: 18px; cursor: pointer; margin-top: 0; border-radius: 4px; border-color: #cbd5e1;">
                                             <?php endif; ?>
                                             <span class="badge px-2.5 py-1 text-xs font-semibold" style="<?= $badgeStyle ?>; border-radius: 6px;"><?= $typeLabel ?></span>
                                             <span class="text-slate-600 font-bold ms-2" style="font-size: 0.925rem;">ID #<?= $region['region_id'] ?></span>
