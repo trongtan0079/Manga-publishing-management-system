@@ -68,6 +68,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             $oldTaskType = $gData['old_task_type'];
                             $oldDesc = $gData['old_description'];
                             
+                            $isStandardType = in_array($oldTaskType, ['background', 'inking', 'coloring', 'effects', '']);
+                            $selectedType = $isStandardType ? $oldTaskType : 'other';
+                            $oldCustomType = !$isStandardType ? $oldTaskType : '';
+                            
                             $typeLabel = 'Khác';
                             $badgeColor = '#6c757d'; // secondary
                             $bgColor = '#f8f9fa';
