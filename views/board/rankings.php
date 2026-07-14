@@ -38,7 +38,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <th>Hạng</th>
                         <th>Series</th>
                         <th>Mangaka</th>
-                        <th>Người Chấm</th>
+                        <th>Người Nhập</th>
                         <th>Số Phiếu</th>
                         <th>Điểm Số (Quy Chuẩn)</th>
                         <th>Ngày Tạo</th>

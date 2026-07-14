@@ -62,7 +62,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             </td>
                         </tr>
                         <tr>
-                            <th class="bg-light">Người Đánh giá</th>
+                            <th class="bg-light">Người Nhập</th>
                             <td><?= htmlspecialchars($ranking['board_member_name'] ?? 'Không xác định') ?> (ID: <?= htmlspecialchars($ranking['board_member_id']) ?>)</td>
                         </tr>
                         <tr>
