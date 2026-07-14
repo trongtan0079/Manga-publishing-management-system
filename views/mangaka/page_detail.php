@@ -904,7 +904,12 @@ function updateSelectedTaskBox(regionId) {
         wrapper.classList.add('has-selected-overlay');
     }
     document.querySelectorAll('.page-region-overlay').forEach(el => {
-        el.classList.remove('selected-overlay');
+        // Chỉ remove nếu overlay đó không ứng với checkbox đang check để giữ highlight cho các vùng được check
+        const rid = el.id.replace('overlay-region-', '');
+        const cb = document.querySelector(`.region-select-cb[value="${rid}"]`);
+        if (!cb || !cb.checked) {
+            el.classList.remove('selected-overlay');
+        }
     });
     const activeOverlay = document.getElementById('overlay-region-' + regionId);
     if (activeOverlay) {
@@ -1404,17 +1409,95 @@ function updateGroupButton() {
         }
     }
 
-    // Cập nhật trạng thái hiển thị của các card dựa trên checkbox
+    // Cập nhật trạng thái hiển thị của các card và canvas overlay dựa trên checkbox
     document.querySelectorAll('.region-select-cb').forEach(cb => {
         const card = document.getElementById('list-region-' + cb.value);
+        const overlay = document.getElementById('overlay-region-' + cb.value);
         if (card) {
             if (cb.checked) {
                 card.classList.add('checked-card');
+                if (overlay) overlay.classList.add('selected-overlay');
             } else {
                 card.classList.remove('checked-card');
+                if (overlay && !card.classList.contains('selected-card')) {
+                    overlay.classList.remove('selected-overlay');
+                }
             }
         }
     });
+
+    // Nếu chọn nhiều hơn 1 phân vùng, hiển thị giao diện Giao việc nhóm ở Details Box
+    if (checked.length > 1) {
+        showGroupAssignBox(checked.length);
+    } else if (checked.length === 1) {
+        // Nếu chỉ chọn 1 phân vùng, hiển thị chi tiết của phân vùng đó
+        updateSelectedTaskBox(checked[0].value);
+    } else {
+        // Nếu không chọn phân vùng nào:
+        // Khôi phục hiển thị chi tiết cho phân vùng đang được click active (nếu có)
+        const activeCard = document.querySelector('.region-card-item.selected-card');
+        if (activeCard) {
+            const regionId = activeCard.id.replace('list-region-', '');
+            updateSelectedTaskBox(regionId);
+        } else {
+            closeSelectedTaskBox();
+        }
+    }
+}
+
+function showGroupAssignBox(count) {
+    const infoBox = document.getElementById('selectedTaskDetailsBox');
+    if (!infoBox) return;
+    
+    infoBox.classList.remove('d-none');
+    document.getElementById('selectedTaskTitle').innerText = 'Giao việc nhóm (' + count + ' phân vùng)';
+    
+    // Ẩn hàng metadata vì là giao việc nhóm mới
+    const metaRow = infoBox.querySelector('.row');
+    if (metaRow) metaRow.classList.add('d-none');
+    
+    // Ẩn tiêu đề metadata
+    const descHeader = infoBox.querySelector('.text-xs.text-slate-500.font-semibold');
+    if (descHeader) descHeader.classList.add('d-none');
+    
+    const submissionContainer = document.getElementById('submissionButtonContainer');
+    if (submissionContainer) submissionContainer.innerHTML = '';
+    
+    const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
+    if (annoContainer) annoContainer.classList.add('d-none');
+    
+    // Thiết lập spotlight cho tất cả các overlay được chọn trên canvas
+    const wrapper = document.getElementById('mangaPageWrapper');
+    if (wrapper) {
+        wrapper.classList.add('has-selected-overlay');
+    }
+    
+    const descEl = document.getElementById('selectedTaskDescription');
+    if (descEl) {
+        descEl.className = "text-slate-700 text-start overflow-y-auto mb-2 font-medium";
+        descEl.style.setProperty('background-color', 'transparent', 'important');
+        descEl.style.setProperty('border-color', 'transparent', 'important');
+        descEl.style.setProperty('border-width', '0', 'important');
+        descEl.style.setProperty('padding', '0', 'important');
+        descEl.style.setProperty('box-shadow', 'none', 'important');
+        
+        descEl.innerHTML = `
+            <div class="d-flex align-items-start gap-3 p-3 text-slate-700" style="background-color: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                <div class="mt-0.5 d-flex align-items-center justify-content-center rounded-circle text-indigo-600" style="width: 32px; height: 32px; background: rgba(99, 102, 241, 0.12); flex-shrink: 0;">
+                    <i class="fas fa-layer-group fs-6"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h6 class="fw-bold text-indigo-900 mb-1" style="font-size: 0.85rem; color: #3730a3;">Giao việc nhóm đang được chọn</h6>
+                    <p class="text-indigo-700 mb-2.5 text-xs" style="line-height: 1.55;">
+                        Bạn đang tích chọn <strong>${count} phân vùng</strong> để giao việc cùng lúc. Hãy nhấn nút dưới đây để tạo nhiệm vụ chung cho các phân vùng này.
+                    </p>
+                    <button class="btn btn-sm text-white py-2 px-3 d-inline-flex align-items-center fw-bold shadow-sm" style="border-radius: 8px; font-size: 0.75rem; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: 0; transition: all 0.2s;" onclick="assignGroupedRegions()">
+                        <i class="fas fa-layer-group me-1.5"></i>Giao việc nhóm ngay
+                    </button>
+                </div>
+            </div>
+        `;
+    }
 }
 
 function assignGroupedRegions() {
