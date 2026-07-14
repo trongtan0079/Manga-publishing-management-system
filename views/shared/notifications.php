@@ -27,54 +27,38 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
 </div>
 
 <div class="card shadow-sm border-0">
-    <div class="card-body p-0">
+    <div class="card-body p-4 bg-light-subtle">
         <?php if (!empty($notifications)): ?>
-            <div class="list-group list-group-flush">
-                <?php foreach ($notifications as $notif): ?>
-                    <div class="list-group-item d-flex gap-3 py-4 <?= !$notif['is_read'] ? 'bg-light' : '' ?>">
+            <div class="notif-list-container">
+                <?php foreach ($notifications as $notif): 
+                    $details = Notification::getTypeDetails($notif['type']);
+                ?>
+                    <div class="notif-list-item d-flex gap-3 align-items-center <?= !$notif['is_read'] ? 'unread' : '' ?>">
                         <div class="d-flex align-items-center">
                             <?php if (!$notif['is_read']): ?>
-                                <span class="badge bg-primary p-1 border border-light rounded-circle me-3" style="width: 12px; height: 12px;"><span class="visually-hidden">New alerts</span></span>
+                                <span class="notif-badge-indicator me-3" title="Chưa đọc"></span>
                             <?php else: ?>
-                                <span class="p-1 me-3" style="width: 12px; height: 12px;"></span>
+                                <span class="me-3" style="width: 10px; height: 10px; display: inline-block;"></span>
                             <?php endif; ?>
                             
-                            <?php 
-                                // Tùy chỉnh icon và màu sắc hiển thị dựa trên loại thông báo (type)
-                                $icon = 'fa-bell';
-                                $color = 'text-secondary';
-                                $typeLabel = 'Thông báo';
-                                switch($notif['type']) {
-                                    case 'task_assigned': $icon = 'fa-tasks'; $color = 'text-warning'; $typeLabel = 'Task mới'; break;
-                                    case 'submission_submitted':
-                                    case 'chapter_submitted': $icon = 'fa-file-upload'; $color = 'text-info'; $typeLabel = 'Bản thảo'; break;
-                                    case 'review_created': $icon = 'fa-comment-dots'; $color = 'text-primary'; $typeLabel = 'Nhận xét'; break;
-                                    case 'submission_approved': $icon = 'fa-check-circle'; $color = 'text-success'; $typeLabel = 'Phê duyệt'; break;
-                                    case 'submission_rejected': $icon = 'fa-times-circle'; $color = 'text-danger'; $typeLabel = 'Từ chối'; break;
-                                    case 'ranking_published': $icon = 'fa-trophy'; $color = 'text-warning'; $typeLabel = 'Xếp hạng'; break;
-                                    case 'series_warning': $icon = 'fa-exclamation-triangle'; $color = 'text-danger'; $typeLabel = 'Cảnh báo'; break;
-                                    case 'series_completed': $icon = 'fa-flag-checkered'; $color = 'text-success'; $typeLabel = 'Bộ truyện'; break;
-                                    case 'series_submitted': $icon = 'fa-folder-plus'; $color = 'text-primary'; $typeLabel = 'Đề xuất mới'; break;
-                                }
-                            ?>
-                            <div class="bg-white shadow-sm rounded-circle d-flex align-items-center justify-content-center border" style="width: 48px; height: 48px;">
-                                <i class="fas <?= $icon ?> <?= $color ?> fs-4"></i>
+                            <div class="notif-list-icon" style="background: <?= $details['bg_gradient'] ?>;">
+                                <i class="fas <?= $details['icon'] ?> fs-5 text-white"></i>
                             </div>
                         </div>
                         <div class="d-flex flex-column justify-content-center w-100 ms-2">
                             <div class="d-flex w-100 justify-content-between align-items-center mb-1">
                                 <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>" class="text-decoration-none text-dark hover-primary-text">
-                                    <strong class="mb-1"><?= $typeLabel ?></strong>
+                                    <strong class="mb-0 text-slate-800" style="font-size: 0.95rem; font-weight: 700;"><?= htmlspecialchars($details['label']) ?></strong>
                                     <?php if (isset($notif['username']) && isset($notif['full_name'])): ?>
                                         <span class="badge bg-secondary ms-2" style="font-size: 0.7rem; font-weight: normal; vertical-align: middle;">
                                             Gửi tới: <?= htmlspecialchars($notif['full_name'] . ' (@' . $notif['username'] . ')') ?>
                                         </span>
                                     <?php endif; ?>
                                 </a>
-                                <small class="text-muted" style="font-size: 0.8rem;"><?= date('d/m/Y H:i', strtotime($notif['created_at'])) ?></small>
+                                <small class="text-muted" style="font-size: 0.78rem; font-weight: 500;"><?= date('d/m/Y H:i', strtotime($notif['created_at'])) ?></small>
                             </div>
-                            <p class="mb-1 fw-normal">
-                                <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>" class="text-decoration-none text-secondary hover-primary-text" style="font-size: 0.9rem;">
+                            <p class="mb-0 fw-normal">
+                                <a href="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=readAndRedirect&id=<?= $notif['notification_id'] ?>" class="text-decoration-none text-secondary hover-primary-text" style="font-size: 0.88rem; font-weight: 500; color: #64748b !important;">
                                     <?= htmlspecialchars($notif['message']) ?>
                                 </a>
                             </p>
@@ -82,12 +66,12 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                         <div class="d-flex align-items-center ms-3">
                             <?php if (!$notif['is_read']): ?>
                                 <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=markAsRead&id=<?= $notif['notification_id'] ?>" method="POST" class="m-0">
-                                    <button type="submit" class="btn btn-sm btn-light border shadow-sm" title="Đánh dấu đã đọc">
+                                    <button type="submit" class="btn btn-sm btn-light border shadow-sm px-2.5 py-1.5" style="border-radius: 8px;" title="Đánh dấu đã đọc">
                                         <i class="fas fa-check text-success"></i>
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1"><i class="fas fa-check me-1"></i> Đã đọc</span>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5" style="border-radius: 8px; font-weight: 600;"><i class="fas fa-check me-1"></i> Đã đọc</span>
                             <?php endif; ?>
                         </div>
                     </div>
