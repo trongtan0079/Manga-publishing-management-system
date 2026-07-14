@@ -1521,9 +1521,9 @@ function showGroupAssignBox(count) {
         let statusBadge = '';
         if (regionTasks.length > 0) {
             const assistantName = regionTasks[0].assistant_name || 'Chưa rõ';
-            statusBadge = `<span class="badge bg-indigo-subtle text-indigo border border-indigo-subtle py-0.5 px-1.5 ms-auto fw-bold" style="font-size: 0.68rem; border-radius: 4px;"><i class="fas fa-user-check me-1"></i>Đã giao: ${escapeHtml(assistantName)}</span>`;
+            statusBadge = `<span class="badge border py-0.5 px-1.5 ms-auto fw-bold" style="font-size: 0.68rem; border-radius: 4px; color: #4f46e5 !important; background-color: #eef2ff !important; border-color: #c7d2fe !important;"><i class="fas fa-user-check me-1"></i>Đã giao: ${escapeHtml(assistantName)}</span>`;
         } else {
-            statusBadge = `<span class="badge bg-slate-100 text-slate-500 border border-slate-200 py-0.5 px-1.5 ms-auto fw-medium" style="font-size: 0.68rem; border-radius: 4px;"><i class="fas fa-user-clock me-1"></i>Chưa giao</span>`;
+            statusBadge = `<span class="badge border py-0.5 px-1.5 ms-auto fw-medium" style="font-size: 0.68rem; border-radius: 4px; color: #475569 !important; background-color: #f1f5f9 !important; border-color: #cbd5e1 !important;"><i class="fas fa-user-clock me-1"></i>Chưa giao</span>`;
         }
         
         const typeLabel = getRegionTypeLabel(region.region_type);
