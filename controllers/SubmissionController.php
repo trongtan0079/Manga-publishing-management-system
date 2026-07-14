@@ -606,10 +606,24 @@ class SubmissionController extends BaseController
         }
 
         $pages = [];
+        $annotatedPages = [];
         if (!empty($submission['chapter_id'])) {
             require_once __DIR__ . '/../models/Page.php';
+            require_once __DIR__ . '/../models/EditorAnnotation.php';
             $pageModel = new \Page();
+            $eaModel = new \EditorAnnotation();
             $pages = $pageModel->findByChapterIdWithAnnotationCount($submission['chapter_id']);
+            
+            $pagesList = $pageModel->findByChapterId($submission['chapter_id']);
+            foreach ($pagesList as $p) {
+                $annotations = $eaModel->findByPageId($p['page_id']);
+                if (!empty($annotations)) {
+                    $annotatedPages[] = [
+                        'page' => $p,
+                        'annotations' => array_values($annotations)
+                    ];
+                }
+            }
         }
 
         // Nạp view chi tiết
