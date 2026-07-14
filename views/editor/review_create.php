@@ -188,15 +188,28 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php if (!empty($annotatedPages)): ?>
                 <!-- Các trang bản thảo bị đánh dấu lỗi (Từ Review trước) -->
                 <div class="mb-4 bg-slate-50 p-3 rounded border border-slate-200">
-                    <h6 class="fw-bold text-danger mb-4 border-bottom pb-2"><i class="fas fa-images me-2 text-danger"></i>Các trang bản thảo gốc có lỗi cần sửa:</h6>
+                    <?php 
+                    $hasUpdatedPages = false;
+                    foreach ($annotatedPages as $ap) {
+                        if ($this->isPageUpdatedAfterAnnotation($ap['page'])) {
+                            $hasUpdatedPages = true;
+                            break;
+                        }
+                    }
+                    $titleText = $hasUpdatedPages ? 'Đối chiếu các trang đã sửa lỗi (Xem bản vẽ cũ có lỗi hoặc bản mới):' : 'Các trang bản thảo gốc có lỗi cần sửa:';
+                    $titleColor = $hasUpdatedPages ? 'text-primary' : 'text-danger';
+                    ?>
+                    <h6 class="fw-bold <?= $titleColor ?> mb-4 border-bottom pb-2"><i class="fas fa-images me-2 <?= $titleColor ?>"></i><?= $titleText ?></h6>
                     
                     <div class="row g-4">
                         <?php foreach ($annotatedPages as $ap): 
                             $page = $ap['page'];
                             $annotations = $ap['annotations'];
                             
-                            $imageUrl = $page['image_url'] ?? '';
+                            // Sử dụng ảnh cũ (old_image_url) làm ảnh nền để vẽ các khung lỗi nếu có
+                            $imageUrl = !empty($page['old_image_url']) ? $page['old_image_url'] : ($page['image_url'] ?? '');
                             $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                            $isUpdated = $this->isPageUpdatedAfterAnnotation($page);
                         ?>
                         <div class="col-12 col-xl-6">
                             <div class="card h-100 shadow-sm border-0 bg-light">
@@ -205,21 +218,52 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 </div>
                                 <div class="card-body text-center">
                                     <div class="position-relative d-inline-block shadow-sm mb-3" style="max-width: 100%; border: 1px solid #ddd; background-color: #fff;">
-                                        <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 400px; display: block;" alt="Annotated Page <?= $page['page_number'] ?>">
-                                        
-                                        <?php foreach ($annotations as $index => $ann): 
-                                            // Chuyển đổi tọa độ gốc (theo khung chuẩn 800x1000) sang phần trăm
-                                            $l = ($ann['x'] / 800) * 100;
-                                            $t = ($ann['y'] / 1000) * 100;
-                                            $w = ($ann['width'] / 800) * 100;
-                                            $h = ($ann['height'] / 1000) * 100;
+                                        <!-- Khung hiển thị Bản vẽ cũ có lỗi -->
+                                        <div id="wrapper-old-<?= $page['page_id'] ?>">
+                                            <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 400px; display: block;" alt="Annotated Page <?= $page['page_number'] ?>">
+                                            
+                                            <?php foreach ($annotations as $index => $ann): 
+                                                // Chuyển đổi tọa độ gốc (theo khung chuẩn 800x1000) sang phần trăm
+                                                $l = ($ann['x'] / 800) * 100;
+                                                $t = ($ann['y'] / 1000) * 100;
+                                                $w = ($ann['width'] / 800) * 100;
+                                                $h = ($ann['height'] / 1000) * 100;
+                                            ?>
+                                                <div style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #dc3545; background-color: rgba(220, 53, 69, 0.2); pointer-events: none;">
+                                                    <span class="badge bg-danger position-absolute top-0 start-0 translate-middle" style="font-size: 0.7rem; pointer-events: auto; z-index: 10;"><?= $index + 1 ?></span>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+
+                                        <!-- Khung hiển thị Bản vẽ mới đã sửa -->
+                                        <?php if ($isUpdated): 
+                                            $newPageImg = $this->resolvePageImageUrl($page['image_url']);
                                         ?>
-                                            <div style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #dc3545; background-color: rgba(220, 53, 69, 0.2); pointer-events: none;">
-                                                <span class="badge bg-danger position-absolute top-0 start-0 translate-middle" style="font-size: 0.7rem; pointer-events: auto; z-index: 10;"><?= $index + 1 ?></span>
+                                            <div id="wrapper-new-<?= $page['page_id'] ?>" style="display: none;">
+                                                <img src="<?= htmlspecialchars($newPageImg) ?>" class="img-fluid" style="max-height: 400px; display: block;" alt="New Page <?= $page['page_number'] ?>">
                                             </div>
-                                        <?php endforeach; ?>
+                                        <?php endif; ?>
+
+                                        <?php if ($isUpdated): ?>
+                                            <span class="position-absolute top-0 start-0 badge rounded-pill bg-warning text-dark m-2 shadow-sm" style="font-size: 0.8rem; padding: 0.35em 0.6em; z-index: 10; border: 1px solid rgba(0,0,0,0.15);">
+                                                <i class="fas fa-sync-alt me-1"></i>Bản mới
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                     
+                                    <?php if ($isUpdated): ?>
+                                        <div class="mb-3 text-center">
+                                            <div class="btn-group btn-group-sm shadow-sm" role="group">
+                                                <button type="button" class="btn btn-outline-secondary active fw-bold" id="btn-show-old-<?= $page['page_id'] ?>" onclick="togglePageView(<?= $page['page_id'] ?>, 'old')">
+                                                    <i class="fas fa-history me-1"></i>Bản vẽ cũ (Có lỗi)
+                                                </button>
+                                                <button type="button" class="btn btn-outline-primary fw-bold" id="btn-show-new-<?= $page['page_id'] ?>" onclick="togglePageView(<?= $page['page_id'] ?>, 'new')">
+                                                    <i class="fas fa-image me-1"></i>Bản vẽ mới đã sửa
+                                                </button>
+                                            </div>
+                                        </div>
+                                    <?php endif; ?>
+
                                     <div class="text-start bg-white p-3 rounded border border-slate-200">
                                         <p class="text-muted text-xs fw-bold mb-2 text-uppercase">Chi tiết lỗi:</p>
                                         <ul class="list-unstyled mb-0 text-sm">
@@ -237,6 +281,27 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <?php endforeach; ?>
                     </div>
                 </div>
+
+                <script>
+                function togglePageView(pageId, version) {
+                    const oldWrapper = document.getElementById('wrapper-old-' + pageId);
+                    const newWrapper = document.getElementById('wrapper-new-' + pageId);
+                    const btnOld = document.getElementById('btn-show-old-' + pageId);
+                    const btnNew = document.getElementById('btn-show-new-' + pageId);
+                    
+                    if (version === 'new') {
+                        if (oldWrapper) oldWrapper.style.display = 'none';
+                        if (newWrapper) newWrapper.style.display = 'block';
+                        if (btnOld) btnOld.classList.remove('active');
+                        if (btnNew) btnNew.classList.add('active');
+                    } else {
+                        if (oldWrapper) oldWrapper.style.display = 'block';
+                        if (newWrapper) newWrapper.style.display = 'none';
+                        if (btnOld) btnOld.classList.add('active');
+                        if (btnNew) btnNew.classList.remove('active');
+                    }
+                }
+                </script>
                 <?php endif; ?>
             </div>
         </div>
