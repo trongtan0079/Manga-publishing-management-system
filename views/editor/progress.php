@@ -121,33 +121,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     
     /* Progress and Chapter Card Box */
     .chapter-card-box {
-        background: #f8fafc;
+        background: #ffffff;
         border: 1px solid #e2e8f0 !important;
         border-radius: 20px !important;
-        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01) !important;
+        box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.03) !important;
         transition: all 0.25s ease;
         position: relative;
         overflow: hidden;
     }
-    .chapter-card-box::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 5px;
-        background: linear-gradient(180deg, var(--primary, #6366f1), #3b82f6);
-    }
     .chapter-card-box:hover {
         border-color: rgba(99, 102, 241, 0.25) !important;
-        box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.05) !important;
-        background: #ffffff;
+        box-shadow: 0 12px 24px -8px rgba(15, 23, 42, 0.06) !important;
     }
     
     /* Page Matrix Cards */
     .page-matrix-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
         gap: 14px;
         margin-top: 5px;
     }
@@ -557,7 +547,7 @@ if (!function_exists('renderTaskStatusDot')) {
                                 </div>
 
                                 <!-- Ma trận tiến độ trang vẽ (Real-time Grid dạng thẻ ảnh xem trước) -->
-                                <div class="studio-progress-grid-wrapper p-3 rounded-4 border border-light-subtle shadow-inner" style="background-color: #f1f5f9; max-height: 420px; overflow-y: auto;">
+                                <div class="studio-progress-grid-wrapper p-3 rounded-4 border border-light-subtle shadow-sm" style="background-color: #f8fafc; max-height: 420px; overflow-y: auto;">
                                     <?php if (!empty($data['active_chapter_pages'])): ?>
                                         <div class="page-matrix-container">
                                             <?php foreach ($data['active_chapter_pages'] as $pageData): 
