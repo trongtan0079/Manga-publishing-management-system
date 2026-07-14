@@ -22,23 +22,42 @@ $rankingModel = new SeriesRanking();
 <!-- Collapsible Formula Guide -->
 <div class="mb-4">
     <button class="btn btn-xs btn-outline-secondary d-inline-flex align-items-center gap-1" type="button" data-bs-toggle="collapse" data-bs-target="#formulaGuide" aria-expanded="false" aria-controls="formulaGuide" style="border-radius: 6px; font-size: 0.78rem; padding: 4px 10px;">
-        <i class="fas fa-calculator text-primary"></i> Xem cách tính điểm quy chuẩn
+        <i class="fas fa-calculator text-primary"></i> Xem cách tính điểm & cảnh báo
     </button>
     <div class="collapse mt-2" id="formulaGuide">
         <div class="card card-body border-0 shadow-sm bg-light p-4 rounded-3">
-            <h6 class="fw-bold text-dark mb-2"><i class="fas fa-info-circle text-primary me-2"></i>Công thức quy chuẩn hóa điểm số</h6>
-            <p class="text-muted text-sm mb-3">
-                Điểm quy chuẩn của từng bộ truyện được tính dựa trên tỷ lệ phiếu bầu của bộ truyện đó so với bộ truyện nhận được nhiều phiếu bầu nhất trong cùng kỳ:
-            </p>
-            <div class="bg-white py-3 px-3 rounded-2 text-center mb-3 font-monospace fw-bold text-primary shadow-sm border border-light" style="font-size: 1rem;">
-                Điểm Quy Chuẩn = ( Số Phiếu Của Bộ Truyện / Số Phiếu Cao Nhất Trong Kỳ ) x 100
+            <h6 class="fw-bold text-dark mb-3"><i class="fas fa-info-circle text-primary me-2"></i>Hướng dẫn Quy chế Xếp hạng & Cảnh báo</h6>
+            
+            <div class="mb-3">
+                <strong class="text-dark d-block mb-1" style="font-size: 0.88rem;">1. Công thức quy chuẩn hóa điểm số:</strong>
+                <p class="text-muted text-sm mb-2">
+                    Điểm quy chuẩn của từng bộ truyện được tính dựa trên tỷ lệ phiếu bầu của bộ truyện đó so với bộ truyện nhận được nhiều phiếu bầu nhất trong cùng kỳ:
+                </p>
+                <div class="bg-white py-2.5 px-3 rounded-2 text-center mb-3 font-monospace fw-bold text-primary shadow-sm border border-light" style="font-size: 0.95rem; width: fit-content; min-width: 320px;">
+                    Điểm Quy Chuẩn = ( Số Phiếu Của Bộ Truyện / Số Phiếu Cao Nhất Trong Kỳ ) x 100
+                </div>
+                <div class="text-muted text-xs">
+                    <ul class="mb-0 ps-3">
+                        <li class="mb-1"><strong>Số phiếu của bộ truyện:</strong> Tổng số phiếu bình chọn của độc giả cho bộ truyện đó trong kỳ đánh giá.</li>
+                        <li class="mb-1"><strong>Số phiếu cao nhất trong kỳ:</strong> Số phiếu lớn nhất đạt được của bộ truyện dẫn đầu trong kỳ đó.</li>
+                        <li><strong>Làm tròn:</strong> Điểm số cuối cùng được làm tròn tới 2 chữ số thập phân (ví dụ: 85.71).</li>
+                    </ul>
+                </div>
             </div>
-            <div class="text-muted text-xs">
-                <ul class="mb-0 ps-3">
-                    <li class="mb-1"><strong>Số phiếu của bộ truyện:</strong> Tổng số phiếu bình chọn của độc giả cho bộ truyện đó trong kỳ đánh giá.</li>
-                    <li class="mb-1"><strong>Số phiếu cao nhất trong kỳ:</strong> Số phiếu lớn nhất đạt được của bộ truyện dẫn đầu trong kỳ đó.</li>
-                    <li><strong>Làm tròn:</strong> Điểm số cuối cùng được làm tròn tới 2 chữ số thập phân (ví dụ: 85.71).</li>
-                </ul>
+
+            <hr class="my-3">
+
+            <div>
+                <strong class="text-dark d-block mb-1" style="font-size: 0.88rem;">2. Cơ chế cảnh báo nguy cơ đình bản (Series Warning):</strong>
+                <p class="text-muted text-sm mb-2">
+                    Hệ thống tích hợp tính năng cảnh báo sớm tự động gửi tới Tác giả (Mangaka) khi chất lượng hoặc độ phổ biến của tác phẩm giảm sút:
+                </p>
+                <div class="text-muted text-xs">
+                    <ul class="mb-0 ps-3">
+                        <li class="mb-1"><strong>Điều kiện kích hoạt:</strong> Ngay khi Hội đồng Biên tập lưu điểm xếp hạng, nếu bộ truyện có Điểm quy chuẩn &lt; 50.00 điểm hoặc Thứ hạng &ge; #5.</li>
+                        <li><strong>Hành động tự động:</strong> Hệ thống sẽ gửi một thông báo cảnh báo khẩn cấp (loại <code class="text-danger">'series_warning'</code>) hiển thị nổi bật màu đỏ trên giao diện của Mangaka sở hữu bộ truyện đó: <em>"Cảnh báo: Bộ truyện của bạn đang xếp hạng thấp. Có nguy cơ bị Hội đồng Biên tập xem xét ngưng xuất bản hoặc hủy dự án."</em></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
