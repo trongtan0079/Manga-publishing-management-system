@@ -135,9 +135,8 @@ class PageController extends BaseController
         }
 
         // Kiểm tra MIME type thực sự
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mimeType = $finfo->file($file['tmp_name']);
         $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!in_array($mimeType, $allowedMimeTypes)) {
             $_SESSION['error'] = "File tải lên không phải là định dạng ảnh hợp lệ.";

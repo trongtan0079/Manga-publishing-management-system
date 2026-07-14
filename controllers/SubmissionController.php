@@ -323,10 +323,9 @@ class SubmissionController extends BaseController
         ];
 
         $mimeType = '';
-        if (function_exists('finfo_open')) {
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mimeType = finfo_file($finfo, $tmpPath);
-            finfo_close($finfo);
+        if (class_exists('finfo')) {
+            $finfo = new finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->file($tmpPath);
         } elseif (function_exists('mime_content_type')) {
             $mimeType = mime_content_type($tmpPath);
         } else {
