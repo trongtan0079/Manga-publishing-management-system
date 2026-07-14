@@ -262,7 +262,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
     <!-- Cột trái: Ảnh trang truyện tích hợp vẽ Bounding Box của AI -->
     <div class="col-md-7 mb-4">
         <!-- Hộp hiển thị mô tả công việc của phân vùng đang được chọn (nằm riêng bên ngoài) -->
-        <div id="selectedTaskDetailsBox" class="card border-0 shadow-lg mb-3 text-start d-none" style="background-color: #ffffff; border-radius: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border-top: 4px solid var(--primary) !important; overflow: hidden; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 5px 15px -5px rgba(15, 23, 42, 0.03) !important;">
+        <div id="selectedTaskDetailsBox" class="card border-0 shadow-lg mb-3 text-start d-none" style="background-color: #ffffff; border-radius: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow: hidden; box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.08), 0 5px 15px -5px rgba(15, 23, 42, 0.03) !important;">
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 text-uppercase fw-extrabold" style="font-size: 0.65rem; letter-spacing: 0.05em; border-radius: 6px;">
