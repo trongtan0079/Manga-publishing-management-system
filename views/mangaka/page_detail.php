@@ -503,15 +503,6 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                     </div>
                 <?php else: ?>
                     <div>
-                        <!-- Bảng hướng dẫn giao việc -->
-                        <div class="alert alert-info py-2 px-3 mb-3 border-0 shadow-sm" style="background-color: #f0fdfa; border-left: 4px solid #0f766e !important; border-radius: 8px;">
-                            <div class="fw-bold text-teal-900 mb-1" style="font-size: 0.825rem;"><i class="fas fa-info-circle me-1.5 text-teal-600"></i>Hướng dẫn giao việc (Task):</div>
-                            <ul class="ps-3 mb-0 text-slate-700 text-xs" style="line-height: 1.5; font-size: 0.76rem;">
-                                <li class="mb-1"><strong>Giao việc riêng lẻ:</strong> Nhấn nút <span class="badge bg-light text-primary border border-primary-subtle py-0.5 px-1.5"><i class="fas fa-plus me-1"></i>Giao việc</span> trên thẻ phân vùng để giao một việc cụ thể cho phân vùng đó.</li>
-                                <li><strong>Giao việc nhóm:</strong> Tích chọn <input type="checkbox" checked disabled style="transform: scale(0.8); vertical-align: middle; pointer-events: none;"> vào nhiều phân vùng. Nút <span class="badge bg-indigo text-white py-0.5 px-1.5" style="background-color: #6366f1;"><i class="fas fa-layer-group me-1"></i>Giao việc nhóm</span> sẽ xuất hiện ở góc trên để giao một công việc chung cho nhóm phân vùng này.</li>
-                            </ul>
-                        </div>
-
                         <div class="list-group" id="region-list-group">
                             <?php foreach ($regions as $region): 
                                 $typeLabel = htmlspecialchars($region['region_type']);
@@ -664,6 +655,15 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                      </div>
                                  </div>
                              <?php endforeach; ?>
+                        </div>
+                        
+                        <!-- Bảng hướng dẫn giao việc -->
+                        <div class="alert alert-info py-2 px-3 mt-3 mb-0 border-0 shadow-sm" style="background-color: #f0fdfa; border-left: 4px solid #0f766e !important; border-radius: 8px;">
+                            <div class="fw-bold text-teal-900 mb-1" style="font-size: 0.825rem;"><i class="fas fa-info-circle me-1.5 text-teal-600"></i>Hướng dẫn giao việc (Task):</div>
+                            <ul class="ps-3 mb-0 text-slate-700 text-xs" style="line-height: 1.5; font-size: 0.76rem;">
+                                <li class="mb-1"><strong>Giao việc riêng lẻ:</strong> Nhấn nút <span class="badge bg-light text-primary border border-primary-subtle py-0.5 px-1.5"><i class="fas fa-plus me-1"></i>Giao việc</span> trên thẻ phân vùng để giao một việc cụ thể cho phân vùng đó.</li>
+                                <li><strong>Giao việc nhóm:</strong> Tích chọn <input type="checkbox" checked disabled style="transform: scale(0.8); vertical-align: middle; pointer-events: none;"> vào nhiều phân vùng. Nút <span class="badge bg-indigo text-white py-0.5 px-1.5" style="background-color: #6366f1;"><i class="fas fa-layer-group me-1"></i>Giao việc nhóm</span> sẽ xuất hiện ở góc trên để giao một công việc chung cho nhóm phân vùng này.</li>
+                            </ul>
                         </div>
                     </div>
                 <?php endif; ?>
