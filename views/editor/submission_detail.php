@@ -239,6 +239,15 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                                     <div class="position-relative d-inline-block shadow-sm mb-3" style="max-width: 100%; border: 1px solid #ddd; background-color: #fff;">
                                         <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 400px; display: block;" alt="Annotated Page <?= $page['page_number'] ?>">
                                         
+                                        <?php 
+                                            $isUpdated = $this->isPageUpdatedAfterAnnotation($page);
+                                            if ($isUpdated): 
+                                        ?>
+                                            <span class="position-absolute top-0 start-0 badge rounded-pill bg-warning text-dark m-2 shadow-sm" style="font-size: 0.8rem; padding: 0.35em 0.6em; z-index: 10; border: 1px solid rgba(0,0,0,0.15);">
+                                                <i class="fas fa-sync-alt me-1"></i>Bản mới
+                                            </span>
+                                        <?php endif; ?>
+                                        
                                         <?php foreach ($annotations as $index => $ann): 
                                             // Chuyển đổi tọa độ gốc (theo khung chuẩn 800x1000) sang phần trăm
                                             $l = ($ann['x'] / 800) * 100;
