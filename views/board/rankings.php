@@ -46,7 +46,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <!-- Cột 1: Công thức tính điểm -->
                 <div class="col-lg-6">
                     <div class="p-3 bg-white rounded-3 border border-light shadow-sm h-100">
-                        <strong class="d-block mb-2.5" style="color: #0f172a; font-size: 0.88rem; font-weight: 700; border-left: 3px solid #6366f1; padding-left: 10px;">
+                        <strong class="d-block mb-2.5" style="color: #0f172a; font-size: 0.88rem; font-weight: 700;">
                             1. Công thức quy chuẩn hóa điểm số
                         </strong>
                         <p class="text-muted mb-3" style="font-size: 0.78rem; line-height: 1.5;">
@@ -77,7 +77,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <!-- Cột 2: Cơ chế cảnh báo -->
                 <div class="col-lg-6">
                     <div class="p-3 bg-white rounded-3 border border-light shadow-sm h-100">
-                        <strong class="d-block mb-2.5" style="color: #0f172a; font-size: 0.88rem; font-weight: 700; border-left: 3px solid #f59e0b; padding-left: 10px;">
+                        <strong class="d-block mb-2.5" style="color: #0f172a; font-size: 0.88rem; font-weight: 700;">
                             2. Cảnh báo nguy cơ đình bản (Series Warning)
                         </strong>
                         <p class="text-muted mb-3" style="font-size: 0.78rem; line-height: 1.5;">
@@ -167,9 +167,11 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-5">
-                                <i class="fas fa-folder-open fs-1 mb-3 opacity-25"></i>
-                                <p class="mb-0">Chưa có dữ liệu xếp hạng nào.</p>
+                            <td colspan="9" class="text-center text-muted py-5" style="background-color: #ffffff;">
+                                <div class="py-4">
+                                    <i class="fas fa-folder-open fs-1 mb-3 opacity-25 text-slate-400"></i>
+                                    <p class="mb-0 fw-semibold text-slate-500">Chưa có dữ liệu xếp hạng nào.</p>
+                                </div>
                             </td>
                         </tr>
                     <?php endif; ?>
