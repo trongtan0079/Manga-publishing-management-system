@@ -179,30 +179,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                             <i class="fas fa-download me-2"></i>Tải Tệp ZIP
                         </a>
                     </div>
-                    
-                    <?php if (!empty($extractedImages)): ?>
-                    <!-- Gallery tự động giải nén ZIP -->
-                    <div class="mt-4 pt-4 border-top w-100 text-start">
-                        <h6 class="fw-bold text-dark mb-3"><i class="fas fa-magic me-2 text-primary"></i>Xem trước nội dung (Tự động giải nén):</h6>
-                        <div class="d-flex overflow-auto gap-3 pb-3 custom-scrollbar" style="white-space: nowrap; align-items: stretch;">
-                            <?php foreach ($extractedImages as $imgIndex => $imgUrl): ?>
-                                <div class="position-relative d-inline-block shadow-sm rounded" style="min-width: 220px; max-width: 250px; border: 1px solid #cbd5e1; background-color: #fff; flex-shrink: 0; display: flex; flex-direction: column;">
-                                    <div class="bg-light border-bottom px-2 py-1.5 text-center">
-                                        <small class="text-muted fw-bold text-truncate d-block" style="font-size: 0.75rem;" title="<?= htmlspecialchars(basename($imgUrl)) ?>"><?= htmlspecialchars(basename($imgUrl)) ?></small>
-                                    </div>
-                                    <div style="height: 280px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
-                                        <img src="<?= htmlspecialchars($imgUrl) ?>" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Extracted Image <?= $imgIndex ?>">
-                                    </div>
-                                    <div class="p-2 text-center bg-white border-top mt-auto">
-                                        <a href="<?= htmlspecialchars($imgUrl) ?>" target="_blank" class="btn btn-outline-primary shadow-sm py-1 px-3" style="font-size: 11px; border-radius: 6px;">
-                                            <i class="fas fa-search-plus me-1"></i> Xem phóng to
-                                        </a>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
+
                 <?php endif; ?>
 
                 <div class="mt-4 pt-3 border-top w-100 d-flex justify-content-between align-items-center text-start">
@@ -227,7 +204,9 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                             $page = $ap['page'];
                             $annotations = $ap['annotations'];
                             
-                            $imageUrl = $page['image_url'] ?? '';
+                            // Sử dụng ảnh cũ (old_image_url) làm ảnh nền để vẽ các khung lỗi nếu có,
+                            // giúp hiển thị đúng vị trí khoanh lỗi cũ.
+                            $imageUrl = !empty($page['old_image_url']) ? $page['old_image_url'] : ($page['image_url'] ?? '');
                             $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
                         ?>
                         <div class="col-12 col-xl-6">
@@ -261,7 +240,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                                         <?php endforeach; ?>
                                     </div>
                                     
-                                    <div class="text-start bg-white p-3 rounded border border-slate-200">
+                                    <div class="text-start bg-white p-3 rounded border border-slate-200 mb-3">
                                         <p class="text-muted text-xs fw-bold mb-2 text-uppercase">Chi tiết lỗi:</p>
                                         <ul class="list-unstyled mb-0 text-sm">
                                             <?php foreach ($annotations as $index => $ann): ?>
@@ -273,6 +252,32 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                                                 </li>
                                             <?php endforeach; ?>
                                         </ul>
+                                    </div>
+
+                                    <div class="text-center">
+                                        <?php 
+                                            $pageImg = $this->resolvePageImageUrl($page['image_url']);
+                                            $oldPageImg = $this->resolvePageImageUrl($page['old_image_url']);
+                                        ?>
+                                        <?php if ($role === 'editor'): ?>
+                                            <button type="button" class="btn btn-sm btn-outline-danger w-100 btn-annotate fw-bold" 
+                                                    data-page-id="<?= $page['page_id'] ?>" 
+                                                    data-page-number="<?= $page['page_number'] ?>" 
+                                                    data-image-url="<?= htmlspecialchars($pageImg) ?>"
+                                                    data-old-image-url="<?= htmlspecialchars($oldPageImg) ?>"
+                                                    style="border-radius: 6px;">
+                                                <i class="fas fa-edit me-1"></i>Đánh dấu / Đối chiếu sửa lỗi
+                                            </button>
+                                        <?php else: ?>
+                                            <button type="button" class="btn btn-sm btn-outline-primary w-100 btn-annotate fw-bold" 
+                                                    data-page-id="<?= $page['page_id'] ?>" 
+                                                    data-page-number="<?= $page['page_number'] ?>" 
+                                                    data-image-url="<?= htmlspecialchars($pageImg) ?>"
+                                                    data-old-image-url="<?= htmlspecialchars($oldPageImg) ?>"
+                                                    style="border-radius: 6px;">
+                                                <i class="fas fa-eye me-1"></i>Xem & Đối chiếu sửa lỗi
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
