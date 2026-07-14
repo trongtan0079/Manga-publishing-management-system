@@ -12,6 +12,9 @@ if (!defined('BASE_PATH')) {
  * @var array $page Thông tin trang hiện tại
  * @var array $chapter Thông tin chapter chứa trang này
  * @var array $series Thông tin bộ truyện
+ * @var array $tasks Danh sách công việc của trang
+ * @var array $regions Danh sách phân vùng bản vẽ
+ * @var array $editorAnnotations Ý kiến chỉnh sửa từ Editor
  */
 $pageTitle = 'Chi tiết Trang ' . htmlspecialchars($page['page_number']);
 $current_page = 'series';
