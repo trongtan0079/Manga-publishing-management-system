@@ -74,12 +74,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 const customTaskTypeInput = document.getElementById('custom_task_type');
 
                 function toggleCustomTaskType() {
-                    if (taskTypeSelect.value === 'other') {
-                        customTaskTypeContainer.classList.remove('d-none');
-                        customTaskTypeInput.required = true;
+                    if (taskTypeSelect && taskTypeSelect.value === 'other') {
+                        if (customTaskTypeContainer) customTaskTypeContainer.classList.remove('d-none');
+                        if (customTaskTypeInput) customTaskTypeInput.required = true;
                     } else {
-                        customTaskTypeContainer.classList.add('d-none');
-                        customTaskTypeInput.required = false;
+                        if (customTaskTypeContainer) customTaskTypeContainer.classList.add('d-none');
+                        if (customTaskTypeInput) customTaskTypeInput.required = false;
                     }
                 }
 

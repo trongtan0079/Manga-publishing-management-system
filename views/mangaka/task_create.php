@@ -90,15 +90,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 <div class="mb-2">
                                     <input type="text" class="form-control form-control-sm region-specific-title border-0" data-region-id="<?= $rId ?>" placeholder="Tiêu đề công việc cho vùng này (Tùy chọn)..." value="<?= htmlspecialchars($oldTitle) ?>" style="font-weight: 600; font-size: 0.95rem; box-shadow: none; background-color: #ffffff99;">
                                 </div>
+                                <?php
+                                    $isStandardType = in_array($oldTaskType, ['background', 'inking', 'coloring', 'effects', '']);
+                                    $selectedType = $isStandardType ? $oldTaskType : 'other';
+                                    $oldCustomType = !$isStandardType ? $oldTaskType : '';
+                                ?>
                                 <div class="mb-2">
                                     <select class="form-select form-select-sm region-specific-type border-0" data-region-id="<?= $rId ?>" style="font-size: 0.85rem; box-shadow: none; background-color: #ffffff99; color: #475569;">
-                                        <option value="" <?= $oldTaskType == '' ? 'selected' : '' ?>>-- Chọn loại công việc chi tiết --</option>
-                                        <option value="background" <?= $oldTaskType == 'background' ? 'selected' : '' ?>>Vẽ nền (Background)</option>
-                                        <option value="inking" <?= $oldTaskType == 'inking' ? 'selected' : '' ?>>Đi nét (Inking)</option>
-                                        <option value="coloring" <?= $oldTaskType == 'coloring' ? 'selected' : '' ?>>Lên màu (Coloring)</option>
-                                        <option value="effects" <?= $oldTaskType == 'effects' ? 'selected' : '' ?>>Hiệu ứng (Effects)</option>
-                                        <option value="other" <?= $oldTaskType == 'other' ? 'selected' : '' ?>>Khác</option>
+                                        <option value="" <?= $selectedType == '' ? 'selected' : '' ?>>-- Chọn loại công việc chi tiết --</option>
+                                        <option value="background" <?= $selectedType == 'background' ? 'selected' : '' ?>>Vẽ nền (Background)</option>
+                                        <option value="inking" <?= $selectedType == 'inking' ? 'selected' : '' ?>>Đi nét (Inking)</option>
+                                        <option value="coloring" <?= $selectedType == 'coloring' ? 'selected' : '' ?>>Lên màu (Coloring)</option>
+                                        <option value="effects" <?= $selectedType == 'effects' ? 'selected' : '' ?>>Hiệu ứng (Effects)</option>
+                                        <option value="other" <?= $selectedType == 'other' ? 'selected' : '' ?>>Khác</option>
                                     </select>
+                                </div>
+                                <div class="mb-2 region-custom-type-container <?= $selectedType === 'other' ? '' : 'd-none' ?>" data-region-id="<?= $rId ?>">
+                                    <input type="text" class="form-control form-control-sm region-specific-custom-type border-0" data-region-id="<?= $rId ?>" placeholder="Nhập loại công việc khác..." value="<?= htmlspecialchars($oldCustomType) ?>" style="font-size: 0.85rem; box-shadow: none; background-color: #ffffff99; color: #475569;">
                                 </div>
                                 <textarea class="form-control region-specific-desc border-0" data-region-id="<?= $rId ?>" data-badge-color="<?= $badgeColor ?>" data-bg-color="<?= $bgColor ?>" data-type-label="<?= htmlspecialchars($typeLabel) ?>" rows="2" placeholder="Nhập ghi chú chi tiết mô tả công việc..." style="font-size: 0.9rem; resize: vertical; box-shadow: none; background-color: #ffffff99;"><?= htmlspecialchars($oldDesc) ?></textarea>
                             </div>
@@ -184,6 +192,25 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         }
                     });
                 }
+
+                // Xử lý loại công việc tự chọn cho từng phân vùng (Region)
+                document.querySelectorAll('.region-specific-type').forEach(function(select) {
+                    const rId = select.getAttribute('data-region-id');
+                    const customContainer = document.querySelector(`.region-custom-type-container[data-region-id="${rId}"]`);
+                    
+                    function toggleRegionCustom() {
+                        if (customContainer) {
+                            if (select.value === 'other') {
+                                customContainer.classList.remove('d-none');
+                            } else {
+                                customContainer.classList.add('d-none');
+                            }
+                        }
+                    }
+
+                    select.addEventListener('change', toggleRegionCustom);
+                    toggleRegionCustom();
+                });
                 
                 // Sync Quill editor HTML with the hidden textarea on submit and validate checkboxes
                 const form = document.querySelector('form');
@@ -217,8 +244,16 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 
                                 const val = input.value.trim();
                                 const rTitle = titleInput ? titleInput.value.trim() : '';
-                                const rType = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : '';
+                                let rType = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : '';
                                 const hasType = typeSelect && typeSelect.value !== '';
+                                
+                                // Nếu chọn "Khác", lấy giá trị từ ô nhập custom
+                                if (typeSelect && typeSelect.value === 'other') {
+                                    const customInput = document.querySelector(`.region-specific-custom-type[data-region-id="${rId}"]`);
+                                    if (customInput && customInput.value.trim()) {
+                                        rType = customInput.value.trim();
+                                    }
+                                }
                                 
                                 // Nếu có bất kỳ nội dung nào được nhập ở thẻ này
                                 if (val || rTitle || hasType) {
