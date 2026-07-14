@@ -229,14 +229,14 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        border-radius: 6px;
+        border-radius: 8px;
         font-size: 0.62rem;
         font-weight: 800;
         cursor: help;
         transition: all 0.2s ease;
         border: 1px solid transparent;
         text-transform: uppercase;
-        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-family: inherit;
     }
     .task-status-dot:hover {
         transform: translateY(-1px);
@@ -244,37 +244,37 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     
     /* Modern Colors for Task States (glowing style) */
     .task-status-completed {
-        background-color: rgba(16, 185, 129, 0.06) !important;
-        color: #059669 !important;
+        background-color: rgba(16, 185, 129, 0.08) !important;
+        color: #10b981 !important;
         border-color: rgba(16, 185, 129, 0.2) !important;
     }
     .task-status-completed:hover {
-        background-color: rgba(16, 185, 129, 0.12) !important;
+        background-color: rgba(16, 185, 129, 0.15) !important;
         box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
     }
     .task-status-in_progress {
-        background-color: rgba(59, 130, 246, 0.06) !important;
-        color: #2563eb !important;
+        background-color: rgba(59, 130, 246, 0.08) !important;
+        color: #3b82f6 !important;
         border-color: rgba(59, 130, 246, 0.2) !important;
         animation: pulse-border 2s infinite ease-in-out;
     }
     .task-status-in_progress:hover {
-        background-color: rgba(59, 130, 246, 0.12) !important;
+        background-color: rgba(59, 130, 246, 0.15) !important;
         box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
     }
     .task-status-pending {
-        background-color: rgba(245, 158, 11, 0.06) !important;
-        color: #d97706 !important;
+        background-color: rgba(245, 158, 11, 0.08) !important;
+        color: #f59e0b !important;
         border-color: rgba(245, 158, 11, 0.2) !important;
     }
     .task-status-pending:hover {
-        background-color: rgba(245, 158, 11, 0.12) !important;
+        background-color: rgba(245, 158, 11, 0.15) !important;
         box-shadow: 0 0 8px rgba(245, 158, 11, 0.25);
     }
     .task-status-null {
-        background-color: var(--slate-50) !important;
-        color: var(--slate-400) !important;
-        border-color: var(--slate-200) !important;
+        background-color: #f8fafc !important;
+        color: #94a3b8 !important;
+        border-color: #e2e8f0 !important;
         opacity: 0.6;
     }
     
