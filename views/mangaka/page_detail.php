@@ -339,7 +339,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         if ($canDraw) $wrapperClasses .= ' drawing-active';
                     ?>
                     <div id="mangaPageWrapper" class="<?= $wrapperClasses ?>" style="max-width: 100%; border: 1px solid #ccc; box-shadow: 0 4px 10px rgba(0,0,0,0.15); overflow: hidden; user-select: none;">
-                        <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%; -webkit-user-drag: none; pointer-events: <?= $canDraw ? 'none' : 'auto' ?>;" draggable="false">
+                        <img id="mangaPageImage" src="<?= htmlspecialchars($resolvedImage) ?>" alt="Page <?= htmlspecialchars($page['page_number']) ?>" class="img-fluid" style="display: block; max-width: 100%; -webkit-user-drag: none;" draggable="false">
                         
                         <?php if (!empty($regions)): ?>
                             <?php foreach ($regions as $region): 
@@ -911,6 +911,7 @@ function updateSelectedTaskBox(regionId) {
                     <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
                         <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
                     </a>`;
+            }
         }
 
         const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
