@@ -157,6 +157,31 @@ class ReviewController extends BaseController
             header('Location: ' . BASE_PATH . '/index.php?controller=review&action=index');
             exit;
         }
+        // Fetch annotated pages if this is a chapter submission
+        $annotatedPages = [];
+        if (!empty($submission['chapter_id'])) {
+            require_once __DIR__ . '/../models/Page.php';
+            require_once __DIR__ . '/../models/EditorAnnotation.php';
+            $pageModel = new \Page();
+            $eaModel = new \EditorAnnotation();
+            
+            $pages = $pageModel->findByChapterId($submission['chapter_id']);
+            $currentUserId = $_SESSION['user_id'];
+            foreach ($pages as $p) {
+                $annotations = $eaModel->findByPageId($p['page_id']);
+                // Chỉ lấy các annotations của chính người đánh giá này
+                $relevantAnnotations = array_filter($annotations, function($a) use ($currentUserId) {
+                    return $a['editor_id'] == $currentUserId;
+                });
+                
+                if (!empty($relevantAnnotations)) {
+                    $annotatedPages[] = [
+                        'page' => $p,
+                        'annotations' => array_values($relevantAnnotations)
+                    ];
+                }
+            }
+        }
         
         require_once __DIR__ . '/../views/editor/review_create.php';
     }

@@ -184,6 +184,60 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                         </div>
                     </div>
                 <?php endif; ?>
+
+                <?php if (!empty($annotatedPages)): ?>
+                <!-- Các trang bản thảo bị đánh dấu lỗi (Từ Review trước) -->
+                <div class="mb-4 bg-slate-50 p-3 rounded border border-slate-200">
+                    <h6 class="fw-bold text-danger mb-4 border-bottom pb-2"><i class="fas fa-images me-2 text-danger"></i>Các trang bản thảo gốc có lỗi cần sửa:</h6>
+                    
+                    <div class="row g-4">
+                        <?php foreach ($annotatedPages as $ap): 
+                            $page = $ap['page'];
+                            $annotations = $ap['annotations'];
+                            
+                            $imageUrl = $page['image_url'] ?? '';
+                            $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
+                        ?>
+                        <div class="col-12 col-xl-6">
+                            <div class="card h-100 shadow-sm border-0 bg-light">
+                                <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                                    <h6 class="fw-bold text-dark mb-0">Trang <?= htmlspecialchars($page['page_number']) ?></h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="position-relative d-inline-block shadow-sm mb-3" style="max-width: 100%; border: 1px solid #ddd; background-color: #fff;">
+                                        <img src="<?= htmlspecialchars($resolvedImage) ?>" class="img-fluid" style="max-height: 400px; display: block;" alt="Annotated Page <?= $page['page_number'] ?>">
+                                        
+                                        <?php foreach ($annotations as $index => $ann): 
+                                            // Chuyển đổi tọa độ gốc (theo khung chuẩn 800x1000) sang phần trăm
+                                            $l = ($ann['x'] / 800) * 100;
+                                            $t = ($ann['y'] / 1000) * 100;
+                                            $w = ($ann['width'] / 800) * 100;
+                                            $h = ($ann['height'] / 1000) * 100;
+                                        ?>
+                                            <div style="position: absolute; left: <?= $l ?>%; top: <?= $t ?>%; width: <?= $w ?>%; height: <?= $h ?>%; border: 3px solid #dc3545; background-color: rgba(220, 53, 69, 0.2); pointer-events: none;">
+                                                <span class="badge bg-danger position-absolute top-0 start-0 translate-middle" style="font-size: 0.7rem; pointer-events: auto; z-index: 10;"><?= $index + 1 ?></span>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    
+                                    <div class="text-start bg-white p-3 rounded border border-slate-200">
+                                        <p class="text-muted text-xs fw-bold mb-2 text-uppercase">Chi tiết lỗi:</p>
+                                        <ul class="list-unstyled mb-0 text-sm">
+                                            <?php foreach ($annotations as $index => $ann): ?>
+                                                <li class="mb-2 pb-2 <?= $index < count($annotations) - 1 ? 'border-bottom border-slate-100' : '' ?>">
+                                                    <span class="badge bg-danger me-2"><?= $index + 1 ?></span>
+                                                    <span class="text-dark"><?= htmlspecialchars($ann['comments']) ?></span>
+                                                </li>
+                                            <?php endforeach; ?>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
