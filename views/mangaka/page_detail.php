@@ -24,16 +24,20 @@ $isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published'
 .selected-card {
     background-color: #f8fafc !important; /* Tông xám pastel nhạt sạch sẽ */
     border-color: #4f46e5 !important;    /* Viền màu tím thương hiệu */
-    border-width: 2px !important;
-    box-shadow: 0 0 20px rgba(79, 70, 229, 0.25) !important; /* Đổ bóng phát sáng (Glowing shadow) */
+    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.15), 0 8px 10px -6px rgba(79, 70, 229, 0.15) !important;
     transform: translateY(-2px);
-    transition: all 0.25s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.checked-card {
+    background-color: #f5f3ff !important; /* Tím nhạt sang trọng */
+    border-color: #c084fc !important;    /* Viền tím sáng */
 }
 
 /* Tối/mờ đi các card phân vùng không được chọn ở danh sách bên phải */
-#region-list-group.has-selected .list-group-item-action:not(.selected-card) {
-    opacity: 0.45;
-    filter: grayscale(15%);
+#region-list-group.has-selected .list-group-item-action:not(.selected-card):not(.checked-card) {
+    opacity: 0.55;
+    filter: grayscale(10%);
     transition: opacity 0.3s ease, filter 0.3s ease;
 }
 
@@ -489,48 +493,48 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                         <div class="list-group" id="region-list-group">
                             <?php foreach ($regions as $region): 
                                 $typeLabel = htmlspecialchars($region['region_type']);
-                                $typeClass = 'bg-secondary';
-                                $rowBorder = 'border-start border-secondary border-4';
+                                $borderColor = '#6c757d'; // Mặc định là xám cho custom type
+                                $badgeStyle = 'background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;';
                                 
                                 if ($region['region_type'] === 'panel') {
                                     $typeLabel = 'Khung truyện';
-                                    $typeClass = 'bg-danger';
-                                    $rowBorder = 'border-start border-danger border-4';
+                                    $borderColor = '#ef4444'; // Đỏ Panel
+                                    $badgeStyle = 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
                                 } elseif ($region['region_type'] === 'bubble') {
                                     $typeLabel = 'Bong bóng thoại';
-                                    $typeClass = 'bg-primary';
-                                    $rowBorder = 'border-start border-primary border-4';
+                                    $borderColor = '#3b82f6'; // Xanh Bubble
+                                    $badgeStyle = 'background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;';
                                 } elseif ($region['region_type'] === 'character') {
                                     $typeLabel = 'Nhân vật';
-                                    $typeClass = 'bg-success';
-                                    $rowBorder = 'border-start border-success border-4';
+                                    $borderColor = '#10b981'; // Xanh lá Nhân vật
+                                    $badgeStyle = 'background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;';
                                 } elseif ($region['region_type'] === 'background') {
                                     $typeLabel = 'Bối cảnh/Nền';
-                                    $typeClass = 'bg-dark';
-                                    $rowBorder = 'border-start border-dark border-4';
+                                    $borderColor = '#64748b'; // Xám Background
+                                    $badgeStyle = 'background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;';
                                 } elseif ($region['region_type'] === 'sfx') {
                                     $typeLabel = 'Hiệu ứng SFX';
-                                    $typeClass = 'bg-warning text-dark';
-                                    $rowBorder = 'border-start border-warning border-4';
+                                    $borderColor = '#f59e0b'; // Cam SFX
+                                    $badgeStyle = 'background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;';
                                 }
                             ?>
-                                <div class="list-group-item list-group-item-action mb-2 <?= $rowBorder ?> shadow-sm transition-all" 
+                                <div class="list-group-item list-group-item-action mb-3 shadow-sm border border-light-subtle transition-all" 
                                      id="list-region-<?= $region['region_id'] ?>"
                                      onclick="highlightCanvasOverlay(<?= $region['region_id'] ?>)"
                                      onmouseenter="hoverOverlay(<?= $region['region_id'] ?>, true)"
                                      onmouseleave="hoverOverlay(<?= $region['region_id'] ?>, false)"
-                                     style="cursor: pointer;">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <h6 class="mb-1 fw-bold text-dark d-flex align-items-center">
+                                     style="cursor: pointer; border-left: 5px solid <?= $borderColor ?> !important; border-radius: 12px; padding: 16px; background-color: #ffffff;">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                        <h6 class="mb-0 fw-bold text-dark d-flex align-items-center">
                                             <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
-                                                <input type="checkbox" class="form-check-input region-select-cb me-2" value="<?= $region['region_id'] ?>" onclick="event.stopPropagation(); updateGroupButton();" style="width: 15px; height: 15px; cursor: pointer; margin-top: 0;">
+                                                <input type="checkbox" class="form-check-input region-select-cb me-2" value="<?= $region['region_id'] ?>" onclick="updateGroupButton();" style="width: 18px; height: 18px; cursor: pointer; margin-top: 0; border-radius: 4px; border-color: #cbd5e1;">
                                             <?php endif; ?>
-                                            <span class="badge <?= $typeClass ?> me-2"><?= $typeLabel ?></span>
-                                            ID #<?= $region['region_id'] ?>
+                                            <span class="badge px-2.5 py-1 text-xs font-semibold" style="<?= $badgeStyle ?>; border-radius: 6px;"><?= $typeLabel ?></span>
+                                            <span class="text-slate-600 font-bold ms-2" style="font-size: 0.925rem;">ID #<?= $region['region_id'] ?></span>
                                         </h6>
-                                        <small class="text-success fw-bold"><i class="fas fa-user-edit me-1"></i>Vẽ thủ công</small>
+                                        <small class="text-success fw-semibold d-flex align-items-center" style="font-size: 0.78rem;"><i class="fas fa-user-edit me-1"></i>Vẽ thủ công</small>
                                     </div>
-                                    <p class="mb-1 text-muted small">
+                                    <p class="mb-2 text-slate-500 small" style="font-size: 0.8rem; line-height: 1.5;">
                                         Tọa độ: X:<?= $region['x'] ?>, Y:<?= $region['y'] ?> | Kích thước: <?= $region['width'] ?>x<?= $region['height'] ?>
                                     </p>
                                     
@@ -595,38 +599,37 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                                  <div class="text-slate-500 d-flex justify-content-between align-items-center mb-2" style="font-size: 0.7rem; padding-left: 14px;">
                                                      <span><i class="fas fa-user-circle me-1 text-slate-400"></i>Trợ lý: <strong><?= htmlspecialchars($rt['assistant_name'] ?? 'Chưa rõ') ?></strong></span>
                                                  </div>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    <?php endif; ?>
-                                    
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <span class="badge bg-light text-dark border">Vẽ tay</span>
-                                        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
-                                        <div class="btn-group" onclick="event.stopPropagation();">
-                                            <?php if ($hasRegionTask): ?>
-                                                <?php $firstTask = reset($regionTasks); ?>
-                                                <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $firstTask['task_id'] ?>" class="btn btn-xs btn-outline-warning py-0 px-2" style="font-size: 11px;" title="Chỉnh sửa công việc đã giao">
-                                                    <i class="fas fa-edit me-1"></i>Sửa việc
-                                                </a>
-                                                <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;" title="Thêm một công việc khác cho phân vùng này">
-                                                    <i class="fas fa-plus"></i>
-                                                </a>
-                                            <?php else: ?>
-                                                <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-xs btn-outline-primary py-0 px-2" style="font-size: 11px;">
-                                                    <i class="fas fa-plus me-1"></i>Giao việc
-                                                </a>
-                                            <?php endif; ?>
-                                            <form action="<?= BASE_PATH ?>/index.php?controller=pageregion&action=delete&id=<?= $region['region_id'] ?>&page_id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa phân vùng này?');">
-                                                <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
-                                                <button type="submit" class="btn btn-xs btn-outline-danger py-0 px-2" style="font-size: 11px; margin-left: 2px;">
-                                                    <i class="fas fa-trash-alt me-1"></i>Xóa
-                                                </button>
-                                            </form>
-                                        </div>
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
+                                             <?php endforeach; ?>
+                                         </div>
+                                     <?php endif; ?>
+                                     
+                                     <div class="d-flex justify-content-end align-items-center mt-2.5 pt-2" style="border-top: 1px solid #f1f5f9 !important;">
+                                         <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
+                                         <div class="d-flex gap-2" onclick="event.stopPropagation();">
+                                             <?php if ($hasRegionTask): ?>
+                                                 <?php $firstTask = reset($regionTasks); ?>
+                                                 <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $firstTask['task_id'] ?>" class="btn btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5 border border-warning-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #fffbeb; color: #d97706; text-decoration: none;" title="Chỉnh sửa công việc đã giao">
+                                                     <i class="fas fa-edit"></i> Sửa việc
+                                                 </a>
+                                                 <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-sm d-inline-flex align-items-center justify-content-center border border-light-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #f8fafc; color: #4f46e5; text-decoration: none; width: 28px; height: 28px;" title="Thêm một công việc khác cho phân vùng này">
+                                                     <i class="fas fa-plus"></i>
+                                                 </a>
+                                             <?php else: ?>
+                                                 <a href="<?= BASE_PATH ?>/index.php?controller=task&action=create&page_id=<?= $page['page_id'] ?>&page_region_id=<?= $region['region_id'] ?>" class="btn btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5 border border-primary-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #eff6ff; color: #2563eb; text-decoration: none;">
+                                                     <i class="fas fa-plus"></i> Giao việc
+                                                 </a>
+                                             <?php endif; ?>
+                                             <form action="<?= BASE_PATH ?>/index.php?controller=pageregion&action=delete&id=<?= $region['region_id'] ?>&page_id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa phân vùng này?');">
+                                                 <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
+                                                 <button type="submit" class="btn btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5 border border-danger-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #fef2f2; color: #dc2626;">
+                                                     <i class="fas fa-trash-alt"></i> Xóa
+                                                 </button>
+                                             </form>
+                                         </div>
+                                         <?php endif; ?>
+                                     </div>
+                                 </div>
+                             <?php endforeach; ?>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -1253,6 +1256,18 @@ function updateGroupButton() {
             btn.classList.add('d-none');
         }
     }
+
+    // Cập nhật trạng thái hiển thị của các card dựa trên checkbox
+    document.querySelectorAll('.region-select-cb').forEach(cb => {
+        const card = document.getElementById('list-region-' + cb.value);
+        if (card) {
+            if (cb.checked) {
+                card.classList.add('checked-card');
+            } else {
+                card.classList.remove('checked-card');
+            }
+        }
+    });
 }
 
 function assignGroupedRegions() {
