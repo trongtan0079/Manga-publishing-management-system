@@ -23,8 +23,8 @@ if (!defined('BASE_PATH')) {
  */
 function safeHTML($html) {
     if (empty($html)) return '';
-    // Cho phép các thẻ: p, strong, em, u, s, ul, ol, li, br
-    return strip_tags($html, '<p><strong><em><u><s><ul><ol><li><br>');
+    // Cho phép các thẻ: p, strong, em, u, s, ul, ol, li, br, div, span, hr, h1-h6, i
+    return strip_tags($html, '<p><strong><em><u><s><ul><ol><li><br><div><span><hr><h1><h2><h3><h4><h5><h6><i>');
 }
 
 /**
@@ -78,7 +78,7 @@ function renderMarkdown($text) {
 /**
  * Trích xuất phần mô tả riêng của 1 phân vùng cụ thể từ chuỗi HTML mô tả nhóm (grouped task).
  * HTML gốc chứa nhiều div.region-instruction-card, mỗi div có text "Phân vùng #ID".
- * Hàm này trả về chỉ nội dung HTML của div card tương ứng với $regionId.
+ * Hàm này trả về toàn bộ HTML của div card tương ứng với $regionId (giữ nguyên style).
  * Nếu không tìm thấy hoặc HTML không phải nhóm, trả về toàn bộ $fullHtml.
  */
 function extractRegionDescription($fullHtml, $regionId) {
@@ -102,12 +102,8 @@ function extractRegionDescription($fullHtml, $regionId) {
         // Kiểm tra xem card này có chứa text "Phân vùng #<regionId>" không
         $textContent = $card->textContent;
         if (preg_match('/Phân vùng\s*#\s*' . preg_quote($regionId, '/') . '(?!\d)/', $textContent)) {
-            // Trả về innerHTML của card này
-            $innerHTML = '';
-            foreach ($card->childNodes as $child) {
-                $innerHTML .= $dom->saveHTML($child);
-            }
-            return $innerHTML;
+            // Trả về toàn bộ HTML của card này (giữ nguyên div ngoài)
+            return $dom->saveHTML($card);
         }
     }
     

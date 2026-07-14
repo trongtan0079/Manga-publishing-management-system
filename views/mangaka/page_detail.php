@@ -929,7 +929,7 @@ function extractRegionDescriptionJS(fullHtml, regionId) {
     
     for (const card of cards) {
         if (searchText.test(card.textContent)) {
-            return card.innerHTML;
+            return card.outerHTML;
         }
     }
     
