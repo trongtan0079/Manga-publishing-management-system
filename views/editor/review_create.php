@@ -191,7 +191,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     <?php 
                     $hasUpdatedPages = false;
                     foreach ($annotatedPages as $ap) {
-                        if ($this->isPageUpdatedAfterAnnotation($ap['page'])) {
+                        if ($this->isPageUpdatedAfterLatestAnnotation($ap['page'], $ap['annotations'])) {
                             $hasUpdatedPages = true;
                             break;
                         }
@@ -209,7 +209,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             // Sử dụng ảnh cũ (old_image_url) làm ảnh nền để vẽ các khung lỗi nếu có
                             $imageUrl = !empty($page['old_image_url']) ? $page['old_image_url'] : ($page['image_url'] ?? '');
                             $resolvedImage = (strpos($imageUrl, 'http') === 0) ? $imageUrl : BASE_PATH . '/' . ltrim($imageUrl, '/');
-                            $isUpdated = $this->isPageUpdatedAfterAnnotation($page);
+                            $isUpdated = $this->isPageUpdatedAfterLatestAnnotation($page, $annotations);
                         ?>
                         <div class="col-12 col-xl-6">
                             <div class="card h-100 shadow-sm border-0 bg-light">
