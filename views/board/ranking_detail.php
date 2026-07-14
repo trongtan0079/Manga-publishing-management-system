@@ -56,9 +56,15 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                             </td>
                         </tr>
                         <tr>
-                            <th class="bg-light">Điểm số (Score)</th>
+                            <th class="bg-light">Điểm Quy Chuẩn (Max 100)</th>
                             <td>
-                                <span class="fs-5 text-success fw-bold"><?= htmlspecialchars($ranking['score']) ?></span>
+                                <span class="fs-5 text-success fw-bold"><?= htmlspecialchars($ranking['score']) ?> / 100</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Phiếu Độc Giả</th>
+                            <td>
+                                <span class="fw-bold"><?= htmlspecialchars($ranking['votes'] ?? 0) ?></span> phiếu
                             </td>
                         </tr>
                         <tr>

@@ -36,7 +36,8 @@ class SeriesRanking extends Model {
 
     public function findAllWithSeries() {
         $sql = "SELECT sr.*, s.title as series_title, u.full_name as mangaka_name, b.full_name as board_member_name,
-                (SELECT chapter_number FROM chapters WHERE series_id = s.series_id AND status = 'published' ORDER BY chapter_number DESC LIMIT 1) as latest_chapter_number
+                (SELECT chapter_number FROM chapters WHERE series_id = s.series_id AND status = 'published' ORDER BY chapter_number DESC LIMIT 1) as latest_chapter_number,
+                (SELECT title FROM chapters WHERE series_id = s.series_id AND status = 'published' ORDER BY chapter_number DESC LIMIT 1) as latest_chapter_title
                 FROM {$this->table} sr
                 JOIN series s ON sr.series_id = s.series_id
                 JOIN users u ON s.mangaka_id = u.user_id
@@ -49,7 +50,8 @@ class SeriesRanking extends Model {
 
     public function findByMangakaId($mangakaId) {
         $sql = "SELECT sr.*, s.title as series_title,
-                (SELECT chapter_number FROM chapters WHERE series_id = s.series_id AND status = 'published' ORDER BY chapter_number DESC LIMIT 1) as latest_chapter_number 
+                (SELECT chapter_number FROM chapters WHERE series_id = s.series_id AND status = 'published' ORDER BY chapter_number DESC LIMIT 1) as latest_chapter_number,
+                (SELECT title FROM chapters WHERE series_id = s.series_id AND status = 'published' ORDER BY chapter_number DESC LIMIT 1) as latest_chapter_title
                 FROM {$this->table} sr
                 JOIN series s ON sr.series_id = s.series_id
                 WHERE s.mangaka_id = :mangaka_id
