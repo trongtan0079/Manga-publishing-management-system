@@ -121,4 +121,107 @@ class Notification extends Model {
         $stmt->execute();
         return $stmt->fetchAll();
     }
+
+    /**
+     * Lấy chi tiết cấu hình hiển thị (icon, màu sắc, label, gradient) của từng loại thông báo.
+     * Đảm bảo tính nhất quán giữa danh sách, card và modal popup.
+     */
+    public static function getTypeDetails($type) {
+        $details = [
+            'task_assigned' => [
+                'icon' => 'fa-clipboard-list',
+                'color' => '#6366f1',
+                'bg_gradient' => 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)',
+                'bg_subtle' => 'rgba(99, 102, 241, 0.1)',
+                'label' => 'Nhiệm vụ mới'
+            ],
+            'submission_submitted' => [
+                'icon' => 'fa-paper-plane',
+                'color' => '#0ea5e9',
+                'bg_gradient' => 'linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%)',
+                'bg_subtle' => 'rgba(14, 165, 233, 0.1)',
+                'label' => 'Bản thảo đề xuất'
+            ],
+            'chapter_submitted' => [
+                'icon' => 'fa-file-medical',
+                'color' => '#06b6d4',
+                'bg_gradient' => 'linear-gradient(135deg, #22d3ee 0%, #06b6d4 100%)',
+                'bg_subtle' => 'rgba(6, 182, 212, 0.1)',
+                'label' => 'Nộp chương mới'
+            ],
+            'review_created' => [
+                'icon' => 'fa-comments',
+                'color' => '#d946ef',
+                'bg_gradient' => 'linear-gradient(135deg, #f0abfc 0%, #d946ef 100%)',
+                'bg_subtle' => 'rgba(217, 70, 239, 0.1)',
+                'label' => 'Nhận xét mới'
+            ],
+            'submission_approved' => [
+                'icon' => 'fa-award',
+                'color' => '#10b981',
+                'bg_gradient' => 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+                'bg_subtle' => 'rgba(16, 185, 129, 0.1)',
+                'label' => 'Phê duyệt bản thảo'
+            ],
+            'submission_rejected' => [
+                'icon' => 'fa-ban',
+                'color' => '#f43f5e',
+                'bg_gradient' => 'linear-gradient(135deg, #fb7185 0%, #f43f5e 100%)',
+                'bg_subtle' => 'rgba(244, 63, 94, 0.1)',
+                'label' => 'Từ chối bản thảo'
+            ],
+            'ranking_published' => [
+                'icon' => 'fa-trophy',
+                'color' => '#eab308',
+                'bg_gradient' => 'linear-gradient(135deg, #fde047 0%, #eab308 100%)',
+                'bg_subtle' => 'rgba(234, 179, 8, 0.1)',
+                'label' => 'Bảng xếp hạng'
+            ],
+            'series_warning' => [
+                'icon' => 'fa-triangle-exclamation',
+                'color' => '#f97316',
+                'bg_gradient' => 'linear-gradient(135deg, #fdba74 0%, #f97316 100%)',
+                'bg_subtle' => 'rgba(249, 115, 22, 0.1)',
+                'label' => 'Cảnh báo bộ truyện'
+            ],
+            'series_completed' => [
+                'icon' => 'fa-flag-checkered',
+                'color' => '#059669',
+                'bg_gradient' => 'linear-gradient(135deg, #34d399 0%, #059669 100%)',
+                'bg_subtle' => 'rgba(5, 150, 105, 0.1)',
+                'label' => 'Bộ truyện hoàn thành'
+            ],
+            'series_submitted' => [
+                'icon' => 'fa-folder-plus',
+                'color' => '#3b82f6',
+                'bg_gradient' => 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)',
+                'bg_subtle' => 'rgba(59, 130, 246, 0.1)',
+                'label' => 'Đề xuất truyện mới'
+            ],
+            'chapter_published' => [
+                'icon' => 'fa-rocket',
+                'color' => '#8b5cf6',
+                'bg_gradient' => 'linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%)',
+                'bg_subtle' => 'rgba(139, 92, 246, 0.1)',
+                'label' => 'Chương đã xuất bản'
+            ],
+            'chapter_approved' => [
+                'icon' => 'fa-check-circle',
+                'color' => '#10b981',
+                'bg_gradient' => 'linear-gradient(135deg, #34d399 0%, #10b981 100%)',
+                'bg_subtle' => 'rgba(16, 185, 129, 0.1)',
+                'label' => 'Chương được duyệt'
+            ],
+            'default' => [
+                'icon' => 'fa-bell',
+                'color' => '#6b7280',
+                'bg_gradient' => 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)',
+                'bg_subtle' => 'rgba(107, 114, 128, 0.1)',
+                'label' => 'Thông báo mới'
+            ]
+        ];
+
+        return $details[$type] ?? $details['default'];
+    }
 }
+
