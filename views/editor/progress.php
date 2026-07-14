@@ -148,38 +148,38 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     .page-matrix-container {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-        gap: 12px;
+        gap: 14px;
         margin-top: 5px;
     }
     .page-item-card {
         background: #ffffff;
-        border: 1px solid var(--slate-200);
-        border-radius: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
         padding: 12px;
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
         position: relative;
-        height: 200px;
+        height: 210px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }
     .page-item-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.25) !important;
-        border-color: var(--primary) !important;
+        border-color: var(--primary, #6366f1) !important;
     }
     .page-preview-box {
         position: relative;
-        height: 100px;
-        border-radius: 10px;
-        background: var(--slate-50);
+        height: 110px;
+        border-radius: 12px;
+        background: #f1f5f9;
         overflow: hidden;
-        border: 1px solid var(--slate-100);
+        border: 1px solid #e2e8f0;
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--slate-400);
+        color: #94a3b8;
         margin-top: 6px;
     }
     .page-preview-box img {
@@ -189,30 +189,30 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         transition: transform 0.3s ease;
     }
     .page-item-card:hover .page-preview-box img {
-        transform: scale(1.08);
+        transform: scale(1.06);
     }
     .page-number-tag {
-        font-size: 0.78rem;
+        font-size: 0.8rem;
         font-weight: 800;
-        color: var(--slate-800);
+        color: #0f172a;
     }
     
     /* Custom Sleek Badges for Page Cards */
     .page-item-card .badge {
-        font-size: 0.6rem !important;
+        font-size: 0.62rem !important;
         font-weight: 700;
-        padding: 3px 6px !important;
-        border-radius: 4px;
+        padding: 3px 7px !important;
+        border-radius: 6px;
         text-transform: uppercase;
-        letter-spacing: 0.02em;
+        letter-spacing: 0.03em;
     }
     
     /* Custom Badges for Card Header */
     .progress-series-card .card-header .badge {
         font-size: 0.68rem !important;
         font-weight: 700;
-        padding: 4px 8px !important;
-        border-radius: 6px;
+        padding: 4px 10px !important;
+        border-radius: 8px;
         letter-spacing: -0.01em;
     }
     
