@@ -101,6 +101,23 @@ $isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published'
 .drawing-active {
     cursor: crosshair !important;
 }
+
+/* Custom thanh cuộn siêu mỏng, bo tròn cho các vùng cuộn dọc */
+.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
 </style>
 <?php
 
@@ -1553,20 +1570,20 @@ function showGroupAssignBox(count) {
         descEl.style.setProperty('box-shadow', 'none', 'important');
         
         descEl.innerHTML = `
-            <div class="d-flex flex-column gap-2.5 p-3 text-slate-700" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                <div class="d-flex align-items-start gap-3">
-                    <div class="mt-0.5 d-flex align-items-center justify-content-center rounded-circle text-slate-500" style="width: 32px; height: 32px; background: rgba(100, 116, 139, 0.12); flex-shrink: 0;">
-                        <i class="fas fa-layer-group fs-6"></i>
+            <div class="d-flex flex-column gap-3 p-1 text-slate-700">
+                <div class="d-flex align-items-center gap-2 mb-1 p-2.5 rounded-3 border border-primary border-opacity-10" style="background-color: rgba(79, 70, 229, 0.05);">
+                    <div class="d-flex align-items-center justify-content-center rounded-circle text-primary" style="width: 28px; height: 28px; background: rgba(79, 70, 229, 0.12); flex-shrink: 0;">
+                        <i class="fas fa-layer-group" style="font-size: 0.8rem;"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <h6 class="fw-bold text-slate-800 mb-1" style="font-size: 0.85rem;">Trạng thái phân công các phân vùng đã chọn</h6>
-                        <p class="text-slate-500 mb-0 text-xs" style="line-height: 1.55;">
-                            Bạn đang tích chọn <strong>${count} phân vùng</strong> (trong đó có <strong style="color: #4f46e5;">${assignedCount} đã giao</strong> và <strong style="color: #475569;">${unassignedCount} chưa giao</strong>). Dưới đây là thông tin chi tiết về từng phân vùng:
-                        </p>
+                        <div class="text-slate-700 fw-bold" style="font-size: 0.8rem; line-height: 1.2;">Chi tiết trạng thái phân công</div>
+                        <span class="text-slate-500 font-medium" style="font-size: 0.72rem;">
+                            Đã chọn <strong style="color: #4f46e5;">${count} phân vùng</strong> (trong đó có <strong style="color: #4f46e5;">${assignedCount} đã giao</strong> và <strong style="color: #64748b;">${unassignedCount} chưa giao</strong>)
+                        </span>
                     </div>
                 </div>
                 
-                <div class="my-2 max-height-150 overflow-y-auto pe-1" style="max-height: 140px;">
+                <div class="pe-1 overflow-y-auto" style="max-height: 200px; display: flex; flex-direction: column; gap: 6px;">
                     ${regionsHtml}
                 </div>
             </div>
