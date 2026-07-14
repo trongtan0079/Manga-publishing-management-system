@@ -103,35 +103,28 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     
     /* Interactive legends */
     .legend-container-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        border-radius: 16px;
-        padding: 14px 20px;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02), 0 2px 4px -1px rgba(0,0,0,0.01);
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 20px;
+        padding: 18px 24px;
+        box-shadow: 0 4px 18px -4px rgba(15, 23, 42, 0.04) !important;
+        margin-bottom: 24px;
     }
     .legend-title {
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         font-weight: 800;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--slate-400);
-        margin-bottom: 8px;
-    }
-    .legend-indicator-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        display: inline-block;
+        letter-spacing: 0.06em;
+        color: #64748b;
+        margin-bottom: 12px;
     }
     
     /* Progress and Chapter Card Box */
     .chapter-card-box {
-        background: #ffffff;
-        border: 1px solid var(--slate-100) !important;
-        border-radius: 16px !important;
-        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01), 0 2px 4px -1px rgba(15, 23, 42, 0.01) !important;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 20px !important;
+        box-shadow: 0 4px 6px -1px rgba(15, 23, 42, 0.01) !important;
         transition: all 0.25s ease;
         position: relative;
         overflow: hidden;
@@ -142,12 +135,13 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         left: 0;
         top: 0;
         bottom: 0;
-        width: 4px;
-        background: var(--primary);
+        width: 5px;
+        background: linear-gradient(180deg, var(--primary, #6366f1), #3b82f6);
     }
     .chapter-card-box:hover {
-        border-color: rgba(99, 102, 241, 0.2) !important;
-        box-shadow: 0 10px 15px -3px rgba(15, 23, 42, 0.04) !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
+        box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.05) !important;
+        background: #ffffff;
     }
     
     /* Page Matrix Cards */
