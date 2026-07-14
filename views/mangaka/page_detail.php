@@ -851,6 +851,34 @@ if (!empty($tasks)) {
 ?>
 const BASE_PATH = '<?= BASE_PATH ?>';
 const pageTasksData = <?= json_encode($jsTasks) ?>;
+const pageRegionsData = <?= json_encode(array_map(function($r) {
+    return [
+        'region_id' => $r['region_id'],
+        'region_type' => $r['region_type']
+    ];
+}, $regions)) ?>;
+
+function getRegionTypeLabel(type) {
+    switch (type) {
+        case 'panel': return 'Khung truyện';
+        case 'bubble': return 'Bong bóng thoại';
+        case 'character': return 'Nhân vật';
+        case 'background': return 'Bối cảnh/Nền';
+        case 'sfx': return 'Hiệu ứng SFX';
+        default: return type;
+    }
+}
+
+function getRegionTypeBadgeClass(type) {
+    switch (type) {
+        case 'panel': return 'bg-danger-subtle text-danger border-danger-subtle';
+        case 'bubble': return 'bg-primary-subtle text-primary border-primary-subtle';
+        case 'character': return 'bg-success-subtle text-success border-success-subtle';
+        case 'background': return 'bg-secondary-subtle text-secondary border-secondary-subtle';
+        case 'sfx': return 'bg-warning-subtle text-warning border-warning-subtle';
+        default: return 'bg-light text-dark';
+    }
+}
 
 function escapeHtml(text) {
     if (!text) return '';
@@ -1472,6 +1500,44 @@ function showGroupAssignBox(count) {
         wrapper.classList.add('has-selected-overlay');
     }
     
+    const checked = document.querySelectorAll('.region-select-cb:checked');
+    const checkedIds = Array.from(checked).map(cb => cb.value);
+    
+    let regionsHtml = '';
+    checkedIds.forEach(id => {
+        const region = pageRegionsData.find(r => r.region_id == id);
+        if (!region) return;
+        
+        // Tìm task đã giao cho phân vùng này
+        const regionTasks = pageTasksData.filter(t => {
+            if (t.page_region_id == id) return true;
+            if (t.grouped_region_ids) {
+                const gids = t.grouped_region_ids.split(',').map(s => s.trim());
+                if (gids.includes(String(id))) return true;
+            }
+            return false;
+        });
+        
+        let statusBadge = '';
+        if (regionTasks.length > 0) {
+            const assistantName = regionTasks[0].assistant_name || 'Chưa rõ';
+            statusBadge = `<span class="badge bg-indigo-subtle text-indigo border border-indigo-subtle py-0.5 px-1.5 ms-auto fw-bold" style="font-size: 0.68rem; border-radius: 4px;"><i class="fas fa-user-check me-1"></i>Đã giao: ${escapeHtml(assistantName)}</span>`;
+        } else {
+            statusBadge = `<span class="badge bg-slate-100 text-slate-500 border border-slate-200 py-0.5 px-1.5 ms-auto fw-medium" style="font-size: 0.68rem; border-radius: 4px;"><i class="fas fa-user-clock me-1"></i>Chưa giao</span>`;
+        }
+        
+        const typeLabel = getRegionTypeLabel(region.region_type);
+        const typeBadgeClass = getRegionTypeBadgeClass(region.region_type);
+        
+        regionsHtml += `
+            <div class="d-flex align-items-center gap-2 p-2 rounded mb-1.5 border border-light-subtle bg-white shadow-sm" style="font-size: 0.75rem;">
+                <span class="badge ${typeBadgeClass} border py-0.5 px-1.5" style="font-size: 0.68rem; border-radius: 4px;">${typeLabel}</span>
+                <span class="text-slate-600 fw-bold">ID #${region.region_id}</span>
+                ${statusBadge}
+            </div>
+        `;
+    });
+    
     const descEl = document.getElementById('selectedTaskDescription');
     if (descEl) {
         descEl.className = "text-slate-700 text-start overflow-y-auto mb-2 font-medium";
@@ -1482,15 +1548,24 @@ function showGroupAssignBox(count) {
         descEl.style.setProperty('box-shadow', 'none', 'important');
         
         descEl.innerHTML = `
-            <div class="d-flex align-items-start gap-3 p-3 text-slate-700" style="background-color: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-                <div class="mt-0.5 d-flex align-items-center justify-content-center rounded-circle text-indigo-600" style="width: 32px; height: 32px; background: rgba(99, 102, 241, 0.12); flex-shrink: 0;">
-                    <i class="fas fa-layer-group fs-6"></i>
+            <div class="d-flex flex-column gap-2.5 p-3 text-slate-700" style="background-color: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                <div class="d-flex align-items-start gap-3">
+                    <div class="mt-0.5 d-flex align-items-center justify-content-center rounded-circle text-indigo-600" style="width: 32px; height: 32px; background: rgba(99, 102, 241, 0.12); flex-shrink: 0;">
+                        <i class="fas fa-layer-group fs-6"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="fw-bold text-indigo-900 mb-1" style="font-size: 0.85rem; color: #3730a3;">Trạng thái phân công các phân vùng đã chọn</h6>
+                        <p class="text-indigo-700 mb-0 text-xs" style="line-height: 1.55;">
+                            Bạn đang chọn <strong>${count} phân vùng</strong> để giao việc nhóm. Dưới đây là trạng thái hiện tại của từng phân vùng:
+                        </p>
+                    </div>
                 </div>
-                <div class="flex-grow-1">
-                    <h6 class="fw-bold text-indigo-900 mb-1" style="font-size: 0.85rem; color: #3730a3;">Giao việc nhóm đang được chọn</h6>
-                    <p class="text-indigo-700 mb-2.5 text-xs" style="line-height: 1.55;">
-                        Bạn đang tích chọn <strong>${count} phân vùng</strong> để giao việc cùng lúc. Hãy nhấn nút dưới đây để tạo nhiệm vụ chung cho các phân vùng này.
-                    </p>
+                
+                <div class="my-2 max-height-150 overflow-y-auto pe-1" style="max-height: 140px;">
+                    ${regionsHtml}
+                </div>
+                
+                <div class="d-flex justify-content-end">
                     <button class="btn btn-sm text-white py-2 px-3 d-inline-flex align-items-center fw-bold shadow-sm" style="border-radius: 8px; font-size: 0.75rem; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: 0; transition: all 0.2s;" onclick="assignGroupedRegions()">
                         <i class="fas fa-layer-group me-1.5"></i>Giao việc nhóm ngay
                     </button>
