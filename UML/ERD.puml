@@ -88,6 +88,7 @@ entity tasks {
   --
   page_id : int <<FK>>
   page_region_id : int <<FK>> <<NULL>>
+  grouped_region_ids : varchar <<NULL>>
   mangaka_id : int <<FK>>
   assistant_id : int <<FK>>
   title : varchar

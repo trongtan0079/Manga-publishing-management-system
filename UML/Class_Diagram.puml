@@ -84,6 +84,7 @@ class Task {
   +task_id : int
   +page_id : int
   +page_region_id : int
+  +grouped_region_ids : string
   +mangaka_id : int
   +assistant_id : int
   +title : string
