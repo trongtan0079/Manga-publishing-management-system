@@ -175,8 +175,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     }
     .page-item-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 20px -8px rgba(15, 23, 42, 0.15);
-        border-color: var(--primary);
+        box-shadow: 0 12px 24px -8px rgba(99, 102, 241, 0.25) !important;
+        border-color: var(--primary) !important;
     }
     .page-preview-box {
         position: relative;
@@ -617,10 +617,11 @@ if (!function_exists('renderTaskStatusDot')) {
                                     <?php endif; ?>
                                 </div>
                             </div>
+                        <?php else: ?>
                             <!-- Styled Premium Empty State -->
                             <div class="premium-empty-state mb-4 shadow-sm">
-                                <div class="empty-state-icon-wrapper text-success bg-success-subtle bg-opacity-25">
-                                    <i class="fa-solid fa-circle-check text-success"></i>
+                                <div class="empty-state-icon-wrapper text-success bg-success-subtle bg-opacity-10 border-0" style="width: 56px; height: 56px; color: #10b981; background-color: rgba(16, 185, 129, 0.1) !important;">
+                                    <i class="fa-solid fa-circle-check text-success fs-4"></i>
                                 </div>
                                 <div class="text-slate-800 fw-extrabold text-xs mb-1">Không có chương đang vẽ (No Active Chapter)</div>
                                 <p class="text-muted text-xs mb-0 px-3">Tất cả các chương đã nộp duyệt thành công hoặc tác giả chưa khởi tạo chương nháp mới.</p>
@@ -630,7 +631,7 @@ if (!function_exists('renderTaskStatusDot')) {
                         <!-- 3. Top 5 Deadline công việc sắp tới -->
                         <h6 class="fw-bold text-slate-800 mb-3"><i class="fa-regular fa-calendar-check me-2 text-warning"></i>Công việc sắp đến hạn hoặc trễ hạn</h6>
                         <?php if (!empty($data['pending_tasks'])): ?>
-                            <div class="table-responsive">
+                            <div class="table-responsive mb-3">
                                 <table class="table table-sm table-hover align-middle mb-0" style="font-size: 0.8rem;">
                                     <tbody>
                                         <?php foreach ($data['pending_tasks'] as $task): 
@@ -689,6 +690,7 @@ if (!function_exists('renderTaskStatusDot')) {
                                     </tbody>
                                 </table>
                             </div>
+                        <?php else: ?>
                             <div class="d-flex align-items-center bg-success-subtle bg-opacity-10 border border-success-subtle p-3 rounded-3 text-success text-xs">
                                 <i class="fa-solid fa-circle-check me-2 fa-lg"></i>
                                 <span class="fw-bold">Tất cả công việc (Tasks) của trợ lý đều đang đúng hạn!</span>
