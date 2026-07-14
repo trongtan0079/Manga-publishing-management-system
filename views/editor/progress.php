@@ -317,7 +317,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     .premium-empty-state {
         background: #ffffff;
         border: 1px dashed var(--slate-200);
-        border-radius: 16px;
+        border-radius: 20px;
         padding: 40px 24px;
         text-align: center;
         position: relative;
@@ -331,7 +331,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         width: 64px;
         height: 64px;
         background: rgba(79, 70, 229, 0.05);
-        color: var(--primary);
+        color: var(--primary, #6366f1);
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
@@ -353,7 +353,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     .overall-progress-box {
         background: linear-gradient(135deg, var(--slate-50) 0%, #ffffff 100%);
         border: 1px solid var(--slate-200) !important;
-        border-radius: 12px;
+        border-radius: 16px;
         padding: 16px !important;
         box-shadow: 0 2px 4px rgba(0,0,0,0.01);
     }
@@ -361,7 +361,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         background: linear-gradient(90deg, #10b981 0%, #34d399 100%) !important;
     }
     .gradient-task-progress-bar {
-        background: linear-gradient(90deg, var(--primary) 0%, #818cf8 100%) !important;
+        background: linear-gradient(90deg, var(--primary, #6366f1) 0%, #818cf8 100%) !important;
     }
 </style>
 
