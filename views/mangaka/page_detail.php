@@ -36,16 +36,32 @@ $isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published'
     box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02) !important;
 }
 .selected-card {
-    background-color: #f5f3ff !important; /* Tông tím pastel nhạt */
-    border: 2px solid #8b5cf6 !important;  /* Viền tím đậm nổi bật */
-    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.15), 0 4px 10px rgba(139, 92, 246, 0.08) !important;
     transform: translateY(-6px) !important;
 }
 .checked-card {
-    background-color: #f5f3ff !important; /* Tông tím pastel nhạt */
-    border: 2px solid #8b5cf6 !important;  /* Viền tím đậm nổi bật */
-    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.15), 0 4px 10px rgba(139, 92, 246, 0.08) !important;
     transform: translateY(-6px) !important;
+}
+
+/* Kiểu viền và bóng đổ riêng biệt cho từng loại phân vùng khi được chọn hoặc tích chọn để giữ nguyên màu sắc đặc trưng */
+.card-type-panel.selected-card, .card-type-panel.checked-card {
+    border: 2px solid #ef4444 !important;
+    box-shadow: 0 12px 28px rgba(239, 68, 68, 0.18), 0 4px 10px rgba(239, 68, 68, 0.08) !important;
+}
+.card-type-bubble.selected-card, .card-type-bubble.checked-card {
+    border: 2px solid #3b82f6 !important;
+    box-shadow: 0 12px 28px rgba(59, 130, 246, 0.18), 0 4px 10px rgba(59, 130, 246, 0.08) !important;
+}
+.card-type-character.selected-card, .card-type-character.checked-card {
+    border: 2px solid #10b981 !important;
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.18), 0 4px 10px rgba(16, 185, 129, 0.08) !important;
+}
+.card-type-background.selected-card, .card-type-background.checked-card {
+    border: 2px solid #64748b !important;
+    box-shadow: 0 12px 28px rgba(100, 116, 139, 0.18), 0 4px 10px rgba(100, 116, 139, 0.08) !important;
+}
+.card-type-sfx.selected-card, .card-type-sfx.checked-card {
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 12px 28px rgba(245, 158, 11, 0.18), 0 4px 10px rgba(245, 158, 11, 0.08) !important;
 }
 
 /* Tối/mờ đi các card phân vùng không được chọn ở danh sách bên phải */
@@ -542,8 +558,24 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                     $boxBg = '#fffbeb';
                                     $boxBorder = '#fef3c7';
                                 }
+                                
+                                // Khớp cả task đơn lẻ và task nhóm có chứa phân vùng này để hiển thị trạng thái giao việc
+                                $regionTasks = array_filter($tasks, function($t) use ($region) {
+                                    if (!empty($t['page_region_id']) && $t['page_region_id'] == $region['region_id']) return true;
+                                    if (!empty($t['grouped_region_ids'])) {
+                                        $gids = array_map('trim', explode(',', $t['grouped_region_ids']));
+                                        if (in_array((string)$region['region_id'], $gids)) return true;
+                                    }
+                                    return false;
+                                });
+                                $hasRegionTask = !empty($regionTasks);
+                                $firstTaskAssistantName = '';
+                                if ($hasRegionTask) {
+                                    $firstTask = reset($regionTasks);
+                                    $firstTaskAssistantName = $firstTask['assistant_name'] ?? 'Chưa rõ';
+                                }
                             ?>
-                                <div class="list-group-item list-group-item-action region-card-item mb-3" 
+                                <div class="list-group-item list-group-item-action region-card-item card-type-<?= htmlspecialchars($region['region_type']) ?> mb-3" 
                                      id="list-region-<?= $region['region_id'] ?>"
                                      onclick="highlightCanvasOverlay(<?= $region['region_id'] ?>)"
                                      onmouseenter="hoverOverlay(<?= $region['region_id'] ?>, true)"
@@ -557,7 +589,11 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                             <span class="badge px-2.5 py-1 text-xs font-semibold" style="<?= $badgeStyle ?>; border-radius: 6px;"><?= $typeLabel ?></span>
                                             <span class="text-slate-600 font-bold ms-2" style="font-size: 0.925rem;">ID #<?= $region['region_id'] ?></span>
                                         </h6>
-                                        <small class="text-success fw-semibold d-flex align-items-center" style="font-size: 0.78rem;"><i class="fas fa-user-edit me-1"></i>Vẽ thủ công</small>
+                                        <?php if ($hasRegionTask): ?>
+                                            <span class="badge bg-indigo-subtle text-indigo border border-indigo-subtle px-2 py-1 d-inline-flex align-items-center" style="font-size: 0.72rem; border-radius: 6px; font-weight: 600;"><i class="fas fa-user-check me-1"></i><?= htmlspecialchars($firstTaskAssistantName) ?></span>
+                                        <?php else: ?>
+                                            <span class="badge bg-slate-100 text-slate-500 border border-slate-200 px-2 py-1 d-inline-flex align-items-center" style="font-size: 0.72rem; border-radius: 6px; font-weight: 500;"><i class="fas fa-user-clock me-1"></i>Chưa giao</span>
+                                        <?php endif; ?>
                                     </div>
                                     <p class="mb-2 text-slate-500 small" style="font-size: 0.8rem; line-height: 1.5;">
                                         Tọa độ: X:<?= $region['x'] ?>, Y:<?= $region['y'] ?> | Kích thước: <?= $region['width'] ?>x<?= $region['height'] ?>
@@ -565,16 +601,6 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                     
                                     <!-- Hiển thị công việc đã giao cho phân vùng này -->
                                     <?php
-                                    // Khớp cả task đơn lẻ và task nhóm có chứa phân vùng này
-                                    $regionTasks = array_filter($tasks, function($t) use ($region) {
-                                        if (!empty($t['page_region_id']) && $t['page_region_id'] == $region['region_id']) return true;
-                                        if (!empty($t['grouped_region_ids'])) {
-                                            $gids = array_map('trim', explode(',', $t['grouped_region_ids']));
-                                            if (in_array((string)$region['region_id'], $gids)) return true;
-                                        }
-                                        return false;
-                                    });
-                                    $hasRegionTask = !empty($regionTasks);
                                     if ($hasRegionTask):
                                     ?>
                                         <div class="mt-2 mb-2 p-2 rounded border" style="font-size: 0.78rem; background-color: #f8fafc; border-color: #e2e8f0 !important;">
