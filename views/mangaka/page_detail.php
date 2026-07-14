@@ -919,7 +919,18 @@ function updateSelectedTaskBox(regionId) {
                 (task.priority === 'medium' ? 'bg-warning-subtle text-warning border-warning-subtle' : 'bg-info-subtle text-info border-info-subtle'));
                 
             document.getElementById('selectedTaskDueDate').innerText = task.due_date;
-            document.getElementById('selectedTaskDescription').innerHTML = task.description || '<em class="text-muted">Không có mô tả chi tiết.</em>';
+            
+            // Khôi phục style mặc định cho ô mô tả khi có task
+            const descEl = document.getElementById('selectedTaskDescription');
+            if (descEl) {
+                descEl.className = "bg-slate-50 p-3 rounded-3 border border-light-subtle text-slate-700 text-start overflow-y-auto mb-2 font-medium";
+                descEl.style.removeProperty('background-color');
+                descEl.style.removeProperty('border-color');
+                descEl.style.removeProperty('border-width');
+                descEl.style.removeProperty('padding');
+                descEl.style.removeProperty('box-shadow');
+                descEl.innerHTML = task.description || '<em class="text-muted">Không có mô tả chi tiết.</em>';
+            }
             
             // Hiện hàng metadata
             const metaRow = infoBox.querySelector('.row');
@@ -998,17 +1009,31 @@ function updateSelectedTaskBox(regionId) {
             }
         } else {
             document.getElementById('selectedTaskTitle').innerText = 'Chi tiết phân vùng ID #' + regionId;
-            document.getElementById('selectedTaskDescription').innerHTML = `
-                <div class="text-center py-4">
-                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: rgba(79, 70, 229, 0.08); color: #4f46e5;">
-                        <i class="fas fa-clipboard-list fs-5"></i>
+            
+            // Xóa style viền/nền xám mặc định của thẻ cha để hiển thị trọn vẹn màu vàng
+            const descEl = document.getElementById('selectedTaskDescription');
+            if (descEl) {
+                descEl.className = "text-slate-700 text-start overflow-y-auto mb-2 font-medium";
+                descEl.style.setProperty('background-color', 'transparent', 'important');
+                descEl.style.setProperty('border-color', 'transparent', 'important');
+                descEl.style.setProperty('border-width', '0', 'important');
+                descEl.style.setProperty('padding', '0', 'important');
+                descEl.style.setProperty('box-shadow', 'none', 'important');
+                
+                descEl.innerHTML = `
+                    <div class="d-flex align-items-start gap-3 p-3 text-slate-700" style="background-color: #fffbeb; border: 1px solid #fde68a; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+                        <div class="mt-0.5 d-flex align-items-center justify-content-center rounded-circle text-amber-600" style="width: 32px; height: 32px; background: rgba(245, 158, 11, 0.12); flex-shrink: 0;">
+                            <i class="fas fa-exclamation-triangle fs-6"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="fw-bold text-slate-800 mb-1" style="font-size: 0.85rem; color: #92400e;">Phân vùng chưa giao việc</h6>
+                            <p class="text-slate-700 mb-0 text-xs" style="line-height: 1.55;">
+                                Phân vùng này chưa được phân công công việc. Bạn có thể nhấn nút <span class="badge bg-white text-primary border border-primary-subtle py-0.5 px-1.5 fw-bold" style="font-size: 0.72rem;"><i class="fas fa-plus me-1"></i>Giao việc</span> trên thẻ phân vùng tương ứng ở cột bên phải để giao việc cho Trợ lý.
+                            </p>
+                        </div>
                     </div>
-                    <h6 class="fw-bold text-slate-800 mb-1" style="font-size: 0.875rem;">Phân vùng chưa giao việc</h6>
-                    <p class="text-slate-500 mb-0 px-3 mx-auto" style="font-size: 0.78rem; line-height: 1.5; max-width: 340px;">
-                        Bạn có thể nhấn nút <span class="badge bg-light text-primary border border-primary-subtle py-1 px-1.5 fw-bold"><i class="fas fa-plus me-1"></i>Giao việc</span> trên thẻ phân vùng tương ứng ở cột bên phải để giao nhiệm vụ mới cho Trợ lý.
-                    </p>
-                </div>
-            `;
+                `;
+            }
             
             // Ẩn hàng metadata
             const metaRow = infoBox.querySelector('.row');
