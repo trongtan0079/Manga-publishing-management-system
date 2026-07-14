@@ -24,8 +24,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     /* Elite SaaS styling for progress tracking */
     .progress-series-card {
         background: #ffffff;
-        border: 1px solid rgba(226, 232, 240, 0.8) !important;
-        border-radius: 20px !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 24px !important;
         box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.02), 0 2px 8px -1px rgba(15, 23, 42, 0.02) !important;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         overflow: hidden;
@@ -37,36 +37,33 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         top: 0;
         left: 0;
         right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
-        opacity: 0;
-        transition: opacity 0.3s ease;
+        height: 5px;
+        background: linear-gradient(90deg, var(--primary, #6366f1) 0%, var(--secondary, #4f46e5) 100%);
+        opacity: 0.8;
+        transition: height 0.3s ease;
     }
     .progress-series-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.08), 0 10px 10px -5px rgba(15, 23, 42, 0.04) !important;
-        border-color: rgba(99, 102, 241, 0.3) !important;
-    }
-    .progress-series-card:hover::before {
-        opacity: 1;
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.08), 0 10px 10px -5px rgba(99, 102, 241, 0.04) !important;
+        border-color: rgba(99, 102, 241, 0.25) !important;
     }
     .series-cover-mini {
-        width: 52px;
-        height: 70px;
+        width: 56px;
+        height: 76px;
         object-fit: cover;
-        border-radius: 10px;
+        border-radius: 12px;
         border: 2px solid #ffffff;
-        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
         transition: transform 0.3s ease;
     }
     .progress-series-card:hover .series-cover-mini {
-        transform: scale(1.08) rotate(1deg);
+        transform: scale(1.06) rotate(2deg);
     }
     .series-cover-placeholder {
-        width: 52px;
-        height: 70px;
+        width: 56px;
+        height: 76px;
         background: linear-gradient(135deg, var(--slate-100) 0%, var(--slate-200) 100%);
-        border-radius: 10px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
