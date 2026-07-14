@@ -123,54 +123,41 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['just_logged_in'])) {
         $totalPopups = count($unreadPopups);
         ?>
         <!-- Modal thông báo nổi bật ở giữa màn hình (dạng Slideshow cho nhiều thông báo) -->
-        <div class="modal fade" id="latestNotificationPopupModal" tabindex="-1" aria-labelledby="latestNotificationPopupLabel" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content border-0 shadow-lg" style="border-radius: 20px;">
-                    <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                        <h5 class="modal-title fw-extrabold text-slate-800 d-flex align-items-center gap-2" id="latestNotificationPopupLabel" style="font-size: 1.1rem;">
-                            <span class="rounded-circle bg-primary-subtle p-2 d-inline-flex align-items-center justify-content-center text-primary" style="width: 32px; height: 32px;">
-                                <i class="fas fa-bell"></i>
+        <div class="modal fade notif-modal" id="latestNotificationPopupModal" tabindex="-1" aria-labelledby="latestNotificationPopupLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+                <div class="modal-content border-0 shadow-lg">
+                    <div class="modal-header notif-modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="modal-title fw-extrabold d-flex align-items-center gap-2" id="latestNotificationPopupLabel" style="font-size: 1.05rem; color: #0f172a;">
+                            <span class="rounded-circle bg-primary-subtle p-2 d-inline-flex align-items-center justify-content-center text-primary" style="width: 32px; height: 32px; background-color: rgba(99, 102, 241, 0.1) !important;">
+                                <i class="fas fa-bell" style="font-size: 0.9rem;"></i>
                             </span>
                             Thông báo mới nhất
                             <?php if ($totalPopups > 1): ?>
-                                <span class="badge bg-primary text-white border-0 rounded-pill ms-2" style="font-size: 0.72rem; padding: 0.3em 0.7em;" id="popupIndexIndicator">1/<?= $totalPopups ?></span>
+                                <span class="badge bg-primary text-white border-0 rounded-pill ms-2" style="font-size: 0.7rem; padding: 0.35em 0.8em;" id="popupIndexIndicator">1/<?= $totalPopups ?></span>
                             <?php endif; ?>
                         </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.8rem;"></button>
                     </div>
                     
                     <div id="notificationCarousel" class="carousel slide" data-bs-interval="false">
                         <div class="carousel-inner">
                             <?php foreach ($unreadPopups as $idx => $notif): 
-                                $popupIcon = 'fa-bell';
-                                $popupColor = 'text-primary';
-                                $popupLabel = 'Thông báo mới';
-                                switch($notif['type']) {
-                                    case 'task_assigned': $popupIcon = 'fa-tasks'; $popupColor = 'text-warning'; $popupLabel = 'Công việc mới được giao'; break;
-                                    case 'submission_submitted':
-                                    case 'chapter_submitted': $popupIcon = 'fa-file-upload'; $popupColor = 'text-info'; $popupLabel = 'Bản thảo mới'; break;
-                                    case 'review_created': $popupIcon = 'fa-comment-dots'; $popupColor = 'text-primary'; $popupLabel = 'Ý kiến nhận xét mới'; break;
-                                    case 'submission_approved': $popupIcon = 'fa-check-circle'; $popupColor = 'text-success'; $popupLabel = 'Phê duyệt bản thảo'; break;
-                                    case 'submission_rejected': $popupIcon = 'fa-times-circle'; $popupColor = 'text-danger'; $popupLabel = 'Từ chối bản thảo'; break;
-                                    case 'ranking_published': $popupIcon = 'fa-trophy'; $popupColor = 'text-warning'; $popupLabel = 'Bảng xếp hạng mới'; break;
-                                    case 'series_warning': $popupIcon = 'fa-exclamation-triangle'; $popupColor = 'text-danger'; $popupLabel = 'Cảnh báo bộ truyện'; break;
-                                    case 'series_completed': $popupIcon = 'fa-flag-checkered'; $popupColor = 'text-success'; $popupLabel = 'Hoàn thành bộ truyện'; break;
-                                    case 'series_submitted': $popupIcon = 'fa-folder-plus'; $popupColor = 'text-primary'; $popupLabel = 'Đề xuất truyện mới'; break;
-                                }
+                                $details = Notification::getTypeDetails($notif['type']);
                                 $redirectUrl = (defined('BASE_PATH') ? BASE_PATH : '') . '/index.php?controller=notification&action=readAndRedirect&id=' . $notif['notification_id'];
                             ?>
                                 <div class="carousel-item <?= $idx === 0 ? 'active' : '' ?>">
                                     <div class="modal-body p-4 text-center">
-                                        <div class="rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3 shadow-sm border bg-light" style="width: 72px; height: 72px;">
-                                            <i class="fas <?= $popupIcon ?> <?= $popupColor ?> fs-1"></i>
+                                        <div class="notif-icon-container" style="background: <?= $details['bg_gradient'] ?>;">
+                                            <i class="fas <?= $details['icon'] ?> fs-2 text-white"></i>
+                                            <div class="notif-icon-glow" style="color: <?= $details['color'] ?>;"></div>
                                         </div>
-                                        <h6 class="fw-bold text-dark mb-2"><?= htmlspecialchars($popupLabel) ?></h6>
-                                        <p class="text-secondary mb-4 px-2" style="font-size: 0.92rem; line-height: 1.5; min-height: 50px;"><?= htmlspecialchars($notif['message']) ?></p>
+                                        <h6 class="notif-modal-title"><?= htmlspecialchars($details['label']) ?></h6>
+                                        <p class="notif-message-text text-secondary mb-4"><?= htmlspecialchars($notif['message']) ?></p>
                                         
-                                        <div class="d-flex gap-2 justify-content-center">
-                                            <button type="button" class="btn btn-outline-secondary px-4 py-2.5" data-bs-dismiss="modal" style="border-radius: 12px; font-weight: 600; font-size: 0.85rem;">Bỏ qua</button>
-                                            <a href="<?= $redirectUrl ?>" class="btn btn-primary px-4 py-2.5 shadow-sm" style="border-radius: 12px; font-weight: 600; font-size: 0.85rem;">
-                                                <i class="fas fa-external-link-alt me-1.5"></i>Xem chi tiết
+                                        <div class="d-flex gap-2.5 justify-content-center">
+                                            <button type="button" class="btn notif-btn-secondary" data-bs-dismiss="modal">Bỏ qua</button>
+                                            <a href="<?= $redirectUrl ?>" class="btn notif-btn-primary" style="background: <?= $details['bg_gradient'] ?>;">
+                                                <i class="fas fa-arrow-right-to-bracket me-1.5"></i>Xem chi tiết
                                             </a>
                                         </div>
                                     </div>
@@ -181,10 +168,10 @@ if (isset($_SESSION['user_id']) && !empty($_SESSION['just_logged_in'])) {
                         <?php if ($totalPopups > 1): ?>
                             <!-- Carousel Navigation Controls -->
                             <div class="d-flex justify-content-between align-items-center px-4 pb-4">
-                                <button class="btn btn-link text-decoration-none text-secondary p-0" type="button" data-bs-target="#notificationCarousel" data-bs-slide="prev">
+                                <button class="btn btn-link notif-nav-btn text-decoration-none p-0" type="button" data-bs-target="#notificationCarousel" data-bs-slide="prev">
                                     <i class="fas fa-chevron-left me-1"></i> Trước
                                 </button>
-                                <button class="btn btn-link text-decoration-none text-primary p-0 fw-bold" type="button" data-bs-target="#notificationCarousel" data-bs-slide="next">
+                                <button class="btn btn-link notif-nav-btn text-decoration-none p-0" type="button" data-bs-target="#notificationCarousel" data-bs-slide="next">
                                     Sau <i class="fas fa-chevron-right ms-1"></i>
                                 </button>
                             </div>
