@@ -24,17 +24,28 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 $isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published');
 ?>
 <style>
-.selected-card {
-    background-color: #f8fafc !important; /* Tông xám pastel nhạt sạch sẽ */
-    border-color: #4f46e5 !important;    /* Viền màu tím thương hiệu */
-    box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.15), 0 8px 10px -6px rgba(79, 70, 229, 0.15) !important;
-    transform: translateY(-2px);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+.region-card-item {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s, background-color 0.25s;
+    border-radius: 12px;
+    padding: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.01) !important;
 }
-
+.region-card-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02) !important;
+}
+.selected-card {
+    background-color: #f5f3ff !important; /* Tông tím pastel nhạt */
+    border: 2px solid #8b5cf6 !important;  /* Viền tím đậm nổi bật */
+    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.15), 0 4px 10px rgba(139, 92, 246, 0.08) !important;
+    transform: translateY(-6px) !important;
+}
 .checked-card {
-    background-color: #f5f3ff !important; /* Tím nhạt sang trọng */
-    border-color: #c084fc !important;    /* Viền tím sáng */
+    background-color: #f5f3ff !important; /* Tông tím pastel nhạt */
+    border: 2px solid #8b5cf6 !important;  /* Viền tím đậm nổi bật */
+    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.15), 0 4px 10px rgba(139, 92, 246, 0.08) !important;
+    transform: translateY(-6px) !important;
 }
 
 /* Tối/mờ đi các card phân vùng không được chọn ở danh sách bên phải */
@@ -492,41 +503,61 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                     </div>
                 <?php else: ?>
                     <div>
-                        <p class="text-muted small mb-3">Các phân vùng bản vẽ hiện có. Bạn có thể chọn giao việc (Task) trực tiếp cho Assistant trên từng phân vùng.</p>
+                        <!-- Bảng hướng dẫn giao việc -->
+                        <div class="alert alert-info py-2 px-3 mb-3 border-0 shadow-sm" style="background-color: #f0fdfa; border-left: 4px solid #0f766e !important; border-radius: 8px;">
+                            <div class="fw-bold text-teal-900 mb-1" style="font-size: 0.825rem;"><i class="fas fa-info-circle me-1.5 text-teal-600"></i>Hướng dẫn giao việc (Task):</div>
+                            <ul class="ps-3 mb-0 text-slate-700 text-xs" style="line-height: 1.5; font-size: 0.76rem;">
+                                <li class="mb-1"><strong>Giao việc riêng lẻ:</strong> Nhấn nút <span class="badge bg-light text-primary border border-primary-subtle py-0.5 px-1.5"><i class="fas fa-plus me-1"></i>Giao việc</span> trên thẻ phân vùng để giao một việc cụ thể cho phân vùng đó.</li>
+                                <li><strong>Giao việc nhóm:</strong> Tích chọn <input type="checkbox" checked disabled style="transform: scale(0.8); vertical-align: middle; pointer-events: none;"> vào nhiều phân vùng. Nút <span class="badge bg-indigo text-white py-0.5 px-1.5" style="background-color: #6366f1;"><i class="fas fa-layer-group me-1"></i>Giao việc nhóm</span> sẽ xuất hiện ở góc trên để giao một công việc chung cho nhóm phân vùng này.</li>
+                            </ul>
+                        </div>
+
                         <div class="list-group" id="region-list-group">
                             <?php foreach ($regions as $region): 
                                 $typeLabel = htmlspecialchars($region['region_type']);
                                 $borderColor = '#6c757d'; // Mặc định là xám cho custom type
                                 $badgeStyle = 'background-color: #f3f4f6; color: #374151; border: 1px solid #e5e7eb;';
+                                $boxBg = '#f9fafb';
+                                $boxBorder = '#e5e7eb';
                                 
                                 if ($region['region_type'] === 'panel') {
                                     $typeLabel = 'Khung truyện';
                                     $borderColor = '#ef4444'; // Đỏ Panel
                                     $badgeStyle = 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fca5a5;';
+                                    $boxBg = '#fef2f2';
+                                    $boxBorder = '#fca5a5';
                                 } elseif ($region['region_type'] === 'bubble') {
                                     $typeLabel = 'Bong bóng thoại';
                                     $borderColor = '#3b82f6'; // Xanh Bubble
                                     $badgeStyle = 'background-color: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe;';
+                                    $boxBg = '#f0f9ff';
+                                    $boxBorder = '#bae6fd';
                                 } elseif ($region['region_type'] === 'character') {
                                     $typeLabel = 'Nhân vật';
                                     $borderColor = '#10b981'; // Xanh lá Nhân vật
                                     $badgeStyle = 'background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;';
+                                    $boxBg = '#f0fdf4';
+                                    $boxBorder = '#bbf7d0';
                                 } elseif ($region['region_type'] === 'background') {
                                     $typeLabel = 'Bối cảnh/Nền';
                                     $borderColor = '#64748b'; // Xám Background
                                     $badgeStyle = 'background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;';
+                                    $boxBg = '#f8fafc';
+                                    $boxBorder = '#e2e8f0';
                                 } elseif ($region['region_type'] === 'sfx') {
                                     $typeLabel = 'Hiệu ứng SFX';
                                     $borderColor = '#f59e0b'; // Cam SFX
                                     $badgeStyle = 'background-color: #fef3c7; color: #92400e; border: 1px solid #fde68a;';
+                                    $boxBg = '#fffbeb';
+                                    $boxBorder = '#fef3c7';
                                 }
                             ?>
-                                <div class="list-group-item list-group-item-action mb-3 shadow-sm border border-light-subtle transition-all" 
+                                <div class="list-group-item list-group-item-action region-card-item mb-3" 
                                      id="list-region-<?= $region['region_id'] ?>"
                                      onclick="highlightCanvasOverlay(<?= $region['region_id'] ?>)"
                                      onmouseenter="hoverOverlay(<?= $region['region_id'] ?>, true)"
                                      onmouseleave="hoverOverlay(<?= $region['region_id'] ?>, false)"
-                                     style="cursor: pointer; border-left: 5px solid <?= $borderColor ?> !important; border-radius: 12px; padding: 16px; background-color: #ffffff;">
+                                     style="background-color: <?= $boxBg ?>; border: 1px solid <?= $boxBorder ?>;">
                                     <div class="d-flex w-100 justify-content-between align-items-center mb-2">
                                         <h6 class="mb-0 fw-bold text-dark d-flex align-items-center">
                                             <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && !in_array($series['status'], ['suspended', 'canceled', 'completed'])): ?>
@@ -1247,6 +1278,9 @@ document.addEventListener("DOMContentLoaded", function() {
             highlightCanvasOverlay(targetRegionId);
         }, 500);
     <?php endif; ?>
+
+    // Đồng bộ hóa trạng thái nút Giao việc nhóm dựa trên checkbox khi tải/quay lại trang
+    updateGroupButton();
 });
 
 function updateGroupButton() {
