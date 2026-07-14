@@ -425,10 +425,13 @@ if (!function_exists('renderTaskStatusDot')) {
 }
 ?>
 
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-4">
-    <div>
-        <h2 class="h3 mb-1 fw-extrabold tracking-tight" style="background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"><i class="fa-solid fa-chart-line text-primary me-2"></i>Giám sát Tiến độ & Deadline Studio</h2>
-        <p class="text-muted text-xs mb-0">Theo dõi tiến độ hoàn thành bản vẽ của nhóm tác giả (studio) theo thời gian thực để đảm bảo kịp deadline giao bản in.</p>
+<div class="p-4 mb-4 rounded-4 text-white shadow-sm border-0 d-flex justify-content-between align-items-center flex-wrap gap-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);">
+    <div class="position-absolute rounded-circle" style="width: 150px; height: 150px; background: rgba(99, 102, 241, 0.2); filter: blur(50px); top: -50px; right: -20px;"></div>
+    <div class="position-absolute rounded-circle" style="width: 120px; height: 120px; background: rgba(236, 72, 153, 0.15); filter: blur(40px); bottom: -30px; left: 10%;"></div>
+    
+    <div class="position-relative z-1">
+        <h2 class="h4 mb-1 fw-extrabold text-white d-flex align-items-center gap-2"><i class="fa-solid fa-chart-line"></i>Giám sát Tiến độ & Deadline Studio</h2>
+        <p class="mb-0 text-white text-xs fw-semibold" style="opacity: 0.75;">Theo dõi tiến độ hoàn thành bản vẽ của nhóm tác giả (studio) theo thời gian thực để đảm bảo kịp deadline giao bản in.</p>
     </div>
 </div>
 
