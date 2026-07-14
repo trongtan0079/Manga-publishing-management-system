@@ -14,6 +14,24 @@ require_once __DIR__ . '/../layouts/navbar.php';
 require_once __DIR__ . '/../layouts/sidebar.php';
 ?>
 
+<style>
+/* Tinh chỉnh thanh công cụ Quill cho phân vùng nhỏ gọn, đẹp mắt */
+.quill-region-editor-wrapper .ql-toolbar.ql-snow {
+    border: none !important;
+    border-bottom: 1px solid #cbd5e1 !important;
+    background-color: #f8fafc;
+    padding: 4px 8px !important;
+}
+.quill-region-editor-wrapper .ql-container.ql-snow {
+    border: none !important;
+}
+.quill-region-editor-wrapper .ql-editor {
+    padding: 8px 12px !important;
+    min-height: 80px;
+    font-size: 0.85rem;
+}
+</style>
+
 <div class="mb-3">
     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=show&id=<?= htmlspecialchars($page['page_id']) ?>" class="btn btn-secondary">&larr; Quay lại Trang</a>
 </div>
@@ -83,24 +101,24 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 case 'sfx': $typeLabel = 'Hiệu ứng SFX'; $badgeColor = '#ffc107'; $bgColor = '#fffdf0'; break;
                             }
                         ?>
-                        <div class="card shadow-sm border-0 mb-3" style="border-left: 5px solid <?= $badgeColor ?> !important; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; background: linear-gradient(145deg, #ffffff, #f8fafc);">
+                        <div class="card shadow-sm border-0 mb-3" style="border: 1px solid <?= $badgeColor ?>33 !important; border-left: 5px solid <?= $badgeColor ?> !important; border-radius: 8px; overflow: hidden; background-color: <?= $bgColor ?> !important;">
                             <div class="card-header border-bottom-0 py-2.5 px-3 d-flex align-items-center justify-content-between" style="background-color: transparent;">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="badge" style="background-color: <?= $badgeColor ?>; font-size: 0.75rem; padding: 0.4em 0.7em; border-radius: 4px; font-weight: 600; box-shadow: 0 2px 4px <?= $badgeColor ?>33;"><?= htmlspecialchars($typeLabel) ?></span>
                                 </div>
-                                <span class="fw-bold text-slate-500" style="font-size: 0.82rem; letter-spacing: 0.5px;">PHÂN VÙNG #<?= $rId ?></span>
+                                <span class="fw-bold text-slate-600" style="font-size: 0.82rem; letter-spacing: 0.5px;">PHÂN VÙNG #<?= $rId ?></span>
                             </div>
                             <div class="card-body pt-1 pb-3 px-3">
                                 <div class="row g-3 mb-3">
                                     <div class="col-md-6">
-                                        <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                                            <i class="fas fa-edit me-1 text-slate-400"></i>Tiêu đề công việc (Tùy chọn)
+                                        <label class="form-label mb-1 text-uppercase fw-bold text-slate-600" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                            <i class="fas fa-edit me-1 text-slate-500"></i>Tiêu đề công việc (Tùy chọn)
                                         </label>
                                         <input type="text" class="form-control form-control-sm region-specific-title border-light-subtle" data-region-id="<?= $rId ?>" placeholder="Tiêu đề cho vùng này..." value="<?= htmlspecialchars($oldTitle) ?>" style="font-weight: 500; font-size: 0.85rem; border-radius: 6px; background-color: #fff; box-shadow: none; border: 1px solid #cbd5e1;">
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                                            <i class="fas fa-tasks me-1 text-slate-400"></i>Loại công việc chi tiết
+                                        <label class="form-label mb-1 text-uppercase fw-bold text-slate-600" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                            <i class="fas fa-tasks me-1 text-slate-500"></i>Loại công việc chi tiết
                                         </label>
                                         <select class="form-select form-select-sm region-specific-type border-light-subtle" data-region-id="<?= $rId ?>" style="font-size: 0.85rem; border-radius: 6px; background-color: #fff; color: #475569; font-weight: 500; box-shadow: none; border: 1px solid #cbd5e1;">
                                             <option value="" <?= $selectedType == '' ? 'selected' : '' ?>>-- Chọn loại công việc chi tiết --</option>
@@ -113,16 +131,20 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     </div>
                                 </div>
                                 <div class="mb-3 region-custom-type-container <?= $selectedType === 'other' ? '' : 'd-none' ?>" data-region-id="<?= $rId ?>">
-                                    <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                                        <i class="fas fa-keyboard me-1 text-slate-400"></i>Nhập loại công việc khác <span class="text-danger">*</span>
+                                    <label class="form-label mb-1 text-uppercase fw-bold text-slate-600" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        <i class="fas fa-keyboard me-1 text-slate-500"></i>Nhập loại công việc khác <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control form-control-sm region-specific-custom-type border-light-subtle" data-region-id="<?= $rId ?>" placeholder="Ví dụ: Đổ tone, Dán decal..." value="<?= htmlspecialchars($oldCustomType) ?>" style="font-size: 0.85rem; border-radius: 6px; background-color: #fff; box-shadow: none; border: 1px solid #cbd5e1;">
                                 </div>
                                 <div>
-                                    <label class="form-label mb-1 text-uppercase fw-bold text-slate-500" style="font-size: 0.7rem; letter-spacing: 0.5px;">
-                                        <i class="fas fa-align-left me-1 text-slate-400"></i>Ghi chú mô tả chi tiết công việc
+                                    <label class="form-label mb-1 text-uppercase fw-bold text-slate-600" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        <i class="fas fa-align-left me-1 text-slate-500"></i>Ghi chú mô tả chi tiết công việc
                                     </label>
-                                    <textarea class="form-control region-specific-desc border-light-subtle" data-region-id="<?= $rId ?>" data-badge-color="<?= $badgeColor ?>" data-bg-color="<?= $bgColor ?>" data-type-label="<?= htmlspecialchars($typeLabel) ?>" rows="3" placeholder="Nhập ghi chú chi tiết mô tả công việc cần xử lý trong vùng này..." style="font-size: 0.85rem; resize: vertical; border-radius: 6px; background-color: #fff; box-shadow: none; border: 1px solid #cbd5e1;"><?= htmlspecialchars($oldDesc) ?></textarea>
+                                    <div class="quill-region-editor-wrapper border rounded" style="background-color: #fff; border: 1px solid #cbd5e1 !important; border-radius: 6px; overflow: hidden;">
+                                        <div class="quill-region-editor region-specific-desc" data-region-id="<?= $rId ?>" data-badge-color="<?= $badgeColor ?>" data-bg-color="<?= $bgColor ?>" data-type-label="<?= htmlspecialchars($typeLabel) ?>" style="height: 120px; font-size: 0.85rem;">
+                                            <?= $oldDesc ?>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -208,6 +230,23 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     });
                 }
 
+                // Khởi tạo Quill Editor cho từng phân vùng (Region)
+                const regionQuills = {};
+                document.querySelectorAll('.quill-region-editor').forEach(function(el) {
+                    const rId = el.getAttribute('data-region-id');
+                    regionQuills[rId] = new Quill(el, {
+                        theme: 'snow',
+                        placeholder: 'Nhập ghi chú chi tiết mô tả công việc cần xử lý trong vùng này...',
+                        modules: {
+                            toolbar: [
+                                ['bold', 'italic', 'underline'],
+                                [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                                ['clean']
+                            ]
+                        }
+                    });
+                });
+
                 // Xử lý loại công việc tự chọn cho từng phân vùng (Region)
                 document.querySelectorAll('.region-specific-type').forEach(function(select) {
                     const rId = select.getAttribute('data-region-id');
@@ -257,7 +296,12 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 const titleInput = document.querySelector(`.region-specific-title[data-region-id="${rId}"]`);
                                 const typeSelect = document.querySelector(`.region-specific-type[data-region-id="${rId}"]`);
                                 
-                                const val = input.value.trim();
+                                // Lấy giá trị từ Quill editor tương ứng
+                                const quillInstance = regionQuills[rId];
+                                const valHtml = quillInstance ? quillInstance.root.innerHTML.trim() : '';
+                                // Lấy text thuần để check xem người dùng có thực sự nhập mô tả không
+                                const plainText = quillInstance ? quillInstance.getText().trim() : '';
+                                
                                 const rTitle = titleInput ? titleInput.value.trim() : '';
                                 let rType = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : '';
                                 const hasType = typeSelect && typeSelect.value !== '';
@@ -271,19 +315,17 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 }
                                 
                                 // Nếu có bất kỳ nội dung nào được nhập ở thẻ này
-                                if (val || rTitle || hasType) {
+                                if (plainText !== '' || rTitle || hasType) {
                                     const bColor = input.getAttribute('data-badge-color');
                                     const bgColor = input.getAttribute('data-bg-color') || '#f8fafc';
                                     const tLabel = input.getAttribute('data-type-label');
                                     
-                                    // Tạo HTML an toàn
-                                    const safeVal = val.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, "<br>");
                                     const safeTitle = rTitle.replace(/</g, "&lt;").replace(/>/g, "&gt;");
                                     
                                     let contentHtml = '';
                                     if (safeTitle) contentHtml += `<h6 style="color: #0f172a; font-weight: 700; font-size: 14.5px; margin-bottom: 4px;">${safeTitle}</h6>`;
                                     if (hasType) contentHtml += `<p style="color: #64748b; font-size: 12px; margin-bottom: 6px; font-weight: 600;"><i class="fas fa-tag me-1"></i> Loại việc: ${rType}</p>`;
-                                    if (safeVal) contentHtml += `<div class="region-desc-content" style="font-size: 13.5px; color: #334155; line-height: 1.5; padding-top: 4px;">${safeVal}</div>`;
+                                    if (plainText !== '') contentHtml += `<div class="region-desc-content ql-editor" style="font-size: 13.5px; color: #334155; line-height: 1.5; padding: 0; background: transparent;">${valHtml}</div>`;
                                     
                                     combinedHtml += `
                                     <div class="region-instruction-card" style="border: 1px solid ${bColor}; padding: 12px; border-radius: 6px; background-color: ${bgColor};">
