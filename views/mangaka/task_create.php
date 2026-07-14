@@ -101,7 +101,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                 case 'sfx': $typeLabel = 'Hiệu ứng SFX'; $badgeColor = '#ffc107'; $bgColor = '#fffdf0'; break;
                             }
                         ?>
-                        <div class="card shadow-sm border-0 mb-3" style="border: 1px solid <?= $badgeColor ?>33 !important; border-left: 5px solid <?= $badgeColor ?> !important; border-radius: 8px; overflow: hidden; background-color: <?= $bgColor ?> !important;">
+                        <div class="card shadow-sm border-0 mb-3" style="border: 1px solid <?= $badgeColor ?>33 !important; border-radius: 8px; overflow: hidden; background-color: <?= $bgColor ?> !important;">
                             <div class="card-header border-bottom-0 py-2.5 px-3 d-flex align-items-center justify-content-between" style="background-color: transparent;">
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="badge" style="background-color: <?= $badgeColor ?>; font-size: 0.75rem; padding: 0.4em 0.7em; border-radius: 4px; font-weight: 600; box-shadow: 0 2px 4px <?= $badgeColor ?>33;"><?= htmlspecialchars($typeLabel) ?></span>
