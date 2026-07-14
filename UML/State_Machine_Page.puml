@@ -30,7 +30,12 @@ reviewing_draft --> drawing : Chapter được duyệt nháp
 drawing --> reviewing_final : Chapter chứa trang chuyển sang reviewing_final
 reviewing_final --> drawing : Chapter bị từ chối duyệt hoàn chỉnh
 
-drawing --> approved : Tất cả phân vùng (PageRegions) chuyển sang 'completed'\nvà tất cả Task đã hoàn thành
+state waiting_genko <<choice>> {
+    description : Tất cả Task hoàn thành nhưng chưa có bản vẽ hoàn chỉnh (Genko)\n[Badge vàng: "Chờ nộp bản hoàn chỉnh"]
+}
+
+drawing --> waiting_genko : Tất cả phân vùng (PageRegions) chuyển sang 'completed'\nvà tất cả Task đã hoàn thành\n[Guard: old_image_url == 'no_genko']
+waiting_genko --> approved : Tác giả tải lên bản vẽ hoàn chỉnh (Genko)\n[PageController::update()]\n[Guard: old_image_url != 'no_genko']
 reviewing_final --> approved : Chapter được duyệt hoàn chỉnh
 
 approved --> published : Chapter chứa trang này được duyệt xuất bản
