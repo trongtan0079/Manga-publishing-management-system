@@ -590,9 +590,9 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                             <span class="text-slate-600 font-bold ms-2" style="font-size: 0.925rem;">ID #<?= $region['region_id'] ?></span>
                                         </h6>
                                         <?php if ($hasRegionTask): ?>
-                                            <span class="badge bg-indigo-subtle text-indigo border border-indigo-subtle px-2 py-1 d-inline-flex align-items-center" style="font-size: 0.72rem; border-radius: 6px; font-weight: 600;"><i class="fas fa-user-check me-1"></i><?= htmlspecialchars($firstTaskAssistantName) ?></span>
+                                            <span class="badge border px-2 py-1 d-inline-flex align-items-center" style="font-size: 0.72rem; border-radius: 6px; font-weight: 600; color: #4f46e5 !important; background-color: #eef2ff !important; border-color: #c7d2fe !important;"><i class="fas fa-user-check me-1"></i><?= htmlspecialchars($firstTaskAssistantName) ?></span>
                                         <?php else: ?>
-                                            <span class="badge bg-slate-100 text-slate-500 border border-slate-200 px-2 py-1 d-inline-flex align-items-center" style="font-size: 0.72rem; border-radius: 6px; font-weight: 500;"><i class="fas fa-user-clock me-1"></i>Chưa giao</span>
+                                            <span class="badge border px-2 py-1 d-inline-flex align-items-center" style="font-size: 0.72rem; border-radius: 6px; font-weight: 500; color: #475569 !important; background-color: #f1f5f9 !important; border-color: #cbd5e1 !important;"><i class="fas fa-user-clock me-1"></i>Chưa giao</span>
                                         <?php endif; ?>
                                     </div>
                                     <p class="mb-2 text-slate-500 small" style="font-size: 0.8rem; line-height: 1.5;">
@@ -1504,6 +1504,9 @@ function showGroupAssignBox(count) {
     const checkedIds = Array.from(checked).map(cb => cb.value);
     
     let regionsHtml = '';
+    let assignedCount = 0;
+    let unassignedCount = 0;
+    
     checkedIds.forEach(id => {
         const region = pageRegionsData.find(r => r.region_id == id);
         if (!region) return;
@@ -1520,9 +1523,11 @@ function showGroupAssignBox(count) {
         
         let statusBadge = '';
         if (regionTasks.length > 0) {
+            assignedCount++;
             const assistantName = regionTasks[0].assistant_name || 'Chưa rõ';
             statusBadge = `<span class="badge border py-0.5 px-1.5 ms-auto fw-bold" style="font-size: 0.68rem; border-radius: 4px; color: #4f46e5 !important; background-color: #eef2ff !important; border-color: #c7d2fe !important;"><i class="fas fa-user-check me-1"></i>Đã giao: ${escapeHtml(assistantName)}</span>`;
         } else {
+            unassignedCount++;
             statusBadge = `<span class="badge border py-0.5 px-1.5 ms-auto fw-medium" style="font-size: 0.68rem; border-radius: 4px; color: #475569 !important; background-color: #f1f5f9 !important; border-color: #cbd5e1 !important;"><i class="fas fa-user-clock me-1"></i>Chưa giao</span>`;
         }
         
@@ -1556,7 +1561,7 @@ function showGroupAssignBox(count) {
                     <div class="flex-grow-1">
                         <h6 class="fw-bold text-slate-800 mb-1" style="font-size: 0.85rem;">Trạng thái phân công các phân vùng đã chọn</h6>
                         <p class="text-slate-500 mb-0 text-xs" style="line-height: 1.55;">
-                            Bạn đang tích chọn <strong>${count} phân vùng</strong>. Dưới đây là thông tin chi tiết về trạng thái phân công của từng phân vùng:
+                            Bạn đang tích chọn <strong>${count} phân vùng</strong> (trong đó có <strong style="color: #4f46e5;">${assignedCount} đã giao</strong> và <strong style="color: #475569;">${unassignedCount} chưa giao</strong>). Dưới đây là thông tin chi tiết về từng phân vùng:
                         </p>
                     </div>
                 </div>
