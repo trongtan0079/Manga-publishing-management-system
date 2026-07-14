@@ -110,8 +110,9 @@ Hệ thống áp dụng cơ chế quản lý vòng đời chặt chẽ đối v�
 - **Giai đoạn Đang vẽ (Drawing)**:
   - Khi Mangaka chỉnh sửa chương và nâng trạng thái từ *Bản nháp (Drafting)* sang *Đang vẽ (Drawing)*, hệ thống sẽ chính thức **kích hoạt hiển thị công khai** tất cả các công việc đã phân công cho Trợ lý.
   - Đồng thời, một loạt **thông báo tự động sẽ gửi đến các Trợ lý** tương ứng để báo hiệu bắt đầu làm việc.
+  - **Trạng thái trung gian "Chờ nộp bản hoàn chỉnh" (Badge vàng):** Khi toàn bộ Task trợ lý trên một trang đã hoàn thành nhưng Tác giả chưa tải lên bản vẽ hoàn chỉnh (Genko), hệ thống hiển thị badge vàng để phân biệt rõ ràng với trạng thái "Hoàn thành" thực sự. Tác giả cần upload bản vẽ Genko hoàn chỉnh qua form Chỉnh sửa Trang để trang tự động chuyển sang trạng thái `approved`.
 - **Giai đoạn Đang chờ duyệt (Reviewing)**:
-  - Khi toàn bộ trang vẽ hoàn thành, Mangaka nộp bản thảo và chuyển trạng thái chương sang *Đang chờ duyệt (Reviewing)* để gửi tới Biên tập viên (Tantou Editor) đánh giá chất lượng.
+  - Khi toàn bộ trang vẽ hoàn thành và Tác giả đã tải lên bản vẽ Genko hoàn chỉnh, Mangaka nộp bản thảo và chuyển trạng thái chương sang *Đang chờ duyệt (Reviewing)* để gửi tới Biên tập viên (Tantou Editor) đánh giá chất lượng.
 - **Giai đoạn Đã duyệt (Approved) & Đã xuất bản (Published)**:
   - Biên tập viên phê duyệt đưa chương truyện vào trạng thái sẵn sàng phát hành hoặc xuất bản thương mại. Các trạng thái này là cuối cùng và bị khóa chỉnh sửa.
 - **Ràng buộc khóa trạng thái hoàn thành (Completed Lock):**

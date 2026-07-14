@@ -105,6 +105,17 @@ Quản lý quy trình sáng tác phân cảnh và vẽ chi tiết của Studio.
 
 ---
 
+### 2.4b. Trạng thái trung gian của Trang: "Chờ nộp bản hoàn chỉnh" (Badge vàng)
+*   **Giá trị CSDL Page**: `status = 'drawing'` (không thay đổi trong DB) VÀ `old_image_url = 'no_genko'`
+*   **Ý nghĩa**: Tất cả các Task trợ lý trên trang này đã hoàn thành (`completed`), nhưng Tác giả chưa tải lên bản vẽ hoàn chỉnh (Genko) để thay thế ảnh phác thảo Storyboard gốc. Hệ thống hiển thị **badge màu vàng "Chờ nộp bản hoàn chỉnh"** thay vì badge xanh "Hoàn thành" để tránh nhầm lẫn.
+*   **Cơ chế `old_image_url`**:
+    *   Khi Editor phê duyệt kịch bản nháp (Chapter: `reviewing_draft` → `drawing`), hệ thống tự động đặt `old_image_url = 'no_genko'` cho toàn bộ trang thuộc chương để đánh dấu rằng ảnh hiện tại vẫn là bản phác thảo thô.
+    *   Khi Mangaka tải lên bản vẽ Genko mới qua form Chỉnh sửa Trang [PageController::update()], hệ thống xóa giá trị `'no_genko'` và lưu đường dẫn ảnh Storyboard cũ vào `old_image_url` để so sánh.
+    *   Hàm `syncPageStatus($pageId)` trong BaseController kiểm tra: nếu tất cả Task hoàn thành **VÀ** `old_image_url != 'no_genko'` → chuyển trạng thái trang sang `approved`. Ngược lại, giữ nguyên `drawing` và hiển thị badge vàng.
+*   **Kích hoạt chuyển sang `approved`**: Khi Tác giả upload bản vẽ Genko hoàn chỉnh [PageController::update()] → hệ thống tự động gọi `syncPageStatus()` và chuyển trang sang `approved` (badge xanh "Hoàn thành - Chờ gửi Editor").
+
+---
+
 ### 2.5. Đã duyệt phát hành
 *   **Giá trị CSDL**: `status = 'approved'`
 *   **Ý nghĩa**: Chương truyện đạt chuẩn xuất bản của tòa soạn. Khóa chỉnh sửa vĩnh viễn (chỉ Editor phụ trách mới có quyền mở khóa trả về `drawing` để tác giả sửa nếu phát hiện lỗi sau đó).

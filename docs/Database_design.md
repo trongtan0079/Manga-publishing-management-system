@@ -84,7 +84,8 @@ Thiết kế Database đảm bảo:
     * `chapter_id`: INT, Foreign Key (chapters.chapter_id), NOT NULL.
     * `page_number`: INT, NOT NULL.
     * `image_url`: VARCHAR(255), NOT NULL.
-    * `status`: ENUM('sketch', 'inked', 'toned', 'finished'), Default 'sketch'.
+    * `old_image_url`: VARCHAR(255), NULL. Lưu trữ đường dẫn ảnh phác thảo gốc (Storyboard) khi chuyển sang giai đoạn vẽ. Giá trị đặc biệt `'no_genko'` cho biết trang chưa có bản vẽ hoàn chỉnh (Genko), dùng để kiểm soát trạng thái trung gian "Chờ nộp bản hoàn chỉnh".
+    * `status`: ENUM('drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published'), Default 'drafting'.
     * `created_at`: TIMESTAMP.
     * `updated_at`: TIMESTAMP.
     * **UNIQUE Constraint**: (`chapter_id`, `page_number`).
@@ -108,6 +109,7 @@ Thiết kế Database đảm bảo:
     * `task_id`: INT, PK, Auto Increment.
     * `page_id`: INT, Foreign Key (pages.page_id), NOT NULL.
     * `page_region_id`: INT, Foreign Key (page_regions.region_id), NULL (Nếu giao việc trên một phân vùng cụ thể).
+    * `grouped_region_ids`: VARCHAR(255), NULL. Danh sách các `region_id` phân tách bằng dấu phẩy khi công việc bao phủ nhiều phân vùng cùng lúc (ví dụ: `"3,5,7"`). Dùng để hiển thị tô sáng đồng thời tất cả các phân vùng liên quan trên canvas.
     * `mangaka_id`: INT, Foreign Key (users.user_id), NOT NULL (Người giao việc).
     * `assistant_id`: INT, Foreign Key (users.user_id), NOT NULL (Người nhận việc).
     * `title`: VARCHAR(255), NOT NULL.
@@ -313,6 +315,7 @@ CREATE TABLE pages (
     chapter_id INT NOT NULL,
     page_number INT NOT NULL,
     image_url VARCHAR(255) NOT NULL,
+    old_image_url VARCHAR(255) NULL COMMENT 'Lưu ảnh Storyboard gốc. Giá trị no_genko = chưa có bản vẽ Genko',
     status ENUM('drafting', 'drawing', 'reviewing_draft', 'reviewing_final', 'approved', 'published') DEFAULT 'drafting',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -343,6 +346,7 @@ CREATE TABLE tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     page_id INT NOT NULL,
     page_region_id INT NULL,
+    grouped_region_ids VARCHAR(255) NULL COMMENT 'Danh sách region_id phân tách bằng dấu phẩy cho công việc tổ hợp nhiều vùng',
     mangaka_id INT NOT NULL,
     assistant_id INT NOT NULL,
     title VARCHAR(255) NOT NULL,
