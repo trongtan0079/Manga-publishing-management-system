@@ -74,6 +74,46 @@ function renderMarkdown($text) {
     
     return implode("\n", $result);
 }
+
+/**
+ * Trích xuất phần mô tả riêng của 1 phân vùng cụ thể từ chuỗi HTML mô tả nhóm (grouped task).
+ * HTML gốc chứa nhiều div.region-instruction-card, mỗi div có text "Phân vùng #ID".
+ * Hàm này trả về chỉ nội dung HTML của div card tương ứng với $regionId.
+ * Nếu không tìm thấy hoặc HTML không phải nhóm, trả về toàn bộ $fullHtml.
+ */
+function extractRegionDescription($fullHtml, $regionId) {
+    if (empty($fullHtml) || empty($regionId)) return $fullHtml;
+    
+    // Kiểm tra nhanh xem có phải HTML nhóm không
+    if (strpos($fullHtml, 'region-instruction-card') === false) {
+        return $fullHtml;
+    }
+    
+    // Dùng DOMDocument để parse HTML
+    $dom = new \DOMDocument('1.0', 'UTF-8');
+    // Suppress warnings cho HTML không hoàn chỉnh
+    @$dom->loadHTML('<?xml encoding="UTF-8"><div>' . $fullHtml . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    
+    $xpath = new \DOMXPath($dom);
+    // Tìm tất cả div có class "region-instruction-card"
+    $cards = $xpath->query('//div[contains(@class, "region-instruction-card")]');
+    
+    foreach ($cards as $card) {
+        // Kiểm tra xem card này có chứa text "Phân vùng #<regionId>" không
+        $textContent = $card->textContent;
+        if (preg_match('/Phân vùng\s*#\s*' . preg_quote($regionId, '/') . '(?!\d)/', $textContent)) {
+            // Trả về innerHTML của card này
+            $innerHTML = '';
+            foreach ($card->childNodes as $child) {
+                $innerHTML .= $dom->saveHTML($child);
+            }
+            return $innerHTML;
+        }
+    }
+    
+    // Nếu không tìm thấy card cho region này, trả về toàn bộ
+    return $fullHtml;
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">

@@ -646,7 +646,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                                              <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $rt['task_id'] ?>" class="text-warning text-decoration-none fw-bold" onclick="event.stopPropagation();" style="font-size: 10px;" title="Chỉnh sửa công việc">Sửa</a>
                                                          <?php endif; ?>
                                                          <?php if (!empty($rt['description'])): ?>
-                                                             <button class="btn btn-link btn-xs p-0 text-decoration-none text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#region-task-desc-<?= $rt['task_id'] ?>" onclick="event.stopPropagation();" aria-expanded="false" aria-controls="region-task-desc-<?= $rt['task_id'] ?>" title="Xem yêu cầu" style="font-size: 10px; font-weight: 500; box-shadow: none;">Chi tiết</button>
+                                                             <button class="btn btn-link btn-xs p-0 text-decoration-none text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#region-task-desc-<?= $rt['task_id'] ?>-<?= $region['region_id'] ?>" onclick="event.stopPropagation();" aria-expanded="false" aria-controls="region-task-desc-<?= $rt['task_id'] ?>-<?= $region['region_id'] ?>" title="Xem yêu cầu" style="font-size: 10px; font-weight: 500; box-shadow: none;">Chi tiết</button>
                                                          <?php endif; ?>
                                                          <span class="badge bg-<?= $rtColor ?> rounded-pill py-0.5 px-1.5" style="font-size: 8px;"><?= $rtLabel ?></span>
                                                      </div>
@@ -657,10 +657,17 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                                      </div>
                                                  <?php endif; ?>
                                                  <?php if (!empty($rt['description'])): ?>
-                                                     <div class="collapse mt-1 mb-2" id="region-task-desc-<?= $rt['task_id'] ?>" onclick="event.stopPropagation();">
+                                                     <?php
+                                                         // Nếu là task nhóm, chỉ hiển thị phần mô tả riêng cho vùng này
+                                                         $displayDesc = $rt['description'];
+                                                         if ($isGroupTask) {
+                                                             $displayDesc = extractRegionDescription($rt['description'], $region['region_id']);
+                                                         }
+                                                     ?>
+                                                     <div class="collapse mt-1 mb-2" id="region-task-desc-<?= $rt['task_id'] ?>-<?= $region['region_id'] ?>" onclick="event.stopPropagation();">
                                                          <div class="card card-body bg-light p-2 border-light text-slate-600 text-start" style="font-size: 0.72rem; line-height: 1.4; border-radius: 6px; max-height: 120px; overflow-y: auto;">
                                                              <strong>Yêu cầu:</strong><br>
-                                                             <?= renderMarkdown($rt['description']) ?>
+                                                             <?= renderMarkdown($displayDesc) ?>
                                                          </div>
                                                      </div>
                                                  <?php endif; ?>
@@ -907,6 +914,28 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
+/**
+ * Trích xuất phần mô tả riêng cho 1 vùng từ HTML mô tả nhóm (grouped task).
+ * Dùng DOMParser để parse HTML và tìm div.region-instruction-card chứa "Phân vùng #regionId".
+ */
+function extractRegionDescriptionJS(fullHtml, regionId) {
+    if (!fullHtml || !regionId) return fullHtml || '';
+    if (fullHtml.indexOf('region-instruction-card') === -1) return fullHtml;
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString('<div>' + fullHtml + '</div>', 'text/html');
+    const cards = doc.querySelectorAll('.region-instruction-card');
+    const searchText = new RegExp('Phân vùng\\s*#\\s*' + regionId + '(?!\\d)');
+    
+    for (const card of cards) {
+        if (searchText.test(card.textContent)) {
+            return card.innerHTML;
+        }
+    }
+    
+    return fullHtml;
+}
+
 function closeSelectedTaskBox() {
     document.getElementById('selectedTaskDetailsBox').classList.add('d-none');
     
@@ -1005,7 +1034,12 @@ function updateSelectedTaskBox(regionId) {
                 descEl.style.removeProperty('border-width');
                 descEl.style.removeProperty('padding');
                 descEl.style.removeProperty('box-shadow');
-                descEl.innerHTML = task.description || '<em class="text-muted">Không có mô tả chi tiết.</em>';
+                // Nếu là task nhóm, chỉ hiển thị phần mô tả riêng cho vùng đang chọn
+                let displayDescription = task.description || '';
+                if (task.grouped_region_ids && regionId) {
+                    displayDescription = extractRegionDescriptionJS(displayDescription, regionId);
+                }
+                descEl.innerHTML = displayDescription || '<em class="text-muted">Không có mô tả chi tiết.</em>';
             }
             
             // Hiện hàng metadata
