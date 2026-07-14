@@ -483,6 +483,76 @@ class TaskController extends BaseController
         // Lấy danh sách Assistant để Mangaka có quyền đổi người thực hiện (Re-assign)
         $assistants = $this->userModel->findByRoleName('assistant');
 
+        // Phân tách mô tả của từng phân vùng trong task nhóm để đưa lên form sửa
+        $groupedRegionData = [];
+        if (!empty($task['grouped_region_ids'])) {
+            $idsArray = array_filter(array_map('trim', explode(',', $task['grouped_region_ids'])));
+            
+            $regionsMap = [];
+            foreach ($regions as $r) {
+                $regionsMap[$r['region_id']] = $r;
+            }
+
+            foreach ($idsArray as $rId) {
+                $rIdInt = intval($rId);
+                $regionType = isset($regionsMap[$rIdInt]) ? $regionsMap[$rIdInt]['region_type'] : 'other';
+                
+                $title = '';
+                $taskType = '';
+                $desc = '';
+                
+                if (!empty($task['description'])) {
+                    $dom = new \DOMDocument('1.0', 'UTF-8');
+                    @$dom->loadHTML('<?xml encoding="UTF-8"><div>' . $task['description'] . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                    $xpath = new \DOMXPath($dom);
+                    
+                    $cards = $xpath->query('//div[contains(@class, "region-instruction-card")]');
+                    foreach ($cards as $card) {
+                        $textContent = $card->textContent;
+                        if (preg_match('/Phân vùng\s*#\s*' . $rIdInt . '(?!\d)/', $textContent)) {
+                            // Tìm tiêu đề
+                            $h6s = $xpath->query('.//h6', $card);
+                            if ($h6s->length > 0) {
+                                $title = $h6s->item(0)->textContent;
+                            }
+                            
+                            // Tìm loại việc
+                            $ps = $xpath->query('.//p', $card);
+                            foreach ($ps as $p) {
+                                if (strpos($p->textContent, 'Loại việc:') !== false) {
+                                    $typeRaw = trim(str_replace('Loại việc:', '', $p->textContent));
+                                    if (strpos($typeRaw, 'Vẽ nền') !== false) $taskType = 'background';
+                                    elseif (strpos($typeRaw, 'Đi nét') !== false) $taskType = 'inking';
+                                    elseif (strpos($typeRaw, 'Lên màu') !== false) $taskType = 'coloring';
+                                    elseif (strpos($typeRaw, 'Hiệu ứng') !== false) $taskType = 'effects';
+                                    else $taskType = $typeRaw;
+                                }
+                            }
+                            
+                            // Tìm mô tả chi tiết
+                            $descDivs = $xpath->query('.//div[contains(@class, "region-desc-content")]', $card);
+                            if ($descDivs->length > 0) {
+                                $descDiv = $descDivs->item(0);
+                                $desc = '';
+                                foreach ($descDiv->childNodes as $child) {
+                                    $desc .= $dom->saveHTML($child);
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                $groupedRegionData[] = [
+                    'region_id' => $rIdInt,
+                    'region_type' => $regionType,
+                    'old_title' => $title,
+                    'old_task_type' => $taskType,
+                    'old_description' => $desc
+                ];
+            }
+        }
+
         // Nạp view chỉnh sửa task
         require __DIR__ . '/../views/mangaka/task_edit.php';
     }
