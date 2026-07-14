@@ -132,8 +132,19 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php if ($submission['file_url']): ?>
                     <div class="mb-4">
                         <p class="fw-bold text-muted mb-2 border-bottom pb-2">File đính kèm:</p>
-                        <?php $ext = pathinfo($submission['file_url'], PATHINFO_EXTENSION); ?>
-                        <?php if (in_array(strtolower($ext), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+                        <?php 
+                            $isImage = false;
+                            $filePath = __DIR__ . '/../../' . ltrim($submission['file_url'], '/');
+                            if (file_exists($filePath)) {
+                                $finfo = new finfo(FILEINFO_MIME_TYPE);
+                                $mime = $finfo->file($filePath);
+                                $isImage = (strpos($mime, 'image/') === 0);
+                            } else {
+                                $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
+                                $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                            }
+                        ?>
+                        <?php if ($isImage): ?>
                             <div class="text-center bg-light p-3 rounded border d-flex justify-content-center align-items-center">
                                 <?php if (!empty($submission['task_id'])): ?>
                                     <div id="subAnnoWrapper" class="position-relative d-inline-block text-start shadow-sm" style="border: 1px solid #cbd5e1; user-select: none; max-width: 100%;">
@@ -256,7 +267,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     }
 </style>
 
-<?php if (!empty($submission['task_id']) && $submission['file_url'] && in_array(strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'gif', 'webp'])): ?>
+<?php if (!empty($submission['task_id']) && !empty($submission['file_url']) && isset($isImage) && $isImage): ?>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const STD_WIDTH = 800;

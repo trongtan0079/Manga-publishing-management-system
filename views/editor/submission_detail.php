@@ -73,8 +73,21 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                 <h5 class="card-title mb-0"><i class="fas fa-file-image me-2 text-primary"></i>Xem trước sản phẩm</h5>
                 <?php 
                 $fileUrl = (strpos((string)($submission['file_url'] ?? ''), 'http') === 0) ? $submission['file_url'] : BASE_PATH . '/' . ltrim((string)($submission['file_url'] ?? ''), '/');
-                $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
-                $isImage = in_array($ext, ['png', 'jpg', 'jpeg']);
+                $isImage = false;
+                $filePath = __DIR__ . '/../../' . ltrim($submission['file_url'], '/');
+                if (file_exists($filePath) && !is_dir($filePath)) {
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mime = $finfo->file($filePath);
+                    $isImage = (strpos($mime, 'image/') === 0);
+                    if ($isImage) {
+                        $ext = 'jpg'; // placeholder for ui
+                    } else {
+                        $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
+                    }
+                } else {
+                    $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
+                    $isImage = in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp']);
+                }
                 ?>
                 <?php if ($isImage || $ext === 'pdf'): ?>
                     <a href="<?= htmlspecialchars((string)($fileUrl ?? '')) ?>" target="_blank" class="btn btn-xs btn-outline-primary py-1 px-2.5" style="border-radius: 6px; font-size: 11px;">
