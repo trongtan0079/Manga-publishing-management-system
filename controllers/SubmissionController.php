@@ -558,6 +558,28 @@ class SubmissionController extends BaseController
             exit;
         }
 
+        $regions = [];
+        if ($submission && !empty($submission['task_id'])) {
+            $db = new \Database();
+            $conn = $db->connect();
+            $stmtTask = $conn->prepare("SELECT page_region_id, grouped_region_ids FROM tasks WHERE task_id = :task_id");
+            $stmtTask->execute([':task_id' => $submission['task_id']]);
+            $taskData = $stmtTask->fetch();
+            if ($taskData) {
+                $regionIds = [];
+                if (!empty($taskData['grouped_region_ids'])) {
+                    $regionIds = array_filter(array_map('trim', explode(',', $taskData['grouped_region_ids'])));
+                } elseif (!empty($taskData['page_region_id'])) {
+                    $regionIds = [$taskData['page_region_id']];
+                }
+                if (!empty($regionIds)) {
+                    $inQuery = implode(',', array_map('intval', $regionIds));
+                    $stmtRegions = $conn->query("SELECT * FROM page_regions WHERE region_id IN ($inQuery)");
+                    $regions = $stmtRegions->fetchAll();
+                }
+            }
+        }
+
         // Kiểm tra quyền xem chi tiết bản thảo:
         // - Editor xem tất cả
         // - Assistant chỉ được xem của chính mình
@@ -724,7 +746,17 @@ class SubmissionController extends BaseController
                     
                     require_once __DIR__ . '/../models/Page.php';
                     $pageModel = new \Page();
-                    $pageModel->updateStatusByChapterId($submission['chapter_id'], $newChapterStatus);
+                    if ($newChapterStatus === 'drafting') {
+                        $pageModel->updateStatusByChapterId($submission['chapter_id'], 'drafting');
+                    } else {
+                        // Trở về drawing, đồng bộ lại từng trang theo tiến độ task và genko
+                        $pagesInChapter = $pageModel->findByChapterId($submission['chapter_id']);
+                        if (!empty($pagesInChapter)) {
+                            foreach ($pagesInChapter as $pInC) {
+                                $this->syncPageStatus($pInC['page_id']);
+                            }
+                        }
+                    }
                 }
             } elseif (!empty($submission['task_id'])) {
                 $task = $this->taskModel->findById($submission['task_id']);

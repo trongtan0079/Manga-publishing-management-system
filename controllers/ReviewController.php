@@ -152,6 +152,28 @@ class ReviewController extends BaseController
         $submissionId = $_GET['submission_id'];
         $submission = $this->submissionModel->findWithMetadataById($submissionId);
         
+        $regions = [];
+        if ($submission && !empty($submission['task_id'])) {
+            $db = new \Database();
+            $conn = $db->connect();
+            $stmtTask = $conn->prepare("SELECT page_region_id, grouped_region_ids FROM tasks WHERE task_id = :task_id");
+            $stmtTask->execute([':task_id' => $submission['task_id']]);
+            $taskData = $stmtTask->fetch();
+            if ($taskData) {
+                $regionIds = [];
+                if (!empty($taskData['grouped_region_ids'])) {
+                    $regionIds = array_filter(array_map('trim', explode(',', $taskData['grouped_region_ids'])));
+                } elseif (!empty($taskData['page_region_id'])) {
+                    $regionIds = [$taskData['page_region_id']];
+                }
+                if (!empty($regionIds)) {
+                    $inQuery = implode(',', array_map('intval', $regionIds));
+                    $stmtRegions = $conn->query("SELECT * FROM page_regions WHERE region_id IN ($inQuery)");
+                    $regions = $stmtRegions->fetchAll();
+                }
+            }
+        }
+        
         if (!$submission || !$this->checkReviewPermission($submission)) {
             $_SESSION['error'] = 'Không tìm thấy bản thảo hoặc bạn không có quyền đánh giá.';
             header('Location: ' . BASE_PATH . '/index.php?controller=review&action=index');
@@ -314,7 +336,7 @@ class ReviewController extends BaseController
                     } elseif (!empty($taskDetail['page_region_id'])) {
                         $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'completed']);
                     }
-                    // Tự động duyệt trang vẽ (Page status = 'approved') nếu tất cả các Task của trang này đã hoàn thành
+                    // Tự động duyệt trang vẽ (Page status = 'approved') nếu tất cả các Task của trang này đã hoàn thành và Tác giả đã tải lên Genko hoàn chỉnh
                     $tasksOnPage = $taskModel->findByPageId($pageId);
                     $allTasksCompleted = true;
                     foreach ($tasksOnPage as $t) {
@@ -325,9 +347,7 @@ class ReviewController extends BaseController
                     }
 
                     if ($allTasksCompleted) {
-                        require_once __DIR__ . '/../models/Page.php';
-                        $pageModel = new \Page();
-                        $pageModel->update($pageId, ['status' => 'approved']);
+                        $this->syncPageStatus($pageId);
                     }
                 }
             } elseif ($submission['task_id'] && $status === 'rejected') {
@@ -346,6 +366,7 @@ class ReviewController extends BaseController
                     } elseif (!empty($taskDetail['page_region_id'])) {
                         $pageRegionModel->update($taskDetail['page_region_id'], ['status' => 'rejected']);
                     }
+                    $this->syncPageStatus($taskDetail['page_id']);
                 }
             }
             // Nếu là bản thảo chương truyện (Chapter)
@@ -431,7 +452,18 @@ class ReviewController extends BaseController
                         $newChapterStatus = 'drafting';
                     }
                     $chapterModel->update($submission['chapter_id'], ['status' => $newChapterStatus]);
-                    $pageModel->updateStatusByChapterId($submission['chapter_id'], $newChapterStatus);
+                    
+                    if ($newChapterStatus === 'drafting') {
+                        $pageModel->updateStatusByChapterId($submission['chapter_id'], 'drafting');
+                    } else {
+                        // Nếu trở về trạng thái drawing, đồng bộ trạng thái từng trang theo tiến độ task và genko
+                        $pagesInChapter = $pageModel->findByChapterId($submission['chapter_id']);
+                        if (!empty($pagesInChapter)) {
+                            foreach ($pagesInChapter as $pInC) {
+                                $this->syncPageStatus($pInC['page_id']);
+                            }
+                        }
+                    }
                 }
             }
 

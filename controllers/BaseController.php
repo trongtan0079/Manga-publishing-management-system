@@ -68,7 +68,10 @@ class BaseController
     /**
      * Helper to render HTML badge for Page status
      */
-    public function getPageStatusBadge($status, $chapterStatus = null) {
+    public function getPageStatusBadge($page, $chapterStatus = null) {
+        $status = is_array($page) ? $page['status'] : $page;
+        $pageId = is_array($page) ? ($page['page_id'] ?? null) : null;
+        $oldImageUrl = is_array($page) ? ($page['old_image_url'] ?? '') : '';
         $badgeClass = 'bg-secondary';
         $statusLabel = $status;
         switch ($status) {
@@ -77,8 +80,33 @@ class BaseController
                 $statusLabel = 'Bản nháp (Drafting)';
                 break;
             case 'drawing':
-                $badgeClass = 'bg-primary';
-                $statusLabel = 'Đang vẽ (Drawing)';
+                // Kiểm tra xem tất cả các task đã hoàn thành chưa (để gợi ý nộp bản hoàn chỉnh)
+                $isPendingFinalSubmit = false;
+                if ($pageId && $oldImageUrl === 'no_genko') {
+                    require_once __DIR__ . '/../models/Task.php';
+                    $taskModel = new \Task();
+                    $tasks = $taskModel->findByPageId($pageId);
+                    if (!empty($tasks)) {
+                        $allTasksDone = true;
+                        foreach ($tasks as $t) {
+                            if ($t['status'] !== 'completed') {
+                                $allTasksDone = false;
+                                break;
+                            }
+                        }
+                        if ($allTasksDone) {
+                            $isPendingFinalSubmit = true;
+                        }
+                    }
+                }
+                
+                if ($isPendingFinalSubmit) {
+                    $badgeClass = 'bg-warning text-dark';
+                    $statusLabel = 'Chờ nộp bản hoàn chỉnh';
+                } else {
+                    $badgeClass = 'bg-primary';
+                    $statusLabel = 'Đang vẽ (Drawing)';
+                }
                 break;
             case 'reviewing_draft':
                 $badgeClass = 'bg-warning text-dark';
@@ -248,7 +276,8 @@ class BaseController
         $page = $pageModel->findById($pageId);
         
         if ($page && !in_array($page['status'], ['drafting', 'reviewing_draft', 'reviewing_final', 'published'])) {
-            $newStatus = $allTasksCompleted ? 'approved' : 'drawing';
+            $hasGenko = (!empty($page['image_url']) && $page['old_image_url'] !== 'no_genko');
+            $newStatus = ($allTasksCompleted && $hasGenko) ? 'approved' : 'drawing';
             if ($page['status'] !== $newStatus) {
                 $pageModel->update($pageId, ['status' => $newStatus]);
             }

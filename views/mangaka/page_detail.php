@@ -127,22 +127,11 @@ $hrParam = $_GET['highlight_region'] ?? null;
 if ($hrParam) {
     $highlightRegionIds = array_filter(array_map('trim', explode(',', $hrParam)));
 }
-if (empty($highlightRegionIds) && isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
-    if (!empty($tasks)) {
-        foreach ($tasks as $t) {
-            if ($t['assistant_id'] == $_SESSION['user_id']) {
-                if (!empty($t['grouped_region_ids'])) {
-                    $highlightRegionIds = array_filter(array_map('trim', explode(',', $t['grouped_region_ids'])));
-                    break;
-                } elseif (!empty($t['page_region_id'])) {
-                    $highlightRegionIds[] = $t['page_region_id'];
-                    break;
-                }
-            }
-        }
-    }
-}
+// Chỉ tự động highlight khi có yêu cầu cụ thể từ URL GET parameter highlight_region
 $hasSpotlight = !empty($highlightRegionIds);
+if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
+    $hasSpotlight = false;
+}
 $highlightRegionId = $hasSpotlight ? reset($highlightRegionIds) : null;
 
 // Filter regions and tasks for Assistant to only show their assigned items
@@ -282,7 +271,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
     <div class="card-body">
         <div class="row">
             <div class="col-md-4">
-                <p><strong>Trạng thái:</strong> <?= $this->getPageStatusBadge($page['status'], $chapter['status']) ?></p>
+                <p><strong>Trạng thái:</strong> <?= $this->getPageStatusBadge($page, $chapter['status']) ?></p>
                 <p><strong>Ngày tạo:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['created_at']))) ?></p>
                 <p><strong>Cập nhật lần cuối:</strong> <?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></p>
             </div>
@@ -301,7 +290,9 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 text-uppercase fw-extrabold" style="font-size: 0.65rem; letter-spacing: 0.05em; border-radius: 6px;">
                         <i class="fa-solid fa-circle-nodes me-1"></i> Yêu cầu công việc phân vùng
                     </span>
+                    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka'): ?>
                     <button type="button" class="btn-close text-slate-400" style="font-size: 0.72rem; box-shadow: none;" onclick="closeSelectedTaskBox()"></button>
+                    <?php endif; ?>
                 </div>
                 <h4 id="selectedTaskTitle" class="fw-extrabold text-slate-800 mb-3" style="font-size: 1.25rem; line-height: 1.35; letter-spacing: -0.015em;">Tiêu đề công việc</h4>
                 
@@ -877,6 +868,7 @@ const pageRegionsData = <?= json_encode(array_map(function($r) {
         'region_type' => $r['region_type']
     ];
 }, $regions)) ?>;
+let currentSelectedRegionId = null;
 
 function getRegionTypeLabel(type) {
     switch (type) {
@@ -934,6 +926,14 @@ function extractRegionDescriptionJS(fullHtml, regionId) {
 }
 
 function closeSelectedTaskBox() {
+    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant' && !empty($tasks)): 
+        $firstTask = reset($tasks); 
+    ?>
+        // Đối với trợ lý, đóng hộp chi tiết phân vùng sẽ khôi phục hiển thị thông tin tổng quát công việc chứ không ẩn đi
+        showTaskGeneralInfo(<?= intval($firstTask['task_id']) ?>);
+        return;
+    <?php endif; ?>
+
     document.getElementById('selectedTaskDetailsBox').classList.add('d-none');
     
     // Khôi phục độ mờ của danh sách card bên phải
@@ -949,13 +949,188 @@ function closeSelectedTaskBox() {
     const wrapper = document.getElementById('mangaPageWrapper');
     if (wrapper) {
         wrapper.classList.remove('has-selected-overlay');
+        wrapper.classList.remove('has-spotlight');
     }
     document.querySelectorAll('.page-region-overlay').forEach(el => {
         el.classList.remove('selected-overlay');
+        el.classList.remove('assistant-spotlight');
+    });
+}
+
+function updateSubmissionAndAnnotations(task) {
+    const submissionContainer = document.getElementById('submissionButtonContainer');
+    if (submissionContainer) {
+        let viewBtnHtml = '';
+        if (task.submission_id) {
+            viewBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-info py-1.5 px-3 me-2" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
+                <i class="fas fa-eye me-1.5"></i>Xem bài nộp
+            </a>`;
+        }
+        
+        if (task.status === 'completed') {
+            submissionContainer.innerHTML = viewBtnHtml + `
+                <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
+                    <i class="fas fa-check-circle me-1.5 text-success"></i>Công việc đã hoàn thành
+                </span>`;
+        } else if (task.status === 'submitted') {
+            submissionContainer.innerHTML = viewBtnHtml + `
+                <span class="badge bg-info-subtle text-info border border-info-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
+                    <i class="fas fa-spinner fa-spin me-1.5 text-info"></i>Đang chờ duyệt bài
+                </span>
+                <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-outline-success py-1.5 px-3" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
+                    Nộp lại bản thảo mới
+                </a>`;
+        } else if (task.status === 'rejected') {
+            let errorBtnHtml = '';
+            if (task.submission_id) {
+                errorBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-danger py-1.5 px-3 me-2 fw-bold" style="border-radius: 8px; font-size: 0.75rem;">
+                    <i class="fas fa-exclamation-triangle me-1.5"></i>Xem ghi chú lỗi
+                </a>`;
+            }
+            submissionContainer.innerHTML = errorBtnHtml + `
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
+                    Yêu cầu sửa lại
+                </span>
+                <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
+                    <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
+                </a>`;
+        } else {
+            submissionContainer.innerHTML = `
+                <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
+                    <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
+                </a>`;
+        }
+    }
+
+    const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
+    const annoList = document.getElementById('selectedTaskAnnotationsList');
+    if (annoContainer && annoList) {
+        annoContainer.classList.add('d-none');
+        annoList.innerHTML = '';
+        
+        if (task.submission_id && (task.status === 'rejected' || task.status === 'submitted' || task.status === 'completed')) {
+            fetch(BASE_PATH + '/index.php?controller=review&action=get_submission_annotations&submission_id=' + task.submission_id)
+            .then(response => response.json())
+            .then(res => {
+                if (res.success && res.annotations && res.annotations.length > 0) {
+                    res.annotations.forEach((ann, idx) => {
+                        const item = document.createElement('div');
+                        item.className = 'list-group-item px-2 py-1.5 border-bottom text-xs';
+                        item.innerHTML = `<strong>Lỗi #${idx + 1} tại (${ann.x}, ${ann.y}):</strong> <span class="text-slate-700">${escapeHtml(ann.comments)}</span>`;
+                        annoList.appendChild(item);
+                    });
+                    annoContainer.classList.remove('d-none');
+                }
+            });
+        }
+    }
+}
+
+function showTaskGeneralInfo(taskId) {
+    const task = pageTasksData.find(t => t.task_id == taskId);
+    if (!task) return;
+
+    currentSelectedRegionId = null;
+
+    const infoBox = document.getElementById('selectedTaskDetailsBox');
+    if (infoBox) {
+        infoBox.classList.remove('d-none');
+        
+        document.getElementById('selectedTaskTitle').innerText = task.title;
+        
+        let typeLabel = task.task_type;
+        if (task.grouped_region_ids) typeLabel = 'Tổ hợp (Group)';
+        else if (task.task_type === 'background') typeLabel = 'Vẽ nền (Background)';
+        else if (task.task_type === 'inking') typeLabel = 'Đi nét (Inking)';
+        else if (task.task_type === 'coloring') typeLabel = 'Lên màu (Coloring)';
+        else if (task.task_type === 'effects') typeLabel = 'Hiệu ứng (Effects)';
+        else typeLabel = task.task_type.charAt(0).toUpperCase() + task.task_type.slice(1);
+        
+        document.getElementById('selectedTaskType').innerText = typeLabel;
+        document.getElementById('selectedTaskAssistant').innerText = task.assistant_name;
+        
+        const priorityEl = document.getElementById('selectedTaskPriority');
+        priorityEl.innerText = task.priority === 'high' ? 'Cao' : (task.priority === 'medium' ? 'Trung bình' : (task.priority === 'low' ? 'Thấp' : 'Thường'));
+        priorityEl.className = 'badge px-2 py-0.5 border ' + 
+            (task.priority === 'high' ? 'bg-danger-subtle text-danger border-danger-subtle' : 
+            (task.priority === 'medium' ? 'bg-warning-subtle text-warning border-warning-subtle' : 'bg-info-subtle text-info border-info-subtle'));
+            
+        document.getElementById('selectedTaskDueDate').innerText = task.due_date;
+        
+        // Khôi phục style mặc định cho ô mô tả
+        const descEl = document.getElementById('selectedTaskDescription');
+        if (descEl) {
+            descEl.className = "bg-slate-50 p-3 rounded-3 border border-light-subtle text-slate-700 text-start overflow-y-auto mb-2 font-medium";
+            descEl.style.removeProperty('background-color');
+            descEl.style.removeProperty('border-color');
+            descEl.style.removeProperty('border-width');
+            descEl.style.removeProperty('padding');
+            descEl.style.removeProperty('box-shadow');
+            
+            let headerHtml = '';
+            if (task.grouped_region_ids) {
+                const gids = task.grouped_region_ids.split(',').map(s => s.trim());
+                let regionLinks = gids.map(gid => {
+                    const reg = pageRegionsData.find(r => r.region_id == gid);
+                    const regTypeLabel = reg ? getRegionTypeLabel(reg.region_type) : 'Vùng';
+                    return `<button type="button" onclick="event.stopPropagation(); updateSelectedTaskBox(${gid});" class="btn btn-xs btn-outline-primary py-0.5 px-2 font-semibold" style="font-size: 0.72rem; border-radius: 6px; cursor: pointer;"><i class="fa-solid fa-expand me-1"></i> ${regTypeLabel} #${gid}</button>`;
+                }).join(' ');
+
+                headerHtml = `
+                    <div class="mb-3 p-2 rounded-3 border border-primary border-opacity-10" style="background-color: rgba(79, 70, 229, 0.03);">
+                        <div class="text-slate-600 font-bold mb-1.5" style="font-size: 0.76rem;"><i class="fa-solid fa-layer-group text-primary me-1"></i> Click để phóng to/xem chi tiết từng vùng:</div>
+                        <div class="d-flex flex-wrap gap-1.5">${regionLinks}</div>
+                    </div>
+                `;
+            }
+            
+            descEl.innerHTML = headerHtml + (task.description || '<em class="text-muted">Không có mô tả chi tiết.</em>');
+        }
+        
+        // Hiện hàng metadata
+        const metaRow = infoBox.querySelector('.row');
+        if (metaRow) metaRow.classList.remove('d-none');
+        
+        // Hiện tiêu đề metadata "Mục tiêu & Yêu cầu chi tiết:"
+        const descHeader = infoBox.querySelector('.text-xs.text-slate-500.font-semibold');
+        if (descHeader) descHeader.classList.remove('d-none');
+        
+        updateSubmissionAndAnnotations(task);
+    }
+
+    // Highlight toàn bộ các vùng thuộc công việc này
+    document.querySelectorAll('.list-group-item-action').forEach(el => el.classList.remove('selected-card'));
+    document.querySelectorAll('.page-region-overlay').forEach(el => {
+        el.classList.remove('selected-overlay');
+        el.classList.remove('assistant-spotlight');
+    });
+    
+    const listGroup = document.getElementById('region-list-group');
+    if (listGroup) listGroup.classList.add('has-selected');
+    
+    const wrapper = document.getElementById('mangaPageWrapper');
+    if (wrapper) {
+        wrapper.classList.remove('has-selected-overlay');
+        wrapper.classList.remove('has-spotlight');
+    }
+    
+    let regionsToHighlight = [];
+    if (task.grouped_region_ids) {
+        regionsToHighlight = task.grouped_region_ids.split(',').map(s => s.trim());
+    } else if (task.page_region_id) {
+        regionsToHighlight = [String(task.page_region_id)];
+    }
+    
+    regionsToHighlight.forEach(rid => {
+        const card = document.getElementById('list-region-' + rid);
+        if (card) card.classList.add('selected-card');
+        const overlay = document.getElementById('overlay-region-' + rid);
+        if (overlay) overlay.classList.add('selected-overlay');
     });
 }
 
 function updateSelectedTaskBox(regionId) {
+    currentSelectedRegionId = regionId;
     // 1. Quản lý các card bên phải (Spotlight Focus)
     const listGroup = document.getElementById('region-list-group');
     if (listGroup) {
@@ -973,8 +1148,12 @@ function updateSelectedTaskBox(regionId) {
     const wrapper = document.getElementById('mangaPageWrapper');
     if (wrapper) {
         wrapper.classList.add('has-selected-overlay');
+        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant'): ?>
+            wrapper.classList.add('has-spotlight');
+        <?php endif; ?>
     }
     document.querySelectorAll('.page-region-overlay').forEach(el => {
+        el.classList.remove('assistant-spotlight');
         // Chỉ remove nếu overlay đó không ứng với checkbox đang check để giữ highlight cho các vùng được check
         const rid = el.id.replace('overlay-region-', '');
         const cb = document.querySelector(`.region-select-cb[value="${rid}"]`);
@@ -985,6 +1164,9 @@ function updateSelectedTaskBox(regionId) {
     const activeOverlay = document.getElementById('overlay-region-' + regionId);
     if (activeOverlay) {
         activeOverlay.classList.add('selected-overlay');
+        <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant'): ?>
+            activeOverlay.classList.add('assistant-spotlight');
+        <?php endif; ?>
     }
 
     // Match both single-region tasks and group tasks that contain this region
@@ -1031,12 +1213,25 @@ function updateSelectedTaskBox(regionId) {
                 descEl.style.removeProperty('border-width');
                 descEl.style.removeProperty('padding');
                 descEl.style.removeProperty('box-shadow');
-                // Nếu là task nhóm, chỉ hiển thị phần mô tả riêng cho vùng đang chọn
+                
                 let displayDescription = task.description || '';
-                if (task.grouped_region_ids && regionId) {
+                let headerHtml = '';
+                
+                if (task.grouped_region_ids) {
                     displayDescription = extractRegionDescriptionJS(displayDescription, regionId);
+                    
+                    headerHtml = `
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom border-warning border-opacity-20" style="border-bottom-style: dashed !important;">
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle px-2 py-1.5 fw-semibold text-start" style="font-size: 0.72rem; border-radius: 6px; color: #b45309 !important; background-color: #fef3c7 !important; border-color: #fde68a !important;">
+                                <i class="fa-solid fa-eye me-1 text-amber-600"></i> Đang xem yêu cầu Phân vùng #${regionId}
+                            </span>
+                            <button type="button" class="btn btn-xs btn-outline-secondary py-1 px-2.5 fw-bold d-inline-flex align-items-center gap-1 border-light-subtle bg-white text-slate-600" style="font-size: 0.68rem; border-radius: 6px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05);" onclick="event.stopPropagation(); showTaskGeneralInfo(${task.task_id})">
+                                <i class="fas fa-undo text-slate-500"></i> Xem thông tin chung
+                            </button>
+                        </div>
+                    `;
                 }
-                descEl.innerHTML = displayDescription || '<em class="text-muted">Không có mô tả chi tiết.</em>';
+                descEl.innerHTML = headerHtml + (displayDescription || '<em class="text-muted">Không có yêu cầu chi tiết cho phân vùng này.</em>');
             }
             
             // Hiện hàng metadata
@@ -1047,73 +1242,7 @@ function updateSelectedTaskBox(regionId) {
             const descHeader = infoBox.querySelector('.text-xs.text-slate-500.font-semibold');
             if (descHeader) descHeader.classList.remove('d-none');
             
-            // Cập nhật nút nộp bài cho trợ lý
-            const submissionContainer = document.getElementById('submissionButtonContainer');
-            if (submissionContainer) {
-                let viewBtnHtml = '';
-                if (task.submission_id) {
-                    viewBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-info py-1.5 px-3 me-2" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
-                        <i class="fas fa-eye me-1.5"></i>Xem bài nộp
-                    </a>`;
-                }
-                
-                if (task.status === 'completed') {
-                    submissionContainer.innerHTML = viewBtnHtml + `
-                        <span class="badge bg-success-subtle text-success border border-success-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;">
-                            <i class="fas fa-check-circle me-1.5 text-success"></i>Công việc đã hoàn thành
-                        </span>`;
-                } else if (task.status === 'submitted') {
-                    submissionContainer.innerHTML = viewBtnHtml + `
-                        <span class="badge bg-info-subtle text-info border border-info-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
-                            <i class="fas fa-spinner fa-spin me-1.5 text-info"></i>Đang chờ duyệt bài
-                        </span>
-                        <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm btn-outline-success py-1.5 px-3" style="border-radius: 8px; font-size: 0.75rem; font-weight: 500;">
-                            Nộp lại bản thảo mới
-                        </a>`;
-                } else if (task.status === 'rejected') {
-                    let errorBtnHtml = '';
-                    if (task.submission_id) {
-                        errorBtnHtml = `<a href="${BASE_PATH}/index.php?controller=submission&action=show&id=${task.submission_id}" class="btn btn-sm btn-outline-danger py-1.5 px-3 me-2 fw-bold" style="border-radius: 8px; font-size: 0.75rem;">
-                            <i class="fas fa-exclamation-triangle me-1.5"></i>Xem ghi chú lỗi
-                        </a>`;
-                    }
-                    submissionContainer.innerHTML = errorBtnHtml + `
-                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; margin-right: 8px;">
-                            Yêu cầu sửa lại
-                        </span>
-                        <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
-                            <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
-                        </a>`;
-                } else {
-                    submissionContainer.innerHTML = `
-                        <a href="${BASE_PATH}/index.php?controller=submission&action=create&task_id=${task.task_id}" class="btn btn-sm text-white py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 0; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); transition: all 0.2s;">
-                            <i class="fas fa-paper-plane me-1.5"></i>Nộp bài làm (Submit)
-                        </a>`;
-                }
-            }
-
-            const annoContainer = document.getElementById('selectedTaskAnnotationsContainer');
-            const annoList = document.getElementById('selectedTaskAnnotationsList');
-            if (annoContainer && annoList) {
-                annoContainer.classList.add('d-none');
-                annoList.innerHTML = '';
-                
-                if (task.submission_id && (task.status === 'rejected' || task.status === 'submitted' || task.status === 'completed')) {
-                    fetch(BASE_PATH + '/index.php?controller=review&action=get_submission_annotations&submission_id=' + task.submission_id)
-                    .then(response => response.json())
-                    .then(res => {
-                        if (res.success && res.annotations && res.annotations.length > 0) {
-                            res.annotations.forEach((ann, idx) => {
-                                const item = document.createElement('div');
-                                item.className = 'list-group-item px-2 py-1.5 border-bottom text-xs';
-                                item.innerHTML = `<strong>Lỗi #${idx + 1} tại (${ann.x}, ${ann.y}):</strong> <span class="text-slate-700">${escapeHtml(ann.comments)}</span>`;
-                                annoList.appendChild(item);
-                            });
-                            annoContainer.classList.remove('d-none');
-                        }
-                    });
-                }
-            }
+            updateSubmissionAndAnnotations(task);
         } else {
             document.getElementById('selectedTaskTitle').innerText = 'Chi tiết phân vùng ID #' + regionId;
             
@@ -1194,12 +1323,12 @@ function hoverOverlay(regionId, isHover) {
 }
 
 function highlightCanvasOverlay(regionId) {
-    const card = document.getElementById('list-region-' + regionId);
-    if (card && card.classList.contains('selected-card')) {
+    if (regionId == currentSelectedRegionId) {
         closeSelectedTaskBox();
         return;
     }
     updateSelectedTaskBox(regionId);
+    const card = document.getElementById('list-region-' + regionId);
 
     if (card) {
         const collapses = card.querySelectorAll('.collapse');
@@ -1248,8 +1377,7 @@ function highlightTableRecord(regionIdOrList) {
     if (ids.length === 0) return;
 
     // Use the first ID to check if it's already selected to toggle deselect
-    const firstCard = document.getElementById('list-region-' + ids[0]);
-    if (firstCard && firstCard.classList.contains('selected-card')) {
+    if (ids.length === 1 && ids[0] == currentSelectedRegionId) {
         closeSelectedTaskBox();
         return;
     }
@@ -1451,21 +1579,39 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    <?php if ($highlightRegionId): ?>
-        // Tự động cuộn đến, tô màu viền/bóng và mở rộng chi tiết công việc của phân vùng được highlight
+    <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant' && !empty($tasks)): 
+        $firstTask = reset($tasks); 
+    ?>
+        // Đối với trợ lý, mặc định hiển thị thông tin tổng quát của công việc được giao
+        setTimeout(() => {
+            showTaskGeneralInfo(<?= intval($firstTask['task_id']) ?>);
+            // Vẫn cuộn đến phân vùng đầu tiên để trợ lý định vị được khu vực làm việc
+            <?php if ($highlightRegionId): ?>
+                const targetRegionId = <?= intval($highlightRegionId) ?>;
+                const card = document.getElementById('list-region-' + targetRegionId);
+                if (card) {
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const collapses = card.querySelectorAll('.collapse');
+                    collapses.forEach(c => {
+                        const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
+                        bsCollapse.show();
+                    });
+                }
+            <?php endif; ?>
+        }, 500);
+    <?php elseif ($highlightRegionId): ?>
+        // Đối với tác giả, mặc định highlight và hiển thị chi tiết của phân vùng cụ thể
         const targetRegionId = <?= intval($highlightRegionId) ?>;
         setTimeout(() => {
             const card = document.getElementById('list-region-' + targetRegionId);
             if (card) {
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                // Mở rộng tất cả collapse mô tả bên trong
                 const collapses = card.querySelectorAll('.collapse');
                 collapses.forEach(c => {
                     const bsCollapse = bootstrap.Collapse.getInstance(c) || new bootstrap.Collapse(c, { toggle: false });
                     bsCollapse.show();
                 });
             }
-            // Kích hoạt hiệu ứng nhấp nháy trên canvas
             highlightCanvasOverlay(targetRegionId);
         }, 500);
     <?php endif; ?>

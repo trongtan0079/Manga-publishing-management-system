@@ -466,6 +466,7 @@ class PageController extends BaseController
             try {
                 $oldStatus = $page['status'];
                 $this->pageModel->update($id, $data);
+                $this->syncPageStatus($id);
                 $_SESSION['success'] = "Cập nhật trang {$pageNumber} thành công!";
                 
                 // Nếu trang chuyển từ nháp sang đang vẽ (active)

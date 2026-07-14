@@ -138,7 +138,7 @@ $isLocked = $this->isChapterLocked($chapter);
                                     </div>
                                 </td>
                                 <td>
-                                     <?= $this->getPageStatusBadge($page['status'], $chapter['status']) ?>
+                                     <?= $this->getPageStatusBadge($page, $chapter['status']) ?>
                                     <?php if ($isUpdatedAfterAnnotation): ?>
                                         <span class="badge bg-warning text-dark ms-1" style="font-size: 0.75rem;" title="Đã tải lên ảnh mới sau khi Editor báo lỗi. Đang chờ duyệt.">
                                             <i class="fas fa-sync-alt me-1"></i>Bản mới

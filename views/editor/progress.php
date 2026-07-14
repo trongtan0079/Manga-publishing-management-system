@@ -576,7 +576,7 @@ if (!function_exists('renderTaskStatusDot')) {
                                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                                             <span class="page-number-tag">Trang <?= htmlspecialchars($pg['page_number']) ?></span>
                                                             <div style="transform: scale(0.85); transform-origin: right center;">
-                                                                <?= $this->getPageStatusBadge($pg['status'], $actChap['status']) ?>
+                                                                <?= $this->getPageStatusBadge($pg, $actChap['status']) ?>
                                                             </div>
                                                         </div>
                                                         

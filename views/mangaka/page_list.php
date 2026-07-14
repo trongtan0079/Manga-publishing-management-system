@@ -78,7 +78,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                     <small class="text-muted">Chương <?= htmlspecialchars($page['chapter_number']) ?>: <?= htmlspecialchars($page['chapter_title'] ?? '') ?></small>
                                 </td>
                                 <td>
-                                     <?= $this->getPageStatusBadge($page['status'], $page['chapter_status']) ?>
+                                     <?= $this->getPageStatusBadge($page, $page['chapter_status']) ?>
                                 </td>
                                 <td><?= htmlspecialchars(date('d/m/Y H:i', strtotime($page['updated_at']))) ?></td>
                                 <td class="text-end pe-4">
