@@ -1478,7 +1478,7 @@ function showGroupAssignBox(count) {
     if (!infoBox) return;
     
     infoBox.classList.remove('d-none');
-    document.getElementById('selectedTaskTitle').innerText = 'Giao việc nhóm (' + count + ' phân vùng)';
+    document.getElementById('selectedTaskTitle').innerText = 'Thông tin các phân vùng đã chọn';
     
     // Ẩn hàng metadata vì là giao việc nhóm mới
     const metaRow = infoBox.querySelector('.row');
@@ -1548,27 +1548,21 @@ function showGroupAssignBox(count) {
         descEl.style.setProperty('box-shadow', 'none', 'important');
         
         descEl.innerHTML = `
-            <div class="d-flex flex-column gap-2.5 p-3 text-slate-700" style="background-color: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+            <div class="d-flex flex-column gap-2.5 p-3 text-slate-700" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                 <div class="d-flex align-items-start gap-3">
-                    <div class="mt-0.5 d-flex align-items-center justify-content-center rounded-circle text-indigo-600" style="width: 32px; height: 32px; background: rgba(99, 102, 241, 0.12); flex-shrink: 0;">
+                    <div class="mt-0.5 d-flex align-items-center justify-content-center rounded-circle text-slate-500" style="width: 32px; height: 32px; background: rgba(100, 116, 139, 0.12); flex-shrink: 0;">
                         <i class="fas fa-layer-group fs-6"></i>
                     </div>
                     <div class="flex-grow-1">
-                        <h6 class="fw-bold text-indigo-900 mb-1" style="font-size: 0.85rem; color: #3730a3;">Trạng thái phân công các phân vùng đã chọn</h6>
-                        <p class="text-indigo-700 mb-0 text-xs" style="line-height: 1.55;">
-                            Bạn đang chọn <strong>${count} phân vùng</strong> để giao việc nhóm. Dưới đây là trạng thái hiện tại của từng phân vùng:
+                        <h6 class="fw-bold text-slate-800 mb-1" style="font-size: 0.85rem;">Trạng thái phân công các phân vùng đã chọn</h6>
+                        <p class="text-slate-500 mb-0 text-xs" style="line-height: 1.55;">
+                            Bạn đang tích chọn <strong>${count} phân vùng</strong>. Dưới đây là thông tin chi tiết về trạng thái phân công của từng phân vùng:
                         </p>
                     </div>
                 </div>
                 
                 <div class="my-2 max-height-150 overflow-y-auto pe-1" style="max-height: 140px;">
                     ${regionsHtml}
-                </div>
-                
-                <div class="d-flex justify-content-end">
-                    <button class="btn btn-sm text-white py-2 px-3 d-inline-flex align-items-center fw-bold shadow-sm" style="border-radius: 8px; font-size: 0.75rem; background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: 0; transition: all 0.2s;" onclick="assignGroupedRegions()">
-                        <i class="fas fa-layer-group me-1.5"></i>Giao việc nhóm ngay
-                    </button>
                 </div>
             </div>
         `;
