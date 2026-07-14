@@ -91,10 +91,10 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         animation: pulse-ring 2s infinite ease-in-out;
         opacity: 0.7;
     }
-    .status-dot-pulse.bg-success::after { background-color: var(--success); }
-    .status-dot-pulse.bg-primary::after { background-color: var(--primary); }
-    .status-dot-pulse.bg-warning::after { background-color: var(--warning); }
-    .status-dot-pulse.bg-secondary::after { background-color: var(--secondary); }
+    .status-dot-pulse.bg-success::after { background-color: var(--success, #10b981); }
+    .status-dot-pulse.bg-primary::after { background-color: var(--primary, #6366f1); }
+    .status-dot-pulse.bg-warning::after { background-color: var(--warning, #f59e0b); }
+    .status-dot-pulse.bg-secondary::after { background-color: var(--secondary, #6b7280); }
     
     @keyframes pulse-ring {
         0% { transform: scale(0.95); opacity: 0.8; }
