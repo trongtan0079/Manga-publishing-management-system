@@ -629,9 +629,9 @@ class SubmissionController extends BaseController
         $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
         $extractedImages = [];
         if ($ext === 'zip') {
-            $zipPath = __DIR__ . '/../../' . ltrim($submission['file_url'], '/');
+            $zipPath = __DIR__ . '/../' . ltrim($submission['file_url'], '/');
             $extractDirName = 'sub_' . $id . '_' . md5(basename($submission['file_url']));
-            $extractPath = __DIR__ . '/../../uploads/extracted/' . $extractDirName;
+            $extractPath = __DIR__ . '/../uploads/extracted/' . $extractDirName;
             
             if (file_exists($zipPath)) {
                 if (!is_dir($extractPath)) {
@@ -650,7 +650,7 @@ class SubmissionController extends BaseController
                         if ($fileInfo->isFile()) {
                             $fileExt = strtolower($fileInfo->getExtension());
                             if (in_array($fileExt, $allowedExts)) {
-                                $relPath = str_replace('\\', '/', str_replace(__DIR__ . '/../../', '', $fileInfo->getPathname()));
+                                $relPath = str_replace('\\', '/', str_replace(__DIR__ . '/../', '', $fileInfo->getPathname()));
                                 $extractedImages[] = BASE_PATH . '/' . ltrim($relPath, '/');
                             }
                         }
