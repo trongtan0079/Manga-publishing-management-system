@@ -997,9 +997,18 @@ function updateSelectedTaskBox(regionId) {
                 }
             }
         } else {
-            // Trường hợp phân vùng chưa có task được giao
             document.getElementById('selectedTaskTitle').innerText = 'Chi tiết phân vùng ID #' + regionId;
-            document.getElementById('selectedTaskDescription').innerHTML = '<div class="alert alert-warning mb-0 border-0 text-slate-800 text-xs py-2 px-3" style="background-color: #fffbeb; border-radius: 6px;"><i class="fas fa-exclamation-triangle text-amber-500 me-1.5"></i>Phân vùng này chưa được phân công công việc. Bạn có thể nhấn nút <strong class="text-primary"><i class="fas fa-plus me-1"></i>Giao việc</strong> trên thẻ phân vùng bên phải để giao nhiệm vụ mới cho Trợ lý.</div>';
+            document.getElementById('selectedTaskDescription').innerHTML = `
+                <div class="text-center py-4">
+                    <div class="mb-3 d-inline-flex align-items-center justify-content-center rounded-circle" style="width: 48px; height: 48px; background: rgba(79, 70, 229, 0.08); color: #4f46e5;">
+                        <i class="fas fa-clipboard-list fs-5"></i>
+                    </div>
+                    <h6 class="fw-bold text-slate-800 mb-1" style="font-size: 0.875rem;">Phân vùng chưa giao việc</h6>
+                    <p class="text-slate-500 mb-0 px-3 mx-auto" style="font-size: 0.78rem; line-height: 1.5; max-width: 340px;">
+                        Bạn có thể nhấn nút <span class="badge bg-light text-primary border border-primary-subtle py-1 px-1.5 fw-bold"><i class="fas fa-plus me-1"></i>Giao việc</span> trên thẻ phân vùng tương ứng ở cột bên phải để giao nhiệm vụ mới cho Trợ lý.
+                    </p>
+                </div>
+            `;
             
             // Ẩn hàng metadata
             const metaRow = infoBox.querySelector('.row');
