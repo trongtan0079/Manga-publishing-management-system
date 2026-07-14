@@ -613,6 +613,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let selectedBox = null;
     let isDrawing = false;
     let startX = 0, startY = 0;
+    let currentAnnotations = [];
     
     const STD_WIDTH = 800;
     const STD_HEIGHT = 1000;
@@ -808,8 +809,9 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(res => {
             if (res.success) {
-                renderOverlayAnnotations(res.annotations);
-                renderListAnnotations(res.annotations);
+                currentAnnotations = res.annotations;
+                renderOverlayAnnotations(currentAnnotations);
+                renderListAnnotations(currentAnnotations);
                 
                 // Cập nhật badge trên trang cha tương ứng ngay lập tức
                 const badgeEl = document.getElementById('badge-page-' + activePageId);
@@ -829,8 +831,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function renderOverlayAnnotations(annotations) {
         document.querySelectorAll('.editor-annotation-box').forEach(el => el.remove());
+        if (!overlayContainer) return;
         
         const rect = overlayContainer.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        
         const scaleX = rect.width / STD_WIDTH;
         const scaleY = rect.height / STD_HEIGHT;
         
@@ -898,6 +903,21 @@ document.addEventListener("DOMContentLoaded", function() {
                 alert('Lỗi: ' + res.error);
             }
         });
+    };
+
+    window.addEventListener('resize', function() {
+        if (document.getElementById('annotateModal').classList.contains('show')) {
+            renderOverlayAnnotations(currentAnnotations);
+        }
+    });
+
+    if (annoImage) {
+        annoImage.addEventListener('load', function() {
+            if (document.getElementById('annotateModal').classList.contains('show')) {
+                renderOverlayAnnotations(currentAnnotations);
+            }
+        });
+    }
 });
 </script>
 <?php endif; ?>
@@ -913,6 +933,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const isMangaka = <?= json_encode($role === 'mangaka') ?>;
     
     let activeSubmissionId = originalSubmissionId;
+    let currentSubAnnotations = [];
     
     const versionRadios = document.querySelectorAll('.compare-version-radio');
     const subOverlayContainer = document.getElementById('subAnnoOverlayContainer');
@@ -1084,13 +1105,15 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(res => {
             if (res.success) {
-                renderSubOverlayAnnotations(res.annotations, subOverlayContainer);
-                renderSubListAnnotations(res.annotations);
+                currentSubAnnotations = res.annotations;
+                renderSubOverlayAnnotations(currentSubAnnotations, subOverlayContainer);
+                renderSubListAnnotations(currentSubAnnotations);
             }
         });
     }
 
     function renderSubOverlayAnnotations(annotations, container) {
+        if (!container) return;
         container.querySelectorAll('.sub-annotation-box').forEach(el => el.remove());
         
         const rect = container.getBoundingClientRect();
@@ -1178,10 +1201,24 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // Load annotations initially and on resize
+    // Load annotations initially, on resize, and when image is loaded
     enableDrawing();
     loadSubAnnotations();
-    window.addEventListener('resize', loadSubAnnotations);
+    
+    const subAnnoImg = document.getElementById('subAnnoImage');
+    if (subAnnoImg) {
+        if (subAnnoImg.complete) {
+            renderSubOverlayAnnotations(currentSubAnnotations, subOverlayContainer);
+        } else {
+            subAnnoImg.addEventListener('load', function() {
+                renderSubOverlayAnnotations(currentSubAnnotations, subOverlayContainer);
+            });
+        }
+    }
+    
+    window.addEventListener('resize', function() {
+        renderSubOverlayAnnotations(currentSubAnnotations, subOverlayContainer);
+    });
 });
 </script>
 <?php endif; ?>

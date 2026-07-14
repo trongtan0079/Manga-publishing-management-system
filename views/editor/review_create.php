@@ -265,6 +265,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const subOverlayContainer = document.getElementById('subAnnoOverlayContainer');
     const subAnnoList = document.getElementById('sub-anno-list');
     const submissionId = <?= json_encode($submission['submission_id']) ?>;
+    let currentSubAnnotations = [];
 
     function loadSubAnnotations() {
         if (!subOverlayContainer) return;
@@ -272,16 +273,20 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(res => {
             if (res.success) {
-                renderSubOverlayAnnotations(res.annotations);
-                renderSubListAnnotations(res.annotations);
+                currentSubAnnotations = res.annotations;
+                renderSubOverlayAnnotations(currentSubAnnotations);
+                renderSubListAnnotations(currentSubAnnotations);
             }
         });
     }
 
     function renderSubOverlayAnnotations(annotations) {
+        if (!subOverlayContainer) return;
         document.querySelectorAll('.sub-annotation-box').forEach(el => el.remove());
         
         const rect = subOverlayContainer.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+        
         const scaleX = rect.width / STD_WIDTH;
         const scaleY = rect.height / STD_HEIGHT;
         
@@ -327,9 +332,23 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Load annotations initially and on resize
+    // Load annotations initially, on resize, and when image is loaded
     loadSubAnnotations();
-    window.addEventListener('resize', loadSubAnnotations);
+    
+    const subAnnoImg = document.getElementById('subAnnoImage');
+    if (subAnnoImg) {
+        if (subAnnoImg.complete) {
+            renderSubOverlayAnnotations(currentSubAnnotations);
+        } else {
+            subAnnoImg.addEventListener('load', function() {
+                renderSubOverlayAnnotations(currentSubAnnotations);
+            });
+        }
+    }
+    
+    window.addEventListener('resize', function() {
+        renderSubOverlayAnnotations(currentSubAnnotations);
+    });
 });
 </script>
 <?php endif; ?>
