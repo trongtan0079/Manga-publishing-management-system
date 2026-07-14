@@ -179,6 +179,30 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                             <i class="fas fa-download me-2"></i>Tải Tệp ZIP
                         </a>
                     </div>
+                    
+                    <?php if (!empty($extractedImages)): ?>
+                    <!-- Gallery tự động giải nén ZIP -->
+                    <div class="mt-4 pt-4 border-top w-100 text-start">
+                        <h6 class="fw-bold text-dark mb-3"><i class="fas fa-magic me-2 text-primary"></i>Xem trước nội dung (Tự động giải nén):</h6>
+                        <div class="d-flex overflow-auto gap-3 pb-3 custom-scrollbar" style="white-space: nowrap; align-items: stretch;">
+                            <?php foreach ($extractedImages as $imgIndex => $imgUrl): ?>
+                                <div class="position-relative d-inline-block shadow-sm rounded" style="min-width: 220px; max-width: 250px; border: 1px solid #cbd5e1; background-color: #fff; flex-shrink: 0; display: flex; flex-direction: column;">
+                                    <div class="bg-light border-bottom px-2 py-1.5 text-center">
+                                        <small class="text-muted fw-bold text-truncate d-block" style="font-size: 0.75rem;" title="<?= htmlspecialchars(basename($imgUrl)) ?>"><?= htmlspecialchars(basename($imgUrl)) ?></small>
+                                    </div>
+                                    <div style="height: 280px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f8f9fa;">
+                                        <img src="<?= htmlspecialchars($imgUrl) ?>" class="img-fluid" style="max-height: 100%; max-width: 100%; object-fit: contain;" alt="Extracted Image <?= $imgIndex ?>">
+                                    </div>
+                                    <div class="p-2 text-center bg-white border-top mt-auto">
+                                        <a href="<?= htmlspecialchars($imgUrl) ?>" target="_blank" class="btn btn-outline-primary shadow-sm py-1 px-3" style="font-size: 11px; border-radius: 6px;">
+                                            <i class="fas fa-search-plus me-1"></i> Xem phóng to
+                                        </a>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 <?php endif; ?>
 
                 <div class="mt-4 pt-3 border-top w-100 d-flex justify-content-between align-items-center text-start">

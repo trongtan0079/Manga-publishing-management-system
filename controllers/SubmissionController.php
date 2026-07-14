@@ -625,6 +625,41 @@ class SubmissionController extends BaseController
                 }
             }
         }
+        
+        $ext = strtolower(pathinfo($submission['file_url'], PATHINFO_EXTENSION));
+        $extractedImages = [];
+        if ($ext === 'zip') {
+            $zipPath = __DIR__ . '/../../' . ltrim($submission['file_url'], '/');
+            $extractDirName = 'sub_' . $id . '_' . md5(basename($submission['file_url']));
+            $extractPath = __DIR__ . '/../../uploads/extracted/' . $extractDirName;
+            
+            if (file_exists($zipPath)) {
+                if (!is_dir($extractPath)) {
+                    mkdir($extractPath, 0777, true);
+                    $zip = new ZipArchive;
+                    if ($zip->open($zipPath) === TRUE) {
+                        $zip->extractTo($extractPath);
+                        $zip->close();
+                    }
+                }
+                
+                if (is_dir($extractPath)) {
+                    $allowedExts = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    $iterator = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($extractPath));
+                    foreach ($iterator as $fileInfo) {
+                        if ($fileInfo->isFile()) {
+                            $fileExt = strtolower($fileInfo->getExtension());
+                            if (in_array($fileExt, $allowedExts)) {
+                                $relPath = str_replace('\\', '/', str_replace(__DIR__ . '/../../', '', $fileInfo->getPathname()));
+                                $extractedImages[] = BASE_PATH . '/' . ltrim($relPath, '/');
+                            }
+                        }
+                    }
+                    natsort($extractedImages);
+                    $extractedImages = array_values($extractedImages);
+                }
+            }
+        }
 
         // Nạp view chi tiết
         require_once __DIR__ . '/../views/editor/submission_detail.php';
