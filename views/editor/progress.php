@@ -557,7 +557,7 @@ if (!function_exists('renderTaskStatusDot')) {
                                 </div>
 
                                 <!-- Ma trận tiến độ trang vẽ (Real-time Grid dạng thẻ ảnh xem trước) -->
-                                <div class="studio-progress-grid-wrapper p-3 rounded-4 border border-light-subtle shadow-inner" style="background-color: var(--slate-100); max-height: 420px; overflow-y: auto;">
+                                <div class="studio-progress-grid-wrapper p-3 rounded-4 border border-light-subtle shadow-inner" style="background-color: #f1f5f9; max-height: 420px; overflow-y: auto;">
                                     <?php if (!empty($data['active_chapter_pages'])): ?>
                                         <div class="page-matrix-container">
                                             <?php foreach ($data['active_chapter_pages'] as $pageData): 
