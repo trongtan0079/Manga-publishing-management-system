@@ -99,4 +99,75 @@ class Series extends Model {
         $stmt->execute();
         return $stmt->fetchColumn() > 0;
     }
+
+    /**
+     * Lấy danh sách series phân trang, tìm kiếm và lọc theo trạng thái theo phân quyền vai trò
+     */
+    public function getPaginatedSeries($role, $userId, $search = '', $status = '', $limit = 10, $offset = 0) {
+        $whereClauses = [];
+        $params = [];
+
+        // 1. Phân quyền dữ liệu theo vai trò (Role-based access)
+        if ($role === 'mangaka') {
+            $whereClauses[] = "s.mangaka_id = :role_user_id";
+            $params['role_user_id'] = $userId;
+        } elseif ($role === 'editor') {
+            $whereClauses[] = "s.editor_id = :role_user_id AND s.status != 'planning'";
+            $params['role_user_id'] = $userId;
+        } elseif ($role === 'board' || $role === 'admin') {
+            $whereClauses[] = "s.publish_type != 'draft'";
+        } else {
+            return ['series' => [], 'total' => 0];
+        }
+
+        // 2. Lọc theo từ khóa tìm kiếm (title, description)
+        if (!empty($search)) {
+            $whereClauses[] = "(s.title LIKE :search OR s.description LIKE :search)";
+            $params['search'] = '%' . $search . '%';
+        }
+
+        // 3. Lọc theo trạng thái hợp lệ
+        $allowedStatuses = ['planning', 'ongoing', 'completed', 'canceled', 'suspended'];
+        if (!empty($status) && in_array($status, $allowedStatuses)) {
+            $whereClauses[] = "s.status = :status";
+            $params['status'] = $status;
+        }
+
+        $whereSql = "";
+        if (!empty($whereClauses)) {
+            $whereSql = "WHERE " . implode(" AND ", $whereClauses);
+        }
+
+        // 4. Đếm tổng số bản ghi khớp điều kiện
+        $countSql = "SELECT COUNT(*) FROM {$this->table} s {$whereSql}";
+        $countStmt = $this->conn->prepare($countSql);
+        foreach ($params as $key => $val) {
+            $countStmt->bindValue(':' . $key, $val);
+        }
+        $countStmt->execute();
+        $total = (int)$countStmt->fetchColumn();
+
+        // 5. Lấy danh sách bản ghi theo trang
+        $dataSql = "SELECT s.*, u.full_name as mangaka_name, ed.full_name as editor_name 
+                    FROM {$this->table} s 
+                    LEFT JOIN users u ON s.mangaka_id = u.user_id 
+                    LEFT JOIN users ed ON s.editor_id = ed.user_id 
+                    {$whereSql} 
+                    ORDER BY s.series_id DESC 
+                    LIMIT :limit OFFSET :offset";
+        $dataStmt = $this->conn->prepare($dataSql);
+        foreach ($params as $key => $val) {
+            $dataStmt->bindValue(':' . $key, $val);
+        }
+        $dataStmt->bindValue(':limit', (int)$limit, PDO::PARAM_INT);
+        $dataStmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+        $dataStmt->execute();
+        $series = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return [
+            'series' => $series,
+            'total'  => $total
+        ];
+    }
 }
+

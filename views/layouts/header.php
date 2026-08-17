@@ -124,6 +124,6 @@ function extractRegionDescription($fullHtml, $regionId) {
     <!-- Quill Rich Text Editor CSS -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="<?= BASE_PATH ?>/assets/css/style.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= BASE_PATH ?>/assets/css/style.css?v=1.0.0" rel="stylesheet">
 </head>
 <body>

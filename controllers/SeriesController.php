@@ -23,29 +23,32 @@ class SeriesController extends BaseController
     }
 
     /**
-     * Hiển thị danh sách các bộ truyện của Mangaka đang đăng nhập
+     * Hiển thị danh sách các bộ truyện kèm tìm kiếm, lọc trạng thái và phân trang
      */
     public function index() {
         $role = $_SESSION['role_name'] ?? '';
-        $currentUserId = $_SESSION['user_id'];
+        $currentUserId = (int)$_SESSION['user_id'];
         
-        if ($role === 'board' || $role === 'admin') {
-            $sql = "SELECT * FROM series WHERE publish_type != 'draft' ORDER BY series_id DESC";
-            $stmt = $this->seriesModel->getConnection()->prepare($sql);
-            $stmt->execute();
-            $seriesList = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } elseif ($role === 'editor') {
-            // Editor chỉ xem các bộ truyện được gán phụ trách và đã được phê duyệt (status !== 'planning')
-            $seriesList = $this->seriesModel->getSeriesByEditorId($currentUserId);
-        } elseif ($role === 'mangaka') {
-            $seriesList = $this->seriesModel->findByMangakaId($currentUserId);
-        } else {
+        if (!in_array($role, ['mangaka', 'editor', 'board', 'admin'])) {
             http_response_code(403);
             $_SESSION['error'] = 'Bạn không có quyền truy cập.';
             header('Location: ' . BASE_PATH . '/index.php?controller=dashboard&action=' . $role);
             exit;
         }
-        
+
+        $search = trim($_GET['search'] ?? '');
+        $status = trim($_GET['status'] ?? '');
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+
+        $limit = 10; // 10 bản ghi mỗi trang
+        $offset = ($page - 1) * $limit;
+
+        $result = $this->seriesModel->getPaginatedSeries($role, $currentUserId, $search, $status, $limit, $offset);
+        $seriesList = $result['series'];
+        $totalSeries = $result['total'];
+        $totalPages = ceil($totalSeries / $limit);
+
         require_once __DIR__ . '/../views/mangaka/series.php';
     }
 

@@ -1,0 +1,64 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+
+    container_name: manga-pms-app
+    restart: unless-stopped
+
+    ports:
+      - "8080:80"
+
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    volumes:
+      - ./uploads:/var/www/html/uploads
+
+    networks:
+      - manga-network
+
+  db:
+    image: mysql:8.0
+
+    container_name: manga-pms-db
+    restart: unless-stopped
+
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/manga_workflow.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+      - ./docker/db/init/02_seed_users.sql:/docker-entrypoint-initdb.d/02_seed_users.sql:ro
+      - ./docker/db/init/03_editor_annotations.sql:/docker-entrypoint-initdb.d/03_editor_annotations.sql:ro
+      - ./docker/db/init/04_submission_annotations.sql:/docker-entrypoint-initdb.d/04_submission_annotations.sql:ro
+      - ./docker/db/init/05_board_votes.sql:/docker-entrypoint-initdb.d/05_board_votes.sql:ro
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    networks:
+      - manga-network
+
+networks:
+  manga-network:
+    driver: bridge
+
+volumes:
+  mysql_data:

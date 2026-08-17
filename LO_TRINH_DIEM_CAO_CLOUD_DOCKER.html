@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Lộ Trình Đạt Điểm Cao - Đồ Án Điện Toán Đám Mây</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        @page {
+            size: A4 portrait;
+            margin: 10mm 12mm 10mm 12mm;
+            @bottom-right {
+                content: counter(page) " / " counter(pages);
+                font-size: 8pt;
+                color: #64748b;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #1e293b;
+            background-color: #ffffff;
+            line-height: 1.45;
+            font-size: 9pt;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header-card {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 10px rgba(30, 58, 138, 0.15);
+        }
+
+        .header-title {
+            font-size: 15.5pt;
+            font-weight: 800;
+            margin: 0 0 4px 0;
+            letter-spacing: -0.5px;
+            text-transform: uppercase;
+        }
+
+        .header-subtitle {
+            font-size: 10pt;
+            font-weight: 500;
+            opacity: 0.95;
+            margin: 0 0 8px 0;
+        }
+
+        .header-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 8.2pt;
+            border-top: 1px solid rgba(255, 255, 255, 0.25);
+            padding-top: 6px;
+            margin-top: 6px;
+        }
+
+        .badge-done {
+            background-color: #10b981;
+            color: white;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 7.2pt;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .badge-todo {
+            background-color: #f59e0b;
+            color: white;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            font-weight: 700;
+            font-size: 7.2pt;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .badge-score {
+            background-color: #ef4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-weight: 700;
+            font-size: 7.2pt;
+            display: inline-block;
+        }
+
+        h2 {
+            font-size: 11pt;
+            font-weight: 800;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 4px;
+            margin: 12px 0 8px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+            font-size: 8.2pt;
+        }
+
+        th, td {
+            padding: 5px 8px;
+            border: 1px solid #cbd5e1;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            font-weight: 700;
+            color: #334155;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        .phase-box {
+            border: 1px solid #e2e8f0;
+            border-radius: 7px;
+            padding: 9px 12px;
+            margin-bottom: 9px;
+            background-color: #ffffff;
+            page-break-inside: avoid;
+        }
+
+        .phase-box.done {
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+
+        .phase-box.todo {
+            border-left: 4px solid #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .phase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .phase-title {
+            font-size: 9.8pt;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        ul {
+            margin: 3px 0 5px 16px;
+            padding: 0;
+        }
+
+        li {
+            margin-bottom: 2px;
+        }
+
+        .checkbox-done {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 9.5pt;
+            margin-right: 4px;
+        }
+
+        .checkbox-todo {
+            color: #3b82f6;
+            font-weight: bold;
+            font-size: 9.5pt;
+            margin-right: 4px;
+        }
+
+        .tip-box {
+            background-color: #eff6ff;
+            border-left: 3px solid #3b82f6;
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 8.2pt;
+            color: #1e40af;
+            margin-top: 5px;
+        }
+
+        .qa-box {
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-left: 3px solid #f59e0b;
+            padding: 7px 10px;
+            border-radius: 5px;
+            margin-bottom: 7px;
+            font-size: 8.2pt;
+            page-break-inside: avoid;
+        }
+
+        .qa-q {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 2px;
+        }
+
+        .qa-a {
+            color: #451a03;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Section -->
+    <div class="header-card">
+        <div class="header-title">LỘ TRÌNH ĐẠT ĐIỂM TỐI ĐA (A+) ĐỒ ÁN CLOUD</div>
+        <div class="header-subtitle">Đề tài 13: Triển khai ứng dụng Container (Manga PMS) trên nền tảng Điện toán Đám mây</div>
+        <div class="header-meta">
+            <div><strong>Môn học:</strong> Điện toán đám mây (Cloud Computing)</div>
+            <div><strong>Công nghệ:</strong> Docker, Docker Compose, PHP 8.2, MySQL 8.0, AWS/GCP/Azure</div>
+            <div><strong>Trạng thái hiện tại:</strong> Đã hoàn thành 65% (Local Docker 100%)</div>
+        </div>
+    </div>
+
+    <!-- Section 1: Tiêu chí chấm điểm -->
+    <h2>1. BẢNG TIÊU CHÍ CHẤM ĐIỂM CỦA GIẢNG VIÊN <span class="badge-score">THANG ĐIỂM 10</span></h2>
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 25%;">Tiêu chí đánh giá</th>
+                <th style="width: 45%;">Yêu cầu chi tiết từ Giảng viên</th>
+                <th style="width: 15%;">Trọng số</th>
+                <th style="width: 15%;">Tình trạng</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>1. Ứng dụng thực tế & Đóng gói</strong></td>
+                <td>Web app hoàn chỉnh (Manga PMS); viết Dockerfile chuẩn; multi-container Docker Compose.</td>
+                <td><strong>25%</strong> (2.5 đ)</td>
+                <td><span class="badge-done">ĐÃ ĐẠT (100%)</span></td>
+            </tr>
+            <tr>
+                <td><strong>2. Tính nhất quán & Bền vững</strong></td>
+                <td>Cơ chế Volume (Database, Uploads); biến môi trường; chạy độc lập không phụ thuộc máy local.</td>
+                <td><strong>20%</strong> (2.0 đ)</td>
+                <td><span class="badge-done">ĐÃ ĐẠT (100%)</span></td>
+            </tr>
+            <tr>
+                <td><strong>3. Triển khai Cloud thực tế</strong></td>
+                <td>Deploy lên máy ảo Cloud (AWS EC2 / GCP / Azure); cấu hình Security Group / Firewall; mở Public IP.</td>
+                <td><strong>25%</strong> (2.5 đ)</td>
+                <td><span class="badge-todo">BƯỚC TIẾP THEO</span></td>
+            </tr>
+            <tr>
+                <td><strong>4. Kiểm thử & Phân tích lợi ích</strong></td>
+                <td>Test chức năng trên Cloud; đo latency/TTFB; so sánh lợi ích Container vs Máy ảo truyền thống (VM).</td>
+                <td><strong>15%</strong> (1.5 đ)</td>
+                <td><span class="badge-todo">BƯỚC TIẾP THEO</span></td>
+            </tr>
+            <tr>
+                <td><strong>5. Báo cáo & Thuyết trình</strong></td>
+                <td>Báo cáo kỹ thuật đủ 5 chương; sơ đồ kiến trúc Cloud; trả lời trôi chảy câu hỏi phản biện.</td>
+                <td><strong>15%</strong> (1.5 đ)</td>
+                <td><span class="badge-todo">BƯỚC TIẾP THEO</span></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Section 2: Lộ trình 5 giai đoạn -->
+    <h2>2. LỘ TRÌNH 5 GIAI ĐOẠN ĐẠT ĐIỂM TỐI ĐA</h2>
+
+    <!-- Phase 1 -->
+    <div class="phase-box done">
+        <div class="phase-header">
+            <span class="phase-title">GIAI ĐOẠN 1: MÔI TRƯỜNG PHÁT TRIỂN & ĐÓNG GÓI DOCKER LOCAL</span>
+            <span class="badge-done">ĐÃ HOÀN THÀNH 100%</span>
+        </div>
+        <ul>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Xây dựng ứng dụng hoàn chỉnh:</strong> Manga PMS phân quyền 5 vai trò (Mangaka, Editor, Board, Admin, Assistant), User CRUD, Series Search/Filter/Pagination, Chapter Workflow.</li>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Viết Dockerfile:</strong> Base image <code>php:8.2-apache</code>, cài <code>pdo</code>, <code>pdo_mysql</code>, bật <code>a2enmod rewrite</code>, phân quyền <code>www-data:www-data</code>.</li>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Cấu hình Docker Compose:</strong> Điều phối container <code>manga-pms-app</code> và <code>manga-pms-db</code> (MySQL 8.0) qua bridge network <code>manga-network</code>.</li>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Thiết lập Data Persistence:</strong> Named volume <code>mysql_data</code> cho CSDL và bind-mount <code>./uploads</code> cho file ảnh/bản thảo.</li>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Tối ưu hóa Caching & Hiệu năng:</strong> Sửa cache CSS tĩnh <code>v=1.0.0</code>, tốc độ phản hồi đạt cực nhanh (~10-20ms).</li>
+        </ul>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="phase-box done">
+        <div class="phase-header">
+            <span class="phase-title">GIAI ĐOẠN 2: TỐI ƯU CẤU HÌNH & CHUẨN BỊ SẴN SÀNG CLOUD</span>
+            <span class="badge-done">ĐÃ HOÀN THÀNH 100%</span>
+        </div>
+        <ul>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Đọc biến môi trường linh hoạt:</strong> File <code>config/database.php</code> tự nhận diện biến môi trường <code>DB_HOST=db</code> khi chạy Docker và fallback về <code>127.0.0.1</code> khi chạy XAMPP.</li>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Healthcheck tự động:</strong> Cấu hình <code>healthcheck</code> cho MySQL để PHP app chỉ start khi DB đã sẵn sàng kết nối.</li>
+            <li><span class="checkbox-done">&#x2611;</span> <strong>Tự động nạp Schema & Dữ liệu mẫu (Seed Data):</strong> Đã cấu hình các script SQL tự động khởi tạo trong thư mục <code>docker-entrypoint-initdb.d/</code>.</li>
+        </ul>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="phase-box todo">
+        <div class="phase-header">
+            <span class="phase-title">GIAI ĐOẠN 3: TRIỂN KHAI THỰC TẾ LÊN CLOUD (CLOUD DEPLOYMENT)</span>
+            <span class="badge-todo">&#x23F3; BƯỚC TRỌNG TÂM CẦN LÀM</span>
+        </div>
+        <ul>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Bước 3.1: Đẩy mã nguồn lên GitHub / GitLab:</strong> Đảm bảo <code>.dockerignore</code> và <code>.gitignore</code> sạch sẽ.</li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Bước 3.2: Khởi tạo Máy ảo Cloud (IaaS):</strong>
+                <ul>
+                    <li>Lựa chọn 1 trong các nền tảng: <strong>AWS EC2</strong> (t2.micro Free Tier), <strong>Google Cloud (GCP) Compute Engine</strong>, <strong>Azure Virtual Machine</strong>, hoặc <strong>DigitalOcean Droplet</strong>.</li>
+                    <li>Chọn Hệ điều hành: <strong>Ubuntu 22.04 / 24.04 LTS</strong>.</li>
+                </ul>
+            </li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Bước 3.3: Cấu hình Firewall / Security Group trên Cloud:</strong> Mở các cổng mạng Inbound: <strong>Port 80 (HTTP)</strong>, <strong>Port 443 (HTTPS)</strong>, <strong>Port 8080 (App)</strong>, <strong>Port 22 (SSH)</strong>.</li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Bước 3.4: Cài đặt Docker trên Máy ảo Cloud:</strong> Chạy script cài đặt nhanh: <code>curl -fsSL https://get.docker.com | sh</code>.</li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Bước 3.5: Kéo Code & Khởi chạy ứng dụng:</strong> Clone repo Git về Cloud và chạy đúng 1 câu lệnh duy nhất: <code>docker compose up -d --build</code>.</li>
+        </ul>
+        <div class="tip-box">
+            <strong>Mẹo ghi điểm tuyệt đối:</strong> Quay video ngắn 1-2 phút chứng minh quá trình deploy từ lúc gõ lệnh trên Cloud đến khi web chạy thành công trên Public IP.
+        </div>
+    </div>
+
+    <div class="page-break"></div>
+
+    <!-- Phase 4 -->
+    <div class="phase-box todo">
+        <div class="phase-header">
+            <span class="phase-title">GIAI ĐOẠN 4: KIỂM THỬ TRÊN CLOUD & ĐO LƯỜNG HIỆU NĂNG</span>
+            <span class="badge-todo">&#x23F3; CẦN THỰC HIỆN</span>
+        </div>
+        <ul>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Kiểm tra truy cập Internet:</strong> Mở trình duyệt ngoài mạng nội bộ, truy cập <code>http://[PUBLIC_IP_CLOUD]:8080</code>.</li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Kiểm thử chức năng đầy đủ:</strong> Đăng nhập, thêm truyện, upload ảnh bìa, nộp bản thảo, duyệt chapter.</li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Thực nghiệm Data Persistence:</strong> Dừng container trên Cloud (<code>docker compose down</code>) rồi bật lại (<code>docker compose up -d</code>) để chứng minh dữ liệu và ảnh upload vẫn còn nguyên vẹn.</li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Đo lường hiệu năng & tài nguyên Cloud:</strong> Dùng lệnh <code>docker stats</code> để chụp ảnh mức tiêu thụ RAM (<30MB) và CPU (<1%) trên Cloud.</li>
+        </ul>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="phase-box todo">
+        <div class="phase-header">
+            <span class="phase-title">GIAI ĐOẠN 5: HOÀN THIỆN BÁO CÁO MÔN HỌC & SLIDE THUYẾT TRÌNH</span>
+            <span class="badge-todo">&#x23F3; CẦN THỰC HIỆN</span>
+        </div>
+        <ul>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Soạn thảo Báo cáo Đồ án (5 Chương chuẩn học phần):</strong>
+                <ul>
+                    <li><em>Chương 1:</em> Tổng quan đề tài, bài toán Manga PMS và mục tiêu Container hóa.</li>
+                    <li><em>Chương 2:</em> Cơ sở lý thuyết về Docker, Docker Compose, Kiến trúc Microservices/Container, So sánh VM vs Container.</li>
+                    <li><em>Chương 3:</em> Thiết kế hệ thống & Đóng gói ứng dụng (Phân tích Dockerfile, Docker Compose, Volume, Network).</li>
+                    <li><em>Chương 4:</em> Quá trình Triển khai trên nền tảng Cloud (AWS/GCP/Azure), Cấu hình Network & Firewall.</li>
+                    <li><em>Chương 5:</em> Kết quả thử nghiệm, Đo lường hiệu năng, Phân tích lợi ích thực tiễn và Kết luận.</li>
+                </ul>
+            </li>
+            <li><span class="checkbox-todo">&#x2610;</span> <strong>Thiết kế Slide thuyết trình:</strong> 12-15 slide trực quan, có sơ đồ kiến trúc, ảnh chụp màn hình Cloud thực tế.</li>
+        </ul>
+    </div>
+
+    <!-- Section 3: Bí kíp phản biện -->
+    <h2>3. BỘ CÂU HỎI PHẢN BIỆN THƯỜNG GẶP CỦA GIẢNG VIÊN (CÁCH TRẢ LỜI ĐẠT ĐIỂM TỐI ĐA)</h2>
+
+    <div class="qa-box">
+        <div class="qa-q">❓ Câu 1: Tại sao nhóm lại sử dụng Docker Compose thay vì chạy từng container bằng lệnh "docker run"?</div>
+        <div class="qa-a">💡 <strong>Trả lời:</strong> Docker Compose cho phép định nghĩa kiến trúc đa container (App + MySQL) dưới dạng code (IaC - Infrastructure as Code). Nó giúp quản lý tập trung biến môi trường, tự động tạo mạng nội bộ bridge cô lập, quản lý volume và thứ tự khởi động (healthcheck) chỉ bằng 1 câu lệnh duy nhất <code>docker compose up -d</code>, đảm bảo tính nhất quán tuyệt đối giữa máy dev và máy chủ cloud.</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">❓ Câu 2: Khi container bị xóa (Recreate / Destroy), dữ liệu CSDL và file upload có bị mất không? Nhóm giải quyết thế nào?</div>
+        <div class="qa-a">💡 <strong>Trả lời:</strong> Hoàn toàn không mất dữ liệu. Nhóm đã tách biệt tầng Stateless (PHP source code) và tầng Stateful (Dữ liệu) bằng cơ chế Docker Volume: CSDL MySQL được lưu trên named volume <code>mysql_data:/var/lib/mysql</code>, file upload được gắn bind-mount <code>./uploads:/var/www/html/uploads</code>. Vòng đời của dữ liệu tồn tại độc lập với vòng đời của container.</div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">❓ Câu 3: So sánh lợi ích cốt lõi giữa việc triển khai ứng dụng bằng Docker Container so với Máy ảo truyền thống (VMware/VirtualBox) trên Cloud?</div>
+        <div class="qa-a">💡 <strong>Trả lời:</strong> 
+            1. <em>Tài nguyên:</em> Container chia sẻ chung Linux Kernel của Host nên cực kỳ nhẹ (App PHP chỉ tốn ~20MB RAM so với 2-4GB của máy ảo đầy đủ OS).<br>
+            2. <em>Tốc độ khởi động:</em> Container khởi động trong vài giây thay vì vài phút như VM.<br>
+            3. <em>Tính linh hoạt (Portability):</em> Đóng gói toàn bộ runtime, library, dependencies giúp chạy nhất quán ở bất kỳ nền tảng Cloud nào mà không bị lỗi môi trường.
+        </div>
+    </div>
+
+    <div class="qa-box">
+        <div class="qa-q">❓ Câu 4: Nếu lượng người dùng truy cập tăng đột biến (Traffic Spike), giải pháp mở rộng (Scale) trên Cloud là gì?</div>
+        <div class="qa-a">💡 <strong>Trả lời:</strong> Có thể mở rộng theo chiều ngang (Horizontal Scaling): Tăng số lượng container app bằng lệnh <code>docker compose up --scale app=3 -d</code>, đặt thêm một Load Balancer (Nginx hoặc AWS ALB) ở phía trước để phân tải; hoặc chuyển đổi sang dịch vụ điều phối container quy mô lớn như Docker Swarm / Kubernetes (AWS EKS, GCP GKE).</div>
+    </div>
+
+</body>
+</html>

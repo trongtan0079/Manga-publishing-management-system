@@ -14,6 +14,8 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Quay lại Bộ truyện</a>
 </div>
 
+<?php require_once __DIR__ . '/../layouts/alerts.php'; ?>
+
 <div class="card border-primary mb-4">
     <div class="card-header bg-primary text-white">
         <h5 class="mb-0">Tạo Chapter Mới</h5>

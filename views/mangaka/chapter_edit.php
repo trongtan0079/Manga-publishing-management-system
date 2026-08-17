@@ -15,6 +15,8 @@ $isLocked = ($chapter['status'] === 'reviewing_draft' || $chapter['status'] === 
     <a href="<?= BASE_PATH ?>/index.php?controller=series&action=show&id=<?= htmlspecialchars($series['series_id']) ?>" class="btn btn-secondary">&larr; Quay lại Bộ truyện</a>
 </div>
 
+<?php require_once __DIR__ . '/../layouts/alerts.php'; ?>
+
 <div class="card border-warning mb-4">
     <div class="card-header bg-warning text-dark">
         <h5 class="mb-0">Chỉnh sửa Chapter</h5>
