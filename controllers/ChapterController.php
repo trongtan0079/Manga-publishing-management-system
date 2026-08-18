@@ -126,6 +126,7 @@ class ChapterController extends BaseController
      */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $seriesId = $_POST['series_id'] ?? null;
             if (!$seriesId) {
                 $_SESSION['error'] = "Thiếu thông tin bộ truyện.";
@@ -237,6 +238,7 @@ class ChapterController extends BaseController
      */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $chapter = $this->chapterModel->findById($id);
             if (!$chapter) {
                 $_SESSION['error'] = "Không tìm thấy chapter.";
@@ -359,6 +361,7 @@ class ChapterController extends BaseController
      */
     public function delete($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $chapter = $this->chapterModel->findById($id);
             if (!$chapter) {
                 $_SESSION['error'] = "Không tìm thấy chapter.";
@@ -444,6 +447,7 @@ class ChapterController extends BaseController
     public function publish($id) {
         requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $chapter = $this->chapterModel->findById($id);
             if (!$chapter) {
                 $_SESSION['error'] = "Không tìm thấy chapter.";

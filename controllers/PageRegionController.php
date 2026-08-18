@@ -55,6 +55,7 @@ class PageRegionController extends BaseController {
      */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $pageId = $_POST['page_id'] ?? '';
             if (empty($pageId) || !$this->checkPageOwnership($pageId)) {
                 $_SESSION['error'] = "Lỗi phân quyền hoặc trang truyện không hợp lệ.";
@@ -104,6 +105,7 @@ class PageRegionController extends BaseController {
      */
     public function delete($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $region = $this->pageRegionModel->findById($id);
             if (!$region || !$this->checkPageOwnership($region['page_id'])) {
                 $_SESSION['error'] = "Lỗi phân quyền hoặc phân vùng không hợp lệ.";

@@ -127,6 +127,7 @@ $roleName = strtolower($user['role_name'] ?? '');
             </div>
             <div class="card-body p-4">
                 <form action="<?= BASE_PATH ?>/index.php?controller=auth&action=updateProfile" method="POST" enctype="multipart/form-data">
+                    <?= Csrf::field() ?>
                     <!-- Username (Read-only) -->
                     <div class="mb-3">
                         <label for="username" class="form-label fw-semibold">Tên đăng nhập</label>

@@ -327,6 +327,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             </div>
             <div class="card-body">
                 <form action="<?= BASE_PATH ?>/index.php?controller=review&action=store" method="POST">
+                    <?= Csrf::field() ?>
                     <input type="hidden" name="submission_id" value="<?= $submission['submission_id'] ?>">
 
                     <div class="mb-4">

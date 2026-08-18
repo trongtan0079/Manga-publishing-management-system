@@ -24,6 +24,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <div class="card-body">
         <!-- Form upload cần thuộc tính enctype="multipart/form-data" để xử lý file -->
         <form action="<?= BASE_PATH ?>/index.php?controller=page&action=store" method="POST" enctype="multipart/form-data">
+            <?= Csrf::field() ?>
             
             <!-- Truyền ẩn chapter_id để controller biết trang thuộc chapter nào -->
             <input type="hidden" name="chapter_id" value="<?= htmlspecialchars($chapter['chapter_id']) ?>">

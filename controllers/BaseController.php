@@ -1,5 +1,6 @@
 <?php
 
+require_once __DIR__ . '/../core/Csrf.php';
 require_once __DIR__ . '/../models/Notification.php';
 
 /**
@@ -282,6 +283,55 @@ class BaseController
                 $pageModel->update($pageId, ['status' => $newStatus]);
             }
         }
+    }
+
+    /**
+     * Xác thực CSRF Token cho các thao tác thay đổi trạng thái (POST).
+     * Nếu token không hợp lệ hoặc bị thiếu, lập tức hủy request và trả về HTTP 403 Forbidden.
+     */
+    protected function validateCsrf() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $token = Csrf::getTokenFromRequest();
+            if (!$token || !Csrf::validate($token)) {
+                $this->handleCsrfError();
+            }
+        }
+    }
+
+    /**
+     * Xử lý phản hồi khi xác thực CSRF thất bại.
+     */
+    protected function handleCsrfError() {
+        http_response_code(403);
+
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+            || (!empty($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)
+            || (!empty($_SERVER['CONTENT_TYPE']) && strpos($_SERVER['CONTENT_TYPE'], 'application/json') !== false)
+            || (!empty($_SERVER['HTTP_X_CSRF_TOKEN']));
+
+        if ($isAjax) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode([
+                'success' => false,
+                'error' => 'CSRF token mismatch'
+            ]);
+            exit;
+        }
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        $_SESSION['error'] = 'Phiên làm việc hết hạn hoặc yêu cầu không hợp lệ (CSRF Error)!';
+
+        $referer = $_SERVER['HTTP_REFERER'] ?? '';
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        if (!empty($referer) && parse_url($referer, PHP_URL_HOST) === $host) {
+            header('Location: ' . $referer);
+        } else {
+            $base = defined('BASE_PATH') ? BASE_PATH : '';
+            header('Location: ' . $base . '/index.php');
+        }
+        exit;
     }
 }
 

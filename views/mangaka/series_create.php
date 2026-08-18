@@ -39,6 +39,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <div class="card-body">
         <!-- Form thêm mới, action trỏ tới method store -->
         <form action="<?= BASE_PATH ?>/index.php?controller=series&action=store" method="POST" enctype="multipart/form-data">
+            <?= Csrf::field() ?>
             
             <div class="mb-3">
                 <label for="title" class="form-label">Tên Series <span class="text-danger">*</span></label>

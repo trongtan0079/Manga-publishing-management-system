@@ -158,6 +158,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         <?php if ($role === 'board'): ?>
                                         <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=edit&id=<?= $ranking['ranking_id'] ?>" class="btn btn-sm btn-warning text-white" title="Sửa"><i class="fas fa-edit"></i></a>
                                         <form action="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=delete&id=<?= $ranking['ranking_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');">
+                                            <?= Csrf::field() ?>
                                             <button type="submit" class="btn btn-sm btn-danger" title="Xóa"><i class="fas fa-trash"></i></button>
                                         </form>
                                         <?php endif; ?>

@@ -132,6 +132,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                         </a>
                                         <!-- Form xóa người dùng cần sử dụng phương thức POST -->
                                         <form action="<?= BASE_PATH ?>/index.php?controller=user&action=delete&id=<?= $user['user_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa người dùng này không? Hành động này không thể hoàn tác.');">
+                                            <?= Csrf::field() ?>
                                             <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa Người dùng">
                                                 <i class="fas fa-trash-alt"></i> Xóa
                                             </button>

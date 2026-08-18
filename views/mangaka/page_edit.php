@@ -33,6 +33,7 @@ $isLocked = ($this->isChapterLocked($chapter) || $page['status'] === 'published'
     <div class="card-body">
         <!-- Form upload cần thuộc tính enctype="multipart/form-data" để xử lý file thay thế nếu có -->
         <form action="<?= BASE_PATH ?>/index.php?controller=page&action=update&id=<?= $page['page_id'] ?>" method="POST" enctype="multipart/form-data">
+            <?= Csrf::field() ?>
             <?php if ($isLocked): ?>
                 <div class="alert alert-warning border-0 py-2.5 px-3 mb-4 d-flex align-items-center gap-2" style="font-size: 0.85rem; border-radius: 8px; background-color: #fffbeb; color: #b45309;">
                     <i class="fas fa-lock fs-6"></i>

@@ -41,6 +41,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <div class="card-body">
         <!-- Form cập nhật, action trỏ tới update với series_id tương ứng -->
         <form action="<?= BASE_PATH ?>/index.php?controller=series&action=update&id=<?= $series['series_id'] ?>" method="POST" enctype="multipart/form-data">
+            <?= Csrf::field() ?>
             
             <div class="mb-3">
                 <label for="title" class="form-label">Tên Series <span class="text-danger">*</span></label>

@@ -48,6 +48,7 @@ if (array_key_exists('this', $vars) && is_object($vars['this'])) {
                         <?php if (!$notif['is_read']): ?>
                             <div class="d-flex align-items-center ms-auto">
                                 <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=notification&action=markAsRead&id=<?= $notif['notification_id'] ?>" method="POST" class="m-0">
+                                    <?= Csrf::field() ?>
                                     <button type="submit" class="btn btn-sm btn-link text-decoration-none p-1" title="Đánh dấu đã đọc">
                                         <i class="fas fa-check text-success" style="font-size: 0.85rem;"></i>
                                     </button>

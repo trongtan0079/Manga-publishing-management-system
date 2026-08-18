@@ -223,6 +223,7 @@ class PageController extends BaseController
      */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $chapterId = $_POST['chapter_id'] ?? null;
             if (!$chapterId) {
                 header('Location: ' . BASE_PATH . '/index.php?controller=series&action=index');
@@ -385,6 +386,7 @@ class PageController extends BaseController
      */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $page = $this->pageModel->findById($id);
             if (!$page) {
                 $_SESSION['error'] = "Không tìm thấy trang.";
@@ -507,6 +509,7 @@ class PageController extends BaseController
      */
     public function delete($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $page = $this->pageModel->findById($id);
             if (!$page) {
                 $_SESSION['error'] = "Không tìm thấy trang.";

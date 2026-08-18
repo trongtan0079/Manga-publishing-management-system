@@ -37,6 +37,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
         <div class="card shadow-sm border-0">
             <div class="card-body p-4">
                 <form action="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=update&id=<?= $ranking['ranking_id'] ?>" method="POST">
+                    <?= Csrf::field() ?>
                     
                     <div class="mb-3">
                         <label for="series_id" class="form-label fw-bold">Chọn Bộ Truyện (Series) <span class="text-danger">*</span></label>

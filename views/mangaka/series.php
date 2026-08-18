@@ -175,6 +175,7 @@ $statusLabels = [
                                             <!-- Form Xóa (dùng POST để bảo mật) -->
                                             <?php if ($series['status'] === 'planning'): ?>
                                                 <form action="<?= BASE_PATH ?>/index.php?controller=series&action=delete&id=<?= $series['series_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bộ truyện này không? Hành động này không thể hoàn tác.');">
+                                                    <?= Csrf::field() ?>
                                                     <button type="submit" class="btn btn-sm btn-danger" title="Xóa Truyện">
                                                         <i class="fas fa-trash-alt"></i> Xóa
                                                     </button>

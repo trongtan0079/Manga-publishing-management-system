@@ -23,6 +23,7 @@ $isLocked = ($chapter['status'] === 'reviewing_draft' || $chapter['status'] === 
     </div>
     <div class="card-body">
         <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=update&id=<?= $chapter['chapter_id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             <?php if ($isLocked): ?>
                 <div class="alert alert-warning border-0 py-2.5 px-3 mb-4 d-flex align-items-center gap-2" style="font-size: 0.85rem; border-radius: 8px; background-color: #fffbeb; color: #b45309;">
                     <i class="fas fa-lock fs-6"></i>

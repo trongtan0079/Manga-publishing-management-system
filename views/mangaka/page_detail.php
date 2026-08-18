@@ -241,6 +241,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
             <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-warning">Sửa trang</a>
             <!-- Form xóa trang, dùng onsubmit để hỏi lại trước khi xóa -->
             <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
+                <?= Csrf::field() ?>
                 <button type="submit" class="btn btn-danger">Xóa</button>
             </form>
         <?php else: ?>
@@ -479,6 +480,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                     <div class="w-100 text-start mt-2">
                         <h6 class="fw-bold text-primary mb-3"><i class="fas fa-upload me-2"></i>Cập nhật Bản vẽ Hoàn chỉnh (Genko)</h6>
                         <form action="<?= BASE_PATH ?>/index.php?controller=page&action=update&id=<?= $page['page_id'] ?>" method="POST" enctype="multipart/form-data">
+                            <?= Csrf::field() ?>
                             <input type="hidden" name="page_number" value="<?= htmlspecialchars($page['page_number']) ?>">
                             <input type="hidden" name="status" value="<?= htmlspecialchars($page['status']) ?>">
                             <div class="upload-dropzone position-relative d-flex flex-column align-items-center justify-content-center border border-primary border-dashed rounded-3 p-4 bg-light text-center shadow-sm" style="cursor: pointer; min-height: 120px; transition: all 0.2s;">
@@ -682,6 +684,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                                                  </a>
                                              <?php endif; ?>
                                              <form action="<?= BASE_PATH ?>/index.php?controller=pageregion&action=delete&id=<?= $region['region_id'] ?>&page_id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa phân vùng này?');">
+                                                 <?= Csrf::field() ?>
                                                  <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
                                                  <button type="submit" class="btn btn-sm d-inline-flex align-items-center gap-1 py-1 px-2.5 border border-danger-subtle" style="font-size: 0.725rem; font-weight: 600; border-radius: 8px; background-color: #fef2f2; color: #dc2626;">
                                                      <i class="fas fa-trash-alt"></i> Xóa
@@ -804,6 +807,7 @@ if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'assistant') {
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="<?= BASE_PATH ?>/index.php?controller=pageregion&action=store" method="POST">
+                <?= Csrf::field() ?>
                 <div class="modal-body py-3">
                     <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
                     <!-- Coordinates mapped to 800x1000 standard -->
@@ -1912,6 +1916,7 @@ function assignGroupedRegions() {
                                      <a href="<?= BASE_PATH ?>/index.php?controller=task&action=edit&id=<?= $task['task_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                      <!-- Nút Xóa thực hiện qua form POST để bảo mật -->
                                      <form action="<?= BASE_PATH ?>/index.php?controller=task&action=delete&id=<?= $task['task_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa công việc này?');">
+                                         <?= Csrf::field() ?>
                                          <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
                                      </form>
                                      <?php else: ?>

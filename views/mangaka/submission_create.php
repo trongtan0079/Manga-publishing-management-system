@@ -49,6 +49,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php endif; ?>
 
                 <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=store" method="POST" enctype="multipart/form-data">
+                    <?= Csrf::field() ?>
                     <input type="hidden" name="submission_type" value="<?= htmlspecialchars($submissionType) ?>">
                     
                     <!-- Chọn Chương truyện (Chapter) -->

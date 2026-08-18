@@ -36,6 +36,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <div class="card-body p-4">
         <form action="<?= BASE_PATH ?>/index.php?controller=user&action=update&id=<?= $user['user_id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label for="username" class="form-label fw-semibold">Tài khoản <span class="text-danger">*</span></label>

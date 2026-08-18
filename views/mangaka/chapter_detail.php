@@ -48,6 +48,7 @@ $isLocked = $this->isChapterLocked($chapter);
             <?php endif; ?>
         <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-warning shadow-sm text-dark"><i class="fas fa-edit me-2"></i>Sửa Chapter</a>
         <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
+            <?= Csrf::field() ?>
             <button type="submit" class="btn btn-danger shadow-sm"><i class="fas fa-trash-alt me-2"></i>Xóa</button>
         </form>
         <?php else: ?>
@@ -151,6 +152,7 @@ $isLocked = $this->isChapterLocked($chapter);
                                     <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$isLocked && $page['status'] !== 'published' && !$this->isSeriesLocked($series)): ?>
                                     <a href="<?= BASE_PATH ?>/index.php?controller=page&action=edit&id=<?= $page['page_id'] ?>" class="btn btn-sm btn-warning">Sửa</a>
                                     <form action="<?= BASE_PATH ?>/index.php?controller=page&action=delete&id=<?= $page['page_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa trang này?');">
+                                        <?= Csrf::field() ?>
                                         <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
                                     </form>
                                     <?php endif; ?>

@@ -561,6 +561,7 @@ if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], 'control
                 <?php elseif (($role === 'assistant' || $role === 'mangaka') && $submission['status'] === 'pending' && $submission['user_id'] == $_SESSION['user_id']): ?>
                     <p class="text-muted text-xs mb-3">Bạn có thể xóa sản phẩm đã nộp nếu nó chưa được đánh giá.</p>
                     <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $submission['submission_id'] ?>" method="POST" class="d-block" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                        <?= Csrf::field() ?>
                         <button type="submit" class="btn btn-danger w-100 py-2.5 shadow-sm fw-bold" style="border-radius: 8px;">
                             <i class="fas fa-trash-alt me-2"></i>Xóa sản phẩm nộp này
                         </button>
@@ -888,7 +889,8 @@ document.addEventListener("DOMContentLoaded", function() {
             fetch('<?= BASE_PATH ?>/index.php?controller=review&action=save_annotation', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
                 body: JSON.stringify(data)
             })
@@ -1011,7 +1013,8 @@ document.addEventListener("DOMContentLoaded", function() {
         fetch('<?= BASE_PATH ?>/index.php?controller=review&action=delete_annotation', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
             },
             body: JSON.stringify({ annotation_id: id })
         })
@@ -1198,7 +1201,8 @@ document.addEventListener("DOMContentLoaded", function() {
             fetch('<?= BASE_PATH ?>/index.php?controller=review&action=save_submission_annotation', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                 },
                 body: JSON.stringify(data)
             })
@@ -1297,7 +1301,8 @@ document.addEventListener("DOMContentLoaded", function() {
         fetch('<?= BASE_PATH ?>/index.php?controller=review&action=delete_submission_annotation', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
             },
             body: JSON.stringify({ annotation_id: id })
         })

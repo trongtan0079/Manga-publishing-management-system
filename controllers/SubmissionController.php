@@ -145,6 +145,8 @@ class SubmissionController extends BaseController
             exit;
         }
 
+        $this->validateCsrf();
+
         $role = $_SESSION['role_name'] ?? '';
         $userId = $_SESSION['user_id'];
 
@@ -700,6 +702,8 @@ class SubmissionController extends BaseController
             header('Location: ' . BASE_PATH . '/index.php?controller=submission&action=index');
             exit;
         }
+
+        $this->validateCsrf();
 
         $userId = $_SESSION['user_id'];
 

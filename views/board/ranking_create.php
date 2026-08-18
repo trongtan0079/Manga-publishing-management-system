@@ -43,6 +43,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
 <div class="row">
     <div class="col-12">
         <form action="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=store" method="POST">
+            <?= Csrf::field() ?>
             <!-- Khung chọn chu kỳ -->
             <div class="card shadow-sm border-0 rounded-3 mb-4">
                 <div class="card-body p-4 bg-light rounded-3">

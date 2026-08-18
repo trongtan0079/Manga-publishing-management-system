@@ -13,6 +13,7 @@ define('BASE_PATH', $basePath);
 // Autoloader cũ cho namespace đã bị lược bỏ do các Controller hiện tại không dùng namespace.
 // Nếu cần load Model/Core tự động, có thể bổ sung require ở đây.
 require_once __DIR__ . '/core/Auth.php';
+require_once __DIR__ . '/core/Csrf.php';
 require_once __DIR__ . '/controllers/BaseController.php';
 
 // Lấy tham số controller và action từ URL (ví dụ: ?controller=auth&action=login)

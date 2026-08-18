@@ -40,6 +40,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                 <?php endif; ?>
 
                 <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=store" method="POST" enctype="multipart/form-data">
+                    <?= Csrf::field() ?>
                     
                     <!-- Chọn Nhiệm vụ (Task) -->
                     <div class="mb-4">

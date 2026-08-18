@@ -48,6 +48,7 @@ class AuthController extends BaseController {
      */
     public function authenticate() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $loginId = trim($_POST['login_id'] ?? ''); // Người dùng có thể nhập Username hoặc Email
             $password = $_POST['password'] ?? '';
 
@@ -217,6 +218,8 @@ class AuthController extends BaseController {
             header('Location: ' . BASE_PATH . '/index.php?controller=auth&action=profile');
             exit;
         }
+
+        $this->validateCsrf();
 
         $userId = $_SESSION['user_id'];
         $fullName = trim($_POST['full_name'] ?? '');

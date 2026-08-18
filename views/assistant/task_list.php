@@ -179,6 +179,7 @@ if (!function_exists('renderTaskTable')) {
                                               <span class="badge bg-info-subtle text-info border border-info-subtle py-1.5 px-3 d-inline-flex align-items-center" style="border-radius: 8px; font-size: 0.75rem; font-weight: 600;"><i class="fas fa-spinner fa-spin me-1.5 text-info"></i>Đang chờ duyệt</span>
                                           <?php else: ?>
                                               <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST" class="m-0">
+                                                  <?= Csrf::field() ?>
                                                   <select name="status" class="form-select form-select-sm py-1.5 px-2 <?= $task['status'] == 'rejected' ? 'border-danger text-danger fw-bold bg-danger-subtle' : '' ?>" style="width: 135px; border-radius: 8px; font-size: 0.78rem; border-color: #cbd5e1; cursor: pointer;" onchange="this.form.submit()" title="Trạng thái">
                                                       <option value="pending" <?= $task['status'] == 'pending' ? 'selected' : '' ?>>Chờ thực hiện</option>
                                                       <option value="in_progress" <?= $task['status'] == 'in_progress' ? 'selected' : '' ?>>Đang làm</option>

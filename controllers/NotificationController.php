@@ -37,6 +37,8 @@ class NotificationController extends BaseController
             exit;
         }
 
+        $this->validateCsrf();
+
         $id = (int)$id;
         if (!$id) {
             $_SESSION['error'] = 'Không tìm thấy thông báo.';
@@ -70,6 +72,8 @@ class NotificationController extends BaseController
             header('Location: ' . $referer);
             exit;
         }
+
+        $this->validateCsrf();
 
         $userId = $_SESSION['user_id'];
         $this->notificationModel->markAllAsRead($userId);

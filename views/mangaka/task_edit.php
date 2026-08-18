@@ -30,6 +30,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <div class="card-body">
         <form action="<?= BASE_PATH ?>/index.php?controller=task&action=update&id=<?= $task['task_id'] ?>" method="POST">
+            <?= Csrf::field() ?>
             <!-- Tiêu đề công việc -->
             <div class="mb-3">
                 <label for="title" class="form-label">Tiêu đề công việc <span class="text-danger">*</span></label>

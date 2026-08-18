@@ -152,12 +152,14 @@ if (!empty($seriesList)) {
                                         <!-- Hàng 3: Cụm nút bấm bỏ phiếu đẹp mắt -->
                                         <div class="d-flex gap-2 mt-1" style="white-space: nowrap;">
                                             <form action="<?= BASE_PATH ?>/index.php?controller=series&action=vote&id=<?= $series['series_id'] ?>" method="POST" class="m-0">
+                                                <?= Csrf::field() ?>
                                                 <input type="hidden" name="vote" value="approve">
                                                 <button type="submit" class="btn btn-sm py-1 px-3 rounded-pill d-inline-flex align-items-center gap-1.5 fw-semibold <?= $myVote === 'approve' ? 'btn-success text-white border-success' : 'btn-outline-success border-success-subtle bg-white text-success' ?>" style="font-size: 0.72rem; letter-spacing: 0.2px; transition: all 0.2s; white-space: nowrap;" title="Bỏ phiếu Đồng ý" <?= $myVote === 'approve' ? 'disabled' : '' ?>>
                                                     <i class="fas fa-thumbs-up"></i>Đồng ý
                                                 </button>
                                             </form>
                                             <form action="<?= BASE_PATH ?>/index.php?controller=series&action=vote&id=<?= $series['series_id'] ?>" method="POST" class="m-0">
+                                                <?= Csrf::field() ?>
                                                 <input type="hidden" name="vote" value="reject">
                                                 <button type="submit" class="btn btn-sm py-1 px-3 rounded-pill d-inline-flex align-items-center gap-1.5 fw-semibold <?= $myVote === 'reject' ? 'btn-danger text-white border-danger' : 'btn-outline-danger border-danger-subtle bg-white text-danger' ?>" style="font-size: 0.72rem; letter-spacing: 0.2px; transition: all 0.2s; white-space: nowrap;" title="Bỏ phiếu Từ chối" <?= $myVote === 'reject' ? 'disabled' : '' ?>>
                                                     <i class="fas fa-thumbs-down"></i>Từ chối
@@ -179,6 +181,7 @@ if (!empty($seriesList)) {
                                          </div>
                                     <?php else: ?>
                                          <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận bỏ phiếu và lưu quyết định phê duyệt bộ truyện này?');">
+                                             <?= Csrf::field() ?>
                                              <select name="status" class="form-select form-select-sm border-slate-200 shadow-sm" style="width: 140px; border-radius: 20px; font-size: 0.8rem; font-weight: 500;" title="Quyết định">
                                                  <option value="planning" selected>Chờ quyết định</option>
                                                  <option value="ongoing" <?= ($percent < 50) ? 'disabled title="Chưa đạt tỉ lệ tán thành tối thiểu (>= 50%)"' : '' ?>>Thông qua (Phê duyệt)</option>
@@ -320,6 +323,7 @@ if (!empty($seriesList)) {
                                   </td>
                                   <td class="text-end pe-4">
                                      <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái và định hướng phát hành cho bộ truyện này?');">
+                                          <?= Csrf::field() ?>
                                          <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
                                              <option value="ongoing" selected>Đang phát hành</option>
                                              <option value="completed">Hoàn thành</option>
@@ -398,6 +402,7 @@ if (!empty($seriesList)) {
                                 </td>
                                 <td class="text-end pe-4">
                                     <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=publish&id=<?= $chap['chapter_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Xác nhận chính thức xuất bản Chương <?= htmlspecialchars($chap['chapter_number']) ?> của bộ truyện <?= htmlspecialchars($chap['series_title']) ?> ra công chúng?');">
+                                        <?= Csrf::field() ?>
                                         <button type="submit" class="btn btn-sm btn-success px-3 rounded-pill shadow-sm d-inline-flex align-items-center gap-1.5 fw-semibold" style="font-size: 0.8rem;">
                                             <i class="fas fa-paper-plane"></i> Xuất bản ngay
                                         </button>
@@ -542,6 +547,7 @@ if (!empty($seriesList)) {
                                   </td>
                                   <td class="text-end pe-4">
                                      <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái bộ truyện này?');">
+                                          <?= Csrf::field() ?>
                                          <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
                                              <option value="ongoing">Đang phát hành</option>
                                              <option value="completed" selected>Hoàn thành</option>
@@ -668,6 +674,7 @@ if (!empty($seriesList)) {
                                   </td>
                                   <td class="text-end pe-4">
                                      <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái bộ truyện này?');">
+                                          <?= Csrf::field() ?>
                                          <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
                                              <option value="ongoing">Đang phát hành</option>
                                              <option value="completed">Hoàn thành</option>
@@ -778,6 +785,7 @@ if (!empty($seriesList)) {
                                   </td>
                                   <td class="text-end pe-4">
                                      <form action="<?= defined('BASE_PATH') ? BASE_PATH : '' ?>/index.php?controller=series&action=updateStatus&id=<?= $series['series_id'] ?>" method="POST" class="d-flex justify-content-end align-items-center gap-2" onsubmit="return confirm('Xác nhận thay đổi trạng thái bộ truyện này?');">
+                                          <?= Csrf::field() ?>
                                          <select name="status" class="form-select form-select-sm w-auto" style="max-width: 130px; border-radius: 6px;" title="Trạng thái">
                                              <option value="ongoing">Đang phát hành</option>
                                              <option value="completed">Hoàn thành</option>

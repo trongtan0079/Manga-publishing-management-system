@@ -167,6 +167,7 @@ class SeriesController extends BaseController
     public function store() {
         requireRole('mangaka');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $title = trim($_POST['title'] ?? '');
             // Validation cơ bản
             if (empty($title)) {
@@ -243,6 +244,9 @@ class SeriesController extends BaseController
      */
     public function submit($id) {
         requireRole('mangaka');
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
+        }
         $id = (int)$id;
         $series = $this->seriesModel->findById($id);
         if (!$series) {
@@ -360,6 +364,7 @@ class SeriesController extends BaseController
     public function update($id) {
         requireRole('mangaka');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $series = $this->seriesModel->findById($id);
             $this->checkOwnership($series, $id);
 
@@ -470,6 +475,7 @@ class SeriesController extends BaseController
     public function delete($id) {
         requireRole('mangaka');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $series = $this->seriesModel->findById($id);
             $this->checkOwnership($series, $id);
 
@@ -617,6 +623,7 @@ class SeriesController extends BaseController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $series = $this->seriesModel->findById($id);
             if (!$series) {
                 $_SESSION['error'] = "Không tìm thấy bộ truyện.";
@@ -806,6 +813,7 @@ class SeriesController extends BaseController
         requireRole('board');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $seriesId = isset($_GET['id']) ? intval($_GET['id']) : 0;
             $voteValue = isset($_POST['vote']) ? trim($_POST['vote']) : '';
             $memberId = $_SESSION['user_id'];
@@ -939,6 +947,7 @@ class SeriesController extends BaseController
     public function updateDossierNotes() {
         requireRole('editor');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             $series = $this->seriesModel->findById($id);
             

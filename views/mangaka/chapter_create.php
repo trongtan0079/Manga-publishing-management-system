@@ -22,6 +22,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <div class="card-body">
         <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=store" method="POST">
+            <?= Csrf::field() ?>
             <input type="hidden" name="series_id" value="<?= htmlspecialchars($series['series_id']) ?>">
             
             <div class="mb-3">

@@ -177,6 +177,7 @@ $role = $_SESSION['role_name'] ?? '';
                                         
                                         <?php if (($role === 'assistant' || $role === 'mangaka') && $sub['status'] === 'pending' && $sub['user_id'] == $_SESSION['user_id']): ?>
                                             <form action="<?= BASE_PATH ?>/index.php?controller=submission&action=delete&id=<?= $sub['submission_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bản thảo này?');">
+                                                <?= Csrf::field() ?>
                                                 <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa bản thảo">
                                                     <i class="fas fa-trash-alt"></i>
                                                 </button>

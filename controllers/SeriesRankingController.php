@@ -97,6 +97,7 @@ class SeriesRankingController extends BaseController
     public function store() {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $periodStartDate = trim($_POST['period_start_date'] ?? '');
             $votes = $_POST['votes'] ?? []; // Mảng [series_id => votes]
 
@@ -276,6 +277,7 @@ class SeriesRankingController extends BaseController
     public function update($id) {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $id = (int)$id;
             $ranking = $this->rankingModel->findById($id);
             if (!$ranking) {
@@ -378,6 +380,7 @@ class SeriesRankingController extends BaseController
     public function delete($id) {
         \requireRole('board');
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $id = (int)$id;
             $ranking = $this->rankingModel->findById($id);
             if (!$ranking) {

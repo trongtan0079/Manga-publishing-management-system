@@ -97,6 +97,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                     Nhập các lý lẽ, số liệu tích cực khác (ví dụ: lượng tương tác mạng xã hội tăng, tiềm năng kịch bản kỳ tới bùng nổ, doanh số bán vật phẩm) để thuyết phục <strong>Hội đồng Biên tập</strong> duy trì xuất bản bộ truyện trong trường hợp thứ hạng tụt giảm.
                 </p>
                 <form action="<?= BASE_PATH ?>/index.php?controller=series&action=updateDossierNotes&id=<?= $series['series_id'] ?>" method="POST">
+                    <?= Csrf::field() ?>
                     <div class="mb-3">
                         <label for="dossier_notes" class="form-label fw-bold text-xs text-uppercase text-muted">Nội dung biện hộ bảo vệ tác phẩm</label>
                         <textarea class="form-control" id="dossier_notes" name="dossier_notes" rows="8" placeholder="Nhập lý do biện hộ để bảo vệ tác phẩm trước nguy cơ bị Board hủy truyện... (Hỗ trợ định dạng văn bản)" style="border-radius: 8px; font-size: 0.88rem;"><?= htmlspecialchars($series['dossier_notes'] ?? '') ?></textarea>

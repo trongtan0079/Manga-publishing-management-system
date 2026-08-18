@@ -48,6 +48,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     </div>
     <div class="card-body">
         <form action="<?= BASE_PATH ?>/index.php?controller=task&action=store" method="POST">
+            <?= Csrf::field() ?>
             <!-- page_id được truyền ngầm để Controller biết task này thuộc về trang nào -->
             <input type="hidden" name="page_id" value="<?= htmlspecialchars($page['page_id']) ?>">
             <?php if (!empty($groupedRegionIds)): ?>

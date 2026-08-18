@@ -216,6 +216,7 @@ class TaskController extends BaseController
         \requireRole('mangaka');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             // Nhận dữ liệu từ form submit lên
             $pageId = isset($_POST['page_id']) ? intval($_POST['page_id']) : 0;
             $assistantId = isset($_POST['assistant_id']) ? intval($_POST['assistant_id']) : 0;
@@ -569,6 +570,8 @@ class TaskController extends BaseController
             exit;
         }
 
+        $this->validateCsrf();
+
         $task = $this->taskModel->findById($id);
         if (!$task) {
             $_SESSION['error'] = 'Không tìm thấy công việc cần cập nhật.';
@@ -815,6 +818,7 @@ class TaskController extends BaseController
         \requireRole('mangaka');
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
             if ($id <= 0) {
                 $_SESSION['error'] = 'ID công việc không hợp lệ.';

@@ -143,6 +143,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
     <div class="d-flex gap-2">
         <?php if ($series['status'] === 'planning' && ($series['publish_type'] ?? '') === 'draft'): ?>
         <form action="<?= BASE_PATH ?>/index.php?controller=series&action=submit&id=<?= $series['series_id'] ?>" method="POST" class="m-0" onsubmit="return confirm('Bạn có chắc chắn muốn nộp đề xuất bộ truyện này đến Ban Biên tập?');">
+            <?= Csrf::field() ?>
             <button type="submit" class="btn btn-success px-3.5 py-2 shadow-xs d-inline-flex align-items-center" style="border-radius: 10px; font-weight: 600; font-size: 0.85rem;">
                 <i class="fa-solid fa-paper-plane me-2"></i>Nộp Đề Xuất
             </button>
@@ -310,6 +311,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
                                                 <?php if (isset($_SESSION['role_name']) && $_SESSION['role_name'] === 'mangaka' && !$this->isSeriesLocked($series) && !$this->isChapterLocked($chapter)): ?>
                                                     <a href="<?= BASE_PATH ?>/index.php?controller=chapter&action=edit&id=<?= $chapter['chapter_id'] ?>" class="btn btn-sm btn-outline-warning action-btn-pill">Sửa</a>
                                                     <form action="<?= BASE_PATH ?>/index.php?controller=chapter&action=delete&id=<?= $chapter['chapter_id'] ?>" method="POST" class="d-inline m-0" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chapter này?');">
+                                                        <?= Csrf::field() ?>
                                                         <button type="submit" class="btn btn-sm btn-outline-danger action-btn-pill">Xóa</button>
                                                     </form>
                                                 <?php endif; ?>

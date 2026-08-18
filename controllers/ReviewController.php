@@ -213,6 +213,7 @@ class ReviewController extends BaseController
      */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $submissionId = $_POST['submission_id'] ?? null;
             $comments = trim($_POST['comments'] ?? '');
             $rating = $_POST['rating'] ?? null;
@@ -563,6 +564,8 @@ class ReviewController extends BaseController
             exit;
         }
 
+        $this->validateCsrf();
+
         $role = $_SESSION['role_name'] ?? '';
         if ($role !== 'editor') {
             echo json_encode(['success' => false, 'error' => 'Bạn không có quyền thực hiện chức năng này']);
@@ -659,6 +662,8 @@ class ReviewController extends BaseController
             echo json_encode(['success' => false, 'error' => 'Phương thức không được hỗ trợ']);
             exit;
         }
+
+        $this->validateCsrf();
 
         $role = $_SESSION['role_name'] ?? '';
         if ($role !== 'editor') {
@@ -810,6 +815,8 @@ class ReviewController extends BaseController
             exit;
         }
 
+        $this->validateCsrf();
+
         $role = $_SESSION['role_name'] ?? '';
         if ($role !== 'mangaka' && $role !== 'admin') {
             echo json_encode(['success' => false, 'error' => 'Bạn không có quyền thực hiện chức năng này']);
@@ -893,6 +900,8 @@ class ReviewController extends BaseController
             echo json_encode(['success' => false, 'error' => 'Phương thức không được hỗ trợ']);
             exit;
         }
+
+        $this->validateCsrf();
 
         $role = $_SESSION['role_name'] ?? '';
         if ($role !== 'mangaka' && $role !== 'admin') {

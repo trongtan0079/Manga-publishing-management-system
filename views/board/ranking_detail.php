@@ -82,6 +82,7 @@ require_once __DIR__ . '/../layouts/sidebar.php';
             <div class="card-footer bg-white border-top text-end py-3">
                 <a href="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=edit&id=<?= $ranking['ranking_id'] ?>" class="btn btn-warning text-white"><i class="fas fa-edit me-1"></i>Sửa Đánh giá</a>
                 <form action="<?= BASE_PATH ?>/index.php?controller=seriesRanking&action=delete&id=<?= $ranking['ranking_id'] ?>" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đánh giá này?');">
+                    <?= Csrf::field() ?>
                     <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Xóa</button>
                 </form>
             </div>

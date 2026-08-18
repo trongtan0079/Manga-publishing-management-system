@@ -60,6 +60,7 @@ class UserController extends BaseController
      */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $username = trim($_POST['username'] ?? '');
             $fullName = trim($_POST['full_name'] ?? '');
             $email = trim($_POST['email'] ?? '');
@@ -171,6 +172,7 @@ class UserController extends BaseController
      */
     public function update($id) {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             $username = trim($_POST['username'] ?? '');
             $fullName = trim($_POST['full_name'] ?? '');
             $email = trim($_POST['email'] ?? '');
@@ -292,6 +294,7 @@ class UserController extends BaseController
     public function delete($id) {
         // Chỉ chấp nhận request POST để xóa, đảm bảo an toàn
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $this->validateCsrf();
             if ($id == $_SESSION['user_id']) {
                 $_SESSION['error'] = "Bạn không thể xóa chính tài khoản của mình!";
                 header('Location: ' . BASE_PATH . '/index.php?controller=user&action=index');
